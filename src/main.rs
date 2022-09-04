@@ -1,6 +1,9 @@
 use packet_parser::parser;
+use std::cell::Cell;
 use std::io::Read;
 use std::net::{TcpListener, TcpStream};
+
+use crate::packet_parser::parser::IndexedBuffer;
 
 mod packet_parser;
 
@@ -8,19 +11,22 @@ fn handle_client(mut stream: TcpStream) {
     println!("Connection from {}", stream.peer_addr().unwrap());
 
     loop {
-        process_packet(&mut stream);
+        process_packet(&mut stream).unwrap();
     }
 }
 
 fn process_packet(stream: &mut TcpStream) -> Result<(), std::io::Error> {
-    let length = parser::parse_var_int(stream)?;
+    let length = parser::parse_packet_length(stream)?;
 
+    // Read the packet data and store it in a buffer
     let mut buffer = vec![0u8; length as usize];
     stream.read_exact(&mut buffer).unwrap();
 
-    let packet_type = parser::parse_var_int(stream)?;
+    let indexed_buffer = IndexedBuffer(&buffer, Cell::new(0));
 
-    println!("Packet: {:?}", buffer);
+    let packet_type = parser::parse_var_int(&indexed_buffer);
+
+    println!("Packet: (type: {}, content: {:?})", packet_type, buffer);
     Ok(())
 }
 
