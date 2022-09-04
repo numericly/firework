@@ -26,12 +26,16 @@ fn process_packet(stream: &mut TcpStream) -> Result<(), std::io::Error> {
 
     let packet_type = parser::parse_var_int(&indexed_buffer);
 
-    println!("Packet: (type: {}, content: {:?})", packet_type, buffer);
+    println!("Packet: (type: {}, content: {:x?})", packet_type, buffer);
     Ok(())
 }
 
 #[tokio::main]
 async fn main() {
+    println!(
+        "{:b}",
+        parser::parse_signed_int(&IndexedBuffer(&vec!(0xf2, 0x35, 0x12, 0xc3), Cell::new(0)))
+    );
     let listener = TcpListener::bind("127.0.0.1:25565").unwrap();
 
     for stream in listener.incoming() {
