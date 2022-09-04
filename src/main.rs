@@ -37,6 +37,9 @@ fn handle_client(mut stream: TcpStream) {
                     println!("Error handling client state")
                 }
             },
+            _ => {
+                println!("Packet not handled")
+            }
         }
     }
 }
@@ -51,6 +54,8 @@ fn process_packet(stream: &mut TcpStream, state: &State) -> Result<C2S, ()> {
     let indexed_buffer = IndexedBuffer(&buffer, Cell::new(0));
 
     let packet_type = parser::parse_var_int(&indexed_buffer);
+
+    // println!("Packet type: {}, data: {:?}", &packet_type, &buffer);
 
     create_packet(&indexed_buffer, &packet_type, state)
 }

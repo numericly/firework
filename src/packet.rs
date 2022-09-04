@@ -11,6 +11,7 @@ pub mod packet {
     ) -> Result<C2S, ()> {
         match state {
             State::HandShaking => get_handshake_packet(indexed_buffer, packet_id),
+            State::Login => get_login_packet(indexed_buffer, packet_id),
             _ => Err(()),
         }
     }
@@ -22,6 +23,13 @@ pub mod packet {
         }
     }
 
+    fn get_login_packet(buf: &IndexedBuffer, packet_id: &i32) -> Result<C2S, ()> {
+        match packet_id {
+            0 => Ok(C2S::LoginStart(LoginStart::parse(buf))),
+            _ => Err(()),
+        }
+    }
+
     pub trait Packet<T> {
         fn parse(indexed_buffer: &IndexedBuffer) -> T;
     }
@@ -29,6 +37,7 @@ pub mod packet {
     #[derive(Debug)]
     pub enum C2S {
         Handshake(Handshake),
+        LoginStart(LoginStart),
     }
 
     #[derive(Debug)]
@@ -46,6 +55,19 @@ pub mod packet {
                 server_address: parser::parse_string(&buf),
                 server_port: parser::parse_unsigned_short(&buf),
                 next_state: parser::parse_var_int(&buf),
+            }
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct LoginStart {
+        pub player_name: String,
+    }
+
+    impl Packet<LoginStart> for LoginStart {
+        fn parse(buf: &IndexedBuffer) -> LoginStart {
+            LoginStart {
+                player_name: parser::parse_string(&buf),
             }
         }
     }
