@@ -123,6 +123,15 @@ pub mod parser {
         ans
     }
 
-    //1110101010100001
-    //0110101000100001
+    pub fn parse_UUID(indexed_buffer: &IndexedBuffer) -> u128 {
+        //untested
+        let mut ans = 0;
+        let index = indexed_buffer.1.get();
+        for i in 0..16 {
+            let val = indexed_buffer.0.get(index + 15 - i).unwrap();
+            ans |= (val.clone() as u128) << (8 * i);
+        }
+        indexed_buffer.1.set(index + 16usize);
+        ans
+    }
 }
