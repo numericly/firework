@@ -3,19 +3,26 @@ use std::cell::Cell;
 use std::io::Read;
 use std::net::{TcpListener, TcpStream};
 
+use crate::client::client_data::{Client, State};
+use crate::packet::packet::create_packet;
 use crate::packet_parser::parser::IndexedBuffer;
 
+mod client;
+mod packet;
 mod packet_parser;
 
 fn handle_client(mut stream: TcpStream) {
     println!("Connection from {}", stream.peer_addr().unwrap());
+    let client = Client {
+        state: State::HandShaking,
+    };
 
     loop {
-        process_packet(&mut stream).unwrap();
+        process_packet(&mut stream, &client.state).unwrap();
     }
 }
 
-fn process_packet(stream: &mut TcpStream) -> Result<(), std::io::Error> {
+fn process_packet(stream: &mut TcpStream, state: &State) -> Result<(), std::io::Error> {
     let length = parser::parse_packet_length(stream)?;
 
     // Read the packet data and store it in a buffer
@@ -26,16 +33,15 @@ fn process_packet(stream: &mut TcpStream) -> Result<(), std::io::Error> {
 
     let packet_type = parser::parse_var_int(&indexed_buffer);
 
-    println!("Packet: (type: {}, content: {:x?})", packet_type, buffer);
+    let packet = create_packet(&indexed_buffer, &packet_type, state).unwrap();
+
+    println!("Packet: {:?}", packet);
+
     Ok(())
 }
 
 #[tokio::main]
 async fn main() {
-    println!(
-        "{:b}",
-        parser::parse_signed_int(&IndexedBuffer(&vec!(0xf2, 0x35, 0x12, 0xc3), Cell::new(0)))
-    );
     let listener = TcpListener::bind("127.0.0.1:25565").unwrap();
 
     for stream in listener.incoming() {

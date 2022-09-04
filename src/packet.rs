@@ -8,16 +8,16 @@ pub mod packet {
         indexed_buffer: &IndexedBuffer,
         packet_id: &i32,
         state: &State,
-    ) -> Result<c2s, ()> {
+    ) -> Result<C2S, ()> {
         match state {
             State::HandShaking => get_handshake_packet(indexed_buffer, packet_id),
             _ => Err(()),
         }
     }
 
-    fn get_handshake_packet(indexed_buffer: &IndexedBuffer, packet_id: &i32) -> Result<c2s, ()> {
+    fn get_handshake_packet(buf: &IndexedBuffer, packet_id: &i32) -> Result<C2S, ()> {
         match packet_id {
-            0 => Ok(c2s::Handshake(Handshake::parse(indexed_buffer))),
+            0 => Ok(C2S::Handshake(Handshake::parse(buf))),
             _ => Err(()),
         }
     }
@@ -27,26 +27,25 @@ pub mod packet {
     }
 
     #[derive(Debug)]
-    #[warn(non_camel_case_types)]
-    pub enum c2s {
+    pub enum C2S {
         Handshake(Handshake),
     }
 
     #[derive(Debug)]
     pub struct Handshake {
-        pub protcol_version: i32,
+        pub protocol_version: i32,
         pub server_address: String,
-        pub server_port: i16,
+        pub server_port: u16,
         pub next_state: i32,
     }
 
     impl Packet<Handshake> for Handshake {
-        fn parse(indexed_buffer: &IndexedBuffer) -> Handshake {
+        fn parse(buf: &IndexedBuffer) -> Handshake {
             Handshake {
-                protcol_version: parser::parse_var_int(&indexed_buffer),
-                server_address: "".to_string(),
-                server_port: 0,
-                next_state: 0,
+                protocol_version: parser::parse_var_int(&buf),
+                server_address: parser::parse_string(&buf),
+                server_port: parser::parse_unsigned_short(&buf),
+                next_state: parser::parse_var_int(&buf),
             }
         }
     }
