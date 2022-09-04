@@ -12,6 +12,7 @@ pub mod packet {
         match state {
             State::HandShaking => get_handshake_packet(indexed_buffer, packet_id),
             State::Login => get_login_packet(indexed_buffer, packet_id),
+            State::Status => get_status_packet(indexed_buffer, packet_id),
             _ => Err(()),
         }
     }
