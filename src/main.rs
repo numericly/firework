@@ -70,10 +70,6 @@ fn process_packet(stream: &mut TcpStream, state: &State) -> Result<C2S, ()> {
 
 #[tokio::main]
 async fn main() {
-    println!(
-        "{}",
-        parser::parse_var_int(&IndexedBuffer(&vec!(0b10000001, 0b01111101), Cell::new(0)))
-    );
     let listener = TcpListener::bind("127.0.0.1:25565").unwrap();
 
     for stream in listener.incoming() {
