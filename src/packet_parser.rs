@@ -1,4 +1,4 @@
-pub mod Parser {
+pub mod parser {
     use std::{io::Read, net::TcpStream};
 
     pub fn parse_var_int(stream: &mut TcpStream) -> Result<i32, std::io::Error> {

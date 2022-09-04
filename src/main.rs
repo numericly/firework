@@ -1,4 +1,4 @@
-use packet_parser::Parser;
+use packet_parser::parser;
 use std::io::Read;
 use std::net::{TcpListener, TcpStream};
 
@@ -13,12 +13,12 @@ fn handle_client(mut stream: TcpStream) {
 }
 
 fn process_packet(stream: &mut TcpStream) -> Result<(), std::io::Error> {
-    let length = Parser::parse_var_int(stream)?;
+    let length = parser::parse_var_int(stream)?;
 
     let mut buffer = vec![0u8; length as usize];
     stream.read_exact(&mut buffer).unwrap();
 
-    let packet_type = Parser::parse_var_int(stream)?;
+    let packet_type = parser::parse_var_int(stream)?;
 
     println!("Packet: {:?}", buffer);
     Ok(())
