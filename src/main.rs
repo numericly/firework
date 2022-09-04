@@ -1,5 +1,6 @@
 use packet::packet::C2S;
 use packet_parser::parser;
+// use packet_serializer::serializer;
 use std::cell::Cell;
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
@@ -11,6 +12,7 @@ use crate::packet_parser::parser::IndexedBuffer;
 mod client;
 mod packet;
 mod packet_parser;
+//mod packet_serializer;
 
 fn handle_client(mut stream: TcpStream) {
     println!("Connection from {}", stream.peer_addr().unwrap());
@@ -37,6 +39,12 @@ fn handle_client(mut stream: TcpStream) {
                     println!("Error handling client state")
                 }
             },
+            C2S::StatusRequest(status_request) => {
+                println!("received status request: {:?}", status_request)
+            }
+            C2S::PingRequest(ping_request) => {
+                println!("received ping request: {:?}", ping_request)
+            }
             _ => {
                 println!("Packet not handled")
             }
@@ -62,6 +70,10 @@ fn process_packet(stream: &mut TcpStream, state: &State) -> Result<C2S, ()> {
 
 #[tokio::main]
 async fn main() {
+    println!(
+        "{}",
+        parser::parse_var_int(&IndexedBuffer(&vec!(0b10000001, 0b01111101), Cell::new(0)))
+    );
     let listener = TcpListener::bind("127.0.0.1:25565").unwrap();
 
     for stream in listener.incoming() {

@@ -30,14 +30,26 @@ pub mod packet {
         }
     }
 
+    fn get_status_packet(buf: &IndexedBuffer, packet_id: &i32) -> Result<C2S, ()> {
+        match packet_id {
+            0 => Ok(C2S::StatusRequest(StatusRequest::parse(buf))),
+            1 => Ok(C2S::PingRequest(PingRequest::parse(buf))),
+            _ => Err(()),
+        }
+    }
+
     pub trait Packet<T> {
         fn parse(indexed_buffer: &IndexedBuffer) -> T;
     }
 
     #[derive(Debug)]
     pub enum C2S {
+        //Handshaking
         Handshake(Handshake),
         LoginStart(LoginStart),
+        //Status
+        StatusRequest(StatusRequest),
+        PingRequest(PingRequest),
     }
 
     #[derive(Debug)]
@@ -68,6 +80,26 @@ pub mod packet {
         fn parse(buf: &IndexedBuffer) -> LoginStart {
             LoginStart {
                 player_name: parser::parse_string(&buf),
+            }
+        }
+    }
+    #[derive(Debug)]
+    pub struct StatusRequest {}
+
+    impl Packet<StatusRequest> for StatusRequest {
+        fn parse(buf: &IndexedBuffer) -> StatusRequest {
+            StatusRequest {}
+        }
+    }
+    #[derive(Debug)]
+    pub struct PingRequest {
+        payload: i64,
+    }
+
+    impl Packet<PingRequest> for PingRequest {
+        fn parse(buf: &IndexedBuffer) -> PingRequest {
+            PingRequest {
+                payload: parser::parse_signed_long(&buf),
             }
         }
     }
