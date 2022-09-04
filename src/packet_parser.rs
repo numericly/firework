@@ -3,11 +3,13 @@ pub mod parser {
 
     pub struct IndexedBuffer<'a>(pub &'a Vec<u8>, pub Cell<usize>);
 
-    pub fn parse_packet_length(stream: &mut TcpStream) -> Result<i32, std::io::Error> {
+    pub fn parse_packet_length(stream: &mut TcpStream) -> Result<i32, ()> {
         let mut buf = [0];
         let mut ans = 0;
         for i in 0..4 {
-            stream.read_exact(&mut buf)?;
+            if let Err(_) = stream.read_exact(&mut buf) {
+                return Err(());
+            }
             ans |= ((buf[0] & 0b0111_1111) as i32) << 7 * i;
             if buf[0] & 0b1000_0000 == 0 {
                 break;

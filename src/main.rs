@@ -1,6 +1,7 @@
+use packet::packet::C2S;
 use packet_parser::parser;
 use std::cell::Cell;
-use std::io::Read;
+use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 
 use crate::client::client_data::{Client, State};
@@ -13,16 +14,34 @@ mod packet_parser;
 
 fn handle_client(mut stream: TcpStream) {
     println!("Connection from {}", stream.peer_addr().unwrap());
-    let client = Client {
+    let mut client = Client {
         state: State::HandShaking,
     };
 
     loop {
-        process_packet(&mut stream, &client.state).unwrap();
+        let packet = process_packet(&mut stream, &client.state);
+
+        if let Err(_) = packet {
+            println!("Stream closed");
+            return;
+        }
+        println!("Packet {:?}", &packet);
+
+        match packet.unwrap() {
+            C2S::Handshake(handshake) => match handshake.next_state {
+                1 => {
+                    client.state = State::Status;
+                }
+                2 => client.state = State::Login,
+                _ => {
+                    println!("Error handling client state")
+                }
+            },
+        }
     }
 }
 
-fn process_packet(stream: &mut TcpStream, state: &State) -> Result<(), std::io::Error> {
+fn process_packet(stream: &mut TcpStream, state: &State) -> Result<C2S, ()> {
     let length = parser::parse_packet_length(stream)?;
 
     // Read the packet data and store it in a buffer
@@ -33,11 +52,7 @@ fn process_packet(stream: &mut TcpStream, state: &State) -> Result<(), std::io::
 
     let packet_type = parser::parse_var_int(&indexed_buffer);
 
-    let packet = create_packet(&indexed_buffer, &packet_type, state).unwrap();
-
-    println!("Packet: {:?}", packet);
-
-    Ok(())
+    create_packet(&indexed_buffer, &packet_type, state)
 }
 
 #[tokio::main]
