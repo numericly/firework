@@ -2,12 +2,14 @@ use packet::c2s_packet::C2S;
 use packet_parser::parser;
 use packet_serializer::serializer;
 use std::cell::Cell;
-use std::io::Read;
+use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 
 use crate::client::client_data::{Client, State};
-use crate::packet::c2s_packet::get_packet;
+use crate::packet::c2s_packet::{get_packet, StatusRequest};
+use crate::packet::s2c_packet::{S2CPacket, ServerStatus};
 use crate::packet_parser::parser::IndexedBuffer;
+use crate::packet_serializer::serializer::serialize_var_int;
 
 mod client;
 mod packet;
@@ -40,7 +42,16 @@ fn handle_client(mut stream: TcpStream) {
                 }
             },
             C2S::StatusRequest(status_request) => {
-                println!("received status request: {:?}", status_request)
+                println!("received status request: {:?}", status_request);
+
+                let server_status = ServerStatus {
+                    server_data: r#"{"version":{"name":"1.19.2","protocol":759},"players":{"max":69,"online":0,"sample":[{}]},"description":{"text":"Hello world"},"favicon":"data:image/png;base64,data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAAXNSR0IArs4c6QAAAEhQTFRFzb6se31qTlVOPkk4d5dYYnyAQWpdMURKmpO3fV9vPDtKIS1Ai0hKajQlRS8pxaRrn2c+dVEpSUEpv413elxUMCslIhoMCAQAx8hwLgAAABh0Uk5TAP//////////////////////////////6dxENgAAAH9JREFUWIXt1LESwCAIA1CG7vz/33a1SFJQB4cwlvCqd5z2bJYJECBAgIBbAfc9wJ0JoFcGULN8hRJAq3CFpRIgQMCFwMqLOAL8RYT/+AI/QpYIABXSgIU+f5Y5gCK8aUloyqHvEzAk80pOFhepOZ5tYmscrXJ1GgKNEiDgCPACZXhImZazDPMAAAAASUVORK5CYII=","previewsChat":true,"enforcesSecureChat":true}"#.to_string()
+                };
+
+                let data = server_status.write();
+
+                stream.write_all(&serialize_var_int(Vec::new(), data.len() as i32));
+                stream.write_all(data.as_slice());
             }
             C2S::PingRequest(ping_request) => {
                 println!("received ping request: {:?}", ping_request)

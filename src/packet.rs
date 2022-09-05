@@ -107,19 +107,24 @@ pub mod c2s_packet {
 }
 
 pub mod s2c_packet {
+    use crate::packet_serializer::serializer::serialize_string;
 
     pub trait S2CPacket {
-        fn write() -> Vec<u8>;
+        fn write(self) -> Vec<u8>;
     }
 
     #[derive(Debug)]
     pub struct ServerStatus {
-        server_data: String,
+        pub server_data: String,
     }
 
-    // impl S2CPacket for ServerStatus {
-    //     fn write() -> Vec<u8> {
+    impl S2CPacket for ServerStatus {
+        fn write(self) -> Vec<u8> {
+            let mut serialized = Vec::new();
 
-    //     }
-    // }
+            serialized = serialize_string(serialized, self.server_data);
+
+            serialized
+        }
+    }
 }
