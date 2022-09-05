@@ -7,7 +7,7 @@ use std::net::{TcpListener, TcpStream};
 
 use crate::client::client_data::{Client, State};
 use crate::packet::c2s_packet::{get_packet, StatusRequest};
-use crate::packet::s2c_packet::{S2CPacket, ServerStatus};
+use crate::packet::s2c_packet::{PingResponse, S2CPacket, ServerStatus};
 use crate::packet_parser::parser::IndexedBuffer;
 use crate::packet_serializer::serializer::serialize_var_int;
 
@@ -26,7 +26,7 @@ fn handle_client(mut stream: TcpStream) {
         let packet = process_packet(&mut stream, &client.state);
 
         if let Err(_) = packet {
-            println!("Stream closed");
+            println!("Stream closed because of error");
             return;
         }
         println!("Packet {:?}", &packet);
@@ -45,13 +45,18 @@ fn handle_client(mut stream: TcpStream) {
                 println!("received status request: {:?}", status_request);
 
                 let mut server_status = ServerStatus {
-                    server_data: r#"{"version":{"name":"1.19.2","protocol":759},"players":{"max":69,"online":0,"sample":[{}]},"description":{"text":"Hello world"},"favicon":"data:image/png;base64,data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAAXNSR0IArs4c6QAAAEhQTFRFzb6se31qTlVOPkk4d5dYYnyAQWpdMURKmpO3fV9vPDtKIS1Ai0hKajQlRS8pxaRrn2c+dVEpSUEpv413elxUMCslIhoMCAQAx8hwLgAAABh0Uk5TAP//////////////////////////////6dxENgAAAH9JREFUWIXt1LESwCAIA1CG7vz/33a1SFJQB4cwlvCqd5z2bJYJECBAgIBbAfc9wJ0JoFcGULN8hRJAq3CFpRIgQMCFwMqLOAL8RYT/+AI/QpYIABXSgIU+f5Y5gCK8aUloyqHvEzAk80pOFhepOZ5tYmscrXJ1GgKNEiDgCPACZXhImZazDPMAAAAASUVORK5CYII=","previewsChat":true,"enforcesSecureChat":true}"#.to_string()
+                    server_data: r#"{"previewsChat":false,"enforcesSecureChat":true,"description":{"text":"\u00a7a<rust-minecraft-server>\u00a7r"},"players":{"max":20,"online":0},"version":{"name":"1.19.2","protocol":760}}
+                    "#.to_string()
                 };
 
                 let data = server_status.write_packet(&mut stream);
             }
             C2S::PingRequest(ping_request) => {
-                println!("received ping request: {:?}", ping_request)
+                println!("received ping request: {:?}", ping_request);
+                let mut ping_response = PingResponse {
+                    payload: ping_request.payload,
+                };
+                ping_response.write_packet(&mut stream);
             }
             _ => {
                 println!("Packet not handled")
@@ -61,17 +66,20 @@ fn handle_client(mut stream: TcpStream) {
 }
 
 fn process_packet(stream: &mut TcpStream, state: &State) -> Result<C2S, ()> {
+    println!("process_packet called with state: {:?}", state);
     let length = parser::parse_packet_length(stream)?;
+    println!("length: {}", length);
 
     // Read the packet data and store it in a buffer
     let mut buffer = vec![0u8; length as usize];
     stream.read_exact(&mut buffer).unwrap();
+    println!("buffer: {:?}", buffer);
 
     let indexed_buffer = IndexedBuffer(&buffer, Cell::new(0));
 
     let packet_type = parser::parse_var_int(&indexed_buffer);
 
-    // println!("Packet type: {}, data: {:?}", &packet_type, &buffer);
+    println!("Packet type: {}, data: {:?}", &packet_type, &buffer);
 
     get_packet(&indexed_buffer, &packet_type, state)
 }
@@ -118,13 +126,10 @@ async fn main() {
 
     // println!("Length: {}, string: {}", length, string);
 
-    println!(
-        "{}",
-        parser::parse_signed_short(&IndexedBuffer(
-            &serializer::serialize_signed_short(Vec::new(), -23176),
-            Cell::new(0)
-        ))
-    );
+    // println!(
+    //     "{:x?}",
+    //     serializer::serialize_signed_short(Vec::new(), -23176)
+    // );
 
     let listener = TcpListener::bind("127.0.0.1:25565").unwrap();
 

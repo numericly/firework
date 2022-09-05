@@ -4,6 +4,8 @@ pub mod c2s_packet {
         packet_parser::parser::{self, IndexedBuffer},
     };
 
+    use super::s2c_packet::{PingResponse, S2CPacket};
+
     pub fn get_packet(
         indexed_buffer: &IndexedBuffer,
         packet_id: &i32,
@@ -18,6 +20,7 @@ pub mod c2s_packet {
     }
 
     fn get_handshake_packet(buf: &IndexedBuffer, packet_id: &i32) -> Result<C2S, ()> {
+        println!("handshake packet with id: {}", packet_id);
         match packet_id {
             0 => Ok(C2S::Handshake(Handshake::parse(buf))),
             //0xFE: legacy server list ping
@@ -26,6 +29,7 @@ pub mod c2s_packet {
     }
 
     fn get_login_packet(buf: &IndexedBuffer, packet_id: &i32) -> Result<C2S, ()> {
+        println!("login packet with id: {}", packet_id);
         match packet_id {
             0 => Ok(C2S::LoginStart(LoginStart::parse(buf))), //TODO two more login packets
             //1 => Encryption Response
@@ -35,6 +39,7 @@ pub mod c2s_packet {
     }
 
     fn get_status_packet(buf: &IndexedBuffer, packet_id: &i32) -> Result<C2S, ()> {
+        println!("status packet with id: {}", packet_id);
         match packet_id {
             0 => Ok(C2S::StatusRequest(StatusRequest::parse(buf))),
             1 => Ok(C2S::PingRequest(PingRequest::parse(buf))),
@@ -43,6 +48,7 @@ pub mod c2s_packet {
     }
 
     fn get_play_packet(buf: &IndexedBuffer, packet_id: &i32) -> Result<C2S, ()> {
+        println!("play packet with id: {}", packet_id);
         match packet_id {
             _ => Err(()),
         }
@@ -103,13 +109,13 @@ pub mod c2s_packet {
     }
     #[derive(Debug)]
     pub struct PingRequest {
-        _payload: i64,
+        pub payload: i64,
     }
 
     impl Packet<PingRequest> for PingRequest {
         fn parse(buf: &IndexedBuffer) -> PingRequest {
             PingRequest {
-                _payload: parser::parse_signed_long(&buf),
+                payload: parser::parse_signed_long(&buf),
             }
         }
     }
@@ -118,7 +124,9 @@ pub mod c2s_packet {
 pub mod s2c_packet {
     use std::{io::Write, net::TcpStream};
 
-    use crate::packet_serializer::serializer::{serialize_string, serialize_var_int};
+    use crate::packet_serializer::serializer::{
+        serialize_signed_long, serialize_string, serialize_var_int,
+    };
 
     pub trait S2CPacket {
         fn write(&mut self) -> Vec<u8>;
@@ -149,6 +157,19 @@ pub mod s2c_packet {
             let mut data = Vec::new();
             data = serialize_var_int(data, 0);
             data = serialize_string(data, &mut self.server_data);
+            data
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct PingResponse {
+        pub payload: i64,
+    }
+
+    impl S2CPacket for PingResponse {
+        fn write(&mut self) -> Vec<u8> {
+            let mut data = Vec::new();
+            data = serialize_signed_long(data, self.payload);
             data
         }
     }
