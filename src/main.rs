@@ -1,4 +1,4 @@
-use packet::packet::C2S;
+use packet::c2s_packet::C2S;
 use packet_parser::parser;
 // use packet_serializer::serializer;
 use std::cell::Cell;
@@ -6,12 +6,13 @@ use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 
 use crate::client::client_data::{Client, State};
-use crate::packet::packet::create_packet;
+use crate::packet::c2s_packet::get_packet;
 use crate::packet_parser::parser::IndexedBuffer;
 
 mod client;
 mod packet;
 mod packet_parser;
+mod packet_writer;
 //mod packet_serializer;
 
 fn handle_client(mut stream: TcpStream) {
@@ -65,12 +66,20 @@ fn process_packet(stream: &mut TcpStream, state: &State) -> Result<C2S, ()> {
 
     // println!("Packet type: {}, data: {:?}", &packet_type, &buffer);
 
-    create_packet(&indexed_buffer, &packet_type, state)
+    get_packet(&indexed_buffer, &packet_type, state)
 }
 
 #[tokio::main]
 async fn main() {
     let listener = TcpListener::bind("127.0.0.1:25565").unwrap();
+    println!("Parsed: {:?}", packet_writer::writer::write_var_int(32000));
+    println!(
+        "Unparsed: {:?}",
+        parser::parse_var_int(&IndexedBuffer(
+            &packet_writer::writer::write_var_int(-32000),
+            Cell::new(0)
+        ))
+    );
 
     for stream in listener.incoming() {
         tokio::spawn(async move { handle_client(stream.unwrap()) });
