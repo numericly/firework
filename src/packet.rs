@@ -13,20 +13,23 @@ pub mod c2s_packet {
             State::HandShaking => get_handshake_packet(indexed_buffer, packet_id),
             State::Login => get_login_packet(indexed_buffer, packet_id),
             State::Status => get_status_packet(indexed_buffer, packet_id),
-            _ => Err(()),
+            State::Play => get_play_packet(indexed_buffer, packet_id),
         }
     }
 
     fn get_handshake_packet(buf: &IndexedBuffer, packet_id: &i32) -> Result<C2S, ()> {
         match packet_id {
             0 => Ok(C2S::Handshake(Handshake::parse(buf))),
+            //0xFE: legacy server list ping
             _ => Err(()),
         }
     }
 
     fn get_login_packet(buf: &IndexedBuffer, packet_id: &i32) -> Result<C2S, ()> {
         match packet_id {
-            0 => Ok(C2S::LoginStart(LoginStart::parse(buf))),
+            0 => Ok(C2S::LoginStart(LoginStart::parse(buf))), //TODO two more login packets
+            //1 => Encryption Response
+            //2 => Login Plugin Response
             _ => Err(()),
         }
     }
@@ -35,6 +38,12 @@ pub mod c2s_packet {
         match packet_id {
             0 => Ok(C2S::StatusRequest(StatusRequest::parse(buf))),
             1 => Ok(C2S::PingRequest(PingRequest::parse(buf))),
+            _ => Err(()),
+        }
+    }
+
+    fn get_play_packet(buf: &IndexedBuffer, packet_id: &i32) -> Result<C2S, ()> {
+        match packet_id {
             _ => Err(()),
         }
     }
