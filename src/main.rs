@@ -50,8 +50,10 @@ fn handle_client(mut stream: TcpStream) {
 
                 let data = server_status.write();
 
-                stream.write_all(&serialize_var_int(Vec::new(), data.len() as i32));
-                stream.write_all(data.as_slice());
+                stream
+                    .write_all(&serialize_var_int(Vec::new(), data.len() as i32))
+                    .unwrap();
+                stream.write_all(&data).unwrap();
             }
             C2S::PingRequest(ping_request) => {
                 println!("received ping request: {:?}", ping_request)
