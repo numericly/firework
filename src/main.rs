@@ -1,8 +1,11 @@
+#![allow(dead_code)]
+#![allow(unused_variables)]
+
 use packet::packet::C2S;
 use packet_parser::parser;
-// use packet_serializer::serializer;
+use packet_serializer::serializer;
 use std::cell::Cell;
-use std::io::{Read, Write};
+use std::io::Read;
 use std::net::{TcpListener, TcpStream};
 
 use crate::client::client_data::{Client, State};
@@ -12,7 +15,7 @@ use crate::packet_parser::parser::IndexedBuffer;
 mod client;
 mod packet;
 mod packet_parser;
-//mod packet_serializer;
+mod packet_serializer;
 
 fn handle_client(mut stream: TcpStream) {
     println!("Connection from {}", stream.peer_addr().unwrap());
@@ -70,6 +73,13 @@ fn process_packet(stream: &mut TcpStream, state: &State) -> Result<C2S, ()> {
 
 #[tokio::main]
 async fn main() {
+    println!(
+        "{}",
+        parser::parse_var_long(&IndexedBuffer(
+            &serializer::serialize_var_long(-3231325821),
+            Cell::new(0)
+        ))
+    );
     let listener = TcpListener::bind("127.0.0.1:25565").unwrap();
 
     for stream in listener.incoming() {
