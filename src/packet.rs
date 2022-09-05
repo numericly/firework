@@ -1,10 +1,10 @@
-pub mod packet {
+pub mod c2s_packet {
     use crate::{
         client::client_data::State,
         packet_parser::parser::{self, IndexedBuffer},
     };
 
-    pub fn create_packet(
+    pub fn get_packet(
         indexed_buffer: &IndexedBuffer,
         packet_id: &i32,
         state: &State,
@@ -88,20 +88,38 @@ pub mod packet {
     pub struct StatusRequest {}
 
     impl Packet<StatusRequest> for StatusRequest {
-        fn parse(buf: &IndexedBuffer) -> StatusRequest {
+        fn parse(_buf: &IndexedBuffer) -> StatusRequest {
             StatusRequest {}
         }
     }
     #[derive(Debug)]
     pub struct PingRequest {
-        payload: i64,
+        _payload: i64,
     }
 
     impl Packet<PingRequest> for PingRequest {
         fn parse(buf: &IndexedBuffer) -> PingRequest {
             PingRequest {
-                payload: parser::parse_signed_long(&buf),
+                _payload: parser::parse_signed_long(&buf),
             }
         }
     }
+}
+
+pub mod s2c_packet {
+
+    pub trait S2CPacket {
+        fn write() -> Vec<u8>;
+    }
+
+    #[derive(Debug)]
+    pub struct ServerStatus {
+        server_data: String,
+    }
+
+    // impl S2CPacket for ServerStatus {
+    //     fn write() -> Vec<u8> {
+
+    //     }
+    // }
 }
