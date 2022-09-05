@@ -125,7 +125,7 @@ pub mod parser {
         ans
     }
 
-    pub fn parse_UUID(indexed_buffer: &IndexedBuffer) -> u128 {
+    pub fn parse_uuid(indexed_buffer: &IndexedBuffer) -> u128 {
         //untested
         let mut ans = 0;
         let index = indexed_buffer.1.get();
