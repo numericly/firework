@@ -57,8 +57,8 @@ pub mod serializer {
         current
     }
 
-    pub fn serialize_string(mut current: Vec<u8>, input: String) -> Vec<u8> {
-        let mut string_data = input.into_bytes();
+    pub fn serialize_string(mut current: Vec<u8>, input: &String) -> Vec<u8> {
+        let mut string_data = input.clone().into_bytes();
         let mut output = serialize_var_int(current, string_data.len() as i32);
         output.append(&mut string_data);
         output

@@ -107,10 +107,20 @@ pub mod c2s_packet {
 }
 
 pub mod s2c_packet {
-    use crate::packet_serializer::serializer::serialize_string;
+    use std::{io::Write, net::TcpStream};
+
+    use crate::packet_serializer::serializer::{serialize_string, serialize_var_int};
 
     pub trait S2CPacket {
-        fn write(self) -> Vec<u8>;
+        fn write(&mut self) -> Vec<u8>;
+        fn write_packet(&mut self, stream: &mut TcpStream) -> Result<(), std::io::Error> {
+            let packet_data = &self.write();
+
+            stream.write_all(&serialize_var_int(Vec::new(), packet_data.len() as i32))?;
+            stream.write_all(&packet_data)?;
+
+            Ok(())
+        }
     }
 
     #[derive(Debug)]
@@ -119,12 +129,11 @@ pub mod s2c_packet {
     }
 
     impl S2CPacket for ServerStatus {
-        fn write(self) -> Vec<u8> {
-            let mut serialized = Vec::new();
-
-            serialized = serialize_string(serialized, self.server_data);
-
-            serialized
+        fn write(&mut self) -> Vec<u8> {
+            let mut data = Vec::new();
+            data = serialize_var_int(data, 0);
+            data = serialize_string(data, &mut self.server_data);
+            data
         }
     }
 }
