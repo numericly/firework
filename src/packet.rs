@@ -116,8 +116,15 @@ pub mod s2c_packet {
         fn write_packet(&mut self, stream: &mut TcpStream) -> Result<(), std::io::Error> {
             let packet_data = &self.write();
 
-            stream.write_all(&serialize_var_int(Vec::new(), packet_data.len() as i32))?;
-            stream.write_all(&packet_data)?;
+            // stream.write_all(&serialize_var_int(Vec::new(), packet_data.len() as i32))?;
+            // stream.write_all(&packet_data)?;
+            let full_packet = [
+                serialize_var_int(Vec::new(), packet_data.len() as i32).to_vec(),
+                packet_data.to_owned(),
+            ]
+            .concat();
+            stream.write_all(&full_packet)?;
+            println!("{:?}", &full_packet);
 
             Ok(())
         }
