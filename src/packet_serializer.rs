@@ -57,12 +57,10 @@ pub mod serializer {
         output
     }
 
-    // pub fn parse_string(indexed_buffer: &IndexedBuffer) -> String {
-    //     let str_length = parse_var_int(indexed_buffer);
-
-    //     let index = indexed_buffer.1.get();
-    //     let slice = &indexed_buffer.0[index..(&index + str_length as usize)];
-    //     indexed_buffer.1.set(index + str_length as usize);
-    //     String::from_utf8_lossy(slice).to_string() //🐄
-    // }
+    pub fn serialize_string(input: String) -> Vec<u8> {
+        let mut string_data = input.into_bytes();
+        let mut output = serialize_var_int(string_data.len() as i32);
+        output.append(&mut string_data);
+        output
+    }
 }

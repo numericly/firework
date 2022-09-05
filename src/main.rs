@@ -75,8 +75,8 @@ fn process_packet(stream: &mut TcpStream, state: &State) -> Result<C2S, ()> {
 async fn main() {
     println!(
         "{}",
-        parser::parse_var_long(&IndexedBuffer(
-            &serializer::serialize_var_long(-3231325821),
+        parser::parse_string(&IndexedBuffer(
+            &serializer::serialize_string("Hi mom! 💖".to_string()),
             Cell::new(0)
         ))
     );
