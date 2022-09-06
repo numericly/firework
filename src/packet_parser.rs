@@ -4,17 +4,22 @@ pub mod parser {
     pub struct IndexedBuffer<'a>(pub &'a Vec<u8>, pub Cell<usize>);
 
     pub fn parse_packet_length(stream: &mut TcpStream) -> Result<i32, ()> {
+        println!("parsing packet length");
         let mut buf = [0];
         let mut ans = 0;
-        for i in 0..4 {
+        for i in 0..5 {
+            println!("starting loop");
             if let Err(_) = stream.read_exact(&mut buf) {
                 return Err(());
             }
             ans |= ((buf[0] & 0b0111_1111) as i32) << 7 * i;
+            println!("ans = {} when i = {}", ans, i);
             if buf[0] & 0b1000_0000 == 0 {
+                println!("breaking out of loop because it was the final packet");
                 break;
             }
         }
+        println!("finished parsing packet length");
         Ok(ans)
     }
 

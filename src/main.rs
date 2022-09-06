@@ -26,7 +26,7 @@ fn handle_client(mut stream: TcpStream) {
         let packet = process_packet(&mut stream, &client.state);
 
         if let Err(_) = packet {
-            println!("Stream closed because of error");
+            println!("Stream Closed by Client");
             return;
         }
         println!("Packet {:?}", &packet);
@@ -45,7 +45,7 @@ fn handle_client(mut stream: TcpStream) {
                 println!("received status request: {:?}", status_request);
 
                 let mut server_status = ServerStatus {
-                    server_data: r#"{"previewsChat":false,"enforcesSecureChat":true,"description":{"text":"\u00a7a<rust-minecraft-server>\u00a7r"},"players":{"max":20,"online":0},"version":{"name":"1.19.2","protocol":760}}
+                    server_data: r#"{"previewsChat":false,"enforcesSecureChat":true,"description":{"text":"\u00a7a<rust-minecraft-server>\u00a7r"},"players":{"max":1000000,"online":0},"version":{"name":"1.19.2","protocol":760}}
                     "#.to_string()
                 };
 
@@ -59,7 +59,7 @@ fn handle_client(mut stream: TcpStream) {
                 ping_response.write_packet(&mut stream);
             }
             _ => {
-                println!("Packet not handled")
+                println!("Packet not handled");
             }
         }
     }
