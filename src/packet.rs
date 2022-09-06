@@ -124,7 +124,7 @@ pub mod s2c_packet {
     use std::{io::Write, net::TcpStream};
 
     use crate::packet_serializer::serializer::{
-        serialize_signed_long, serialize_string, serialize_var_int,
+        serialize_signed_long, serialize_string, serialize_var_int, serialize_byte_array,
     };
 
     pub trait S2CPacket {
@@ -169,6 +169,27 @@ pub mod s2c_packet {
         fn write(&mut self) -> Vec<u8> {
             let mut data = Vec::new();
             data = serialize_signed_long(data, self.payload);
+            data
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct EncryptionRequest {
+        server_id: String,
+        public_key_length: i32,
+        public_key: Vec<u8>,
+        verify_token_length: i32,
+        verify_token: Vec<u8>,
+    }
+
+    impl S2CPacket for EncryptionRequest {
+        fn write(&mut self) -> Vec<u8> {
+            let mut data = Vec::new();
+            data = serialize_string(data, &self.server_id);
+            data = serialize_var_int(data, self.public_key_length);
+            data = serialize_byte_array(data, self.public_key.clone(), self.public_key_length);
+            data = serialize_var_int(data, self.verify_token_length);
+            data = serialize_byte_array(data, self.verify_token.clone(), self.verify_token_length);
             data
         }
     }

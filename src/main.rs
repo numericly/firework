@@ -5,7 +5,7 @@ use std::io::Read;
 use std::net::{TcpListener, TcpStream};
 
 use crate::client::client_data::{Client, State};
-use crate::packet::c2s_packet::get_packet;
+use crate::packet::c2s_packet::{get_packet, LoginStart};
 use crate::packet::s2c_packet::{PingResponse, S2CPacket, ServerStatus};
 use crate::packet_parser::parser::{IndexedBuffer, ReadUncompressed};
 
@@ -48,14 +48,23 @@ fn handle_client(mut stream: TcpStream) {
                 };
 
                 let data = server_status.write_packet(&mut stream);
-            }
+            },
             C2S::PingRequest(ping_request) => {
                 println!("received ping request: {:?}", ping_request);
                 let mut ping_response = PingResponse {
                     payload: ping_request.payload,
                 };
                 ping_response.write_packet(&mut stream);
-            }
+                println!("sent ping response");
+            },
+            C2S::LoginStart(login_start) => {
+                println!("received ping request: {:?}", ping_request);
+                let mut ping_response = LoginStart {
+                    player_name: todo!(),
+                };
+                ping_response.write_packet(&mut stream);
+                println!("sent ping response");
+            },
             _ => {
                 println!("Packet not handled");
             }

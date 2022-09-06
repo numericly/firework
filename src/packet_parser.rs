@@ -106,7 +106,6 @@ pub mod parser {
                 break;
             }
         }
-        println!("finished parsing packet length");
         Ok(ans)
     }
 

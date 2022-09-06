@@ -59,4 +59,9 @@ pub mod serializer {
         let output = serialize_var_int(current, string_data.len() as i32);
         [output, string_data].concat()
     }
+
+    pub fn serialize_byte_array(current: Vec<u8>, array: Vec<u8>, length: i32) -> Vec<u8> {
+        println!("array: {:?}, length: {}, first length bytes of array: {:?}", array, length, array[..length as usize].to_vec());
+        [current, array[..length as usize].to_vec()].concat()
+    }
 }
