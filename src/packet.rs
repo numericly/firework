@@ -20,7 +20,6 @@ pub mod c2s_packet {
     }
 
     fn get_handshake_packet(buf: PacketBuffer, packet_id: &i32) -> Result<C2S, String> {
-        println!("handshake packet with id: {}", packet_id);
         match packet_id {
             0 => Ok(C2S::Handshake(Handshake::parse(buf))),
             //0xFE: legacy server list ping
@@ -29,7 +28,6 @@ pub mod c2s_packet {
     }
 
     fn get_login_packet(buf: PacketBuffer, packet_id: &i32) -> Result<C2S, String> {
-        println!("login packet with id: {}", packet_id);
         match packet_id {
             0 => Ok(C2S::LoginStart(LoginStart::parse(buf))), //TODO two more login packets
             //1 => Encryption Response
@@ -39,7 +37,6 @@ pub mod c2s_packet {
     }
 
     fn get_status_packet(buf: PacketBuffer, packet_id: &i32) -> Result<C2S, String> {
-        println!("status packet with id: {}", packet_id);
         match packet_id {
             0 => Ok(C2S::StatusRequest(StatusRequest::parse(buf))),
             1 => Ok(C2S::PingRequest(PingRequest::parse(buf))),
@@ -134,13 +131,6 @@ pub mod s2c_packet {
 
             stream.write_all(&serialize_var_int(Vec::new(), packet_data.len() as i32))?;
             stream.write_all(&packet_data)?;
-            // let full_packet = [
-            //     serialize_var_int(Vec::new(), packet_data.len() as i32).to_vec(),
-            //     packet_data.to_owned(),
-            // ]
-            // .concat();
-            // stream.write_all(&full_packet)?;
-            // println!("{:?}", &full_packet);
 
             Ok(())
         }
