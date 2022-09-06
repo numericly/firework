@@ -58,12 +58,7 @@ fn handle_client(mut stream: TcpStream) {
                 println!("sent ping response");
             },
             C2S::LoginStart(login_start) => {
-                println!("received ping request: {:?}", ping_request);
-                let mut ping_response = LoginStart {
-                    player_name: todo!(),
-                };
-                ping_response.write_packet(&mut stream);
-                println!("sent ping response");
+                println!("received login start: {:?}", login_start);
             },
             _ => {
                 println!("Packet not handled");
