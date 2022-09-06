@@ -7,11 +7,15 @@ pub mod parser {
         println!("parsing packet length");
         let mut buf = [0];
         let mut ans = 0;
-        for i in 0..5 {
-            println!("starting loop");
+        for i in 0..6 {
+            if i > 5 {
+                println!("Error");
+                return Err(());
+            }
             if let Err(_) = stream.read_exact(&mut buf) {
                 return Err(());
             }
+            println!("byte {:x}", buf[0]);
             ans |= ((buf[0] & 0b0111_1111) as i32) << 7 * i;
             println!("ans = {} when i = {}", ans, i);
             if buf[0] & 0b1000_0000 == 0 {
