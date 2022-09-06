@@ -64,20 +64,14 @@ fn handle_client(mut stream: TcpStream) {
 }
 
 fn process_packet(stream: &mut TcpStream, state: &State) -> Result<C2S, String> {
-    let mut packet_buffer = match stream.read_packet() {
+    let packet_buffer = match stream.read_packet() {
         Ok(packet_buffer) => packet_buffer,
         Err(e) => return Err(e),
     };
 
     let packet_type = packet_buffer.parse_var_int();
 
-    println!(
-        "Packet type: {}, data: {:?}",
-        &packet_type,
-        &packet_buffer.data.len()
-    );
-
-    //get_packet(&indexed_buffer, &packet_type, state)
+    get_packet(packet_buffer, &packet_type, state)
 }
 
 #[tokio::main]

@@ -1,61 +1,60 @@
 pub mod c2s_packet {
     use crate::{
         client::client_data::State,
-        packet_parser::parser::{self, IndexedBuffer},
+        packet_parser::parser::{self, IndexedBuffer, PacketBuffer},
     };
 
     use super::s2c_packet::{PingResponse, S2CPacket};
 
     pub fn get_packet(
-        indexed_buffer: &IndexedBuffer,
+        packet_buffer: PacketBuffer,
         packet_id: &i32,
         state: &State,
-    ) -> Result<C2S, ()> {
+    ) -> Result<C2S, String> {
         match state {
-            State::HandShaking => get_handshake_packet(indexed_buffer, packet_id),
-            State::Login => get_login_packet(indexed_buffer, packet_id),
-            State::Status => get_status_packet(indexed_buffer, packet_id),
-            State::Play => get_play_packet(indexed_buffer, packet_id),
+            State::HandShaking => get_handshake_packet(packet_buffer, packet_id),
+            State::Login => get_login_packet(packet_buffer, packet_id),
+            State::Status => get_status_packet(packet_buffer, packet_id),
+            State::Play => get_play_packet(packet_buffer, packet_id),
         }
     }
 
-    fn get_handshake_packet(buf: &IndexedBuffer, packet_id: &i32) -> Result<C2S, ()> {
+    fn get_handshake_packet(buf: PacketBuffer, packet_id: &i32) -> Result<C2S, String> {
         println!("handshake packet with id: {}", packet_id);
         match packet_id {
             0 => Ok(C2S::Handshake(Handshake::parse(buf))),
             //0xFE: legacy server list ping
-            _ => Err(()),
+            _ => Err(format!("Could not find packet with ID: {}, state: Handshake", packet_id)),
         }
     }
 
-    fn get_login_packet(buf: &IndexedBuffer, packet_id: &i32) -> Result<C2S, ()> {
+    fn get_login_packet(buf: PacketBuffer, packet_id: &i32) -> Result<C2S, String> {
         println!("login packet with id: {}", packet_id);
         match packet_id {
             0 => Ok(C2S::LoginStart(LoginStart::parse(buf))), //TODO two more login packets
             //1 => Encryption Response
             //2 => Login Plugin Response
-            _ => Err(()),
+            _ => Err(format!("Could not find packet with ID: {}, state: Login", packet_id)),
         }
     }
 
-    fn get_status_packet(buf: &IndexedBuffer, packet_id: &i32) -> Result<C2S, ()> {
+    fn get_status_packet(buf: PacketBuffer, packet_id: &i32) -> Result<C2S, String> {
         println!("status packet with id: {}", packet_id);
         match packet_id {
             0 => Ok(C2S::StatusRequest(StatusRequest::parse(buf))),
             1 => Ok(C2S::PingRequest(PingRequest::parse(buf))),
-            _ => Err(()),
+            _ => Err(format!("Could not find packet with ID: {}, state: Status", packet_id)),
         }
     }
 
-    fn get_play_packet(buf: &IndexedBuffer, packet_id: &i32) -> Result<C2S, ()> {
-        println!("play packet with id: {}", packet_id);
+    fn get_play_packet(_buf: PacketBuffer, packet_id: &i32) -> Result<C2S, String> {
         match packet_id {
-            _ => Err(()),
+            _ => Err(format!("Could not find packet with ID: {}, state: Handshake", packet_id)),
         }
     }
 
     pub trait Packet<T> {
-        fn parse(indexed_buffer: &IndexedBuffer) -> T;
+        fn parse(indexed_buffer: PacketBuffer) -> T;
     }
 
     #[derive(Debug)]
@@ -77,12 +76,12 @@ pub mod c2s_packet {
     }
 
     impl Packet<Handshake> for Handshake {
-        fn parse(buf: &IndexedBuffer) -> Handshake {
+        fn parse(buf: PacketBuffer) -> Handshake {
             Handshake {
-                protocol_version: parser::parse_var_int(&buf),
-                server_address: parser::parse_string(&buf),
-                server_port: parser::parse_unsigned_short(&buf),
-                next_state: parser::parse_var_int(&buf),
+                protocol_version: buf.parse_var_int(),
+                server_address: buf.parse_string(),
+                server_port: buf.parse_unsigned_short(),
+                next_state: buf.parse_var_int(),
             }
         }
     }
@@ -93,9 +92,9 @@ pub mod c2s_packet {
     }
 
     impl Packet<LoginStart> for LoginStart {
-        fn parse(buf: &IndexedBuffer) -> LoginStart {
+        fn parse(buf: PacketBuffer) -> LoginStart {
             LoginStart {
-                player_name: parser::parse_string(&buf),
+                player_name: buf.parse_string()
             }
         }
     }
@@ -103,7 +102,7 @@ pub mod c2s_packet {
     pub struct StatusRequest {}
 
     impl Packet<StatusRequest> for StatusRequest {
-        fn parse(_buf: &IndexedBuffer) -> StatusRequest {
+        fn parse(_buf: PacketBuffer) -> StatusRequest {
             StatusRequest {}
         }
     }
@@ -113,9 +112,9 @@ pub mod c2s_packet {
     }
 
     impl Packet<PingRequest> for PingRequest {
-        fn parse(buf: &IndexedBuffer) -> PingRequest {
+        fn parse(buf: PacketBuffer) -> PingRequest {
             PingRequest {
-                payload: parser::parse_signed_long(&buf),
+                payload: buf.parse_signed_long(),
             }
         }
     }
@@ -133,15 +132,15 @@ pub mod s2c_packet {
         fn write_packet(&mut self, stream: &mut TcpStream) -> Result<(), std::io::Error> {
             let packet_data = &self.write();
 
-            // stream.write_all(&serialize_var_int(Vec::new(), packet_data.len() as i32))?;
-            // stream.write_all(&packet_data)?;
-            let full_packet = [
-                serialize_var_int(Vec::new(), packet_data.len() as i32).to_vec(),
-                packet_data.to_owned(),
-            ]
-            .concat();
-            stream.write_all(&full_packet)?;
-            println!("{:?}", &full_packet);
+            stream.write_all(&serialize_var_int(Vec::new(), packet_data.len() as i32))?;
+            stream.write_all(&packet_data)?;
+            // let full_packet = [
+            //     serialize_var_int(Vec::new(), packet_data.len() as i32).to_vec(),
+            //     packet_data.to_owned(),
+            // ]
+            // .concat();
+            // stream.write_all(&full_packet)?;
+            // println!("{:?}", &full_packet);
 
             Ok(())
         }
