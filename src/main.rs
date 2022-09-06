@@ -7,7 +7,7 @@ use std::net::{TcpListener, TcpStream};
 use crate::client::client_data::{Client, State};
 use crate::packet::c2s_packet::get_packet;
 use crate::packet::s2c_packet::{PingResponse, S2CPacket, ServerStatus};
-use crate::packet_parser::parser::IndexedBuffer;
+use crate::packet_parser::parser::{IndexedBuffer, ReadUncompressed};
 
 mod client;
 mod packet;
@@ -63,23 +63,21 @@ fn handle_client(mut stream: TcpStream) {
     }
 }
 
-fn process_packet(stream: &mut TcpStream, state: &State) -> Result<C2S, ()> {
-    println!("process_packet called with state: {:?}", state);
-    let length = parser::parse_packet_length(stream)?;
-    println!("length: {}", length);
+fn process_packet(stream: &mut TcpStream, state: &State) -> Result<C2S, String> {
+    let mut packet_buffer = match stream.read_packet() {
+        Ok(packet_buffer) => packet_buffer,
+        Err(e) => return Err(e),
+    };
 
-    // Read the packet data and store it in a buffer
-    let mut buffer = vec![0u8; length as usize];
-    stream.read_exact(&mut buffer).unwrap();
-    println!("buffer: {:?}", buffer);
+    let packet_type = packet_buffer.parse_var_int();
 
-    let indexed_buffer = IndexedBuffer(&buffer, Cell::new(0));
+    println!(
+        "Packet type: {}, data: {:?}",
+        &packet_type,
+        &packet_buffer.data.len()
+    );
 
-    let packet_type = parser::parse_var_int(&indexed_buffer);
-
-    println!("Packet type: {}, data: {:?}", &packet_type, &buffer);
-
-    get_packet(&indexed_buffer, &packet_type, state)
+    //get_packet(&indexed_buffer, &packet_type, state)
 }
 
 #[tokio::main]

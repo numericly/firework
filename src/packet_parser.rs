@@ -3,18 +3,59 @@ pub mod parser {
 
     pub struct IndexedBuffer<'a>(pub &'a Vec<u8>, pub Cell<usize>);
 
-    pub fn parse_packet_length(stream: &mut TcpStream) -> Result<i32, ()> {
+    pub struct PacketBuffer {
+        pub data: Vec<u8>,
+        pub index: Cell<usize>,
+    }
+
+    pub trait ReadUncompressed {
+        fn read_packet(&mut self) -> Result<PacketBuffer, String>;
+    }
+
+    impl ReadUncompressed for TcpStream {
+        fn read_packet(&mut self) -> Result<PacketBuffer, String> {
+            let length = match parse_packet_length(&mut self) {
+                Ok(length) => length as usize,
+                Err(e) => return Err(e),
+            };
+
+            let mut buffer = vec![0u8; length];
+            if let Err(_) = &self.read_exact(&mut buffer) {
+                return Err("Error filling buffer".to_string());
+            }
+
+            Ok(PacketBuffer {
+                data: buffer,
+                index: Cell::new(0),
+            })
+        }
+    }
+
+    impl PacketBuffer {
+        pub fn parse_var_int(&self) -> i32 {
+            let mut ans = 0;
+            let mut used_bytes = 0;
+            let index = &self.index.get();
+            for i in 0..5 {
+                used_bytes += 1;
+                let val = &self.data[index + i];
+                ans |= ((val & 0b0111_1111) as i32) << 7 * i;
+                if val & 0b1000_0000 == 0 {
+                    break;
+                }
+            }
+            &self.index.set(index + used_bytes);
+            ans
+        }
+    }
+
+    pub fn parse_packet_length(stream: &mut TcpStream) -> Result<i32, String> {
         let mut buf = [0];
         let mut ans = 0;
         for i in 0..4 {
-            if i > 4 {
-                println!("Error");
-                return Err(());
-            }
             if let Err(_) = stream.read_exact(&mut buf) {
-                return Err(());
+                return Err("Stream closed by client".to_string());
             }
-            println!("byte {:x}", buf[0]);
             ans |= ((buf[0] & 0b0111_1111) as i32) << 7 * i;
             if buf[0] & 0b1000_0000 == 0 {
                 break;
