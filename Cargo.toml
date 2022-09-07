@@ -7,4 +7,8 @@ edition = "2021"
 
 [dependencies]
 tokio = { version ="1.21.0", features = ["full"] }
-rsa = "0.6.1"
+openssl = "0.10.28"
+rand = "0.8.5"
+reqwest = "0.11.11"
+aes = "0.8.1"
+cfb8 = "0.8.1"

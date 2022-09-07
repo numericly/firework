@@ -48,7 +48,6 @@ pub mod parser {
             ans
         }
         pub fn parse_var_long(&self) -> i64 {
-
             //not tested
             let mut ans = 0;
             let mut used_bytes = 0;
@@ -66,7 +65,7 @@ pub mod parser {
         }
         pub fn parse_string(&self) -> String {
             let str_length = self.parse_var_int();
-    
+
             let index = self.index.get();
             let slice = &self.data[index..(index + str_length as usize)];
             &self.index.set(index + str_length as usize);
@@ -91,6 +90,13 @@ pub mod parser {
             }
             self.index.set(index + 8usize);
             ans
+        }
+        pub fn parse_byte_array(&self) -> Vec<u8> {
+            let length = self.parse_var_int() as usize;
+            let index = self.index.get();
+            let read_bytes = &self.data[index..(index + length)];
+            self.index.set(index + length);
+            read_bytes.to_vec()
         }
     }
 

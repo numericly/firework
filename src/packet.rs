@@ -23,16 +23,22 @@ pub mod c2s_packet {
         match packet_id {
             0 => Ok(C2S::Handshake(Handshake::parse(buf))),
             //0xFE: legacy server list ping
-            _ => Err(format!("Could not find packet with ID: {}, state: Handshake", packet_id)),
+            _ => Err(format!(
+                "Could not find packet with ID: {}, state: Handshake",
+                packet_id
+            )),
         }
     }
 
     fn get_login_packet(buf: PacketBuffer, packet_id: &i32) -> Result<C2S, String> {
         match packet_id {
             0 => Ok(C2S::LoginStart(LoginStart::parse(buf))), //TODO two more login packets
-            //1 => Encryption Response
+            1 => Ok(C2S::EncryptionResponse(EncryptionReponse::parse(buf))),
             //2 => Login Plugin Response
-            _ => Err(format!("Could not find packet with ID: {}, state: Login", packet_id)),
+            _ => Err(format!(
+                "Could not find packet with ID: {}, state: Login",
+                packet_id
+            )),
         }
     }
 
@@ -40,13 +46,19 @@ pub mod c2s_packet {
         match packet_id {
             0 => Ok(C2S::StatusRequest(StatusRequest::parse(buf))),
             1 => Ok(C2S::PingRequest(PingRequest::parse(buf))),
-            _ => Err(format!("Could not find packet with ID: {}, state: Status", packet_id)),
+            _ => Err(format!(
+                "Could not find packet with ID: {}, state: Status",
+                packet_id
+            )),
         }
     }
 
     fn get_play_packet(_buf: PacketBuffer, packet_id: &i32) -> Result<C2S, String> {
         match packet_id {
-            _ => Err(format!("Could not find packet with ID: {}, state: Handshake", packet_id)),
+            _ => Err(format!(
+                "Could not find packet with ID: {}, state: Handshake",
+                packet_id
+            )),
         }
     }
 
@@ -62,6 +74,7 @@ pub mod c2s_packet {
         //Status
         StatusRequest(StatusRequest),
         PingRequest(PingRequest),
+        EncryptionResponse(EncryptionReponse)
     }
 
     #[derive(Debug)]
@@ -91,7 +104,7 @@ pub mod c2s_packet {
     impl Packet<LoginStart> for LoginStart {
         fn parse(buf: PacketBuffer) -> LoginStart {
             LoginStart {
-                player_name: buf.parse_string()
+                player_name: buf.parse_string(),
             }
         }
     }
@@ -115,13 +128,31 @@ pub mod c2s_packet {
             }
         }
     }
+
+    #[derive(Debug)]
+    pub struct EncryptionReponse {
+        pub shared_secret: Vec<u8>,
+        pub verify_token: Option<Vec<u8>>,
+        pub salt: Option<i64>
+    }
+
+    impl Packet<EncryptionReponse> for EncryptionReponse {
+        fn parse(buf: PacketBuffer) -> EncryptionReponse {
+            EncryptionReponse {
+                shared_secret: buf.parse_byte_array(),
+                verify_token: None,
+                salt: None
+            }
+        }
+    }
+
 }
 
 pub mod s2c_packet {
     use std::{io::Write, net::TcpStream};
 
     use crate::packet_serializer::serializer::{
-        serialize_signed_long, serialize_string, serialize_var_int, serialize_byte_array,
+        serialize_byte_array, serialize_signed_long, serialize_string, serialize_var_int,
     };
 
     pub trait S2CPacket {
@@ -158,6 +189,7 @@ pub mod s2c_packet {
     impl S2CPacket for PingResponse {
         fn write(&mut self) -> Vec<u8> {
             let mut data = Vec::new();
+            data = serialize_var_int(data, 1);
             data = serialize_signed_long(data, self.payload);
             data
         }
@@ -165,21 +197,22 @@ pub mod s2c_packet {
 
     #[derive(Debug)]
     pub struct EncryptionRequest {
-        server_id: String,
-        public_key_length: i32,
-        public_key: Vec<u8>,
-        verify_token_length: i32,
-        verify_token: Vec<u8>,
+        pub server_id: String,
+        pub public_key_length: i32,
+        pub public_key: Vec<u8>,
+        pub verify_token_length: i32,
+        pub verify_token: Vec<u8>,
     }
 
     impl S2CPacket for EncryptionRequest {
         fn write(&mut self) -> Vec<u8> {
             let mut data = Vec::new();
+            data = serialize_var_int(data, 1);
             data = serialize_string(data, &self.server_id);
             data = serialize_var_int(data, self.public_key_length);
-            data = serialize_byte_array(data, self.public_key.clone(), self.public_key_length);
+            data = serialize_byte_array(data, &mut self.public_key);
             data = serialize_var_int(data, self.verify_token_length);
-            data = serialize_byte_array(data, self.verify_token.clone(), self.verify_token_length);
+            data = serialize_byte_array(data, &mut self.verify_token);
             data
         }
     }

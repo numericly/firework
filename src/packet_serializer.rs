@@ -60,8 +60,8 @@ pub mod serializer {
         [output, string_data].concat()
     }
 
-    pub fn serialize_byte_array(current: Vec<u8>, array: Vec<u8>, length: i32) -> Vec<u8> {
-        println!("array: {:?}, length: {}, first length bytes of array: {:?}", array, length, array[..length as usize].to_vec());
-        [current, array[..length as usize].to_vec()].concat()
+    pub fn serialize_byte_array(mut current: Vec<u8>, array: &mut Vec<u8>) -> Vec<u8> {
+        current.append(array);
+        current
     }
 }
