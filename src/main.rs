@@ -1,36 +1,32 @@
-use openssl::rsa::{Padding, Rsa};
-use openssl::symm::Cipher;
+use aes::cipher::KeyIvInit;
 use packet::c2s_packet::C2S;
-use packet_parser::parser::{self};
-use rand::RngCore;
 use rand::rngs::OsRng;
+use rand::RngCore;
+use rsa::pkcs1::{RsaPublicKey as RsaPublicKeyPKCS1, UIntBytes};
+use rsa::pkcs8::der::Document;
+use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
+use server::server_data::Server;
+use std::f64::consts::E;
 use std::net::{TcpListener, TcpStream};
-use aes::cipher::{AsyncStreamCipher, KeyIvInit};
+use std::sync::Arc;
 
 type Aes128Cfb8Enc = cfb8::Encryptor<aes::Aes128>;
 type Aes128Cfb8Dec = cfb8::Decryptor<aes::Aes128>;
 
 use crate::client::client_data::{Client, State};
-use crate::packet::c2s_packet::{get_packet, LoginStart};
-use crate::packet::s2c_packet::{PingResponse, S2CPacket, ServerStatus, EncryptionRequest};
-use crate::packet_parser::parser::{IndexedBuffer, ReadUncompressed};
+use crate::packet::c2s_packet::get_packet;
+use crate::packet::s2c_packet::{EncryptionRequest, PingResponse, S2CPacket, ServerStatus};
+use crate::packet_parser::parser::ReadUncompressed;
 
 mod client;
 mod packet;
 mod packet_parser;
 mod packet_serializer;
+mod server;
 
-fn handle_client(mut stream: TcpStream) {
+fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
     println!("Connection from {}", stream.peer_addr().unwrap());
-    let mut client = Client {
-        state: State::HandShaking,
-    };
-
-    let rsa = Rsa::generate(1024).unwrap();
-    let public_key: Vec<u8> = rsa.public_key_to_der().unwrap();
-
-    let mut encryptor = None;
-    let mut decryptor = None;
+    let mut client = Client::new();
 
     loop {
         let packet = process_packet(&mut stream, &client.state);
@@ -73,24 +69,36 @@ fn handle_client(mut stream: TcpStream) {
                 rng.fill_bytes(&mut bytes);
 
                 let mut start_encryption = EncryptionRequest {
-                    server_id: "".to_string(), // depracated after 1.7
-                    public_key_length: (&public_key.len()).clone() as i32,
-                    public_key: (&public_key).clone(),
+                    server_id: "".to_string(), // deprecated after 1.7
+                    public_key_length: server.encryption.encoded_pub.len().clone() as i32,
+                    public_key: server.encryption.encoded_pub.clone(),
                     verify_token_length: bytes.len() as i32,
-                    verify_token: bytes.to_vec()
+                    verify_token: bytes.to_vec(),
                 };
 
                 start_encryption.write_packet(&mut stream).unwrap();
             }
-            C2S::EncryptionResponse(encryption_reponse) => {
-                let mut buf = vec![0u8; encryption_reponse.shared_secret.len()];
-                let shared_secret_length = rsa.private_decrypt(&encryption_reponse.shared_secret, &mut buf, Padding::PKCS1).unwrap();
-                if shared_secret_length != 16usize {
+            C2S::EncryptionResponse(encryption_response) => {
+                let shared_secret = server
+                    .encryption
+                    .priv_key
+                    .decrypt(
+                        rsa::PaddingScheme::PKCS1v15Encrypt,
+                        encryption_response.shared_secret.as_slice(),
+                    )
+                    .unwrap();
+                if shared_secret.len() != 16usize {
                     return;
                 }
 
-                encryptor = Some(Aes128Cfb8Enc::new(buf[0..16].into(), buf[0..16].into()));
-                decryptor = Some(Aes128Cfb8Dec::new(buf[0..16].into(), buf[0..16].into()));
+                client.packet_encryption.encryptor = Some(Aes128Cfb8Enc::new(
+                    shared_secret.as_slice().into(),
+                    shared_secret.as_slice().into(),
+                ));
+                client.packet_encryption.decryptor = Some(Aes128Cfb8Dec::new(
+                    shared_secret.as_slice().into(),
+                    shared_secret.as_slice().into(),
+                ));
             }
             _ => {
                 println!("Packet not handled");
@@ -112,11 +120,12 @@ fn process_packet(stream: &mut TcpStream, state: &State) -> Result<C2S, String> 
 
 #[tokio::main]
 async fn main() {
-
     let listener = TcpListener::bind("127.0.0.1:25566").unwrap();
+    let server = Arc::new(Server::new());
 
     for stream in listener.incoming() {
-        tokio::spawn(async move { handle_client(stream.unwrap()) });
+        let server = Arc::clone(&server);
+        tokio::spawn(async move { handle_client(stream.unwrap(), server) });
     }
 }
 
