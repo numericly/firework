@@ -26,7 +26,7 @@ pub mod serializer {
         [current, input.to_be_bytes().to_vec()].concat()
     }
 
-    pub fn serialize_uuid(mut current: Vec<u8>, input: i128) -> Vec<u8> {
+    pub fn serialize_uuid(mut current: Vec<u8>, input: u128) -> Vec<u8> {
         [current, input.to_be_bytes().to_vec()].concat()
     }
 

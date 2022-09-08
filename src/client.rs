@@ -1,7 +1,11 @@
 pub mod client_data {
+    use crate::authentication::Profile;
+
     pub struct Client {
         pub state: State,
         pub packet_encryption: PacketEncryption,
+        pub username: Option<String>,
+        pub profile: Option<Profile>
     }
 
     type Aes128Cfb8Enc = cfb8::Encryptor<aes::Aes128>;
@@ -12,6 +16,8 @@ pub mod client_data {
             Client {
                 state: State::HandShaking,
                 packet_encryption: PacketEncryption::new(),
+                username: None,
+                profile: None,
             }
         }
     }

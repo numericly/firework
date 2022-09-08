@@ -1,4 +1,5 @@
 use aes::cipher::KeyIvInit;
+use num_bigint::BigInt;
 use packet::c2s_packet::C2S;
 use rand::rngs::OsRng;
 use rand::RngCore;
@@ -6,25 +7,29 @@ use rsa::pkcs1::{RsaPublicKey as RsaPublicKeyPKCS1, UIntBytes};
 use rsa::pkcs8::der::Document;
 use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
 use server::server_data::Server;
+use sha1::{Digest, Sha1};
 use std::f64::consts::E;
+use std::fmt::format;
 use std::net::{TcpListener, TcpStream};
 use std::sync::Arc;
 
 type Aes128Cfb8Enc = cfb8::Encryptor<aes::Aes128>;
 type Aes128Cfb8Dec = cfb8::Decryptor<aes::Aes128>;
 
+use crate::authentication::authenticate;
 use crate::client::client_data::{Client, State};
 use crate::packet::c2s_packet::get_packet;
 use crate::packet::s2c_packet::{EncryptionRequest, PingResponse, S2CPacket, ServerStatus};
 use crate::packet_parser::parser::ReadUncompressed;
 
+mod authentication;
 mod client;
 mod packet;
 mod packet_parser;
 mod packet_serializer;
 mod server;
 
-fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
+async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
     println!("Connection from {}", stream.peer_addr().unwrap());
     let mut client = Client::new();
 
@@ -46,7 +51,7 @@ fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
                     client.state = State::Login;
                 }
                 _ => {
-                    println!("Error handling client state")
+                    println!("Error handling next client state")
                 }
             },
             C2S::StatusRequest(_status_request) => {
@@ -63,10 +68,13 @@ fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
                 };
                 ping_response.write_packet(&mut stream).unwrap();
             }
-            C2S::LoginStart(_login_start) => {
+            C2S::LoginStart(login_start) => {
                 let mut rng = OsRng {};
                 let mut bytes = [0u8; 4];
+
                 rng.fill_bytes(&mut bytes);
+
+                client.username = Some(login_start.player_name);
 
                 let mut start_encryption = EncryptionRequest {
                     server_id: "".to_string(), // deprecated after 1.7
@@ -99,6 +107,17 @@ fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
                     shared_secret.as_slice().into(),
                     shared_secret.as_slice().into(),
                 ));
+                let profile = authenticate(
+                    &shared_secret[0..16],
+                    &server.encryption.encoded_pub,
+                    client.username.as_ref().unwrap(),
+                    &stream.peer_addr().unwrap().ip().to_string(),
+                )
+                .await;
+
+                i128::from_str_radix(&profile.id, 16).unwrap();
+
+                println!("{:?}", profile);
             }
             _ => {
                 println!("Packet not handled");
@@ -125,7 +144,7 @@ async fn main() {
 
     for stream in listener.incoming() {
         let server = Arc::clone(&server);
-        tokio::spawn(async move { handle_client(stream.unwrap(), server) });
+        tokio::spawn(async move { handle_client(stream.unwrap(), server).await });
     }
 }
 

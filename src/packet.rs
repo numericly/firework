@@ -74,7 +74,7 @@ pub mod c2s_packet {
         //Status
         StatusRequest(StatusRequest),
         PingRequest(PingRequest),
-        EncryptionResponse(EncryptionReponse)
+        EncryptionResponse(EncryptionReponse),
     }
 
     #[derive(Debug)]
@@ -133,7 +133,7 @@ pub mod c2s_packet {
     pub struct EncryptionReponse {
         pub shared_secret: Vec<u8>,
         pub verify_token: Option<Vec<u8>>,
-        pub salt: Option<i64>
+        pub salt: Option<i64>,
     }
 
     impl Packet<EncryptionReponse> for EncryptionReponse {
@@ -141,18 +141,20 @@ pub mod c2s_packet {
             EncryptionReponse {
                 shared_secret: buf.parse_byte_array(),
                 verify_token: None,
-                salt: None
+                salt: None,
             }
         }
     }
-
 }
 
 pub mod s2c_packet {
-    use std::{io::Write, net::TcpStream};
+    use std::{io::Write, net::TcpStream, sync::Mutex, rc::Rc};
+    use aes::cipher::{AsyncStreamCipher, KeyIvInit};
+
+    type Aes128Cfb8Enc = cfb8::Encryptor<aes::Aes128>;
 
     use crate::packet_serializer::serializer::{
-        serialize_byte_array, serialize_signed_long, serialize_string, serialize_var_int,
+        serialize_byte_array, serialize_signed_long, serialize_string, serialize_var_int, serialize_uuid, serialize_boolean,
     };
 
     pub trait S2CPacket {
@@ -163,6 +165,15 @@ pub mod s2c_packet {
             stream.write_all(&serialize_var_int(Vec::new(), packet_data.len() as i32))?;
             stream.write_all(&packet_data)?;
 
+            Ok(())
+        }
+        fn write_encrypted_packet(&mut self, stream: &mut TcpStream, encryptor_lock: &Rc<Aes128Cfb8Enc>) -> Result<(), std::io::Error> {
+            let mut packet_data = self.write();
+            let mut encryptor = Rc::clone(&encryptor_lock);
+
+            //encryptor.encrypt(&mut packet_data);
+            stream.write_all(&serialize_var_int(Vec::new(), packet_data.len() as i32))?;
+            stream.write_all(&packet_data)?;
             Ok(())
         }
     }
@@ -213,6 +224,38 @@ pub mod s2c_packet {
             data = serialize_byte_array(data, &mut self.public_key);
             data = serialize_var_int(data, self.verify_token_length);
             data = serialize_byte_array(data, &mut self.verify_token);
+            data
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct LoginSuccess {
+        pub id: u128,
+        pub username: String,
+        pub properties: Vec<LoginSucessProperty>
+    }
+
+    #[derive(Debug)]
+    pub struct LoginSucessProperty {
+        pub name: String,
+        pub value: String,
+        pub signature: Option<String>
+    }
+
+    impl S2CPacket for LoginSuccess {
+        fn write(&mut self) -> Vec<u8> {
+            let mut data = Vec::new();
+            data = serialize_uuid(data, self.id);
+            data = serialize_string(data, &self.username);
+            data = serialize_var_int(data, self.properties.len() as i32);
+            for property in &self.properties {
+                data = serialize_string(data, &property.name);
+                data = serialize_string(data, &property.value);
+                data = serialize_boolean(data, property.signature.is_some());
+                if property.signature.is_some() {
+                    data = serialize_string(data, property.signature.as_ref().unwrap())
+                }
+            }
             data
         }
     }
