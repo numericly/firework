@@ -5,7 +5,7 @@ pub mod client_data {
         pub state: State,
         pub packet_encryption: PacketEncryption,
         pub username: Option<String>,
-        pub profile: Option<Profile>
+        pub profile: Option<Profile>,
     }
 
     type Aes128Cfb8Enc = cfb8::Encryptor<aes::Aes128>;

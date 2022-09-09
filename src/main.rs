@@ -13,16 +13,18 @@ use std::fmt::format;
 use std::net::{TcpListener, TcpStream};
 use std::sync::Arc;
 
-type Aes128Cfb8Enc = cfb8::Encryptor<aes::Aes128>;
-type Aes128Cfb8Dec = cfb8::Decryptor<aes::Aes128>;
-
 use crate::authentication::authenticate;
+use crate::cfb8::CarrotCakeCipher;
 use crate::client::client_data::{Client, State};
 use crate::packet::c2s_packet::get_packet;
-use crate::packet::s2c_packet::{EncryptionRequest, PingResponse, S2CPacket, ServerStatus};
+use crate::packet::cfb8::CBF8Cipher;
+use crate::packet::s2c_packet::{
+    EncryptionRequest, LoginSuccess, LoginSuccessProperty, PingResponse, S2CPacket, ServerStatus,
+};
 use crate::packet_parser::parser::ReadUncompressed;
 
 mod authentication;
+mod cfb8;
 mod client;
 mod packet;
 mod packet_parser;
@@ -56,7 +58,7 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
             },
             C2S::StatusRequest(_status_request) => {
                 let mut server_status = ServerStatus {
-                    server_data: r#"{"previewsChat":false,"enforcesSecureChat":true,"description":{"text":"\u00a7a<rust-minecraft-server>\u00a7r"},"players":{"max":10,"online":0},"version":{"name":"1.19.2","protocol":760}}
+                    server_data: r#"{"previewsChat":false,"enforcesSecureChat":true,"description":{"text":"\u00a7a<rust-minecraft-server>\u00a7r"},"players":{"max":10,"online":0},"version":{"name":"1.20.3","protocol":760}}
                     "#.to_string()
                 };
 
@@ -99,14 +101,6 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
                     return;
                 }
 
-                client.packet_encryption.encryptor = Some(Aes128Cfb8Enc::new(
-                    shared_secret.as_slice().into(),
-                    shared_secret.as_slice().into(),
-                ));
-                client.packet_encryption.decryptor = Some(Aes128Cfb8Dec::new(
-                    shared_secret.as_slice().into(),
-                    shared_secret.as_slice().into(),
-                ));
                 let profile = authenticate(
                     &shared_secret[0..16],
                     &server.encryption.encoded_pub,
@@ -115,9 +109,31 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
                 )
                 .await;
 
-                i128::from_str_radix(&profile.id, 16).unwrap();
+                let mut cipher = CarrotCakeCipher::new(
+                    shared_secret.as_slice().into(),
+                    shared_secret.as_slice().into(),
+                )
+                .unwrap();
 
-                println!("{:?}", profile);
+                let mut packet = LoginSuccess {
+                    id: u128::from_str_radix(&profile.id, 16).unwrap(),
+                    username: profile.name,
+                    properties: {
+                        let mut properties = Vec::new();
+                        for prop in profile.properties {
+                            properties.push(LoginSuccessProperty {
+                                name: prop.name,
+                                value: prop.value,
+                                signature: Some(prop.signature),
+                            });
+                        }
+                        properties
+                    },
+                };
+
+                packet
+                    .write_encrypted_packet(&mut stream, &mut cipher)
+                    .unwrap();
             }
             _ => {
                 println!("Packet not handled");

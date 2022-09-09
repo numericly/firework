@@ -33,7 +33,7 @@ pub mod c2s_packet {
     fn get_login_packet(buf: PacketBuffer, packet_id: &i32) -> Result<C2S, String> {
         match packet_id {
             0 => Ok(C2S::LoginStart(LoginStart::parse(buf))), //TODO two more login packets
-            1 => Ok(C2S::EncryptionResponse(EncryptionReponse::parse(buf))),
+            1 => Ok(C2S::EncryptionResponse(EncryptionResponse::parse(buf))),
             //2 => Login Plugin Response
             _ => Err(format!(
                 "Could not find packet with ID: {}, state: Login",
@@ -74,7 +74,7 @@ pub mod c2s_packet {
         //Status
         StatusRequest(StatusRequest),
         PingRequest(PingRequest),
-        EncryptionResponse(EncryptionReponse),
+        EncryptionResponse(EncryptionResponse),
     }
 
     #[derive(Debug)]
@@ -130,15 +130,15 @@ pub mod c2s_packet {
     }
 
     #[derive(Debug)]
-    pub struct EncryptionReponse {
+    pub struct EncryptionResponse {
         pub shared_secret: Vec<u8>,
         pub verify_token: Option<Vec<u8>>,
         pub salt: Option<i64>,
     }
 
-    impl Packet<EncryptionReponse> for EncryptionReponse {
-        fn parse(buf: PacketBuffer) -> EncryptionReponse {
-            EncryptionReponse {
+    impl Packet<EncryptionResponse> for EncryptionResponse {
+        fn parse(buf: PacketBuffer) -> EncryptionResponse {
+            EncryptionResponse {
                 shared_secret: buf.parse_byte_array(),
                 verify_token: None,
                 salt: None,
@@ -148,14 +148,20 @@ pub mod c2s_packet {
 }
 
 pub mod s2c_packet {
-    use std::{io::Write, net::TcpStream, sync::Mutex, rc::Rc};
     use aes::cipher::{AsyncStreamCipher, KeyIvInit};
+    use std::{io::Write, net::TcpStream, rc::Rc, sync::Mutex};
 
     type Aes128Cfb8Enc = cfb8::Encryptor<aes::Aes128>;
 
-    use crate::packet_serializer::serializer::{
-        serialize_byte_array, serialize_signed_long, serialize_string, serialize_var_int, serialize_uuid, serialize_boolean,
+    use crate::{
+        cfb8::CarrotCakeCipher,
+        packet_serializer::serializer::{
+            serialize_byte_array, serialize_signed_long, serialize_string, serialize_uuid,
+            serialize_var_int,
+        },
     };
+
+    use super::cfb8::CBF8Cipher;
 
     pub trait S2CPacket {
         fn write(&mut self) -> Vec<u8>;
@@ -167,13 +173,24 @@ pub mod s2c_packet {
 
             Ok(())
         }
-        fn write_encrypted_packet(&mut self, stream: &mut TcpStream, encryptor_lock: &Rc<Aes128Cfb8Enc>) -> Result<(), std::io::Error> {
+        fn write_encrypted_packet(
+            &mut self,
+            stream: &mut TcpStream,
+            cipher: &mut CarrotCakeCipher,
+        ) -> Result<(), std::io::Error> {
             let mut packet_data = self.write();
-            let mut encryptor = Rc::clone(&encryptor_lock);
+            let mut full_packet_data = [
+                serialize_var_int(Vec::new(), packet_data.len() as i32),
+                packet_data,
+            ]
+            .concat();
 
-            //encryptor.encrypt(&mut packet_data);
-            stream.write_all(&serialize_var_int(Vec::new(), packet_data.len() as i32))?;
-            stream.write_all(&packet_data)?;
+            cipher.encrypt(&mut full_packet_data);
+
+            stream.write_all(&full_packet_data)?;
+
+            // stream.write_all(&serialize_var_int(Vec::new(), packet_data.len() as i32))?;
+            // stream.write_all(&packet_data)?;
             Ok(())
         }
     }
@@ -232,31 +249,82 @@ pub mod s2c_packet {
     pub struct LoginSuccess {
         pub id: u128,
         pub username: String,
-        pub properties: Vec<LoginSucessProperty>
+        pub properties: Vec<LoginSuccessProperty>,
     }
 
     #[derive(Debug)]
-    pub struct LoginSucessProperty {
+    pub struct LoginSuccessProperty {
         pub name: String,
         pub value: String,
-        pub signature: Option<String>
+        pub signature: Option<String>,
     }
 
     impl S2CPacket for LoginSuccess {
         fn write(&mut self) -> Vec<u8> {
             let mut data = Vec::new();
+            data = serialize_var_int(data, 2);
             data = serialize_uuid(data, self.id);
             data = serialize_string(data, &self.username);
-            data = serialize_var_int(data, self.properties.len() as i32);
-            for property in &self.properties {
-                data = serialize_string(data, &property.name);
-                data = serialize_string(data, &property.value);
-                data = serialize_boolean(data, property.signature.is_some());
-                if property.signature.is_some() {
-                    data = serialize_string(data, property.signature.as_ref().unwrap())
-                }
-            }
+            data = serialize_var_int(data, 0 as i32);
             data
+        }
+    }
+}
+
+pub mod cfb8 {
+
+    use aes::cipher::consts::U16;
+    use aes::cipher::generic_array::sequence::Lengthen;
+    use aes::cipher::KeyInit;
+    use aes::{
+        cipher::{generic_array::GenericArray, BlockEncrypt},
+        Aes128,
+    };
+
+    pub struct CBF8Cipher {
+        iv: GenericArray<u8, U16>,
+        tmp: GenericArray<u8, U16>,
+        cipher: Aes128,
+    }
+
+    const SIZE: usize = 16;
+
+    impl CBF8Cipher {
+        pub fn new(key: &[u8], iv: &[u8]) -> Result<CBF8Cipher, String> {
+            if key.len() != SIZE {
+                return Err(format!("key is not {} bytes", SIZE));
+            }
+            if iv.len() != SIZE {
+                return Err(format!("key is not {} bytes", SIZE));
+            }
+
+            let mut iv_fixed = [0u8; SIZE];
+            iv_fixed.copy_from_slice(key);
+
+            let mut key_fixed = [0u8; SIZE];
+            key_fixed.copy_from_slice(key);
+
+            let tmp = [0u8; SIZE];
+
+            Ok(CBF8Cipher {
+                iv: GenericArray::from(iv_fixed),
+                tmp: GenericArray::from(tmp),
+                cipher: Aes128::new(&GenericArray::from(key_fixed)),
+            })
+        }
+        pub fn encrypt(&mut self, data: &mut [u8]) {
+            // iterate through the data encrypting it
+            for i in 0..data.len() {
+                // encrypt the iv
+                self.cipher.encrypt_block(&mut self.iv);
+
+                // xor the data with the iv
+                data[i] ^= self.iv[0];
+
+                // shift the iv left
+                self.iv.copy_within(1..SIZE, 0);
+                self.iv[SIZE - 1] = data[i];
+            }
         }
     }
 }
