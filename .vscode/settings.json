@@ -5,6 +5,7 @@
         "encryptor",
         "minecraft",
         "PKCS",
-        "rngs"
+        "rngs",
+        "varint"
     ]
 }
