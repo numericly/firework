@@ -21,7 +21,7 @@ pub mod world {
 
     pub struct PalettedContainer {
         pub bits_per_entry: u8,
-        pub palette: Vec,
+        pub palette: Vec<u8>, // FIX THIS XAVIER
         pub data_length: i32, //varint
         pub data: Vec<i64>,
     }
@@ -30,7 +30,7 @@ pub mod world {
         pub x: i32,
         pub y: i32,
         pub z: i32,
-        pub nbt: todo(),
+        pub nbt: bool, // FIX THIS XAVIER
     }
 
     pub struct Entity {
@@ -47,10 +47,10 @@ pub mod world {
         pub on_ground: bool,
         pub entity_id: i32,
         pub entity_type: i32,
-        pub nbt: todo(),
+        pub nbt: bool, // FIX THIS XAVIER
     }
 
-    fn read_chunk_file(file_path: String) -> Chunk {
-        let chunk_binary = fs::read(file_path);
-    }
+    // fn read_chunk_file(file_path: String) -> Chunk {
+    //     let chunk_binary = fs::read(file_path);
+    // }
 }
