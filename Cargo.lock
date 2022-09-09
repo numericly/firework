@@ -506,6 +506,7 @@ dependencies = [
  "aes",
  "cfb8",
  "num-bigint",
+ "protocol",
  "rand",
  "reqwest",
  "rsa",
@@ -767,6 +768,10 @@ checksum = "0a2ca2c61bc9f3d74d2886294ab7b9853abd9c1ad903a3ac7815c58989bb7bab"
 dependencies = [
  "unicode-ident",
 ]
+
+[[package]]
+name = "protocol"
+version = "0.1.0"
 
 [[package]]
 name = "quote"

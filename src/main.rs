@@ -12,6 +12,7 @@ use std::f64::consts::E;
 use std::fmt::format;
 use std::net::{TcpListener, TcpStream};
 use std::sync::Arc;
+use protocol::testfile::print;
 
 use crate::authentication::authenticate;
 use crate::cfb8::CarrotCakeCipher;
