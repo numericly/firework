@@ -7,6 +7,8 @@ pub mod client_data {
         pub username: Option<String>,
         pub profile: Option<Profile>,
         pub uuid: Option<String>,
+        pub gamemode: Option<u8>,
+        pub previous_gamemode: Option<u8>,
     }
 
     type Aes128Cfb8Enc = cfb8::Encryptor<aes::Aes128>;
@@ -20,6 +22,8 @@ pub mod client_data {
                 username: None,
                 profile: None,
                 uuid: None,
+                gamemode: None,
+                previous_gamemode: None,
             }
         }
     }

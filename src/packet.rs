@@ -159,6 +159,7 @@ pub mod s2c_packet {
             serialize_byte_array, serialize_signed_long, serialize_string, serialize_uuid,
             serialize_var_int,
         },
+        server::server_data,
     };
 
     use super::cfb8::CBF8Cipher;
@@ -266,6 +267,39 @@ pub mod s2c_packet {
             data = serialize_uuid(data, self.id);
             data = serialize_string(data, &self.username);
             data = serialize_var_int(data, 0 as i32);
+            data
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct LoginPlay {
+        pub entity_id: i32, //entity id of the player
+        pub hardcore: bool,
+        pub gamemode: u8, //0 = survival, 1 = creative, 2 = adventure, 3 = spectator
+        pub previous_gamemode: u8, //0 = survival, 1 = creative, 2 = adventure, 3 = spectator
+        pub dimension_count: i32,
+        pub dimension_names: Vec<String>,
+        pub registry_codec: String, //NBT Tag Compound (idk what that means but it's a string and probably nbt format)
+        pub dimension_type: String,
+        pub dimension_name: String,
+        pub hashed_seed: i64,  //first 8 bytes of sha256 of world seed
+        pub max_players: i32,  //unused
+        pub view_distance: u8, //2-32
+        pub simulation_distance: u8,
+        pub reduced_debug_info: bool,    //should be true
+        pub enable_respawn_screen: bool, //true: show respawn screen, false: instantly respawn
+        pub is_debug: bool,              //debug world
+        pub is_flat: bool,               //superflat world
+        pub has_death_location: bool,
+        pub death_dimension_name: Option<String>,
+        pub death_position: Option<[f64; 3]>,
+    }
+
+    impl S2CPacket for LoginPlay {
+        fn write(&mut self) -> Vec<u8> {
+            let mut data = Vec::new();
+            data = serialize_var_int(data, 2);
+            //can you add these will i have to not be late to school
             data
         }
     }

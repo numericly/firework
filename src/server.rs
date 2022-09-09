@@ -3,12 +3,14 @@ pub mod server_data {
 
     pub struct Server {
         pub encryption: Encryption,
+        pub hardcore: bool,
     }
 
     impl Server {
         pub fn new() -> Server {
             Server {
                 encryption: Encryption::new(),
+                hardcore: false,
             }
         }
     }
