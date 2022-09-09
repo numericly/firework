@@ -1,9 +1,11 @@
 {
-    "cSpell.words": [
-        "decryptor",
-        "encryptor",
-        "minecraft",
-        "PKCS",
-        "rngs"
-    ]
+  "cSpell.words": [
+    "decryptor",
+    "encryptor",
+    "minecraft",
+    "Paletted",
+    "PKCS",
+    "rngs",
+    "varint"
+  ]
 }

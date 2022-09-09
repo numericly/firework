@@ -28,6 +28,7 @@ mod packet;
 mod packet_parser;
 mod packet_serializer;
 mod server;
+mod world;
 
 async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
     println!("Connection from {}", stream.peer_addr().unwrap());
