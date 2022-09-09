@@ -6,11 +6,11 @@ use sha1::{Digest, Sha1};
 pub struct Profile {
     pub id: String,
     pub name: String,
-    pub properties: Vec<ProfilePropertry>,
+    pub properties: Vec<ProfileProperty>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct ProfilePropertry {
+pub struct ProfileProperty {
     pub name: String,
     pub value: String,
     pub signature: String,

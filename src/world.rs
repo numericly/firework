@@ -21,7 +21,7 @@ pub mod world {
 
     pub struct PalettedContainer {
         pub bits_per_entry: u8,
-        pub palette: Vec<u8>, // FIX THIS XAVIER
+        //pub palette: todo(),
         pub data_length: i32, //varint
         pub data: Vec<i64>,
     }
@@ -30,7 +30,7 @@ pub mod world {
         pub x: i32,
         pub y: i32,
         pub z: i32,
-        pub nbt: bool, // FIX THIS XAVIER
+        //pub nbt: todo(),
     }
 
     pub struct Entity {

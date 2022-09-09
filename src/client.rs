@@ -6,6 +6,7 @@ pub mod client_data {
         pub packet_encryption: PacketEncryption,
         pub username: Option<String>,
         pub profile: Option<Profile>,
+        pub uuid: Option<String>,
     }
 
     type Aes128Cfb8Enc = cfb8::Encryptor<aes::Aes128>;
@@ -18,6 +19,7 @@ pub mod client_data {
                 packet_encryption: PacketEncryption::new(),
                 username: None,
                 profile: None,
+                uuid: None,
             }
         }
     }

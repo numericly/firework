@@ -132,6 +132,12 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
                     },
                 };
 
+                //save the uuid to the client for later use
+                client.uuid = Some(profile.id);
+
+                println!("Sending Login Success");
+                println!("{:?}", packet);
+
                 packet
                     .write_encrypted_packet(&mut stream, &mut cipher)
                     .unwrap();
