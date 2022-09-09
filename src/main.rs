@@ -1,6 +1,8 @@
 use aes::cipher::KeyIvInit;
 use num_bigint::BigInt;
 use packet::c2s_packet::C2S;
+use protocol::packets::server_bound::ServerBoundPacket;
+use protocol::protocol::{ConnectionState, Protocol};
 use rand::rngs::OsRng;
 use rand::RngCore;
 use rsa::pkcs1::{RsaPublicKey as RsaPublicKeyPKCS1, UIntBytes};
@@ -12,7 +14,6 @@ use std::f64::consts::E;
 use std::fmt::format;
 use std::net::{TcpListener, TcpStream};
 use std::sync::Arc;
-use protocol::testfile::print;
 
 use crate::authentication::authenticate;
 use crate::cfb8::CarrotCakeCipher;
@@ -35,8 +36,123 @@ mod world;
 
 async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
     println!("Connection from {}", stream.peer_addr().unwrap());
-    let mut client = Client::new();
+    //let mut client = Client::new();
 
+    let mut protocol = Protocol::new(&stream);
+    let mut temp_username = None;
+
+    loop {
+        let packet = match protocol.read_and_serialize(&ConnectionState::HandShaking) {
+            Ok(packet) => packet,
+            Err(e) => {
+                println!("Error: {}", e);
+                break;
+            }
+        };
+
+        println!("Packet: {:?}", packet);
+
+        match packet {
+            ServerBoundPacket::Handshake(handshake) => match handshake.next_state {
+                ConnectionState::Login => {
+                    protocol.connection_state = ConnectionState::Login;
+                }
+                ConnectionState::Status => {
+                    protocol.connection_state = ConnectionState::Status;
+                }
+                _ => return,
+            },
+            ServerBoundPacket::StatusRequest(_status_request) => {
+                let mut server_status = ServerStatus {
+                    server_data: r#"{"previewsChat":false,"enforcesSecureChat":true,"description":{"text":"\u00a7a<rust-minecraft-server>\u00a7r"},"players":{"max":10,"online":0},"version":{"name":"1.20.3","protocol":760}}
+                    "#.to_string()
+                };
+
+                server_status.write_packet(&mut stream).unwrap();
+            }
+            ServerBoundPacket::PingRequest(ping_request) => {
+                let mut ping_response = PingResponse {
+                    payload: ping_request.payload,
+                };
+                ping_response.write_packet(&mut stream).unwrap();
+            }
+            ServerBoundPacket::LoginStart(login_start) => {
+                let mut rng = OsRng {};
+                let mut bytes = [0u8; 4];
+
+                rng.fill_bytes(&mut bytes);
+
+                temp_username = Some(login_start.username);
+
+                let mut start_encryption = EncryptionRequest {
+                    server_id: "".to_string(), // deprecated after 1.7
+                    public_key_length: server.encryption.encoded_pub.len().clone() as i32,
+                    public_key: server.encryption.encoded_pub.clone(),
+                    verify_token_length: bytes.len() as i32,
+                    verify_token: bytes.to_vec(),
+                };
+
+                start_encryption.write_packet(&mut stream).unwrap();
+            }
+            ServerBoundPacket::EncryptionResponse(encryption_response) => {
+                let shared_secret = server
+                    .encryption
+                    .priv_key
+                    .decrypt(
+                        rsa::PaddingScheme::PKCS1v15Encrypt,
+                        encryption_response.shared_secret.as_slice(),
+                    )
+                    .unwrap();
+                if shared_secret.len() != 16usize {
+                    return;
+                }
+
+                let profile = authenticate(
+                    &shared_secret[0..16],
+                    &server.encryption.encoded_pub,
+                    &temp_username.unwrap(),
+                    &stream.peer_addr().unwrap().ip().to_string(),
+                )
+                .await;
+
+                let mut cipher = CarrotCakeCipher::new(
+                    shared_secret.as_slice().into(),
+                    shared_secret.as_slice().into(),
+                )
+                .unwrap();
+
+                let mut packet = LoginSuccess {
+                    id: u128::from_str_radix(&profile.id, 16).unwrap(),
+                    username: profile.name,
+                    properties: {
+                        let mut properties = Vec::new();
+                        for prop in profile.properties {
+                            properties.push(LoginSuccessProperty {
+                                name: prop.name,
+                                value: prop.value,
+                                signature: Some(prop.signature),
+                            });
+                        }
+                        properties
+                    },
+                };
+
+                //save the uuid to the client for later use
+                //client.uuid = Some(profile.id);
+
+                println!("Sending Login Success");
+                println!("{:?}", packet);
+
+                packet
+                    .write_encrypted_packet(&mut stream, &mut cipher)
+                    .unwrap();
+            }
+            _ => {
+                println!("Packet not handled");
+            }
+        }
+    }
+    /*
     loop {
         let packet = process_packet(&mut stream, &client.state);
 
@@ -148,6 +264,7 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
             }
         }
     }
+    */
 }
 
 fn process_packet(stream: &mut TcpStream, state: &State) -> Result<C2S, String> {
