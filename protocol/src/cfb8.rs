@@ -1,9 +1,9 @@
+// This code was not written by me, but the author of the craft-io crate.
+
 use aes::{
     cipher::{consts::U16, generic_array::GenericArray, BlockEncrypt, KeyInit},
     Aes128,
 };
-#[cfg(feature = "backtrace")]
-use std::backtrace::Backtrace;
 
 pub type CraftCipherResult<T> = Result<T, CipherError>;
 
@@ -15,33 +15,16 @@ pub enum CipherComponent {
 
 #[derive(Debug)]
 pub enum CipherError {
-    AlreadyEnabled {
-        #[cfg(feature = "backtrace")]
-        backtrace: Backtrace,
-    },
+    AlreadyEnabled {},
     BadSize {
         size: usize,
         component: CipherComponent,
-        #[cfg(feature = "backtrace")]
-        backtrace: Backtrace,
     },
 }
 
 impl CipherError {
     fn bad_size(component: CipherComponent, size: usize) -> Self {
-        CipherError::BadSize {
-            component,
-            size,
-            #[cfg(feature = "backtrace")]
-            backtrace: Backtrace::capture(),
-        }
-    }
-
-    fn already_enabled() -> Self {
-        CipherError::AlreadyEnabled {
-            #[cfg(feature = "backtrace")]
-            backtrace: Backtrace::capture(),
-        }
+        CipherError::BadSize { component, size }
     }
 }
 

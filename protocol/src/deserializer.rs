@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct IncomingPacketData {
     data: Vec<u8>,
     index: usize,
@@ -12,10 +13,12 @@ impl IncomingPacketData {
         const CONTINUE_BIT: u8 = 0x80;
 
         let mut val = 0i32;
-        for i in 0..5 {
+
+        for i in 0..4 {
             let position = i * 7;
-            let current_byte = &self.data[self.index + i];
+            let current_byte = &self.data[self.index];
             self.index += 1;
+
             val |= ((current_byte & SEGMENT_BITS) as i32) << position;
 
             if (current_byte & CONTINUE_BIT) == 0 {

@@ -1,10 +1,19 @@
-use std::{io::Read, net::TcpStream};
+use std::{
+    io::{Read, Write},
+    net::TcpStream,
+};
 
-use crate::{deserializer::IncomingPacketData, packets::server_bound::ServerBoundPacket};
+use crate::{
+    cfb8::CarrotCakeCipher,
+    deserializer::IncomingPacketData,
+    packets::{client_bound::Serialize, server_bound::ServerBoundPacket},
+    serializer::OutboundPacketData,
+};
 
 pub struct Protocol<'a> {
     stream: &'a TcpStream,
     pub connection_state: ConnectionState,
+    pub cipher: Option<CarrotCakeCipher>,
 }
 
 #[derive(Debug)]
@@ -20,15 +29,13 @@ impl Protocol<'_> {
         Protocol {
             stream: &stream,
             connection_state: ConnectionState::HandShaking,
+            cipher: None,
         }
     }
-    pub fn read_and_serialize(
-        &mut self,
-        state: &ConnectionState,
-    ) -> Result<ServerBoundPacket, String> {
+    pub fn read_and_serialize(&mut self) -> Result<ServerBoundPacket, String> {
         let packet_data = self.read_packet()?;
 
-        Ok(ServerBoundPacket::from(state, packet_data)?)
+        ServerBoundPacket::from(&self.connection_state, packet_data)
     }
     pub fn read_packet(&mut self) -> Result<IncomingPacketData, String> {
         let packet_length = self.read_packet_length()? as usize;
@@ -40,6 +47,28 @@ impl Protocol<'_> {
         // ZLIB decompression (Not implemented)
 
         Ok(IncomingPacketData::new(buffer))
+    }
+    pub fn write_packet(&mut self, packet: impl Serialize) -> Result<(), String> {
+        let packet_data = packet.serialize();
+
+        // ZLIB compression (Not implemented)
+
+        let data_length = OutboundPacketData::write_length(packet_data.data.len());
+
+        let mut full_packet = [&data_length[..], &packet_data.data[..]].concat();
+
+        if let Some(cipher) = &mut self.cipher {
+            cipher.encrypt(&mut full_packet);
+        }
+
+        self.stream
+            .write_all(&full_packet)
+            .map_err(|e| e.to_string())?;
+
+        Ok(())
+    }
+    pub fn set_encryption(&mut self, key: &[u8], iv: &[u8]) {
+        self.cipher = Some(CarrotCakeCipher::new(key, iv).unwrap());
     }
     fn read_packet_length(&mut self) -> Result<i32, String> {
         const SEGMENT_BITS: u8 = 0x7F;

@@ -6,6 +6,7 @@
     "gamemode",
     "minecraft",
     "PKCS",
+    "reqwest",
     "rngs",
     "varint"
   ]

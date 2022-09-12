@@ -140,3 +140,105 @@ pub mod server_bound {
         }
     }
 }
+
+pub mod client_bound {
+    use crate::serializer::OutboundPacketData;
+
+    pub trait Serialize {
+        fn serialize(&self) -> OutboundPacketData {
+            let mut packet_data = OutboundPacketData::new();
+
+            // Write packet with packet id
+            packet_data.write_var_int(self.packet_id());
+            self.serialize_into(&mut packet_data);
+
+            packet_data
+        }
+        fn serialize_into(&self, packet_data: &mut OutboundPacketData);
+        fn packet_id(&self) -> i32;
+    }
+
+    #[derive(Debug)]
+    pub struct ServerStatus {
+        pub server_data: String,
+    }
+
+    impl Serialize for ServerStatus {
+        fn serialize_into(&self, packet_data: &mut OutboundPacketData) {
+            packet_data.write_string(&self.server_data);
+        }
+        fn packet_id(&self) -> i32 {
+            0
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct PingResponse {
+        pub payload: i64,
+    }
+
+    impl Serialize for PingResponse {
+        fn serialize_into(&self, packet_data: &mut OutboundPacketData) {
+            packet_data.write_signed_long(self.payload);
+        }
+        fn packet_id(&self) -> i32 {
+            1
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct EncryptionRequest {
+        pub server_id: String,
+        pub public_key: Vec<u8>,
+        pub verify_token: Vec<u8>,
+    }
+
+    impl Serialize for EncryptionRequest {
+        fn serialize_into(&self, packet_data: &mut OutboundPacketData) {
+            packet_data.write_string(&self.server_id);
+            packet_data.write_var_int(self.public_key.len() as i32);
+            packet_data.write_bytes(&self.public_key);
+            packet_data.write_var_int(self.verify_token.len() as i32);
+            packet_data.write_bytes(&self.verify_token);
+        }
+        fn packet_id(&self) -> i32 {
+            1
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct LoginSuccess {
+        pub id: u128,
+        pub username: String,
+        pub properties: Vec<LoginSuccessProperty>,
+    }
+
+    #[derive(Debug)]
+    pub struct LoginSuccessProperty {
+        pub name: String,
+        pub value: String,
+        pub signature: Option<String>,
+    }
+
+    impl Serialize for LoginSuccess {
+        fn serialize_into(&self, packet_data: &mut OutboundPacketData) {
+            packet_data.write_uuid(self.id);
+            packet_data.write_string(&self.username);
+            packet_data.write_var_int(self.properties.len() as i32);
+            for property in &self.properties {
+                packet_data.write_string(&property.name);
+                packet_data.write_string(&property.value);
+                match &property.signature {
+                    Some(signature) => {
+                        packet_data.write_bool(true);
+                        packet_data.write_string(signature);
+                    }
+                    None => packet_data.write_bool(false),
+                }
+            }
+        }
+        fn packet_id(&self) -> i32 {
+            2
+        }
+    }
+}
