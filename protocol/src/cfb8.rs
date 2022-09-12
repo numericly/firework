@@ -31,7 +31,7 @@ impl CipherError {
 const BYTES_SIZE: usize = 16;
 
 pub struct CarrotCakeCipher {
-    iv: GenericArray<u8, U16>,
+    pub iv: GenericArray<u8, U16>,
     tmp: GenericArray<u8, U16>,
     cipher: Aes128,
 }

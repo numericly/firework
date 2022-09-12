@@ -1,14 +1,16 @@
 use protocol::packets::client_bound::{
-    EncryptionRequest, LoginSuccess, PingResponse, ServerStatus,
+    EncryptionRequest, LoginSuccess, PingResponse, ServerStatus, WorldLogin,
 };
 use protocol::packets::server_bound::ServerBoundPacket;
-use protocol::protocol::Protocol;
+use protocol::protocol::{ConnectionState, Protocol};
+use quartz_nbt::snbt;
 use rand::rngs::OsRng;
 use rand::RngCore;
 use server::server_data::Server;
 use std::env;
 use std::net::{TcpListener, TcpStream};
 use std::sync::Arc;
+use tokio::fs;
 
 use crate::authentication::authenticate;
 
@@ -99,6 +101,40 @@ async fn handle_client(stream: TcpStream, server: Arc<Server>) {
                 };
 
                 protocol.write_packet(login_success).unwrap();
+
+                let registry_content = fs::read_to_string("default-registry.txt").await.unwrap();
+
+                let registry = snbt::parse(&registry_content).unwrap();
+
+                let world_login = WorldLogin {
+                    entity_id: 0,
+                    is_hardcore: false,
+                    game_mode: 0,
+                    previous_game_mode: 1,
+                    dimensions: vec![
+                        "minecraft:overworld".to_string(),
+                        "minecraft:the_nether".to_string(),
+                        "minecraft:the_end".to_string(),
+                    ],
+                    registry_codec: registry,
+                    dimension_type: "minecraft:overworld".to_string(),
+                    dimension_name: "minecraft:overworld".to_string(),
+                    hashed_seed: 0,
+                    max_players: 0,
+                    view_distance: 8,
+                    simulation_distance: 8,
+                    reduced_debug_info: false,
+                    enable_respawn_screen: true,
+                    is_debug: false,
+                    is_flat: false,
+                    has_death_location: false,
+                    death_dimension_name: None,
+                    death_position: None,
+                };
+
+                protocol.write_packet(world_login).unwrap();
+
+                protocol.connection_state = ConnectionState::Play;
             }
         }
     }

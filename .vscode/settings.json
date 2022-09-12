@@ -7,7 +7,9 @@
     "minecraft",
     "PKCS",
     "reqwest",
+    "respawn",
     "rngs",
+    "snbt",
     "varint"
   ]
 }

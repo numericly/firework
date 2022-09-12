@@ -142,6 +142,8 @@ pub mod server_bound {
 }
 
 pub mod client_bound {
+    use quartz_nbt::NbtCompound;
+
     use crate::serializer::OutboundPacketData;
 
     pub trait Serialize {
@@ -239,6 +241,57 @@ pub mod client_bound {
         }
         fn packet_id(&self) -> i32 {
             2
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct WorldLogin {
+        pub entity_id: i32,
+        pub is_hardcore: bool,
+        pub game_mode: u8,
+        pub previous_game_mode: i8,
+        pub dimensions: Vec<String>,
+        pub registry_codec: NbtCompound,
+        pub dimension_type: String,
+        pub dimension_name: String,
+        pub hashed_seed: i64,
+        pub max_players: i32,
+        pub view_distance: i32,
+        pub simulation_distance: i32,
+        pub reduced_debug_info: bool,
+        pub enable_respawn_screen: bool,
+        pub is_debug: bool,
+        pub is_flat: bool,
+        pub has_death_location: bool,
+        pub death_dimension_name: Option<String>,
+        pub death_position: Option<(i32, i32, i32)>,
+    }
+
+    impl Serialize for WorldLogin {
+        fn serialize_into(&self, packet_data: &mut OutboundPacketData) {
+            packet_data.write_signed_int(self.entity_id);
+            packet_data.write_bool(self.is_hardcore);
+            packet_data.write_unsigned_byte(self.game_mode);
+            packet_data.write_signed_byte(self.previous_game_mode);
+            packet_data.write_var_int(self.dimensions.len() as i32);
+            for dimension in &self.dimensions {
+                packet_data.write_string(dimension);
+            }
+            packet_data.write_nbt(&self.registry_codec);
+            packet_data.write_string(&self.dimension_type);
+            packet_data.write_string(&self.dimension_name);
+            packet_data.write_signed_long(self.hashed_seed);
+            packet_data.write_var_int(self.max_players);
+            packet_data.write_var_int(self.view_distance);
+            packet_data.write_var_int(self.simulation_distance);
+            packet_data.write_bool(self.reduced_debug_info);
+            packet_data.write_bool(self.enable_respawn_screen);
+            packet_data.write_bool(self.is_debug);
+            packet_data.write_bool(self.is_flat);
+            packet_data.write_bool(self.has_death_location);
+        }
+        fn packet_id(&self) -> i32 {
+            37
         }
     }
 }

@@ -1,3 +1,5 @@
+use quartz_nbt::{io, NbtCompound};
+
 pub struct OutboundPacketData {
     pub data: Vec<u8>,
 }
@@ -39,6 +41,18 @@ impl OutboundPacketData {
     }
     pub fn write_bool(&mut self, val: bool) {
         self.data.push(if val { 1 } else { 0 });
+    }
+    pub fn write_nbt(&mut self, nbt: &NbtCompound) {
+        io::write_nbt(&mut self.data, None, nbt, io::Flavor::Uncompressed).unwrap();
+    }
+    pub fn write_signed_byte(&mut self, val: i8) {
+        self.data.push(val as u8);
+    }
+    pub fn write_unsigned_byte(&mut self, val: u8) {
+        self.data.push(val);
+    }
+    pub fn write_signed_int(&mut self, val: i32) {
+        self.data.extend_from_slice(&val.to_be_bytes());
     }
     pub fn write_length(length: usize) -> Vec<u8> {
         let mut data = Vec::new();

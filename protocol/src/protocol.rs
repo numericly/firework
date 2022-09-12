@@ -59,6 +59,7 @@ impl Protocol<'_> {
 
         if let Some(cipher) = &mut self.cipher {
             cipher.encrypt(&mut full_packet);
+            println!("Iv after encryption: {:?}", cipher.iv);
         }
 
         self.stream
@@ -91,6 +92,9 @@ impl Protocol<'_> {
     fn read_bytes_exact(&mut self, buf: &mut [u8]) -> Result<(), String> {
         self.stream.read_exact(buf).map_err(|e| e.to_string())?;
 
+        if let Some(cipher) = &mut self.cipher {
+            cipher.decrypt(buf);
+        }
         // decrypt the the read data (Not implemented)
         Ok(())
     }
@@ -110,7 +114,12 @@ impl Protocol<'_> {
             };
         };
 
-        // decrypt the read bytes (Not implemented)
+        println!("read encrypted: {}", buf[0]);
+        if let Some(cipher) = &mut self.cipher {
+            cipher.decrypt(&mut buf);
+        }
+
+        println!("read decrypted: {}", buf[0]);
 
         Ok(buf[0])
     }
