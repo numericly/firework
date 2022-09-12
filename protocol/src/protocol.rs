@@ -1,5 +1,7 @@
-use std::{
-    io::{Read, Write},
+use std::fmt::Debug;
+
+use tokio::{
+    io::{AsyncReadExt, AsyncWriteExt},
     net::TcpStream,
 };
 
@@ -11,9 +13,10 @@ use crate::{
 };
 
 pub struct Protocol<'a> {
-    stream: &'a TcpStream,
+    stream: &'a mut TcpStream,
     pub connection_state: ConnectionState,
-    pub cipher: Option<CarrotCakeCipher>,
+    pub encryption: Option<CarrotCakeCipher>,
+    pub decryption: Option<CarrotCakeCipher>,
 }
 
 #[derive(Debug)]
@@ -25,30 +28,37 @@ pub enum ConnectionState {
 }
 
 impl Protocol<'_> {
-    pub fn new(stream: &TcpStream) -> Protocol {
+    pub fn new(stream: &mut TcpStream) -> Protocol {
         Protocol {
-            stream: &stream,
+            stream: stream,
             connection_state: ConnectionState::HandShaking,
-            cipher: None,
+            encryption: None,
+            decryption: None,
         }
     }
-    pub fn read_and_serialize(&mut self) -> Result<ServerBoundPacket, String> {
-        let packet_data = self.read_packet()?;
+    pub async fn read_and_serialize(&mut self) -> Result<ServerBoundPacket, String> {
+        let packet_data = self.read_packet().await?;
 
-        ServerBoundPacket::from(&self.connection_state, packet_data)
+        let packet = ServerBoundPacket::from(&self.connection_state, packet_data);
+
+        println!("Received packet: {:?}", packet);
+
+        packet
     }
-    pub fn read_packet(&mut self) -> Result<IncomingPacketData, String> {
-        let packet_length = self.read_packet_length()? as usize;
+    pub async fn read_packet(&mut self) -> Result<IncomingPacketData, String> {
+        let packet_length = self.read_packet_length().await? as usize;
 
         let mut buffer = vec![0; packet_length];
 
-        self.read_bytes_exact(&mut buffer)?;
+        self.read_bytes_exact(&mut buffer).await?;
 
         // ZLIB decompression (Not implemented)
 
         Ok(IncomingPacketData::new(buffer))
     }
-    pub fn write_packet(&mut self, packet: impl Serialize) -> Result<(), String> {
+    pub async fn write_packet(&mut self, packet: impl Serialize + Debug) -> Result<(), String> {
+        //println!("Sending packet: {:#?}", packet);
+
         let packet_data = packet.serialize();
 
         // ZLIB compression (Not implemented)
@@ -57,28 +67,29 @@ impl Protocol<'_> {
 
         let mut full_packet = [&data_length[..], &packet_data.data[..]].concat();
 
-        if let Some(cipher) = &mut self.cipher {
+        if let Some(cipher) = &mut self.encryption {
             cipher.encrypt(&mut full_packet);
-            println!("Iv after encryption: {:?}", cipher.iv);
         }
 
         self.stream
             .write_all(&full_packet)
+            .await
             .map_err(|e| e.to_string())?;
 
         Ok(())
     }
     pub fn set_encryption(&mut self, key: &[u8], iv: &[u8]) {
-        self.cipher = Some(CarrotCakeCipher::new(key, iv).unwrap());
+        self.encryption = Some(CarrotCakeCipher::new(key, iv).unwrap());
+        self.decryption = Some(CarrotCakeCipher::new(key, iv).unwrap());
     }
-    fn read_packet_length(&mut self) -> Result<i32, String> {
+    async fn read_packet_length(&mut self) -> Result<i32, String> {
         const SEGMENT_BITS: u8 = 0x7F;
         const CONTINUE_BIT: u8 = 0x80;
 
         let mut val = 0i32;
         for i in 0..5 {
             let position = i * 7;
-            let current_byte = &self.read_byte()?;
+            let current_byte = &self.read_byte().await?;
             val |= ((current_byte & SEGMENT_BITS) as i32) << position;
 
             if (current_byte & CONTINUE_BIT) == 0 {
@@ -89,19 +100,21 @@ impl Protocol<'_> {
         }
         Ok(val)
     }
-    fn read_bytes_exact(&mut self, buf: &mut [u8]) -> Result<(), String> {
-        self.stream.read_exact(buf).map_err(|e| e.to_string())?;
+    async fn read_bytes_exact(&mut self, buf: &mut [u8]) -> Result<(), String> {
+        self.stream
+            .read_exact(buf)
+            .await
+            .map_err(|e| e.to_string())?;
 
-        if let Some(cipher) = &mut self.cipher {
+        if let Some(cipher) = &mut self.decryption {
             cipher.decrypt(buf);
         }
-        // decrypt the the read data (Not implemented)
         Ok(())
     }
-    fn read_byte(&mut self) -> Result<u8, String> {
+    async fn read_byte(&mut self) -> Result<u8, String> {
         let mut buf = [0u8; 1];
 
-        if let Err(err) = &self.stream.read_exact(&mut buf) {
+        if let Err(err) = &self.stream.read_exact(&mut buf).await {
             return match err.kind() {
                 std::io::ErrorKind::UnexpectedEof => Err("stream closed by client".to_string()),
                 std::io::ErrorKind::Interrupted => {
@@ -114,12 +127,9 @@ impl Protocol<'_> {
             };
         };
 
-        println!("read encrypted: {}", buf[0]);
-        if let Some(cipher) = &mut self.cipher {
+        if let Some(cipher) = &mut self.decryption {
             cipher.decrypt(&mut buf);
         }
-
-        println!("read decrypted: {}", buf[0]);
 
         Ok(buf[0])
     }

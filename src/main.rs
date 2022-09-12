@@ -8,9 +8,9 @@ use rand::rngs::OsRng;
 use rand::RngCore;
 use server::server_data::Server;
 use std::env;
-use std::net::{TcpListener, TcpStream};
 use std::sync::Arc;
 use tokio::fs;
+use tokio::net::{TcpListener, TcpStream};
 
 use crate::authentication::authenticate;
 
@@ -19,22 +19,22 @@ mod server;
 //mod client;
 //mod world;
 
-async fn handle_client(stream: TcpStream, server: Arc<Server>) {
-    println!("Connection from {}", stream.peer_addr().unwrap());
+async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
+    let ip_addr = stream.peer_addr().unwrap().ip().to_owned().to_string();
 
-    let mut protocol = Protocol::new(&stream);
+    println!("Connection from {}", ip_addr);
+
+    let mut protocol = Protocol::new(&mut stream);
     let mut temp_username = None;
 
     loop {
-        let packet = match protocol.read_and_serialize() {
+        let packet = match protocol.read_and_serialize().await {
             Ok(packet) => packet,
             Err(e) => {
                 println!("Error: {}", e);
                 break;
             }
         };
-
-        println!("Packet: {:?}", packet);
 
         match packet {
             ServerBoundPacket::Handshake(handshake) => {
@@ -47,13 +47,13 @@ async fn handle_client(stream: TcpStream, server: Arc<Server>) {
                     "#.to_string()
                 };
 
-                protocol.write_packet(server_status).unwrap();
+                protocol.write_packet(server_status).await.unwrap();
             }
             ServerBoundPacket::PingRequest(ping_request) => {
                 let ping_response = PingResponse {
                     payload: ping_request.payload,
                 };
-                protocol.write_packet(ping_response).unwrap();
+                protocol.write_packet(ping_response).await.unwrap();
             }
             ServerBoundPacket::LoginStart(login_start) => {
                 let mut rng = OsRng {};
@@ -69,7 +69,7 @@ async fn handle_client(stream: TcpStream, server: Arc<Server>) {
                     verify_token: bytes.to_vec(),
                 };
 
-                protocol.write_packet(encryption_request).unwrap();
+                protocol.write_packet(encryption_request).await.unwrap();
             }
             ServerBoundPacket::EncryptionResponse(encryption_response) => {
                 let shared_secret = server
@@ -88,7 +88,7 @@ async fn handle_client(stream: TcpStream, server: Arc<Server>) {
                     &shared_secret[0..16],
                     &server.encryption.encoded_pub,
                     &temp_username.as_ref().unwrap(),
-                    &stream.peer_addr().unwrap().ip().to_string(),
+                    &ip_addr,
                 )
                 .await;
 
@@ -100,7 +100,7 @@ async fn handle_client(stream: TcpStream, server: Arc<Server>) {
                     properties: Vec::new(),
                 };
 
-                protocol.write_packet(login_success).unwrap();
+                protocol.write_packet(login_success).await.unwrap();
 
                 let registry_content = fs::read_to_string("default-registry.txt").await.unwrap();
 
@@ -132,7 +132,7 @@ async fn handle_client(stream: TcpStream, server: Arc<Server>) {
                     death_position: None,
                 };
 
-                protocol.write_packet(world_login).unwrap();
+                protocol.write_packet(world_login).await.unwrap();
 
                 protocol.connection_state = ConnectionState::Play;
             }
@@ -143,11 +143,15 @@ async fn handle_client(stream: TcpStream, server: Arc<Server>) {
 #[tokio::main]
 async fn main() {
     env::set_var("RUST_BACKTRACE", "1");
-    let listener = TcpListener::bind("127.0.0.1:25566").unwrap();
+    let listener = TcpListener::bind("127.0.0.1:25566").await.unwrap();
     let server = Arc::new(Server::new());
 
-    for stream in listener.incoming() {
+    loop {
+        let (stream, _) = listener.accept().await.unwrap();
         let server = Arc::clone(&server);
-        tokio::spawn(async move { handle_client(stream.unwrap(), server).await });
+
+        tokio::spawn(async move {
+            handle_client(stream, server).await;
+        });
     }
 }
