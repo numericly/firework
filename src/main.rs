@@ -4,6 +4,8 @@ use protocol::packets::client_bound::{
 };
 use protocol::packets::server_bound::ServerBoundPacket;
 use protocol::protocol::{ConnectionState, Protocol};
+
+use world::world::read_region_file;
 use quartz_nbt::snbt;
 use rand::rngs::OsRng;
 use rand::RngCore;
@@ -145,7 +147,10 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
 
 #[tokio::main]
 async fn main() {
-    env::set_var("RUST_BACKTRACE", "1");
+    //env::set_var("RUST_BACKTRACE", "1");
+
+    world::world::read_region_file("world/region/r.0.0.mca".to_string());
+
     let listener = TcpListener::bind("127.0.0.1:25566").await.unwrap();
     let server = Arc::new(Server::new());
 
