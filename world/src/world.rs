@@ -1,6 +1,11 @@
-
-use std::{fs, io::{Cursor, BufRead, Read}};
-use quartz_nbt::{io::{self, Flavor}, NbtTag};
+use quartz_nbt::{
+    io::{self, Flavor},
+    NbtTag,
+};
+use std::{
+    fs,
+    io::{Cursor, Read},
+};
 
 pub struct Chunk {
     pub x: i32,
@@ -52,7 +57,6 @@ pub struct Entity {
 }
 
 pub fn read_region_file(file_path: String) -> Vec<Chunk> {
-
     let chunk_binary = fs::read(file_path).unwrap();
 
     //println!("Chunk binary: {:?}", &mut chunk_binary);
@@ -61,24 +65,22 @@ pub fn read_region_file(file_path: String) -> Vec<Chunk> {
 
     // println!("Cursor has {} lines", &cursor.lines().count());
 
-
     let mut buffer = [0u8; 8192];
     let _chunk_tables = cursor.read_exact(&mut buffer);
 
     println!("Chunk tables: {:x?}", buffer.len());
-
 
     let mut buffer2 = [0u8; 5];
     let _chunk_header = cursor.read_exact(&mut buffer2);
 
     println!("Chunk header: {:x?}", buffer2);
 
-    let nbt = match io::read_nbt(&mut cursor , Flavor::ZlibCompressed) {
+    let nbt = match io::read_nbt(&mut cursor, Flavor::ZlibCompressed) {
         Ok(nbt) => nbt.0,
         Err(e) => panic!("Error reading NBT: {}", e),
     };
 
-    println!{"NBT: {:?}", nbt};
+    println! {"NBT: {:?}", nbt};
 
     println!("nbt.1: {:?}", nbt.get::<_, &NbtTag>("sections").unwrap());
 
@@ -94,5 +96,5 @@ pub fn read_region_file(file_path: String) -> Vec<Chunk> {
         sky_light: Vec::new(),
     };
 
-    vec!(chunk)
+    vec![chunk]
 }

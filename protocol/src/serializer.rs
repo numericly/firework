@@ -54,6 +54,12 @@ impl OutboundPacketData {
     pub fn write_signed_int(&mut self, val: i32) {
         self.data.extend_from_slice(&val.to_be_bytes());
     }
+    pub fn write_float(&mut self, val: f32) {
+        self.data.extend_from_slice(&val.to_be_bytes());
+    }
+    pub fn write_double(&mut self, val: f64) {
+        self.data.extend_from_slice(&val.to_be_bytes());
+    }
     pub fn write_length(length: usize) -> Vec<u8> {
         let mut data = Vec::new();
 
