@@ -10,6 +10,14 @@ pub mod server_bound {
         StatusRequest(StatusRequest),
         PingRequest(PingRequest),
         EncryptionResponse(EncryptionResponse),
+
+        ClientInformation(ClientInformation),
+        CloseContainer(CloseContainer),
+        PluginMessage(PluginMessage),
+        SetPlayerPosition(SetPlayerPosition),
+        SetPlayerAndRotationPosition(SetPlayerAndRotationPosition),
+        PlayerCommand(PlayerCommand),
+        SetHeldItem(SetHeldItem),
     }
 
     impl ServerBoundPacket {
@@ -44,6 +52,13 @@ pub mod server_bound {
                     )),
                 },
                 ConnectionState::Play => match packet_id {
+                    8 => ClientInformation::deserialize(packet_data),
+                    12 => CloseContainer::deserialize(packet_data),
+                    13 => PluginMessage::deserialize(packet_data),
+                    20 => SetPlayerPosition::deserialize(packet_data),
+                    21 => SetPlayerAndRotationPosition::deserialize(packet_data),
+                    30 => PlayerCommand::deserialize(packet_data),
+                    40 => SetHeldItem::deserialize(packet_data),
                     _ => Err(format!(
                         "Unknown packet id {} for state {:?}",
                         packet_id, state
@@ -136,6 +151,214 @@ pub mod server_bound {
             Ok(ServerBoundPacket::EncryptionResponse(EncryptionResponse {
                 shared_secret: shared_secret,
                 verify_token: Some(verify_token),
+            }))
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct ClientInformation {
+        pub locale: String,
+        pub view_distance: u8,
+        pub chat_mode: ChatMode,
+        pub chat_colors: bool,
+        pub displayed_skin_parts: u8,
+        pub main_hand: MainHand,
+        pub enable_text_filtering: bool,
+        pub allow_server_listings: bool,
+    }
+
+    #[derive(Debug)]
+    pub enum ChatMode {
+        Enabled,
+        CommandsOnly,
+        Hidden,
+    }
+
+    #[derive(Debug)]
+    pub enum MainHand {
+        Left,
+        Right,
+    }
+
+    impl Deserialize for ClientInformation {
+        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+            let locale = packet_data.read_string()?;
+            let view_distance = packet_data.read_unsigned_byte()?;
+            let chat_mode = match packet_data.read_var_int()? {
+                0 => ChatMode::Enabled,
+                1 => ChatMode::CommandsOnly,
+                2 => ChatMode::Hidden,
+                _ => return Err("Invalid chat mode".to_string()),
+            };
+            let chat_colors = packet_data.read_boolean()?;
+            let displayed_skin_parts = packet_data.read_unsigned_byte()?;
+            let main_hand = match packet_data.read_var_int()? {
+                0 => MainHand::Left,
+                1 => MainHand::Right,
+                _ => return Err("Invalid main hand".to_string()),
+            };
+            let enable_text_filtering = packet_data.read_boolean()?;
+            let allow_server_listings = packet_data.read_boolean()?;
+
+            Ok(ServerBoundPacket::ClientInformation(ClientInformation {
+                locale: locale,
+                view_distance: view_distance,
+                chat_mode: chat_mode,
+                chat_colors: chat_colors,
+                displayed_skin_parts: displayed_skin_parts,
+                main_hand: main_hand,
+                enable_text_filtering: enable_text_filtering,
+                allow_server_listings: allow_server_listings,
+            }))
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct CloseContainer {
+        pub window_id: u8,
+    }
+
+    impl Deserialize for CloseContainer {
+        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+            let window_id = packet_data.read_unsigned_byte()?;
+
+            Ok(ServerBoundPacket::CloseContainer(CloseContainer {
+                window_id,
+            }))
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct PluginMessage {
+        pub channel: String,
+        pub data: Vec<u8>,
+    }
+
+    impl Deserialize for PluginMessage {
+        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+            let channel = packet_data.read_string()?;
+            let data_length = packet_data.read_var_int()?;
+            let data = packet_data.read_bytes(data_length as usize)?;
+
+            Ok(ServerBoundPacket::PluginMessage(PluginMessage {
+                channel: channel,
+                data: data,
+            }))
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct SetPlayerPosition {
+        pub x: f64,
+        pub y: f64,
+        pub z: f64,
+        pub on_ground: bool,
+    }
+
+    impl Deserialize for SetPlayerPosition {
+        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+            let x = packet_data.read_double()?;
+            let y = packet_data.read_double()?;
+            let z = packet_data.read_double()?;
+            let on_ground = packet_data.read_boolean()?;
+
+            Ok(ServerBoundPacket::SetPlayerPosition(SetPlayerPosition {
+                x: x,
+                y: y,
+                z: z,
+                on_ground: on_ground,
+            }))
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct SetPlayerAndRotationPosition {
+        pub x: f64,
+        pub y: f64,
+        pub z: f64,
+        pub yaw: f32,
+        pub pitch: f32,
+        pub on_ground: bool,
+    }
+
+    impl Deserialize for SetPlayerAndRotationPosition {
+        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+            let x = packet_data.read_double()?;
+            let y = packet_data.read_double()?;
+            let z = packet_data.read_double()?;
+            let yaw = packet_data.read_float()?;
+            let pitch = packet_data.read_float()?;
+            let on_ground = packet_data.read_boolean()?;
+
+            Ok(ServerBoundPacket::SetPlayerAndRotationPosition(
+                SetPlayerAndRotationPosition {
+                    x: x,
+                    y: y,
+                    z: z,
+                    yaw: yaw,
+                    pitch: pitch,
+                    on_ground: on_ground,
+                },
+            ))
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct SetHeldItem {
+        pub slot: u16,
+    }
+
+    impl Deserialize for SetHeldItem {
+        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+            let slot = packet_data.read_short()?;
+
+            Ok(ServerBoundPacket::SetHeldItem(SetHeldItem {
+                slot: slot as u16,
+            }))
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct PlayerCommand {
+        pub entity_id: i32,
+        pub action: PlayerCommandAction,
+        pub jump_boost: i32,
+    }
+
+    #[derive(Debug)]
+    pub enum PlayerCommandAction {
+        StartSneaking,
+        StopSneaking,
+        LeaveBed,
+        StartSprinting,
+        StopSprinting,
+        StartJumpWithHorse,
+        StopJumpWithHorse,
+        OpenHorseInventory,
+        StartFlyingWithElytra,
+    }
+
+    impl Deserialize for PlayerCommand {
+        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+            let entity_id = packet_data.read_var_int()?;
+            let action = match packet_data.read_var_int()? {
+                0 => PlayerCommandAction::StartSneaking,
+                1 => PlayerCommandAction::StopSneaking,
+                2 => PlayerCommandAction::LeaveBed,
+                3 => PlayerCommandAction::StartSprinting,
+                4 => PlayerCommandAction::StopSprinting,
+                5 => PlayerCommandAction::StartJumpWithHorse,
+                6 => PlayerCommandAction::StopJumpWithHorse,
+                7 => PlayerCommandAction::OpenHorseInventory,
+                8 => PlayerCommandAction::StartFlyingWithElytra,
+                _ => return Err("Invalid player command action".to_string()),
+            };
+            let jump_boost = packet_data.read_var_int()?;
+
+            Ok(ServerBoundPacket::PlayerCommand(PlayerCommand {
+                entity_id: entity_id,
+                action: action,
+                jump_boost: jump_boost,
             }))
         }
     }
@@ -244,6 +467,19 @@ pub mod client_bound {
         }
     }
 
+    #[derive(Debug)]
+    pub struct Disconnect {
+        pub reason: String,
+    }
+
+    impl Serialize for Disconnect {
+        fn serialize_into(&self, packet_data: &mut OutboundPacketData) {
+            packet_data.write_string(&self.reason);
+        }
+        fn packet_id(&self) -> i32 {
+            25
+        }
+    }
     #[derive(Debug)]
     pub struct WorldLogin {
         pub entity_id: i32,

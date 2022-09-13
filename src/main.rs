@@ -1,5 +1,5 @@
 use protocol::packets::client_bound::{
-    EncryptionRequest, LoginSuccess, PingResponse, ServerStatus, WorldLogin,
+    Disconnect, EncryptionRequest, LoginSuccess, PingResponse, ServerStatus, WorldLogin,
 };
 use protocol::packets::server_bound::ServerBoundPacket;
 use protocol::protocol::{ConnectionState, Protocol};
@@ -32,6 +32,10 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
             Ok(packet) => packet,
             Err(e) => {
                 println!("Error: {}", e);
+                let disconnect = Disconnect {
+                    reason: format!(r#"{{"text": "Error: {}"}}"#, e),
+                };
+                protocol.write_packet(disconnect).await.unwrap();
                 break;
             }
         };
@@ -136,6 +140,7 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
 
                 protocol.connection_state = ConnectionState::Play;
             }
+            _ => {}
         }
     }
 }

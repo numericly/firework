@@ -53,4 +53,31 @@ impl IncomingPacketData {
         self.index += length;
         Ok(bytes)
     }
+    pub fn read_unsigned_byte(&mut self) -> Result<u8, String> {
+        let byte = self.data[self.index];
+        self.index += 1;
+        Ok(byte)
+    }
+    pub fn read_boolean(&mut self) -> Result<bool, String> {
+        let byte = self.read_unsigned_byte()?;
+        Ok(byte != 0)
+    }
+    pub fn read_double(&mut self) -> Result<f64, String> {
+        let mut buf = [0u8; 8];
+        buf.copy_from_slice(&self.data[self.index..self.index + 8]);
+        self.index += 8;
+        Ok(f64::from_be_bytes(buf))
+    }
+    pub fn read_float(&mut self) -> Result<f32, String> {
+        let mut buf = [0u8; 4];
+        buf.copy_from_slice(&self.data[self.index..self.index + 4]);
+        self.index += 4;
+        Ok(f32::from_be_bytes(buf))
+    }
+    pub fn read_short(&mut self) -> Result<i16, String> {
+        let mut buf = [0u8; 2];
+        buf.copy_from_slice(&self.data[self.index..self.index + 2]);
+        self.index += 2;
+        Ok(i16::from_be_bytes(buf))
+    }
 }
