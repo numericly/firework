@@ -1,3 +1,4 @@
+use authentication::authentication::authenticate;
 use protocol::packets::client_bound::{
     Disconnect, EncryptionRequest, LoginSuccess, PingResponse, ServerStatus, WorldLogin,
 };
@@ -12,9 +13,6 @@ use std::sync::Arc;
 use tokio::fs;
 use tokio::net::{TcpListener, TcpStream};
 
-use crate::authentication::authenticate;
-
-mod authentication;
 mod server;
 //mod client;
 //mod world;
