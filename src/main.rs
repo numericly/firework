@@ -4,12 +4,10 @@ use protocol::packets::client_bound::{
 use protocol::packets::server_bound::ServerBoundPacket;
 use protocol::protocol::{ConnectionState, Protocol};
 
-use world::world::read_region_file;
 use quartz_nbt::snbt;
 use rand::rngs::OsRng;
 use rand::RngCore;
 use server::server_data::Server;
-use std::env;
 use std::sync::Arc;
 use tokio::fs;
 use tokio::net::{TcpListener, TcpStream};

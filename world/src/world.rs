@@ -1,6 +1,6 @@
 
-use std::{fs, io::{Cursor, BufRead, Read}};
-use quartz_nbt::{io::{self, Flavor}, NbtTag};
+use std::{fs, io::{Cursor, Read}};
+use quartz_nbt::{io::{self, Flavor}, NbtTag, NbtList, NbtCompound};
 
 pub struct Chunk {
     pub x: i32,
@@ -78,9 +78,12 @@ pub fn read_region_file(file_path: String) -> Vec<Chunk> {
         Err(e) => panic!("Error reading NBT: {}", e),
     };
 
-    println!{"NBT: {:?}", nbt};
-
-    println!("nbt.1: {:?}", nbt.get::<_, &NbtTag>("sections").unwrap());
+    let sections = nbt.get::<_, &NbtList>("sections").unwrap();
+    let mut chunk_sections: Vec<ChunkSection> = Vec::new();
+    for i in 0..sections.len() {
+        let section = sections.get::<&NbtCompound>(i).unwrap();
+        println!("Section: {:?}", section);
+    }
 
     let chunk = Chunk {
         x: nbt.get::<_, i32>("xPos").unwrap(),
