@@ -21,3 +21,5 @@ protocol = { path = "./protocol", version = "*"}
 authentication = { path = "./authentication", version = "*"}
 world = { path = "./world", version = "*"}
 quartz_nbt = "0.2.6"
+bevy = { version = "0.8.1", default-features = false }
+dashmap = "5.4.0"

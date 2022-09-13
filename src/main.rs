@@ -10,11 +10,13 @@ use protocol::protocol::{ConnectionState, Protocol};
 use quartz_nbt::snbt;
 use rand::rngs::{OsRng, ThreadRng};
 use rand::RngCore;
-use server::server_data::Server;
+use server::Server;
+use std::env;
 use std::sync::Arc;
 use tokio::fs;
 use tokio::net::{TcpListener, TcpStream};
 
+mod player;
 mod server;
 
 async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
@@ -177,7 +179,7 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
 
                 let position_sync = SynchronizePlayerPosition {
                     x: 0.0,
-                    y: 0.0,
+                    y: 1_000.0,
                     z: 0.0,
                     yaw: 0.0,
                     pitch: 0.0,
@@ -201,19 +203,20 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
 
 #[tokio::main]
 async fn main() {
-    //env::set_var("RUST_BACKTRACE", "1");
+    env::set_var("RUST_BACKTRACE", "1");
 
-    //world::world::read_region_file("world/region/r.0.0.mca".to_string());
+    world::world::read_region_file("world/region/r.0.0.mca".to_string());
 
-    let listener = TcpListener::bind("127.0.0.1:25566").await.unwrap();
-    let server = Arc::new(Server::new());
+    // let listener = TcpListener::bind("127.0.0.1:25566").await.unwrap();
+    // let server = Arc::new(Server::new());
 
-    loop {
-        let (stream, _) = listener.accept().await.unwrap();
-        let server = Arc::clone(&server);
+    // loop {
+    //     let (stream, _) = listener.accept().await.unwrap();
+    //     let server = Arc::clone(&server);
 
-        tokio::spawn(async move {
-            handle_client(stream, server).await;
-        });
-    }
+    //     tokio::spawn(async move {
+    //         handle_client(stream, server).await;
+    //     });
+    // }
+    //.insert_resource(ScheduleRunnerSettings::from())
 }

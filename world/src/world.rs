@@ -1,6 +1,11 @@
-
-use std::{fs, io::{Cursor, Read}};
-use quartz_nbt::{io::{self, Flavor}, NbtList, NbtCompound};
+use quartz_nbt::{
+    io::{self, Flavor},
+    NbtCompound, NbtList,
+};
+use std::{
+    fs,
+    io::{Cursor, Read},
+};
 
 pub struct Chunk {
     pub x: i32,
@@ -14,12 +19,14 @@ pub struct Chunk {
     pub sky_light: Vec<i32>,
 }
 
+#[derive(Debug)]
 pub struct ChunkSection {
     pub block_count: i16,
     pub block_states: PalettedContainer,
     pub biomes: PalettedContainer,
 }
 
+#[derive(Debug)]
 pub struct PalettedContainer {
     pub bits_per_entry: u8,
     //pub palette: todo(),
@@ -52,7 +59,6 @@ pub struct Entity {
 }
 
 pub fn read_region_file(file_path: String) -> Vec<Chunk> {
-
     let chunk_binary = fs::read(file_path.clone()).unwrap();
 
     //println!("Chunk binary: {:?}", &mut chunk_binary);
@@ -61,12 +67,11 @@ pub fn read_region_file(file_path: String) -> Vec<Chunk> {
 
     // println!("Cursor has {} lines", &cursor.lines().count());
 
-
     let mut chunk_positions = [0u8; 4096];
-    cursor.read_exact(&mut chunk_positions);
+    cursor.read_exact(&mut chunk_positions).unwrap();
 
     let mut chunk_timestamps = [0u8; 4096];
-    cursor.read_exact(&mut chunk_timestamps);
+    cursor.read_exact(&mut chunk_timestamps).unwrap();
 
     //println!("Chunk tables: {:x?}", buffer.len());
 
@@ -79,61 +84,69 @@ pub fn read_region_file(file_path: String) -> Vec<Chunk> {
 
     let mut been_accessed = [0u8; 2000];
 
-    for i in 0..chunk_positions.len()/4 {
+    //for i in 0..chunk_positions.len() / 4 {
+    for i in 0..1 {
         // print!("{} ", chunk_positions[i*4] as u64 * 256 * 256 + chunk_positions[i*4+1] as u64 * 256 + chunk_positions[i*4+2] as u64);
         let chunk_binary = fs::read(file_path.clone()).unwrap();
         let cursor = Cursor::new(chunk_binary);
-        read_chunk_nbt(cursor, 8197+4096*(chunk_positions[i*4] as u64 * 256 * 256 + chunk_positions[i*4+1] as u64 * 256 + chunk_positions[i*4+2] as u64));
-        been_accessed[(chunk_positions[i*4] as u64 * 256 * 256 + chunk_positions[i*4+1] as u64 * 256 + chunk_positions[i*4+2] as u64) as usize] = 1;
+        read_chunk_nbt(
+            cursor,
+            8197 + 4096
+                * (chunk_positions[i * 4] as u64 * 256 * 256
+                    + chunk_positions[i * 4 + 1] as u64 * 256
+                    + chunk_positions[i * 4 + 2] as u64),
+        );
+        been_accessed[(chunk_positions[i * 4] as u64 * 256 * 256
+            + chunk_positions[i * 4 + 1] as u64 * 256
+            + chunk_positions[i * 4 + 2] as u64) as usize] = 1;
     }
 
     // println!("");
 
     // println!("Been accessed: {:x?}", been_accessed);
 
-
     //println!("Chunk positions: {:?}", chunk_positions);
-
-    
 
     chunks
 }
 
-
-fn read_chunk_nbt (mut cursor: Cursor<Vec<u8>>, pointer: u64) -> Chunk {
+fn read_chunk_nbt(mut cursor: Cursor<Vec<u8>>, pointer: u64) {
     cursor.set_position(pointer);
-    let chunk_nbt = match io::read_nbt(&mut cursor , Flavor::ZlibCompressed) {//nbt data for the current chunk
+    let chunk_nbt = match io::read_nbt(&mut cursor, Flavor::ZlibCompressed) {
+        //nbt data for the current chunk
         Ok(chunk_nbt) => chunk_nbt.0,
         Err(e) => panic!("Error reading NBT: {}", e),
     };
 
+    let sections: &NbtList = chunk_nbt.get::<_, _>("sections").unwrap();
 
-    let sections = chunk_nbt.get::<_, &NbtList>("sections").unwrap();
-    for i in 0..sections.len() {
+    for i in 0..1 {
         let section = sections.get::<&NbtCompound>(i).unwrap();
-        
-        let y = section.get::<_, &i8>("Y").unwrap();
+        let block_states = section.get::<_, &NbtCompound>("block_states").unwrap();
+        let block_data = block_states.get::<_, &[i64]>("data").unwrap();
+        let palette = block_states.get::<_, &NbtList>("palette").unwrap();
 
-        //println!("Y: {}", y);
-    //     if y != &10i8  {
-    // println!("{}", chunk_nbt);
+        const BITS_PER_BYTE: usize = 8;
 
-            // let palette = section.get::<_, &NbtCompound>("block_states").unwrap().get::<_, &NbtList>("palette").unwrap();
-            //         println!("data: {:?}", palette);
+        let bits_per_block =
+            BITS_PER_BYTE * std::mem::size_of::<usize>() - (4usize.leading_zeros() as usize) - 1;
+
+        println!("Bits per block: {}", bits_per_block);
+        println!("Palette: {:?}", palette);
+
+        const CHUNK_WIDTH: usize = 16;
+        const CHUNK_HEIGHT: usize = 16;
+
+        let individual_value_mask = (1 << bits_per_block) - 1;
+
+        for y in 0..CHUNK_HEIGHT {
+            for z in 0..CHUNK_WIDTH {
+                for x in 0..CHUNK_WIDTH {
+                    let block_number: usize =
+                        ((((y * CHUNK_HEIGHT) + z) * CHUNK_WIDTH) + x) as usize;
+                    let start_long = 64 / bits_per_block;
                 }
-
-    let chunk = Chunk {
-        x: chunk_nbt.get::<_, i32>("xPos").unwrap(),
-        z: chunk_nbt.get::<_, i32>("zPos").unwrap(),
-        sections: Vec::new(),
-        biomes: Vec::new(),
-        height_maps: Vec::new(),
-        block_entities: Vec::new(),
-        entities: Vec::new(),
-        block_light: Vec::new(),
-        sky_light: Vec::new(),
-    };
-
-    println!("Visited Chunk: {}, {}", chunk.x, chunk.z);
-    chunk
+            }
+        }
+    }
 }
