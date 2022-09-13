@@ -149,7 +149,7 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
 async fn main() {
     //env::set_var("RUST_BACKTRACE", "1");
 
-    world::world::read_region_file("world/region/r.0.0.mca".to_string());
+    //world::world::read_region_file("world/region/r.0.1.mca".to_string());
 
     let listener = TcpListener::bind("127.0.0.1:25566").await.unwrap();
     let server = Arc::new(Server::new());
