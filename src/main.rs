@@ -45,7 +45,7 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
             }
             ServerBoundPacket::StatusRequest(_status_request) => {
                 let server_status = ServerStatus {
-                    server_data: r#"{"previewsChat":false,"enforcesSecureChat":true,"description":{"text":"\u00a7a<rust-minecraft-server>\u00a7r"},"players":{"max":10,"online":0},"version":{"name":"1.19.2","protocol":760}}
+                    server_data: r#"{"previewsChat":false,"enforcesSecureChat":true,"description":{"text":"                  \u00A7dRust Network \u00A75\u00A7l[1.19.2]\u00A7r\n            \u00A76\u00A7lNOW IN PRE\u00A7f\u00A7l-\u00A76\u00A7lPRE\u00A7f\u00A7l-\u00A76\u00A7lPRE\u00A7f\u00A7l-\u00A76\u00A7lALPHA!"},"players":{"max":10,"online":0},"version":{"name":"1.19.2","protocol":760}}
                     "#.to_string()
                 };
 
