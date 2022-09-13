@@ -1,23 +1,21 @@
+use authentication::authentication::authenticate;
 use protocol::packets::client_bound::{
-    Disconnect, EncryptionRequest, LoginSuccess, PingResponse, ServerStatus, WorldLogin,
+    ChangeDifficulty, ClientBoundKeepAlive, Disconnect, EncryptionRequest, LoginSuccess,
+    PingResponse, PlayerAbilities, PlayerFlags, ServerStatus, SetSelectedSlot,
+    SynchronizePlayerPosition, SynchronizePlayerPositionFlags, UpdateRecipes, WorldLogin,
 };
 use protocol::packets::server_bound::ServerBoundPacket;
 use protocol::protocol::{ConnectionState, Protocol};
 
 use quartz_nbt::snbt;
-use rand::rngs::OsRng;
+use rand::rngs::{OsRng, ThreadRng};
 use rand::RngCore;
 use server::server_data::Server;
 use std::sync::Arc;
 use tokio::fs;
 use tokio::net::{TcpListener, TcpStream};
 
-use crate::authentication::authenticate;
-
-mod authentication;
 mod server;
-//mod client;
-//mod world;
 
 async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
     let ip_addr = stream.peer_addr().unwrap().ip().to_owned().to_string();
@@ -139,8 +137,64 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
                 protocol.write_packet(world_login).await.unwrap();
 
                 protocol.connection_state = ConnectionState::Play;
+
+                let ping = ClientBoundKeepAlive {
+                    id: ThreadRng::default().next_u64() as i64,
+                };
+
+                protocol.write_packet(ping).await.unwrap();
+
+                let change_difficulty = ChangeDifficulty {
+                    difficulty: 0,
+                    locked: false,
+                };
+
+                protocol.write_packet(change_difficulty).await.unwrap();
+
+                let _player_abilities = PlayerAbilities {
+                    flags: PlayerFlags {
+                        is_invulnerable: false,
+                        is_flying: true,
+                        can_fly: true,
+                        is_instantly_breaking: false,
+                    },
+                    flying_speed: 0.05,
+                    fov_modifier: 0.1,
+                };
+
+                //protocol.write_packet(player_abilities).await.unwrap();
             }
-            _ => {}
+            ServerBoundPacket::ClientInformation(_client_information) => {
+                let set_selected_slot = SetSelectedSlot { slot: 5 };
+
+                protocol.write_packet(set_selected_slot).await.unwrap();
+
+                let update_recipes = UpdateRecipes {
+                    recipes: Vec::new(),
+                };
+
+                protocol.write_packet(update_recipes).await.unwrap();
+
+                let position_sync = SynchronizePlayerPosition {
+                    x: 0.0,
+                    y: 0.0,
+                    z: 0.0,
+                    yaw: 0.0,
+                    pitch: 0.0,
+                    flags: SynchronizePlayerPositionFlags {
+                        x: false,
+                        y: false,
+                        z: false,
+                        yaw: false,
+                        pitch: false,
+                    },
+                };
+
+                protocol.write_packet(position_sync).await.unwrap();
+            }
+            _packet => {
+                // println!("Unhandled packet: {:?}", packet);
+            }
         }
     }
 }
@@ -149,7 +203,7 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
 async fn main() {
     //env::set_var("RUST_BACKTRACE", "1");
 
-    //world::world::read_region_file("world/region/r.0.1.mca".to_string());
+    //world::world::read_region_file("world/region/r.0.0.mca".to_string());
 
     let listener = TcpListener::bind("127.0.0.1:25566").await.unwrap();
     let server = Arc::new(Server::new());

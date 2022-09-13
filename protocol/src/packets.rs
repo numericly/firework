@@ -11,8 +11,10 @@ pub mod server_bound {
         PingRequest(PingRequest),
         EncryptionResponse(EncryptionResponse),
 
+        ConfirmTeleport(ConfirmTeleport),
         ClientInformation(ClientInformation),
         CloseContainer(CloseContainer),
+        ClientKeepAlive(ClientKeepAlive),
         PluginMessage(PluginMessage),
         SetPlayerPosition(SetPlayerPosition),
         SetPlayerAndRotationPosition(SetPlayerAndRotationPosition),
@@ -52,9 +54,11 @@ pub mod server_bound {
                     )),
                 },
                 ConnectionState::Play => match packet_id {
+                    0 => ConfirmTeleport::deserialize(packet_data),
                     8 => ClientInformation::deserialize(packet_data),
                     12 => CloseContainer::deserialize(packet_data),
                     13 => PluginMessage::deserialize(packet_data),
+                    18 => ClientKeepAlive::deserialize(packet_data),
                     20 => SetPlayerPosition::deserialize(packet_data),
                     21 => SetPlayerAndRotationPosition::deserialize(packet_data),
                     30 => PlayerCommand::deserialize(packet_data),
@@ -156,6 +160,19 @@ pub mod server_bound {
     }
 
     #[derive(Debug)]
+    pub struct ConfirmTeleport {
+        pub id: i32,
+    }
+
+    impl Deserialize for ConfirmTeleport {
+        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+            let id = packet_data.read_var_int()?;
+
+            Ok(ServerBoundPacket::ConfirmTeleport(ConfirmTeleport { id }))
+        }
+    }
+
+    #[derive(Debug)]
     pub struct ClientInformation {
         pub locale: String,
         pub view_distance: u8,
@@ -228,6 +245,18 @@ pub mod server_bound {
         }
     }
 
+    #[derive(Debug)]
+    pub struct ClientKeepAlive {
+        pub id: i64,
+    }
+
+    impl Deserialize for ClientKeepAlive {
+        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+            let id = packet_data.read_long()?;
+
+            Ok(ServerBoundPacket::ClientKeepAlive(ClientKeepAlive { id }))
+        }
+    }
     #[derive(Debug)]
     pub struct PluginMessage {
         pub channel: String,
@@ -365,6 +394,7 @@ pub mod server_bound {
 }
 
 pub mod client_bound {
+
     use quartz_nbt::NbtCompound;
 
     use crate::serializer::OutboundPacketData;
@@ -528,6 +558,140 @@ pub mod client_bound {
         }
         fn packet_id(&self) -> i32 {
             37
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct ChangeDifficulty {
+        pub difficulty: u8,
+        pub locked: bool,
+    }
+
+    impl Serialize for ChangeDifficulty {
+        fn serialize_into(&self, packet_data: &mut OutboundPacketData) {
+            packet_data.write_unsigned_byte(self.difficulty);
+            packet_data.write_bool(self.locked);
+        }
+        fn packet_id(&self) -> i32 {
+            11
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct PlayerAbilities {
+        pub flags: PlayerFlags,
+        pub flying_speed: f32,
+        pub fov_modifier: f32,
+    }
+
+    #[derive(Debug)]
+    pub struct PlayerFlags {
+        pub is_invulnerable: bool,
+        pub is_flying: bool,
+        pub can_fly: bool,
+        pub is_instantly_breaking: bool,
+    }
+
+    impl Serialize for PlayerAbilities {
+        fn serialize_into(&self, packet_data: &mut OutboundPacketData) {
+            packet_data.write_unsigned_byte(
+                (self.flags.is_invulnerable as u8)
+                    | ((self.flags.is_flying as u8) << 1)
+                    | ((self.flags.can_fly as u8) << 2)
+                    | ((self.flags.is_instantly_breaking as u8) << 3),
+            );
+            packet_data.write_float(self.flying_speed);
+            packet_data.write_float(self.fov_modifier);
+        }
+        fn packet_id(&self) -> i32 {
+            49
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct SetSelectedSlot {
+        pub slot: u8,
+    }
+
+    impl Serialize for SetSelectedSlot {
+        fn serialize_into(&self, packet_data: &mut OutboundPacketData) {
+            packet_data.write_unsigned_byte(self.slot);
+        }
+        fn packet_id(&self) -> i32 {
+            74
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct UpdateRecipes {
+        pub recipes: Vec<Recipe>,
+    }
+
+    #[derive(Debug)]
+    pub struct Recipe {}
+
+    impl Serialize for UpdateRecipes {
+        fn serialize_into(&self, packet_data: &mut OutboundPacketData) {
+            packet_data.write_var_int(self.recipes.len() as i32);
+            for _recipe in &self.recipes {}
+        }
+        fn packet_id(&self) -> i32 {
+            106
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct ClientBoundKeepAlive {
+        pub id: i64,
+    }
+
+    impl Serialize for ClientBoundKeepAlive {
+        fn serialize_into(&self, packet_data: &mut OutboundPacketData) {
+            packet_data.write_signed_long(self.id);
+        }
+        fn packet_id(&self) -> i32 {
+            32
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct SynchronizePlayerPosition {
+        pub x: f64,
+        pub y: f64,
+        pub z: f64,
+        pub yaw: f32,
+        pub pitch: f32,
+        pub flags: SynchronizePlayerPositionFlags,
+    }
+
+    #[derive(Debug)]
+    pub struct SynchronizePlayerPositionFlags {
+        pub x: bool,
+        pub y: bool,
+        pub z: bool,
+        pub yaw: bool,
+        pub pitch: bool,
+    }
+
+    impl Serialize for SynchronizePlayerPosition {
+        fn serialize_into(&self, packet_data: &mut OutboundPacketData) {
+            packet_data.write_double(self.x);
+            packet_data.write_double(self.y);
+            packet_data.write_double(self.z);
+            packet_data.write_float(self.yaw);
+            packet_data.write_float(self.pitch);
+            packet_data.write_unsigned_byte(
+                (self.flags.x as u8)
+                    | ((self.flags.y as u8) << 1)
+                    | ((self.flags.z as u8) << 2)
+                    | ((self.flags.yaw as u8) << 3)
+                    | ((self.flags.pitch as u8) << 4),
+            );
+            packet_data.write_var_int(0);
+            packet_data.write_bool(true);
+        }
+        fn packet_id(&self) -> i32 {
+            57
         }
     }
 }
