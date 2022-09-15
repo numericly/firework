@@ -3026,6 +3026,7 @@ dependencies = [
 name = "world"
 version = "0.1.0"
 dependencies = [
+ "protocol",
  "quartz_nbt",
 ]
 

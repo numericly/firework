@@ -1,8 +1,10 @@
+use protocol::serializer::OutboundPacketData;
 use quartz_nbt::{
     io::{self, Flavor},
-    NbtCompound, NbtList,
+    NbtCompound, NbtList, NbtTag,
 };
 use std::{
+    convert::TryInto,
     fs,
     io::{Cursor, Read},
     time::Instant,
@@ -69,13 +71,11 @@ fn read_chunk_nbt(cursor: &mut Cursor<Vec<u8>>, pointer: u64) {
 
     let sections: &NbtList = chunk_nbt.get::<_, _>("sections").unwrap();
 
-    let mut chunk_sections: Vec<String> = Vec::new();
+    let _chunk_sections: Vec<String> = Vec::new();
 
     for i in 0..sections.len() {
         let section = sections.get::<&NbtCompound>(i).unwrap();
 
-        //println!("Section: {:?}", section);
-        // let section = sections.get::<&NbtCompound>(i).unwrap();
         let biomes = match section.get::<_, &NbtCompound>("biomes") {
             Ok(block_data) => PalettedContainer::from_nbt(block_data, 4096),
             Err(_) => {
@@ -93,35 +93,26 @@ fn read_chunk_nbt(cursor: &mut Cursor<Vec<u8>>, pointer: u64) {
 
         println!("Block states: {:?}", block_states);
         println!("Biomes: {:?}", biomes);
-
-        // let block_data = match block_states.get::<_, &[i64]>("data") {
-        //     Ok(block_data) => block_data,
-        //     Err(_) => {
-        //         //println!("Section {} is empty", section);
-        //         continue;
-        //     }
-        // };
-        // let palette = block_states.get::<_, &NbtList>("palette").unwrap();
-        // let bit_array = BitArray::new(block_data, 4096);
-
-        // let bits_per_block = 4;
-
-        // const CHUNK_WIDTH: usize = 16;
-        // const CHUNK_HEIGHT: usize = 16;
-
-        // //println!("Bits per block: {}", bits_per_block);
-        // if palette.len() > 4 {
-        //     println!("Bit array: {:?}", bit_array);
-        //     println!("Palette: {:?}", palette);
-        // }
     }
 }
 
 #[derive(Debug)]
 struct PalettedContainer<'a> {
-    pub palette: &'a NbtList,
+    pub palette: Vec<PaletteElement>,
     pub data: Option<BitArray<'a>>,
     pub size: usize,
+}
+
+#[derive(Debug, Hash)]
+struct PaletteElement {
+    pub name: String,
+    pub properties: Vec<PaletteProperty>,
+}
+
+#[derive(Debug, Hash)]
+struct PaletteProperty {
+    pub name: String,
+    pub value: String,
 }
 
 impl PalettedContainer<'_> {
@@ -130,19 +121,91 @@ impl PalettedContainer<'_> {
             Ok(data) => Some(BitArray::new(data, size.clone())),
             Err(_) => None,
         };
-        let palette = nbt.get::<_, &NbtList>("palette").unwrap();
+        let start = std::time::Instant::now();
+        let palette = {
+            let palette_nbt = nbt.get::<_, &NbtList>("palette").unwrap();
+
+            let mut palette = Vec::new();
+            for i in 0..palette_nbt.len() {
+                let palette_element_nbt = palette_nbt.get::<&NbtTag>(i).unwrap();
+
+                let palette_element_deserialized = match palette_element_nbt {
+                    NbtTag::Compound(element_data) => {
+                        let name = element_data.get::<_, &String>("Name").unwrap();
+                        let nbt_properties = element_data.get::<_, &NbtCompound>("Properties");
+                        let mut properties = Vec::new();
+                        if let Ok(properties_nbt) = nbt_properties {
+                            for (key, value) in properties_nbt {
+                                properties.push(PaletteProperty {
+                                    name: key.clone(),
+                                    value: value.to_string(),
+                                });
+                            }
+                        }
+                        PaletteElement {
+                            name: name.clone(),
+                            properties: properties,
+                        }
+                    }
+                    NbtTag::String(name) => PaletteElement {
+                        name: name.clone(),
+                        properties: Vec::new(),
+                    },
+                    tag_type => {
+                        panic!("Unknown Type {}", tag_type);
+                    }
+                };
+
+                palette.push(palette_element_deserialized);
+            }
+            palette
+        };
+
+        println!(
+            "Palette deserialization took {}ms",
+            start.elapsed().as_secs_f32() * 1000.0
+        );
 
         PalettedContainer::new(data, palette, size)
     }
     fn new<'a>(
         data: Option<BitArray<'a>>,
-        palette: &'a NbtList,
+        palette: Vec<PaletteElement>,
         size: usize,
     ) -> PalettedContainer<'a> {
         PalettedContainer {
             palette,
             data,
             size,
+        }
+    }
+    fn write_packet(&mut self, packet_data: &mut OutboundPacketData) {
+        // This is temporary, I'm just using this to test the packet writing
+        packet_data.write_short(1000);
+
+        match self.data.is_some() {
+            true => {
+                let bit_array = self.data.as_mut().unwrap();
+                packet_data.write_unsigned_byte(bit_array.bits_per_value as u8);
+                packet_data.write_var_int(bit_array.data.len() as i32);
+                for i in 0..bit_array.data.len() {
+                    // Get from the registry IMPORTANT
+                    // packet_data.write_var_int(data.data[i]);
+                }
+
+                packet_data.write_var_int(bit_array.data.len() as i32);
+                for i in 0..bit_array.data.len() {
+                    packet_data.write_signed_long(bit_array.data[i]);
+                }
+            }
+            false => {
+                packet_data.write_unsigned_byte(0);
+                // Get from the registry IMPORTANT
+                //packet_data.write_var_int(0);
+
+                // Write empty long array
+                packet_data.write_var_int(0);
+            }
         }
     }
     // fn get_3d(&self, x: usize, y: usize, z: usize, width: usize) -> usize {

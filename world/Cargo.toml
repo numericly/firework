@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 quartz_nbt = "0.2.6"
+protocol = {path = "../protocol", version = "*"}
