@@ -3,12 +3,36 @@ use quartz_nbt::{
     io::{self, Flavor},
     NbtCompound, NbtList, NbtTag,
 };
+use serde::Deserialize;
 use std::{
+    collections::{hash_map::DefaultHasher, HashMap},
     convert::TryInto,
     fs,
+    hash::{Hash, Hasher},
     io::{Cursor, Read},
     time::Instant,
 };
+
+#[derive(Debug, Deserialize)]
+struct JsonPaletteElement {
+    #[serde(rename = "block")]
+    pub name: String,
+    pub key: i32,
+    pub properties: Vec<JsonPaletteProperty>,
+}
+
+#[derive(Debug, Hash, Deserialize)]
+struct JsonPaletteProperty {
+    pub name: String,
+    pub value: String,
+}
+
+impl Hash for JsonPaletteElement {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.name.hash(state);
+        self.properties.hash(state);
+    }
+}
 
 pub fn read_region_file(file_path: String) -> Vec<String> {
     let start = std::time::Instant::now();
@@ -73,26 +97,45 @@ fn read_chunk_nbt(cursor: &mut Cursor<Vec<u8>>, pointer: u64) {
 
     let _chunk_sections: Vec<String> = Vec::new();
 
+    let block_registry = {
+        let file_content = fs::read_to_string("./blocks-palette.json").unwrap();
+
+        let mut hashmap = HashMap::new();
+        let json: Vec<JsonPaletteElement> = serde_json::from_str(&file_content).unwrap();
+
+        for element in json.iter() {
+            let mut hasher = DefaultHasher::new();
+            element.hash(&mut hasher);
+            hashmap.insert(hasher.finish(), element.key);
+        }
+        hashmap
+    };
+
     for i in 0..sections.len() {
         let section = sections.get::<&NbtCompound>(i).unwrap();
 
         let biomes = match section.get::<_, &NbtCompound>("biomes") {
-            Ok(block_data) => PalettedContainer::from_nbt(block_data, 4096),
+            Ok(block_data) => PalettedContainer::from_nbt(block_data, 64, &block_registry),
             Err(_) => {
                 println!("An error occurred while reading biomes");
                 continue;
             }
         };
         let block_states = match section.get::<_, &NbtCompound>("block_states") {
-            Ok(block_data) => PalettedContainer::from_nbt(block_data, 64),
+            Ok(block_data) => PalettedContainer::from_nbt(block_data, 4096, &block_registry),
             Err(_) => {
                 println!("An error occurred while reading block states");
                 continue;
             }
         };
 
-        println!("Block states: {:?}", block_states);
-        println!("Biomes: {:?}", biomes);
+        let mut data = OutboundPacketData::new();
+
+        block_states.write_packet(&mut data);
+
+        println!("Data {:?}", data.data);
+
+        //println!("Block states: {:?}", block_states);
     }
 }
 
@@ -101,6 +144,7 @@ struct PalettedContainer<'a> {
     pub palette: Vec<PaletteElement>,
     pub data: Option<BitArray<'a>>,
     pub size: usize,
+    pub registry: &'a HashMap<u64, i32>,
 }
 
 #[derive(Debug, Hash)]
@@ -116,12 +160,15 @@ struct PaletteProperty {
 }
 
 impl PalettedContainer<'_> {
-    fn from_nbt<'a>(nbt: &NbtCompound, size: usize) -> PalettedContainer {
+    fn from_nbt<'a>(
+        nbt: &'a NbtCompound,
+        size: usize,
+        registry: &'a HashMap<u64, i32>,
+    ) -> PalettedContainer<'a> {
         let data = match nbt.get::<_, &[i64]>("data") {
             Ok(data) => Some(BitArray::new(data, size.clone())),
             Err(_) => None,
         };
-        let start = std::time::Instant::now();
         let palette = {
             let palette_nbt = nbt.get::<_, &NbtList>("palette").unwrap();
 
@@ -161,41 +208,45 @@ impl PalettedContainer<'_> {
             palette
         };
 
-        println!(
-            "Palette deserialization took {}ms",
-            start.elapsed().as_secs_f32() * 1000.0
-        );
-
-        PalettedContainer::new(data, palette, size)
+        PalettedContainer::new(data, palette, size, registry)
     }
     fn new<'a>(
         data: Option<BitArray<'a>>,
         palette: Vec<PaletteElement>,
         size: usize,
+        registry: &'a HashMap<u64, i32>,
     ) -> PalettedContainer<'a> {
         PalettedContainer {
             palette,
             data,
             size,
+            registry,
         }
     }
-    fn write_packet(&mut self, packet_data: &mut OutboundPacketData) {
+    fn write_packet(&self, packet_data: &mut OutboundPacketData) {
         // This is temporary, I'm just using this to test the packet writing
         packet_data.write_short(1000);
 
         match self.data.is_some() {
             true => {
-                let bit_array = self.data.as_mut().unwrap();
+                let bit_array = self.data.as_ref().unwrap();
                 packet_data.write_unsigned_byte(bit_array.bits_per_value as u8);
-                packet_data.write_var_int(bit_array.data.len() as i32);
-                for i in 0..bit_array.data.len() {
-                    // Get from the registry IMPORTANT
-                    // packet_data.write_var_int(data.data[i]);
+
+                packet_data.write_var_int(self.palette.len() as i32);
+                for i in 0..self.palette.len() {
+                    let block_data = &self.palette[i];
+
+                    let mut hasher = DefaultHasher::new();
+                    block_data.hash(&mut hasher);
+                    let hash = hasher.finish();
+                    println!("Writing {}", self.registry.get(&hash).unwrap().clone());
+                    packet_data.write_var_int(self.registry.get(&hash).unwrap().clone());
                 }
 
                 packet_data.write_var_int(bit_array.data.len() as i32);
                 for i in 0..bit_array.data.len() {
                     packet_data.write_signed_long(bit_array.data[i]);
+                    println!("Bits {:64b}", bit_array.data[i]);
                 }
             }
             false => {
@@ -252,5 +303,12 @@ impl BitArray<'_> {
             bits_per_value,
             individual_value_mask,
         }
+    }
+    fn get(&self, index: usize) -> usize {
+        let values_per_long = 64 / self.bits_per_value;
+        let long_index = index / values_per_long;
+        let long_value = self.data[long_index];
+        let value_index = index % values_per_long;
+        ((long_value >> (value_index * self.bits_per_value)) & self.individual_value_mask) as usize
     }
 }

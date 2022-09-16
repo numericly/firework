@@ -66,6 +66,9 @@ impl OutboundPacketData {
     pub fn write_unsigned_short(&mut self, val: u16) {
         self.data.extend_from_slice(&val.to_be_bytes());
     }
+    pub fn write_unsigned_long(&mut self, val: u64) {
+        self.data.extend_from_slice(&val.to_be_bytes());
+    }
     pub fn write_length(length: usize) -> Vec<u8> {
         let mut data = Vec::new();
 
