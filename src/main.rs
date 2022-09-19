@@ -1,7 +1,7 @@
 use authentication::authentication::authenticate;
 use protocol::packets::client_bound::{
     ChangeDifficulty, ClientBoundKeepAlive, Disconnect, EncryptionRequest, LoginSuccess,
-    PingResponse, PlayerAbilities, PlayerFlags, ServerStatus, SetSelectedSlot,
+    PingResponse, PlayerAbilities, PlayerFlags, ServerStatus, SetCenterChunk, SetSelectedSlot,
     SynchronizePlayerPosition, SynchronizePlayerPositionFlags, UpdateRecipes, WorldLogin,
 };
 use protocol::packets::server_bound::ServerBoundPacket;
@@ -177,6 +177,14 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
 
                 protocol.write_packet(update_recipes).await.unwrap();
 
+                let set_center_chunk = SetCenterChunk { x: 0, y: 0 };
+
+                protocol.write_packet(set_center_chunk).await.unwrap();
+
+                for i in -7..7 {
+                    for j in -7..7 {}
+                }
+
                 let position_sync = SynchronizePlayerPosition {
                     x: 0.0,
                     y: 1_000.0,
@@ -203,7 +211,7 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
 
 #[tokio::main]
 async fn main() {
-    env::set_var("RUST_BACKTRACE", "1");
+    //env::set_var("RUST_BACKTRACE", "1");
 
     world::world::read_region_file("world/region/r.0.0.mca".to_string());
 
@@ -218,5 +226,4 @@ async fn main() {
     //         handle_client(stream, server).await;
     //     });
     // }
-    //.insert_resource(ScheduleRunnerSettings::from())
 }

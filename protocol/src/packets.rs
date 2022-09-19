@@ -694,4 +694,51 @@ pub mod client_bound {
             57
         }
     }
+
+    #[derive(Debug)]
+    pub struct SetCenterChunk {
+        pub x: i32,
+        pub y: i32,
+    }
+
+    impl Serialize for SetCenterChunk {
+        fn serialize_into(&self, packet_data: &mut OutboundPacketData) {
+            packet_data.write_var_int(self.x);
+            packet_data.write_var_int(self.y);
+        }
+        fn packet_id(&self) -> i32 {
+            75
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct ChunkDataAndLightUpdate {
+        pub x: i32,
+        pub y: i32,
+        pub height_maps: NbtCompound,
+        pub data: Vec<u8>,
+        pub block_entities: Vec<BlockEntity>,
+        pub trusted_edges: bool,
+    }
+
+    #[derive(Debug)]
+    pub struct BlockEntity {}
+
+    impl Serialize for ChunkDataAndLightUpdate {
+        fn serialize_into(&self, packet_data: &mut OutboundPacketData) {
+            packet_data.write_signed_int(self.x);
+            packet_data.write_signed_int(self.y);
+            packet_data.write_nbt(&self.height_maps);
+            packet_data.write_var_int(self.data.len() as i32);
+            packet_data.write_bytes(self.data.as_slice());
+            packet_data.write_var_int(self.block_entities.len() as i32);
+            //TODO write block entities
+
+            packet_data.write_bool(self.trusted_edges);
+            //TODO write lighting information
+        }
+        fn packet_id(&self) -> i32 {
+            33
+        }
+    }
 }
