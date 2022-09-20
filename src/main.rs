@@ -1,9 +1,9 @@
 use authentication::authentication::authenticate;
 use protocol::packets::client_bound::{
     ChangeDifficulty, ChunkDataAndLightUpdate, ClientBoundKeepAlive, Disconnect, EncryptionRequest,
-    LoginSuccess, PingResponse, PlayerAbilities, PlayerFlags, Serialize, ServerStatus,
-    SetCenterChunk, SetCompression, SetSelectedSlot, SynchronizePlayerPosition,
-    SynchronizePlayerPositionFlags, UpdateRecipes, WorldLogin,
+    LoginSuccess, PingResponse, PlayerAbilities, PlayerFlags, ServerStatus, SetCenterChunk,
+    SetCompression, SetSelectedSlot, SynchronizePlayerPosition, SynchronizePlayerPositionFlags,
+    UpdateRecipes, WorldLogin,
 };
 use protocol::packets::server_bound::ServerBoundPacket;
 use protocol::protocol::{ConnectionState, Protocol};
@@ -13,9 +13,7 @@ use quartz_nbt::{snbt, NbtCompound};
 use rand::rngs::{OsRng, ThreadRng};
 use rand::RngCore;
 use server_state::server::Server;
-use std::env;
 use std::sync::Arc;
-use std::time::Instant;
 use tokio::fs;
 use tokio::net::{TcpListener, TcpStream};
 use world::world::ChunkPos;

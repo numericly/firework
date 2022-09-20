@@ -1,9 +1,6 @@
-use std::{fmt::Debug, io::Write};
+use std::fmt::Debug;
 
-use miniz_oxide::{
-    deflate::{compress_to_vec, compress_to_vec_zlib},
-    inflate::{decompress_to_vec, decompress_to_vec_with_limit, decompress_to_vec_zlib},
-};
+use miniz_oxide::{deflate::compress_to_vec_zlib, inflate::decompress_to_vec_zlib};
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::TcpStream,
@@ -79,11 +76,10 @@ impl Protocol<'_> {
 
         let data_length = OutboundPacketData::write_length(packet_data.data.len());
 
-        let start = std::time::Instant::now();
         let mut full_packet = if !self.compression_enabled {
             [&data_length[..], &packet_data.data[..]].concat()
         } else {
-            let compressed_data = compress_to_vec_zlib(&packet_data.data, 9);
+            let compressed_data = compress_to_vec_zlib(&packet_data.data, 1);
             let full_data_length =
                 OutboundPacketData::write_length(compressed_data.len() + data_length.len());
 
@@ -98,7 +94,6 @@ impl Protocol<'_> {
         if let Some(cipher) = &mut self.encryption {
             cipher.encrypt(&mut full_packet);
         }
-        println!("Preprocessing took {:?}", start.elapsed());
 
         self.stream
             .write_all(&full_packet)
