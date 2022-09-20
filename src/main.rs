@@ -10,14 +10,15 @@ use protocol::protocol::{ConnectionState, Protocol};
 use quartz_nbt::snbt;
 use rand::rngs::{OsRng, ThreadRng};
 use rand::RngCore;
-use server::Server;
+use server_state::server::Server;
 use std::env;
 use std::sync::Arc;
 use tokio::fs;
 use tokio::net::{TcpListener, TcpStream};
+use world::world::ChunkPos;
 
-mod player;
-mod server;
+//mod player;
+//mod server;
 
 async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
     let ip_addr = stream.peer_addr().unwrap().ip().to_owned().to_string();
@@ -213,7 +214,11 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
 async fn main() {
     //env::set_var("RUST_BACKTRACE", "1");
 
-    world::world::read_region_file("world/region/r.0.0.mca".to_string());
+    let mut server = Server::new();
+
+    let mut world = world::world::World::new("./world/region".to_string(), &server.registry);
+
+    world.get_chunks(vec![ChunkPos { x: 0, y: 0 }]);
 
     // let listener = TcpListener::bind("127.0.0.1:25566").await.unwrap();
     // let server = Arc::new(Server::new());

@@ -760,6 +760,7 @@ dependencies = [
  "rsa-der",
  "serde",
  "serde_json",
+ "server_state",
  "sha1",
  "tokio",
  "world",
@@ -1359,6 +1360,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "server_state"
+version = "0.1.0"
+dependencies = [
+ "dashmap",
+ "rand",
+ "rsa",
+ "rsa-der",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "sha1"
 version = "0.10.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1863,6 +1876,7 @@ dependencies = [
  "quartz_nbt",
  "serde",
  "serde_json",
+ "server_state",
 ]
 
 [[package]]
