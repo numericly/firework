@@ -1,7 +1,7 @@
 #[derive(Debug)]
 pub struct IncomingPacketData {
-    data: Vec<u8>,
-    index: usize,
+    pub data: Vec<u8>,
+    pub index: usize,
 }
 
 impl IncomingPacketData {

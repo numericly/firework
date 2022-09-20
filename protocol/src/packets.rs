@@ -498,6 +498,20 @@ pub mod client_bound {
     }
 
     #[derive(Debug)]
+    pub struct SetCompression {
+        pub threshold: i32,
+    }
+
+    impl Serialize for SetCompression {
+        fn serialize_into(&self, packet_data: &mut OutboundPacketData) {
+            packet_data.write_var_int(self.threshold);
+        }
+        fn packet_id(&self) -> i32 {
+            3
+        }
+    }
+
+    #[derive(Debug)]
     pub struct Disconnect {
         pub reason: String,
     }
@@ -719,6 +733,7 @@ pub mod client_bound {
         pub data: Vec<u8>,
         pub block_entities: Vec<BlockEntity>,
         pub trusted_edges: bool,
+        pub lighting: Vec<u8>,
     }
 
     #[derive(Debug)]
@@ -728,14 +743,18 @@ pub mod client_bound {
         fn serialize_into(&self, packet_data: &mut OutboundPacketData) {
             packet_data.write_signed_int(self.x);
             packet_data.write_signed_int(self.y);
+
             packet_data.write_nbt(&self.height_maps);
+
             packet_data.write_var_int(self.data.len() as i32);
             packet_data.write_bytes(self.data.as_slice());
-            packet_data.write_var_int(self.block_entities.len() as i32);
-            //TODO write block entities
 
-            packet_data.write_bool(self.trusted_edges);
-            //TODO write lighting information
+            packet_data.write_var_int(self.block_entities.len() as i32);
+
+            //packet_data.write_bool(self.trusted_edges);
+
+            // This is temporary until I figure out how to do this properly
+            packet_data.write_bytes(self.lighting.as_slice());
         }
         fn packet_id(&self) -> i32 {
             33

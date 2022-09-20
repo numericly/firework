@@ -38,9 +38,8 @@ impl Encryption {
         let priv_key = RsaPrivateKey::new(&mut rng, BITS).expect("failed to generate a key");
         let pub_key = RsaPublicKey::from(&priv_key);
 
-        let key_bytes = &pub_key.n().to_bytes_be();
-
-        let pub_encoded_bytes = rsa_der::public_key_to_der(&key_bytes, &key_bytes);
+        let pub_encoded_bytes =
+            rsa_der::public_key_to_der(&pub_key.n().to_bytes_be(), &pub_key.e().to_bytes_be());
 
         Encryption {
             pub_key: pub_key,

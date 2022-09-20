@@ -1,5 +1,9 @@
-use std::fmt::Debug;
+use std::{fmt::Debug, io::Write};
 
+use miniz_oxide::{
+    deflate::{compress_to_vec, compress_to_vec_zlib},
+    inflate::{decompress_to_vec, decompress_to_vec_with_limit, decompress_to_vec_zlib},
+};
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt},
     net::TcpStream,
@@ -14,6 +18,7 @@ use crate::{
 
 pub struct Protocol<'a> {
     stream: &'a mut TcpStream,
+    compression_enabled: bool,
     pub connection_state: ConnectionState,
     pub encryption: Option<CarrotCakeCipher>,
     pub decryption: Option<CarrotCakeCipher>,
@@ -30,6 +35,7 @@ pub enum ConnectionState {
 impl Protocol<'_> {
     pub fn new(stream: &mut TcpStream) -> Protocol {
         Protocol {
+            compression_enabled: false,
             stream: stream,
             connection_state: ConnectionState::HandShaking,
             encryption: None,
@@ -41,20 +47,28 @@ impl Protocol<'_> {
 
         let packet = ServerBoundPacket::from(&self.connection_state, packet_data);
 
-        println!("Received packet: {:?}", packet);
-
         packet
     }
     pub async fn read_packet(&mut self) -> Result<IncomingPacketData, String> {
         let packet_length = self.read_packet_length().await? as usize;
 
         let mut buffer = vec![0; packet_length];
-
         self.read_bytes_exact(&mut buffer).await?;
 
-        // ZLIB decompression (Not implemented)
+        if self.compression_enabled {
+            let mut packet_data = IncomingPacketData::new(buffer);
 
-        Ok(IncomingPacketData::new(buffer))
+            packet_data.read_var_int().unwrap();
+
+            let decoded = decompress_to_vec_zlib(
+                &packet_data.data[packet_data.index..packet_data.data.len()].to_vec(),
+            )
+            .unwrap();
+
+            Ok(IncomingPacketData::new(decoded))
+        } else {
+            Ok(IncomingPacketData::new(buffer))
+        }
     }
     pub async fn write_packet(&mut self, packet: impl Serialize + Debug) -> Result<(), String> {
         //println!("Sending packet: {:#?}", packet);
@@ -65,22 +79,41 @@ impl Protocol<'_> {
 
         let data_length = OutboundPacketData::write_length(packet_data.data.len());
 
-        let mut full_packet = [&data_length[..], &packet_data.data[..]].concat();
+        let start = std::time::Instant::now();
+        let mut full_packet = if !self.compression_enabled {
+            [&data_length[..], &packet_data.data[..]].concat()
+        } else {
+            let compressed_data = compress_to_vec_zlib(&packet_data.data, 9);
+            let full_data_length =
+                OutboundPacketData::write_length(compressed_data.len() + data_length.len());
+
+            [
+                &full_data_length[..],
+                &data_length[..],
+                &compressed_data[..],
+            ]
+            .concat()
+        };
 
         if let Some(cipher) = &mut self.encryption {
             cipher.encrypt(&mut full_packet);
         }
+        println!("Preprocessing took {:?}", start.elapsed());
 
         self.stream
             .write_all(&full_packet)
             .await
-            .map_err(|e| e.to_string())?;
+            .map_err(|e| format!("Failed to write packet to stream: {}", e.to_string()))?;
 
         Ok(())
     }
     pub fn set_encryption(&mut self, key: &[u8], iv: &[u8]) {
+        println!("Setting encryption");
         self.encryption = Some(CarrotCakeCipher::new(key, iv).unwrap());
         self.decryption = Some(CarrotCakeCipher::new(key, iv).unwrap());
+    }
+    pub fn enable_compression(&mut self) {
+        self.compression_enabled = true;
     }
     async fn read_packet_length(&mut self) -> Result<i32, String> {
         const SEGMENT_BITS: u8 = 0x7F;

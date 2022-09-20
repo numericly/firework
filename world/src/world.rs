@@ -1,18 +1,8 @@
 use self::region::{chunk::Chunk, Region};
-use protocol::serializer::OutboundPacketData;
-use quartz_nbt::{
-    io::{self, Flavor},
-    NbtCompound, NbtList, NbtTag,
-};
-use serde::Deserialize;
 use server_state::registry::Registry;
-use std::{
-    collections::{hash_map::DefaultHasher, HashMap},
-    fs,
-    hash::{Hash, Hasher},
-    io::{Cursor, Read},
-    time::Instant,
-};
+use std::collections::HashMap;
+
+use std::hash::Hash;
 
 pub struct World<'a> {
     pub path: String,
@@ -26,7 +16,7 @@ pub struct ChunkPos {
     pub y: i32,
 }
 
-#[derive(Hash, Debug, PartialEq, Eq, Clone)]
+#[derive(Hash, Debug, PartialEq, Eq, Clone, Copy)]
 pub struct RegionPos {
     pub x: i32,
     pub y: i32,
@@ -40,33 +30,32 @@ impl World<'_> {
             registry,
         }
     }
-    pub fn get_chunks(&mut self, chunk_positions: Vec<ChunkPos>) {
-        let mut cached_regions = HashMap::new();
-
+    pub fn get_chunks(&mut self, chunk_positions: Vec<ChunkPos>) -> Vec<Chunk> {
+        let mut cached_regions: HashMap<RegionPos, Region> = HashMap::new();
+        let mut return_chunks: Vec<Chunk> = Vec::new();
         for chunk_pos in chunk_positions {
             let region_pos = RegionPos {
                 x: chunk_pos.x / 32,
                 y: chunk_pos.y / 32,
             };
 
-            if !cached_regions.contains_key(&region_pos) {
-                let region = Region::new(format!(
+            let region = cached_regions.entry(region_pos).or_insert_with(|| {
+                Region::new(format!(
                     "{}/r.{}.{}.mca",
                     self.path.clone(),
                     region_pos.x,
                     region_pos.y
-                ));
-                cached_regions.insert(region_pos.clone(), region);
-            }
-
-            let region = cached_regions.get_mut(&region_pos).unwrap();
+                ))
+            });
 
             let chunk = region.get_chunk(
                 (chunk_pos.x % 32) as u8,
                 (chunk_pos.y % 32) as u8,
                 self.registry,
             );
+            return_chunks.push(chunk.unwrap());
         }
+        return_chunks
     }
 }
 
@@ -86,7 +75,7 @@ pub mod region {
         pub data: Cursor<Vec<u8>>,
         file_header_size: u64,
         chunk_positions: [u8; 4096],
-        chunk_timestamps: [u8; 4096],
+        _chunk_timestamps: [u8; 4096],
     }
 
     impl Region {
@@ -106,15 +95,15 @@ pub mod region {
                 file_header_size: data_cursor.position(),
                 data: data_cursor,
                 chunk_positions,
-                chunk_timestamps,
+                _chunk_timestamps: chunk_timestamps,
             }
         }
-        pub fn get_chunk<'a, 'b>(
-            &'b mut self,
+        pub fn get_chunk<'a>(
+            &mut self,
             x: u8,
             y: u8,
-            registry: &'b Registry,
-        ) -> Result<Chunk, String> {
+            registry: &'a Registry,
+        ) -> Result<Chunk<'a>, String> {
             let chunk_pos = (x as usize + y as usize * 32) * 4;
 
             let bytes = [
@@ -144,7 +133,6 @@ pub mod region {
     pub mod chunk {
         use std::{
             collections::{hash_map::DefaultHasher, HashMap},
-            fs,
             hash::{Hash, Hasher},
         };
 
@@ -201,12 +189,33 @@ pub mod region {
                 }
                 Ok(Chunk { sections: chunk })
             }
+            pub fn write(&self, packet: &mut OutboundPacketData) {
+                for section in &self.sections {
+                    section.write(packet);
+                }
+                packet.write_bytes(&vec![
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                ]);
+            }
         }
 
         #[derive(Debug)]
         pub struct ChunkSection<'a> {
             pub block_states: PalettedContainer<'a>,
             pub biomes: PalettedContainer<'a>,
+        }
+
+        impl ChunkSection<'_> {
+            pub fn write(&self, packet: &mut OutboundPacketData) {
+                if self.block_states.palette.len() > 1 {
+                    packet.write_short(1024);
+                } else {
+                    packet.write_short(0);
+                }
+
+                self.block_states.write_packet(packet);
+                self.biomes.write_packet(packet);
+            }
         }
 
         #[derive(Debug)]
@@ -309,7 +318,6 @@ pub mod region {
             }
             fn write_packet(&self, packet_data: &mut OutboundPacketData) {
                 if let Some(bit_array) = self.data.as_ref() {
-                    let bit_array = self.data.as_ref().unwrap();
                     packet_data.write_unsigned_byte(bit_array.bits_per_value as u8);
 
                     packet_data.write_var_int(self.palette.len() as i32);
@@ -360,7 +368,7 @@ pub mod region {
                     individual_value_mask,
                 }
             }
-            fn get(&self, index: usize) -> usize {
+            pub fn get(&self, index: usize) -> usize {
                 let values_per_long = 64 / self.bits_per_value;
                 let long_index = index / values_per_long;
                 let long_value = self.data[long_index];
