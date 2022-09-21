@@ -350,6 +350,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "data_types"
+version = "0.1.0"
+
+[[package]]
 name = "der"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -751,6 +755,7 @@ dependencies = [
  "cfb8",
  "criterion",
  "dashmap",
+ "data_types",
  "num-bigint",
  "protocol",
  "quartz_nbt",
