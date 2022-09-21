@@ -18,6 +18,8 @@ pub mod server_bound {
         PluginMessage(PluginMessage),
         SetPlayerPosition(SetPlayerPosition),
         SetPlayerAndRotationPosition(SetPlayerAndRotationPosition),
+        SetPlayerRotation(SetPlayerRotation),
+        SetAbilities(SetAbilities),
         PlayerCommand(PlayerCommand),
         SetHeldItem(SetHeldItem),
     }
@@ -61,6 +63,8 @@ pub mod server_bound {
                     18 => ClientKeepAlive::deserialize(packet_data),
                     20 => SetPlayerPosition::deserialize(packet_data),
                     21 => SetPlayerAndRotationPosition::deserialize(packet_data),
+                    22 => SetPlayerRotation::deserialize(packet_data),
+                    28 => SetAbilities::deserialize(packet_data),
                     30 => PlayerCommand::deserialize(packet_data),
                     40 => SetHeldItem::deserialize(packet_data),
                     _ => Err(format!(
@@ -329,6 +333,37 @@ pub mod server_bound {
                     on_ground: on_ground,
                 },
             ))
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct SetPlayerRotation {
+        pub yaw: f32,
+        pub pitch: f32,
+    }
+
+    impl Deserialize for SetPlayerRotation {
+        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+            let yaw = packet_data.read_float()?;
+            let pitch = packet_data.read_float()?;
+
+            Ok(ServerBoundPacket::SetPlayerRotation(SetPlayerRotation {
+                yaw: yaw,
+                pitch: pitch,
+            }))
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct SetAbilities {
+        pub flags: u8,
+    }
+
+    impl Deserialize for SetAbilities {
+        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+            let flags = packet_data.read_unsigned_byte()?;
+
+            Ok(ServerBoundPacket::SetAbilities(SetAbilities { flags }))
         }
     }
 

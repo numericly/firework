@@ -13,13 +13,13 @@ pub struct World<'a> {
 #[derive(Hash, Debug)]
 pub struct ChunkPos {
     pub x: i32,
-    pub y: i32,
+    pub z: i32,
 }
 
 #[derive(Hash, Debug, PartialEq, Eq, Clone, Copy)]
 pub struct RegionPos {
     pub x: i32,
-    pub y: i32,
+    pub z: i32,
 }
 
 impl World<'_> {
@@ -34,25 +34,24 @@ impl World<'_> {
         let mut cached_regions: HashMap<RegionPos, Region> = HashMap::new();
         let mut return_chunks: Vec<Chunk> = Vec::new();
         for chunk_pos in chunk_positions {
+            println!("ChunkPos: {:?}", chunk_pos);
             let region_pos = RegionPos {
-                x: chunk_pos.x / 32,
-                y: chunk_pos.y / 32,
+                x: (chunk_pos.x as f32 / 32.0).floor() as i32,
+                z: (chunk_pos.z as f32 / 32.0).floor() as i32,
             };
+
+            println!("region_pos: {:?}", region_pos);
 
             let region = cached_regions.entry(region_pos).or_insert_with(|| {
                 Region::new(format!(
                     "{}/r.{}.{}.mca",
                     self.path.clone(),
                     region_pos.x,
-                    region_pos.y
+                    region_pos.z
                 ))
             });
 
-            let chunk = region.get_chunk(
-                (chunk_pos.x % 32) as u8,
-                (chunk_pos.y % 32) as u8,
-                self.registry,
-            );
+            let chunk = region.get_chunk(chunk_pos.x, chunk_pos.z, self.registry);
             return_chunks.push(chunk.unwrap());
         }
         return_chunks
@@ -100,11 +99,13 @@ pub mod region {
         }
         pub fn get_chunk<'a>(
             &mut self,
-            x: u8,
-            y: u8,
+            x: i32,
+            z: i32,
             registry: &'a Registry,
         ) -> Result<Chunk<'a>, String> {
-            let chunk_pos = (x as usize + y as usize * 32) * 4;
+            let chunk_pos = (x.rem_euclid(32) as usize + (z.rem_euclid(32) as usize * 32)) * 4;
+
+            println!("chunk_pos: {}", chunk_pos);
 
             let bytes = [
                 self.chunk_positions[chunk_pos + 2],
@@ -117,13 +118,18 @@ pub mod region {
 
             let file_position = self.file_header_size + (chunk_position * 4096) as u64;
 
+            println!("Chunk position: {:?}", chunk_position);
+
             self.data.set_position(file_position);
 
             let chunk_nbt = match io::read_nbt(&mut self.data, Flavor::ZlibCompressed) {
                 //nbt data for the current chunk
                 Ok(chunk_nbt) => chunk_nbt.0,
                 Err(e) => {
-                    return Err(format!("Error reading NBT {e}"));
+                    println!("Chunk position: {:?}", chunk_position);
+                    println!("Data length: {:?}", self.data.get_ref().len());
+                    println!("File position: {:?}", file_position);
+                    return Err(format!("Error reading NBT: {e}"));
                 }
             };
             Chunk::from_nbt(chunk_nbt, registry)
@@ -281,6 +287,7 @@ pub mod region {
                                 PaletteElement {
                                     name: name.clone(),
                                     properties: if properties.len() > 0 {
+                                        properties.sort_by(|a, b| a.name.cmp(&b.name));
                                         Some(properties)
                                     } else {
                                         None
@@ -321,6 +328,9 @@ pub mod region {
                     packet_data.write_unsigned_byte(bit_array.bits_per_value as u8);
 
                     packet_data.write_var_int(self.palette.len() as i32);
+                    if self.palette.len() > 16 {
+                        println!("Bit array {}", bit_array.bits_per_value)
+                    }
                     for i in 0..self.palette.len() {
                         let block_data = &self.palette[i];
 
