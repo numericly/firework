@@ -68,18 +68,16 @@ impl Protocol<'_> {
         }
     }
     pub async fn write_packet(&mut self, packet: impl Serialize + Debug) -> Result<(), String> {
-        //println!("Sending packet: {:#?}", packet);
-
         let packet_data = packet.serialize();
-
-        // ZLIB compression (Not implemented)
 
         let data_length = OutboundPacketData::write_length(packet_data.data.len());
 
         let mut full_packet = if !self.compression_enabled {
             [&data_length[..], &packet_data.data[..]].concat()
         } else {
-            let compressed_data = compress_to_vec_zlib(&packet_data.data, 1);
+            let start = std::time::Instant::now();
+            let compressed_data = compress_to_vec_zlib(&packet_data.data, 10);
+            //println!("Compression took: {:?}", start.elapsed());
             let full_data_length =
                 OutboundPacketData::write_length(compressed_data.len() + data_length.len());
 
@@ -92,7 +90,9 @@ impl Protocol<'_> {
         };
 
         if let Some(cipher) = &mut self.encryption {
+            let start = std::time::Instant::now();
             cipher.encrypt(&mut full_packet);
+            //println!("Encryption took: {:?}", start.elapsed());
         }
 
         self.stream

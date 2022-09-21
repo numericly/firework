@@ -32,8 +32,6 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
 
     let mut world = World::new("./world/region".to_string(), &server.registry);
 
-    let chunks = world.get_chunks(vec![ChunkPos { x: 0, y: 0 }]);
-
     loop {
         let packet = match protocol.read_and_serialize().await {
             Ok(packet) => packet,
@@ -47,7 +45,7 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
             }
         };
 
-        println!("-> {:?}", packet);
+        //println!("-> {:?}", packet);
 
         match packet {
             ServerBoundPacket::Handshake(handshake) => {
@@ -144,7 +142,7 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
                     reduced_debug_info: false,
                     enable_respawn_screen: true,
                     is_debug: false,
-                    is_flat: false,
+                    is_flat: true,
                     has_death_location: false,
                     death_dimension_name: None,
                     death_position: None,
@@ -167,7 +165,7 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
 
                 protocol.write_packet(change_difficulty).await.unwrap();
 
-                let _player_abilities = PlayerAbilities {
+                let player_abilities = PlayerAbilities {
                     flags: PlayerFlags {
                         is_invulnerable: false,
                         is_flying: true,
@@ -178,7 +176,7 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
                     fov_modifier: 0.1,
                 };
 
-                //protocol.write_packet(player_abilities).await.unwrap();
+                protocol.write_packet(player_abilities).await.unwrap();
             }
             ServerBoundPacket::ClientInformation(_client_information) => {
                 let set_selected_slot = SetSelectedSlot { slot: 5 };
@@ -195,8 +193,8 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
 
                 protocol.write_packet(set_center_chunk).await.unwrap();
 
-                for i in -7..7 {
-                    for j in -7..7 {
+                for i in -8..8 {
+                    for j in -8..8 {
                         let lighting_data: Vec<u8> = vec![
                             1, 1, 0, 0, 0, 0, 0, 0, 0, 6, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0,
                             0, 0, 0, 0, 7, 2, 128, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -478,6 +476,8 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
                             255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
                             255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0,
                         ];
+
+                        let chunks = world.get_chunks(vec![ChunkPos { x: i, z: j }]);
                         let mut packet_data = OutboundPacketData::new();
                         chunks[0].write(&mut packet_data);
 
@@ -497,7 +497,7 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
 
                 let position_sync = SynchronizePlayerPosition {
                     x: 0.0,
-                    y: 150.0,
+                    y: 30.0,
                     z: 0.0,
                     yaw: 0.0,
                     pitch: 0.0,
