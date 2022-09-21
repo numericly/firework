@@ -48,7 +48,9 @@ impl World<'_> {
                 ))
             });
 
+            let start = std::time::Instant::now();
             let chunk = region.get_chunk(chunk_pos.x, chunk_pos.z, self.registry);
+            println!("Fetched chunk in {:?}", start.elapsed());
             return_chunks.push(chunk.unwrap());
         }
         return_chunks
@@ -113,7 +115,7 @@ pub mod region {
                     return Err(format!("Error reading NBT: {e}"));
                 }
             };
-            Chunk::from_nbt(chunk_nbt, registry)
+            Chunk::from_nbt(chunk_nbt, registry, super::ChunkPos { x, z })
         }
     }
 
@@ -127,15 +129,19 @@ pub mod region {
         use quartz_nbt::{NbtCompound, NbtList, NbtTag};
         use server_state::registry::Registry;
 
+        use crate::world::ChunkPos;
+
         #[derive(Debug)]
         pub struct Chunk<'a> {
             pub sections: Vec<ChunkSection<'a>>,
+            pub pos: ChunkPos,
         }
 
         impl Chunk<'_> {
             pub fn from_nbt<'a>(
                 chunk_nbt: NbtCompound,
                 registry: &'a Registry,
+                pos: ChunkPos,
             ) -> Result<Chunk<'a>, String> {
                 let sections = chunk_nbt.get::<_, &NbtList>("sections").unwrap().clone();
                 drop(chunk_nbt);
@@ -174,7 +180,10 @@ pub mod region {
                     };
                     chunk.push(chunk_section);
                 }
-                Ok(Chunk { sections: chunk })
+                Ok(Chunk {
+                    sections: chunk,
+                    pos,
+                })
             }
             pub fn write(&self, packet: &mut OutboundPacketData) {
                 for section in &self.sections {
