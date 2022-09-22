@@ -24,6 +24,8 @@ quartz_nbt = "0.2.6"
 dashmap = "5.4.0"
 server_state = { path = "./server_state", version = "*"}
 data_types = { path = "./data_types", version = "*"}
+miniz_oxide = "0.6.2"
+byteorder = "1.4.3"
 
 [dev-dependencies]
 criterion = "0.4.0"

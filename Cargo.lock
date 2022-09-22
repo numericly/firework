@@ -752,10 +752,12 @@ version = "0.1.0"
 dependencies = [
  "aes",
  "authentication",
+ "byteorder",
  "cfb8",
  "criterion",
  "dashmap",
  "data_types",
+ "miniz_oxide 0.6.2",
  "num-bigint",
  "protocol",
  "quartz_nbt",
@@ -1887,6 +1889,7 @@ dependencies = [
 name = "world"
 version = "0.1.0"
 dependencies = [
+ "byteorder",
  "protocol",
  "quartz_nbt",
  "serde",

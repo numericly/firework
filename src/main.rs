@@ -1,4 +1,6 @@
 use authentication::authentication::authenticate;
+use miniz_oxide::deflate::compress_to_vec_zlib;
+use miniz_oxide::inflate::decompress_to_vec_zlib;
 use protocol::packets::client_bound::{
     ChangeDifficulty, ChunkDataAndLightUpdate, ClientBoundKeepAlive, Disconnect, EncryptionRequest,
     LoginSuccess, PingResponse, PlayerAbilities, PlayerFlags, ServerStatus, SetCenterChunk,
@@ -13,6 +15,7 @@ use quartz_nbt::{snbt, NbtCompound};
 use rand::rngs::{OsRng, ThreadRng};
 use rand::RngCore;
 use server_state::server::Server;
+use std::io;
 use std::sync::Arc;
 use std::time::Instant;
 use tokio::fs;
@@ -499,7 +502,6 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
 #[tokio::main]
 async fn main() {
     //env::set_var("RUST_BACKTRACE", "1");
-
     // let server = Server::new();
 
     // let mut data = OutboundPacketData::new();
