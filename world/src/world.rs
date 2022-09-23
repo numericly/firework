@@ -140,7 +140,7 @@ pub mod region {
                 registry: &'a Registry,
             ) -> Result<Chunk<'a>, String> {
                 let sections = chunk_nbt.get::<_, &NbtList>("sections").unwrap().clone();
-                println!("{:?}", &chunk_nbt);
+                //println!("{:?}", &chunk_nbt);
                 drop(chunk_nbt);
 
                 let mut chunk_sections: Vec<ChunkSection> = Vec::new();
@@ -148,6 +148,7 @@ pub mod region {
                 for i in 0..24 {
                     let section = sections.get::<&NbtCompound>(i).unwrap();
 
+                    println!();
                     //println!("section: {:?}", section);
 
                     let biomes = match section.get::<_, &NbtCompound>("biomes") {
@@ -172,29 +173,40 @@ pub mod region {
                             continue;
                         }
                     };
-                    let sky_light = match section.get::<_, &NbtList>("sky_light") {
-                        Ok(sky_light) => sky_light,
+
+                    println!("at y level {:?}, ", section.get::<_, u8>("Y").unwrap());
+
+                    let sky_light = match section.get::<_, &NbtTag>("SkyLight") {
+                        Ok(sky_light) => Some((Vec::<i8>::try_from(sky_light.clone()).unwrap()).try_into().unwrap()),
+                                                        
+                                                    
                         Err(e) => {
-                            println!("An error occurred while reading sky light: {:?}", e);
-                            continue;
+                            println!("Probably no sky light in section: {:?}", e);
+                            None
                         }
                     };
-                    let block_light = match section.get::<_, &NbtList>("block_light") {
-                        Ok(block_light) => block_light,
+                    let block_light = match section.get::<_, &NbtTag>("BlockLight") {
+                        Ok(block_light) => Some((Vec::<i8>::try_from(block_light.clone()).unwrap()).try_into().unwrap()),
+
                         Err(e) => {
-                            println!("An error occurred while reading block light: {:?}", e);
-                            continue;
+                            println!("Probably no block light in section: {:?}", e);
+                            None
                         }
                     };
 
-                    let mut sky_light_bytes = sky_light.iter_map().collect();
+                    if(block_light.is_some()) {
+                        println!("block light: {:?}", block_light.unwrap());
+                    }
+                    if(sky_light.is_some()) {
+                        println!("sky light: {:?}", sky_light.unwrap());
+                    }
                     
 
                     let chunk_section = ChunkSection {
                         block_states,
                         biomes,
-                        Ok(([0u8; 2048])),
-                        [0u8; 2048],
+                        sky_light,
+                        block_light,
                     };
                     chunk_sections.push(chunk_section);
                 }
@@ -214,8 +226,8 @@ pub mod region {
         pub struct ChunkSection<'a> {
             pub block_states: PalettedContainer<'a>,
             pub biomes: PalettedContainer<'a>,
-            pub sky_light: Option<[u8; 2048]>,
-            pub block_light: Option<[u8; 2048]>
+            pub sky_light: Option<[i8; 2048]>,
+            pub block_light: Option<[i8; 2048]>
         }
 
         impl ChunkSection<'_> {
