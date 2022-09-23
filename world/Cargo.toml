@@ -12,3 +12,4 @@ serde = { version = "1.0.130", features = ["derive"] }
 serde_json = "1.0.70"
 server_state = {path = "../server_state", version = "*"}
 byteorder = "1.4.3"
+hematite-nbt = "0.5.2"

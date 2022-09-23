@@ -26,6 +26,8 @@ server_state = { path = "./server_state", version = "*"}
 data_types = { path = "./data_types", version = "*"}
 miniz_oxide = "0.6.2"
 byteorder = "1.4.3"
+hematite-nbt = "0.5.2"
+futures = "0.3.24"
 
 [dev-dependencies]
 criterion = "0.4.0"
