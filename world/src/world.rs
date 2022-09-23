@@ -38,7 +38,8 @@ impl World<'_> {
                 x: (chunk_pos.x as f32 / 32.0).floor() as i32,
                 z: (chunk_pos.z as f32 / 32.0).floor() as i32,
             };
-
+            println!("region_pos: {:?}", region_pos);
+            // Check if the region is cached and if not, load it
             let region = cached_regions.entry(region_pos).or_insert_with(|| {
                 Region::new(format!(
                     "{}/r.{}.{}.mca",
@@ -48,6 +49,7 @@ impl World<'_> {
                 ))
             });
 
+            //add the chunk to the return vector
             let chunk = region.get_chunk(chunk_pos.x, chunk_pos.z, self.registry);
             return_chunks.push(chunk.unwrap());
         }
@@ -120,7 +122,7 @@ pub mod region {
     pub mod chunk {
         use std::{
             collections::{hash_map::DefaultHasher, HashMap},
-            hash::{Hash, Hasher},
+            hash::{Hash, Hasher}, convert::TryInto,
         };
 
         use protocol::serializer::OutboundPacketData;
@@ -138,12 +140,15 @@ pub mod region {
                 registry: &'a Registry,
             ) -> Result<Chunk<'a>, String> {
                 let sections = chunk_nbt.get::<_, &NbtList>("sections").unwrap().clone();
+                println!("{:?}", &chunk_nbt);
                 drop(chunk_nbt);
 
-                let mut chunk: Vec<ChunkSection> = Vec::new();
+                let mut chunk_sections: Vec<ChunkSection> = Vec::new();
 
                 for i in 0..24 {
                     let section = sections.get::<&NbtCompound>(i).unwrap();
+
+                    //println!("section: {:?}", section);
 
                     let biomes = match section.get::<_, &NbtCompound>("biomes") {
                         Ok(block_data) => PalettedContainer::from_nbt(
@@ -167,14 +172,33 @@ pub mod region {
                             continue;
                         }
                     };
+                    let sky_light = match section.get::<_, &NbtList>("sky_light") {
+                        Ok(sky_light) => sky_light,
+                        Err(e) => {
+                            println!("An error occurred while reading sky light: {:?}", e);
+                            continue;
+                        }
+                    };
+                    let block_light = match section.get::<_, &NbtList>("block_light") {
+                        Ok(block_light) => block_light,
+                        Err(e) => {
+                            println!("An error occurred while reading block light: {:?}", e);
+                            continue;
+                        }
+                    };
+
+                    let mut sky_light_bytes = sky_light.iter_map().collect();
+                    
 
                     let chunk_section = ChunkSection {
                         block_states,
                         biomes,
+                        Ok(([0u8; 2048])),
+                        [0u8; 2048],
                     };
-                    chunk.push(chunk_section);
+                    chunk_sections.push(chunk_section);
                 }
-                Ok(Chunk { sections: chunk })
+                Ok(Chunk {sections: chunk_sections })
             }
             pub fn write(&self, packet: &mut OutboundPacketData) {
                 for section in &self.sections {
@@ -190,6 +214,8 @@ pub mod region {
         pub struct ChunkSection<'a> {
             pub block_states: PalettedContainer<'a>,
             pub biomes: PalettedContainer<'a>,
+            pub sky_light: Option<[u8; 2048]>,
+            pub block_light: Option<[u8; 2048]>
         }
 
         impl ChunkSection<'_> {

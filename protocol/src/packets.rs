@@ -767,8 +767,13 @@ pub mod client_bound {
         pub height_maps: NbtCompound,
         pub data: Vec<u8>,
         pub block_entities: Vec<BlockEntity>,
-        pub trusted_edges: bool,
-        pub lighting: Vec<u8>,
+        pub trust_edges: bool,
+        pub sky_light_mask: BitSet,
+        pub block_light_mask: BitSet,
+        pub empty_sky_light_mask: BitSet,
+        pub empty_block_light_mask: BitSet,
+        pub sky_light: Vec<[u8; 2048]>,
+        pub block_light: Vec<[u8; 2048]>,
     }
 
     #[derive(Debug)]
@@ -786,13 +791,99 @@ pub mod client_bound {
 
             packet_data.write_var_int(self.block_entities.len() as i32);
 
-            //packet_data.write_bool(self.trusted_edges);
+            packet_data.write_bool(self.trust_edges);
 
-            // This is temporary until I figure out how to do this properly
-            packet_data.write_bytes(self.lighting.as_slice());
+            //lighting data masks
+            packet_data.write_bytes(self.sky_light_mask.serialize().as_slice());//1 for sky light data, 0 for no sky light data
+            packet_data.write_bytes(self.block_light_mask.serialize().as_slice());//1 for block light data, 0 for no block light data
+            packet_data.write_bytes(self.empty_sky_light_mask.serialize().as_slice());//1 for empty sky light data, 0 for no empty sky light data
+            packet_data.write_bytes(self.empty_block_light_mask.serialize().as_slice());//1 for empty block light data, 0 for no empty block light data
+
+            //write sky light data
+            packet_data.write_var_int(self.sky_light.len() as i32);//number of sections in sky light array
+            for section in &self.sky_light {
+                packet_data.write_var_int(2048); // length is always 2048 bytes for each section
+                packet_data.write_bytes(section);
+            }
+            
+            //write block light data
+            packet_data.write_var_int(self.block_light.len() as i32);//number of sections in block light array
+            for section in &self.block_light {
+                packet_data.write_var_int(2048); // length is always 2048 bytes for each section
+                packet_data.write_bytes(section);
+            }
+
         }
         fn packet_id(&self) -> i32 {
             33
         }
     }
+
+    #[derive(Debug)]
+    pub struct BitSet {
+        pub bits: Vec<u64>,
+    }
+
+    impl BitSet {
+        pub fn new(bits: Vec<u64>) -> BitSet {
+            BitSet { bits: bits }
+        }
+        pub fn get_bit(&self, index: usize) -> bool {//copilot
+            let word_index = index / 64;
+            let bit_index = index % 64;
+            if word_index >= self.bits.len() {
+                return false;
+            }
+            (self.bits[word_index] & (1 << bit_index)) != 0
+        }
+        pub fn set_bit(&mut self, index: usize, value: bool) {//copilot
+            let word_index = index / 64;
+            let bit_index = index % 64;
+            if word_index >= self.bits.len() {
+                self.bits.resize(word_index + 1, 0);
+            }
+            if value {
+                self.bits[word_index] |= 1 << bit_index;
+            } else {
+                self.bits[word_index] &= !(1 << bit_index);
+            }
+        }
+        pub fn serialize(&self) -> Vec<u8> {
+            let mut output = vec![];
+            
+            const SEGMENT_BITS: u8 = 0x7F;
+            const CONTINUE_BIT: u8 = 0x80;
+    
+            //serialize length of bitset in u64s as a var_int
+            let mut val = self.bits.len() as i32;
+
+            loop {
+                let mut current_byte = (val & SEGMENT_BITS as i32) as u8;
+                val >>= 7;
+                if val != 0 {
+                    current_byte |= CONTINUE_BIT;
+                }
+                output.push(current_byte);
+                if val == 0 {
+                    break;
+                }
+            }
+
+            //serialize the u64s
+            for word in &self.bits {
+                output.append(&mut word.to_be_bytes().to_vec());//maybe use to_le_bytes
+            }
+            output
+        }
+
+        pub fn count_set_bits(&self) -> i32 {
+            let mut count = 0;
+            for word in &self.bits {
+                count += word.count_ones() as i32;
+            }
+            count
+        }
+    }
 }
+
+
