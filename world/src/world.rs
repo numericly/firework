@@ -220,6 +220,10 @@ pub mod region {
                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 ]);
             }
+
+            pub fn get_sections(&self) -> &Vec<ChunkSection> {
+                &self.sections
+            }
         }
 
         #[derive(Debug)]

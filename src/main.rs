@@ -18,7 +18,7 @@ use tokio::fs;
 use tokio::net::{TcpListener, TcpStream};
 use world::world::ChunkPos;
 use world::world::World;
-use lighting_engine::lighting_engine::lighting_engine::calculate_section_lighting;
+use lighting_engine::lighting_engine::lighting_engine::lighting_update_in_section;
 
 //mod player;
 //mod server;
@@ -537,7 +537,7 @@ async fn main() {
 
     // let server = Server::new();
 
-    calculate_section_lighting([None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]);
+    //lighting_update_in_section([None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]);
 
     let listener = TcpListener::bind("127.0.0.1:25566").await.unwrap();
     let server = Arc::new(Server::new());
