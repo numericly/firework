@@ -11,7 +11,7 @@ pub mod lighting_engine {
     }
 
     pub fn lighting_update_in_section(
-        section_index: usize,
+        section_index: u16,
         sections: &mut [[Option<ChunkSection>; 26]; 25],
     ) {
         //recalculates lighting in the 3x3x3 cube around the section updated
@@ -20,20 +20,20 @@ pub mod lighting_engine {
 
         //loop through the blocks and add block light calculations to the queue
         for x in 0..80 {
-            for y in 0..80 {
+            for y in 16 * section_index - 80..16 * section_index {
                 for z in 0..80 {
                     //if there's a light source at these coordinates, add it to the queue
                     //the zero check takes slight CPU but saves a lot of memory and honestly probably more CPU than it uses by removing the need to push a value to the queue
                     let lvl = get_source_brightness(
-                        x,
-                        y,
-                        z,
+                        x % 16,
+                        (y % 16) as u8,
+                        z % 16,
                         &sections[(x / 16 + z / 16 * 5) as usize][(y / 16) as usize],
                     );
                     if lvl != 0 {
                         queue.push(QueuedLightingUpdate {
                             x,
-                            y: y as u16,
+                            y,
                             z,
                             light_level: lvl,
                             is_sky_light: false,
@@ -194,12 +194,14 @@ pub mod lighting_engine {
         if x % 2 == 0 {
             //uses the first four bits
             lighting_data[((x + y * 16 + z * 16 * 16) / 2) as usize] =
-                (lighting_data[((x + y * 16 + z * 16 * 16) / 2) as usize] as u8 >> 4) as i8;
+                (lighting_data[((x + y * 16 + z * 16 * 16) / 2) as usize] as u8 & 0b11110000 | lvl)
+                    as i8;
         //FIXME: does this copy the whole chunk section?
         } else {
             //uses the second four bits
             lighting_data[((x + y * 16 + z * 16 * 16) / 2) as usize] =
-                (lighting_data[((x + y * 16 + z * 16 * 16) / 2) as usize] as u8 & 0b00001111) as i8;
+                (lighting_data[((x + y * 16 + z * 16 * 16) / 2) as usize] as u8 & 0b00001111
+                    | (lvl << 4)) as i8;
         } //FIXME: does this copy the whole chunk section?
     }
 
