@@ -794,25 +794,24 @@ pub mod client_bound {
             packet_data.write_bool(self.trust_edges);
 
             //lighting data masks
-            packet_data.write_bytes(self.sky_light_mask.serialize().as_slice());//1 for sky light data, 0 for no sky light data
-            packet_data.write_bytes(self.block_light_mask.serialize().as_slice());//1 for block light data, 0 for no block light data
-            packet_data.write_bytes(self.empty_sky_light_mask.serialize().as_slice());//1 for empty sky light data, 0 for no empty sky light data
-            packet_data.write_bytes(self.empty_block_light_mask.serialize().as_slice());//1 for empty block light data, 0 for no empty block light data
+            packet_data.write_bytes(self.sky_light_mask.serialize().as_slice()); //1 for sky light data, 0 for no sky light data
+            packet_data.write_bytes(self.block_light_mask.serialize().as_slice()); //1 for block light data, 0 for no block light data
+            packet_data.write_bytes(self.empty_sky_light_mask.serialize().as_slice()); //1 for empty sky light data, 0 for no empty sky light data
+            packet_data.write_bytes(self.empty_block_light_mask.serialize().as_slice()); //1 for empty block light data, 0 for no empty block light data
 
             //write sky light data
-            packet_data.write_var_int(self.sky_light.len() as i32);//number of sections in sky light array
+            packet_data.write_var_int(self.sky_light.len() as i32); //number of sections in sky light array
             for section in &self.sky_light {
                 packet_data.write_var_int(2048); // length is always 2048 bytes for each section
                 packet_data.write_bytes(section);
             }
-            
+
             //write block light data
-            packet_data.write_var_int(self.block_light.len() as i32);//number of sections in block light array
+            packet_data.write_var_int(self.block_light.len() as i32); //number of sections in block light array
             for section in &self.block_light {
                 packet_data.write_var_int(2048); // length is always 2048 bytes for each section
                 packet_data.write_bytes(section);
             }
-
         }
         fn packet_id(&self) -> i32 {
             33
@@ -828,7 +827,8 @@ pub mod client_bound {
         pub fn new(bits: Vec<u64>) -> BitSet {
             BitSet { bits: bits }
         }
-        pub fn get_bit(&self, index: usize) -> bool {//copilot
+        pub fn get_bit(&self, index: usize) -> bool {
+            //copilot
             let word_index = index / 64;
             let bit_index = index % 64;
             if word_index >= self.bits.len() {
@@ -836,7 +836,8 @@ pub mod client_bound {
             }
             (self.bits[word_index] & (1 << bit_index)) != 0
         }
-        pub fn set_bit(&mut self, index: usize, value: bool) {//copilot
+        pub fn set_bit(&mut self, index: usize, value: bool) {
+            //copilot
             let word_index = index / 64;
             let bit_index = index % 64;
             if word_index >= self.bits.len() {
@@ -850,10 +851,10 @@ pub mod client_bound {
         }
         pub fn serialize(&self) -> Vec<u8> {
             let mut output = vec![];
-            
+
             const SEGMENT_BITS: u8 = 0x7F;
             const CONTINUE_BIT: u8 = 0x80;
-    
+
             //serialize length of bitset in u64s as a var_int
             let mut val = self.bits.len() as i32;
 
@@ -871,7 +872,7 @@ pub mod client_bound {
 
             //serialize the u64s
             for word in &self.bits {
-                output.append(&mut word.to_be_bytes().to_vec());//maybe use to_le_bytes
+                output.append(&mut word.to_be_bytes().to_vec()); //maybe use to_le_bytes
             }
             output
         }
@@ -885,5 +886,3 @@ pub mod client_bound {
         }
     }
 }
-
-

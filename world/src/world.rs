@@ -122,7 +122,8 @@ pub mod region {
     pub mod chunk {
         use std::{
             collections::{hash_map::DefaultHasher, HashMap},
-            hash::{Hash, Hasher}, convert::TryInto,
+            convert::TryInto,
+            hash::{Hash, Hasher},
         };
 
         use protocol::serializer::OutboundPacketData;
@@ -177,16 +178,23 @@ pub mod region {
                     println!("at y level {:?}, ", section.get::<_, u8>("Y").unwrap());
 
                     let sky_light = match section.get::<_, &NbtTag>("SkyLight") {
-                        Ok(sky_light) => Some((Vec::<i8>::try_from(sky_light.clone()).unwrap()).try_into().unwrap()),
-                                                        
-                                                    
+                        Ok(sky_light) => Some(
+                            (Vec::<i8>::try_from(sky_light.clone()).unwrap())
+                                .try_into()
+                                .unwrap(),
+                        ),
+
                         Err(e) => {
                             println!("Probably no sky light in section: {:?}", e);
                             None
                         }
                     };
                     let block_light = match section.get::<_, &NbtTag>("BlockLight") {
-                        Ok(block_light) => Some((Vec::<i8>::try_from(block_light.clone()).unwrap()).try_into().unwrap()),
+                        Ok(block_light) => Some(
+                            (Vec::<i8>::try_from(block_light.clone()).unwrap())
+                                .try_into()
+                                .unwrap(),
+                        ),
 
                         Err(e) => {
                             println!("Probably no block light in section: {:?}", e);
@@ -194,13 +202,12 @@ pub mod region {
                         }
                     };
 
-                    if(block_light.is_some()) {
+                    if (block_light.is_some()) {
                         println!("block light: {:?}", block_light.unwrap());
                     }
-                    if(sky_light.is_some()) {
+                    if (sky_light.is_some()) {
                         println!("sky light: {:?}", sky_light.unwrap());
                     }
-                    
 
                     let chunk_section = ChunkSection {
                         block_states,
@@ -210,7 +217,9 @@ pub mod region {
                     };
                     chunk_sections.push(chunk_section);
                 }
-                Ok(Chunk {sections: chunk_sections })
+                Ok(Chunk {
+                    sections: chunk_sections,
+                })
             }
             pub fn write(&self, packet: &mut OutboundPacketData) {
                 for section in &self.sections {
@@ -231,7 +240,7 @@ pub mod region {
             pub block_states: PalettedContainer<'a>,
             pub biomes: PalettedContainer<'a>,
             pub sky_light: Option<[i8; 2048]>,
-            pub block_light: Option<[i8; 2048]>
+            pub block_light: Option<[i8; 2048]>,
         }
 
         impl ChunkSection<'_> {

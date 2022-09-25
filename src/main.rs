@@ -1,13 +1,14 @@
 use authentication::authentication::authenticate;
 use protocol::packets::client_bound::{
-    ChangeDifficulty, ChunkDataAndLightUpdate, ClientBoundKeepAlive, Disconnect, EncryptionRequest,
-    LoginSuccess, PingResponse, PlayerAbilities, PlayerFlags, ServerStatus, SetCenterChunk,
-    SetCompression, SetSelectedSlot, SynchronizePlayerPosition, SynchronizePlayerPositionFlags,
-    UpdateRecipes, WorldLogin, BitSet,
+    BitSet, ChangeDifficulty, ChunkDataAndLightUpdate, ClientBoundKeepAlive, Disconnect,
+    EncryptionRequest, LoginSuccess, PingResponse, PlayerAbilities, PlayerFlags, ServerStatus,
+    SetCenterChunk, SetCompression, SetSelectedSlot, SynchronizePlayerPosition,
+    SynchronizePlayerPositionFlags, UpdateRecipes, WorldLogin,
 };
 use protocol::packets::server_bound::ServerBoundPacket;
 use protocol::protocol::{ConnectionState, Protocol};
 
+use lighting_engine::lighting_engine::lighting_engine::lighting_update_in_section;
 use protocol::serializer::OutboundPacketData;
 use quartz_nbt::{snbt, NbtCompound};
 use rand::rngs::{OsRng, ThreadRng};
@@ -18,7 +19,6 @@ use tokio::fs;
 use tokio::net::{TcpListener, TcpStream};
 use world::world::ChunkPos;
 use world::world::World;
-use lighting_engine::lighting_engine::lighting_engine::lighting_update_in_section;
 
 //mod player;
 //mod server;
@@ -482,11 +482,10 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
                         let mut packet_data = OutboundPacketData::new();
                         chunks[0].write(&mut packet_data);
 
-                        let mut sky_light_mask: Vec<u64> = vec!();
-                        let mut block_light_mask: Vec<u64> = vec!();
-                        let mut empty_sky_light_mask: Vec<u64> = vec!();
-                        let mut empty_block_light_mask: Vec<u64> = vec!();
-
+                        let mut sky_light_mask: Vec<u64> = vec![];
+                        let mut block_light_mask: Vec<u64> = vec![];
+                        let mut empty_sky_light_mask: Vec<u64> = vec![];
+                        let mut empty_block_light_mask: Vec<u64> = vec![];
 
                         let chunk_data = ChunkDataAndLightUpdate {
                             x: i,
@@ -495,12 +494,12 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
                             data: packet_data.data,
                             block_entities: Vec::new(),
                             trust_edges: true,
-                            sky_light_mask: BitSet::new(sky_light_mask),//bitset
-                            block_light_mask: BitSet::new(block_light_mask),//bitset
-                            empty_sky_light_mask: BitSet::new(empty_sky_light_mask),//bitset
-                            empty_block_light_mask: BitSet::new(empty_block_light_mask),//bitset
-                            sky_light: vec!(),
-                            block_light: vec!(),
+                            sky_light_mask: BitSet::new(sky_light_mask), //bitset
+                            block_light_mask: BitSet::new(block_light_mask), //bitset
+                            empty_sky_light_mask: BitSet::new(empty_sky_light_mask), //bitset
+                            empty_block_light_mask: BitSet::new(empty_block_light_mask), //bitset
+                            sky_light: vec![],
+                            block_light: vec![],
                         };
 
                         protocol.write_packet(chunk_data).await.unwrap();
