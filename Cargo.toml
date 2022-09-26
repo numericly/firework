@@ -1,5 +1,5 @@
 [package]
-name = "minecrat-server-rs"
+name = "minecraft-server-rs"
 version = "0.1.0"
 edition = "2021"
 
