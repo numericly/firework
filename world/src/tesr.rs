@@ -21,12 +21,12 @@ pub struct ChunkOffset {
 
 #[derive(Debug, Deserialize)]
 pub struct ChunkNBT {
-    sections: Vec<SectionNBT>,
+    pub sections: Vec<SectionNBT>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct SectionNBT {
-    block_states: PalettedContainer<BlockPaletteElement>,
+    pub block_states: PalettedContainer<BlockPaletteElement>,
     biomes: PalettedContainer<String>,
     #[serde(rename = "SkyLight")]
     sky_light: Option<Vec<i8>>,
@@ -47,6 +47,7 @@ pub enum Palette<T> {
     LinearValue(Vec<T>),
 }
 
+pub enum Blocks {}
 #[derive(Debug, Deserialize)]
 pub struct BlockPaletteElement {
     #[serde(rename = "Name")]
@@ -90,7 +91,7 @@ impl Region {
             data,
         })
     }
-    pub fn get_chunk(&self, x: u8, z: u8) -> Result<Option<ChunkNBT>, String> {
+    pub fn get_chunk<'a>(&self, x: u8, z: u8) -> Result<Option<ChunkNBT>, String> {
         let index = ((x % 32) as usize) + ((z % 32) as usize) * 32;
 
         let offset = self.chunk_positions[index];
@@ -104,35 +105,62 @@ impl Region {
         let mut cursor = Cursor::new(&self.data[offset_bytes..]);
 
         let nbt: ChunkNBT = from_zlib_reader(&mut cursor).map_err(|e| e.to_string())?;
-
-        if let Palette::LinearValue(data) = &nbt.sections[0].block_states.palette {
-            if data.len() > 16 {
-                println!(
-                    "Palette: {:?}",
-                    &nbt.sections[0].block_states.data.as_ref().unwrap().len()
-                );
-                println!("Palette size: {:?}", data.len());
-            }
-        }
-
         Ok(Some(nbt))
     }
 }
 
-impl<T> PalettedContainer<T> {
-    // pub fn get(&self, index: usize, container_size: usize) -> Option<&T> {
-    //     match &self.palette {
-    //         Palette::SingleValue(value) => Some(value),
-    //         Palette::LinearValue(values) => {
-    //             let data_index =
-    //             values.get(index);
-    //         }
-    //     }
-    // }
-    fn bits_per_value(&self, container_size: usize) -> usize {
+impl ChunkNBT {
+    pub fn get_block<'a>(
+        &'a self,
+        x: usize,
+        y: usize,
+        z: usize,
+    ) -> Option<&'a BlockPaletteElement> {
+        let section = (y / 16) - SECTION_OFFSET;
+        let section = &self.sections[section];
+
+        //FIXME: This might not work
+        let index = (x * 16 + z) * 16 + (y % 16);
+
+        section.block_states.get(index, 4096)
+    }
+}
+
+const SECTION_OFFSET: usize = 4;
+const BITS_PER_ENTRY: usize = 64;
+
+impl<T> PalettedContainer<T>
+where
+    T: std::fmt::Debug,
+{
+    pub fn get(&self, index: usize, container_size: usize) -> Option<&T> {
+        match &self.palette {
+            Palette::SingleValue(value) => Some(value),
+            Palette::LinearValue(values) => {
+                let bits_per_value = &self.bits_per_value(container_size);
+                if bits_per_value == &0 && values.len() == 1 {
+                    return Some(&values[0]);
+                }
+                let values_per_long = BITS_PER_ENTRY / bits_per_value;
+                let array_index = index / values_per_long;
+                let long = self.data.as_ref().unwrap()[array_index];
+                let offset = (index % values_per_long) * bits_per_value;
+                let mask = (1 << bits_per_value) - 1;
+                let value_index = (long >> offset) & mask as i64;
+                Some(&values[value_index as usize])
+            }
+        }
+    }
+    pub fn bits_per_value(&self, container_size: usize) -> usize {
         match &self.palette {
             Palette::SingleValue(_) => 0,
-            Palette::LinearValue(values) => values.len() * 64 / container_size,
+            Palette::LinearValue(_) => {
+                if let Some(data) = self.data.as_ref() {
+                    data.len() * BITS_PER_ENTRY / container_size
+                } else {
+                    0
+                }
+            }
         }
     }
 }

@@ -522,36 +522,4 @@ async fn main() {
     //         handle_client(stream, server).await;
     //     });
     // }
-    let mut data = std::fs::File::open("./world/region/r.0.0.mca").unwrap();
-    let region = world::tesr::Region::deserialize(&mut data).unwrap();
-
-    let start = Instant::now();
-    let mut i = 0;
-    for x in 0..32 {
-        for z in 0..32 {
-            let chunk = region.get_chunk(x, z);
-            //println!("Chunk: {:?}", chunk);
-            i += 1;
-        }
-    }
-    println!("Size {}", std::mem::size_of::<ChunkNBT>());
-    println!("Fetching chunk took {:?}", start.elapsed() / i);
-}
-
-async fn read_chunks() {
-    let mut data = std::fs::File::open("./world/region/r.0.0.mca").unwrap();
-    let region = Arc::new(world::tesr::Region::deserialize(&mut data).unwrap());
-
-    let mut handles = Vec::new();
-    let start = Instant::now();
-    for z in 0..32 {
-        for x in 0..32 {
-            let region = Arc::clone(&region);
-            handles.push(tokio::spawn(async move {
-                region.get_chunk(x, z).unwrap();
-            }));
-        }
-    }
-    futures::future::try_join_all(handles).await.unwrap();
-    println!("Read chunks in {:?}", start.elapsed());
 }
