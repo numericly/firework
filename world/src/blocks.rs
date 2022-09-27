@@ -1,18 +1,11 @@
-macro_rules! block_registry {
-    ($($name: ident, $id: literal => $body: ident {
-        $($fname: ident: $ftyp: ty), *}),*) => {
-        0
-    };
-}
+use crate::{
+    materials::{MaterialColor, Materials},
+    sound::SoundType,
+};
 
-block_registry!(
-    SandStone, 24 => SandStone {
-        properties: e
-    }
-);
-
-macro_rules! mac {
-    () => {
-        0
-    };
+pub struct BlockProperties {
+    material: Materials,
+    material_color: MaterialColor,
+    has_collision: bool,
+    sound_type: SoundType,
 }

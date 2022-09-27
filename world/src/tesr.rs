@@ -6,6 +6,8 @@ use std::{
     time::Instant,
 };
 
+use crate::materials::Materials;
+
 #[derive(Debug)]
 pub struct Region {
     chunk_positions: [ChunkOffset; 1024],
@@ -124,6 +126,8 @@ impl ChunkNBT {
 
         //FIXME: This might not work
         let index = (x * 16 + z) * 16 + (y % 16);
+
+        let material = Materials::AIR.get();
 
         section.block_states.get(index, 4096)
     }

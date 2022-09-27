@@ -1,20 +1,26 @@
 {
   "cSpell.words": [
+    "BUILDABLE",
     "byteorder",
     "consts",
     "dashmap",
     "decryptor",
+    "DEEPSLATE",
     "Elytra",
     "encryptor",
+    "FROGLIGHT",
     "gamemode",
     "hasher",
     "minecraft",
     "overworld",
     "Paletted",
     "PKCS",
+    "PODZOL",
+    "Pushable",
     "reqwest",
     "respawn",
     "rngs",
+    "SHULKER",
     "snbt",
     "varint"
   ]

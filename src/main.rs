@@ -42,7 +42,6 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
             Ok(packet) => packet,
             Err(e) => {
                 println!("Error: {}", e);
-                vec![];
                 let disconnect = Disconnect {
                     reason: format!(r#"{{"text": "Error: {}"}}"#, e),
                 };
