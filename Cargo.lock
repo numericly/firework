@@ -697,13 +697,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "292a948cd991e376cf75541fe5b97a1081d713c618b4f1b9500f8844e49eb565"
 
 [[package]]
-name = "lighting_engine"
-version = "0.1.0"
-dependencies = [
- "world",
-]
-
-[[package]]
 name = "lock_api"
 version = "0.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -758,7 +751,6 @@ dependencies = [
  "cfb8",
  "criterion",
  "dashmap",
- "lighting_engine",
  "num-bigint",
  "protocol",
  "quartz_nbt",
