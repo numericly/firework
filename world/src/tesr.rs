@@ -47,7 +47,10 @@ pub enum Palette<T> {
     LinearValue(Vec<T>),
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(tag = "Name", content = "Properties")]
 pub enum Blocks {}
+
 #[derive(Debug, Deserialize)]
 pub struct BlockPaletteElement {
     #[serde(rename = "Name")]
