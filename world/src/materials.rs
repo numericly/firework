@@ -128,12 +128,6 @@ pub struct Material {
     pub push_reaction: PushReaction,
 }
 
-// This code was generated with a lot of regex
-// "   public static final Material ([A-Z_]+) = \(new Material\.Builder\(MaterialColor.([A-Z_]+)\)\)(?:(\.noCollider\(\))|(\.notSolidBlocking\(\))|(\.nonSolid\(\))|(\.replaceable\(\))|(\.notPushable\(\))|(\.flammable\(\))|(\.destroyOnPush\(\))|(\.liquid\(\)))*\.build\(\);\n"
-// "$1 => Material {\n\tcolor: MaterialColors::$2,\n\tliquid: false$10,\n\tsolid: true$5,\n\tblocks_motion: true$3,\n\tsolid_blocking: true$4,\n\tflammable: false$8,\n\treplaceable: false$6,\n\tpush_reaction: PushReaction::Normal$7$9,\n},\n"
-// Then I found and replaced it
-// Note this was hacky and not the best way to do this by any means
-
 materials!(
     AIR => Material {
         color: MaterialColor::NONE,

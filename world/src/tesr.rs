@@ -6,7 +6,7 @@ use std::{
     time::Instant,
 };
 
-use crate::materials::Materials;
+use crate::{blocks::Blocks, materials::Materials};
 use serde;
 
 #[derive(Debug)]
@@ -29,7 +29,7 @@ pub struct ChunkNBT {
 
 #[derive(Debug, Deserialize)]
 pub struct SectionNBT {
-    pub block_states: PalettedContainer<BlockPaletteElement>,
+    pub block_states: PalettedContainer<block>,
     biomes: PalettedContainer<String>,
     #[serde(rename = "SkyLight")]
     sky_light: Option<Vec<i8>>,
@@ -51,40 +51,28 @@ pub enum Palette<T> {
 }
 
 #[derive(Debug, Deserialize)]
-#[serde(tag = "Name", content = "Properties")]
-pub enum Blocks {}
-
+#[serde(untagged)]
+pub enum block {
+    Block(Blocks),
+    Other(BlockPaletteElement),
+}
 #[derive(Debug, Deserialize)]
 pub struct BlockPaletteElement {
     #[serde(rename = "Name")]
     name: String,
     #[serde(rename = "Properties")]
-    pub properties: Option<Vec<Props>>,
-    //pub properties: Option<Map<String, String>>,
+    pub properties: Option<Map<String, String>>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "lowercase")]
-pub enum Props {
-    Attached(#[serde(deserialize_with = "deserialize_str")] bool),
-    Axis(#[serde(deserialize_with = "deserialize_str")] String),
-    Lit(#[serde(deserialize_with = "deserialize_str")] bool),
-    Snowy(#[serde(deserialize_with = "deserialize_str")] bool),
-    Half(#[serde(deserialize_with = "deserialize_str")] String),
-}
-
-#[derive(Debug, Deserialize)]
-pub struct PropVal(#[serde(deserialize_with = "deserialize_str")] pub String);
-
-fn deserialize_str<'de, T, D>(deserializer: D) -> Result<T, D::Error>
-where
-    D: serde::Deserializer<'de>,
-    T: std::str::FromStr + serde::de::Deserialize<'de> + std::fmt::Debug,
-    <T as std::str::FromStr>::Err: std::fmt::Debug,
-{
-    let s = String::deserialize(deserializer)?;
-    Ok(s.parse().unwrap())
-}
+// fn deserialize_str<'de, T, D>(deserializer: D) -> Result<T, D::Error>
+// where
+//     D: serde::Deserializer<'de>,
+//     T: std::str::FromStr + serde::de::Deserialize<'de> + std::fmt::Debug,
+//     <T as std::str::FromStr>::Err: std::fmt::Debug,
+// {
+//     let s = String::deserialize(deserializer)?;
+//     Ok(s.parse().unwrap())
+// }
 
 #[derive(Debug, Deserialize)]
 pub struct Property {
@@ -140,12 +128,7 @@ impl Region {
 }
 
 impl ChunkNBT {
-    pub fn get_block<'a>(
-        &'a self,
-        x: usize,
-        y: usize,
-        z: usize,
-    ) -> Option<&'a BlockPaletteElement> {
+    pub fn get_block<'a>(&'a self, x: usize, y: usize, z: usize) -> Option<&'a block> {
         let section = (y / 16) - SECTION_OFFSET;
         let section = &self.sections[section];
 
