@@ -7,6 +7,7 @@ use std::{
 };
 
 use crate::materials::Materials;
+use serde;
 
 #[derive(Debug)]
 pub struct Region {
@@ -38,7 +39,7 @@ pub struct SectionNBT {
 
 #[derive(Debug, Deserialize)]
 pub struct PalettedContainer<T> {
-    palette: Palette<T>,
+    pub palette: Palette<T>,
     data: Option<Vec<i64>>,
 }
 
@@ -58,7 +59,31 @@ pub struct BlockPaletteElement {
     #[serde(rename = "Name")]
     name: String,
     #[serde(rename = "Properties")]
-    properties: Option<Map<String, Value>>,
+    pub properties: Option<Vec<Props>>,
+    //pub properties: Option<Map<String, String>>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Props {
+    Attached(#[serde(deserialize_with = "deserialize_str")] bool),
+    Axis(#[serde(deserialize_with = "deserialize_str")] String),
+    Lit(#[serde(deserialize_with = "deserialize_str")] bool),
+    Snowy(#[serde(deserialize_with = "deserialize_str")] bool),
+    Half(#[serde(deserialize_with = "deserialize_str")] String),
+}
+
+#[derive(Debug, Deserialize)]
+pub struct PropVal(#[serde(deserialize_with = "deserialize_str")] pub String);
+
+fn deserialize_str<'de, T, D>(deserializer: D) -> Result<T, D::Error>
+where
+    D: serde::Deserializer<'de>,
+    T: std::str::FromStr + serde::de::Deserialize<'de> + std::fmt::Debug,
+    <T as std::str::FromStr>::Err: std::fmt::Debug,
+{
+    let s = String::deserialize(deserializer)?;
+    Ok(s.parse().unwrap())
 }
 
 #[derive(Debug, Deserialize)]
@@ -126,8 +151,6 @@ impl ChunkNBT {
 
         //FIXME: This might not work
         let index = (x * 16 + z) * 16 + (y % 16);
-
-        let material = Materials::AIR.get();
 
         section.block_states.get(index, 4096)
     }

@@ -9,3 +9,11 @@ pub struct BlockProperties {
     has_collision: bool,
     sound_type: SoundType,
 }
+
+pub mod properties {
+    use serde;
+    // pub enum E {
+    //     #[serde(rename = "inactive")]
+    //     Inactive,
+    // }
+}
