@@ -1,26 +1,26 @@
 use crate::{
     materials::{MaterialColor, Materials},
-    sound::{SoundType, SoundTypes},
+    sound::SoundTypes,
 };
 
-struct BlockProperties {
-    material: Materials,
-    material_color: Option<MaterialColor>,
-    has_collision: bool,
-    sound_type: SoundTypes,
-    explosion_resistance: f32,
-    destroy_time: f32,
-    requires_tool: bool,
+pub struct BlockProperties {
+    pub material: Materials,
+    pub material_color: Option<MaterialColor>,
+    pub has_collision: bool,
+    pub sound_type: SoundTypes,
+    pub explosion_resistance: f32,
+    pub destroy_time: f32,
+    pub requires_tool: bool,
     // TODO: is randomly ticking
-    friction: f32,
-    speed_factor: f32,
-    jump_factor: f32,
-    can_occlude: bool,
-    is_air: bool,
+    pub friction: f32,
+    pub speed_factor: f32,
+    pub jump_factor: f32,
+    pub can_occlude: bool,
+    pub is_air: bool,
 }
 
 impl BlockProperties {
-    pub fn new(material: Materials, material_color: Option<MaterialColor>) -> Self {
+    pub const fn new(material: Materials, material_color: Option<MaterialColor>) -> Self {
         Self {
             material_color,
             material,
@@ -40,23 +40,16 @@ impl BlockProperties {
 
 macro_rules! block_props {
     ($($name: ident => $type: ty),*) => {
-        pub mod block_properties {
             $(
                 #[allow(non_camel_case_types)]
                 pub type $name = $type;
             )*
-        }
     };
 }
 
 macro_rules! blocks {
     ($($name: ident, $id: literal => {$properties: expr $(, $state_name: ident: {$($field: ident: $f_default: expr),*})?}),*) => {
         use serde::{Deserialize};
-
-        block_props!(
-            snowy => bool,
-            lit => bool
-        );
 
         #[derive(Deserialize, Debug)]
         #[serde(tag = "Name", content = "Properties")]
@@ -65,6 +58,59 @@ macro_rules! blocks {
                 #[serde(rename = $id)]
                 $name$((block_states::$state_name))?
             ),*
+        }
+
+        impl Blocks {
+            pub fn get_properties(&self) -> &BlockProperties {
+                #[allow(unused_variables, non_snake_case)]
+                match self {
+                    $(
+                        Self::$name$(($state_name))?
+                            => &block_properties::$name
+                    ),*
+                }
+            }
+        }
+
+        pub mod block {
+            use super::block_states;
+            use super::BlockProperties;
+            use super::block_properties;
+
+            use serde::{Deserialize};
+
+            $(
+                #[derive(Deserialize)]
+                #[serde(default)]
+                pub struct $name {
+                    $(state: block_states::$state_name,)?
+                    #[serde(skip)]
+                    properties: BlockProperties
+                }
+
+                impl Default for $name {
+                    fn default() -> Self {
+                        Self {
+                            $(state: block_states::$state_name::new(),)?
+                            properties: block_properties::$name
+                        }
+                    }
+                }
+            )*
+        }
+
+        pub mod block_properties {
+            use super::BlockProperties;
+
+            block_props!(
+                snowy => bool,
+                lit => bool
+            );
+
+            $(
+                #[allow(non_upper_case_globals)]
+                pub const $name: BlockProperties = $properties;
+            )*
         }
 
         pub mod block_states {
@@ -110,19 +156,15 @@ macro_rules! blocks {
 blocks!(
     Air, "minecraft:air" => {
         BlockProperties {
-            material: Materials::Air,
-            material_color: MaterialColor::Air,
             has_collision: false,
-            sound_type: SoundType::Stone,
-            ..BlockProperties::new()
+            can_occlude: false,
+            is_air: true,
+            ..BlockProperties::new(crate::materials::Materials::AIR, None)
         }
     },
     GrassBlock, "minecraft:grass_block" => {
         BlockProperties {
-            material: Materials::Grass,
-            material_color: MaterialColor::Grass,
-            has_collision: true,
-            sound_type: SoundType::Grass,
+            ..BlockProperties::new(crate::materials::Materials::GRASS, None)
         },
         GrassBlockState: {
             snowy: false
@@ -130,21 +172,17 @@ blocks!(
     }
 );
 
-pub mod properties {
-
-    pub enum BlockProperties {
-        Snowy(bool),
+trait LightLevel {
+    fn get_light_level(&self) -> u8 {
+        0
     }
+}
 
-    pub struct Property<T>
-    where
-        T: std::str::FromStr + std::fmt::Debug,
-    {
-        name: String,
-        values: Vec<T>,
-    }
-
-    fn t() {
-        let p = BlockProperties::Snowy(false);
+impl LightLevel for Blocks {
+    fn get_light_level(&self) -> u8 {
+        match self {
+            Blocks::GrassBlock(_) => 15,
+            _ => 0,
+        }
     }
 }
