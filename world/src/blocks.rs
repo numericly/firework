@@ -1,11 +1,7 @@
-use crate::{
-    materials::{MaterialColor, Materials},
-    sound::SoundTypes,
-};
+use crate::{materials::Materials, sound::SoundTypes};
 
 pub struct BlockProperties {
     pub material: Materials,
-    pub material_color: Option<MaterialColor>,
     pub has_collision: bool,
     pub sound_type: SoundTypes,
     pub explosion_resistance: f32,
@@ -20,9 +16,8 @@ pub struct BlockProperties {
 }
 
 impl BlockProperties {
-    pub const fn new(material: Materials, material_color: Option<MaterialColor>) -> Self {
+    pub const fn new(material: Materials) -> Self {
         Self {
-            material_color,
             material,
             has_collision: true,
             sound_type: SoundTypes::STONE,
@@ -38,17 +33,65 @@ impl BlockProperties {
     }
 }
 
+macro_rules! enum_property {
+    ($name:ident { $($variant:ident => $val:literal),* $(,)? }) => {
+
+        #[derive(Deserialize, Debug)]
+        pub enum $name {
+            $($variant),*
+        }
+
+        impl FromStr for $name {
+            type Err = ();
+
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                match s {
+                    $($val => Ok(Self::$variant)),*,
+                    _ => Err(()),
+                }
+            }
+        }
+
+        impl ToString for $name {
+            fn to_string(&self) -> String {
+                match self {
+                    $($name::$variant => $val.to_string()),*
+                }
+            }
+        }
+    }
+}
+
+macro_rules! block_prop {
+    ($name: ident) => {
+        pub type $name<T> = T;
+    };
+    ($name: ident, $type: ty) => {
+        pub type $name = $type;
+    };
+}
+
 macro_rules! block_props {
-    ($($name: ident => $type: ty),*) => {
-            $(
-                #[allow(non_camel_case_types)]
-                pub type $name = $type;
-            )*
+    ($($name: ident$( => $type: ty)?),*) => {
+
+        $(
+            #[allow(non_camel_case_types)]
+            block_prop!($name$(, $type )?);
+        )*
+    };
+}
+
+macro_rules! field_type {
+    ($field: ident) => {
+        $field
+    };
+    ($field: ident, $field_ty: ty) => {
+        $field<$field_ty>
     };
 }
 
 macro_rules! blocks {
-    ($($name: ident, $id: literal => {$properties: expr $(, $state_name: ident: {$($field: ident: $f_default: expr),*})?}),*) => {
+    ($($name: ident, $id: literal => {$properties: expr $(, $state_name: ident {$($field: ident$(, $prop_ty: ty)?: $f_default: expr),*})?}),*) => {
         use serde::{Deserialize};
 
         #[derive(Deserialize, Debug)]
@@ -73,11 +116,89 @@ macro_rules! blocks {
         }
 
         pub mod block_properties {
+            use serde::{Deserialize};
+            use std::str::FromStr;
             use super::BlockProperties;
 
+            enum_property! { Axis { X => "x", Y => "y", Z => "z" } }
+            enum_property! { HorizontalAxis { X => "x", Z => "z" } }
+
+            enum_property! { Facing { North => "north", East => "east", South => "south", West => "west", Up => "up", Down => "down" } }
+            enum_property! { HopperFacing { North => "north", East => "east", South => "south", West => "west", Down => "down" } }
+            enum_property! { HorizontalFacing { North => "north", East => "east", South => "south", West => "west" } }
+
+            enum_property! { Orientation {
+                DownEast => "down_east",
+                DownNorth => "down_north",
+                DownSouth => "down_south",
+                DownWest => "down_west",
+                UpEast => "up_east",
+                UpNorth => "up_north",
+                UpSouth => "up_south",
+                UpWest => "up_west",
+                WestUp => "west_up",
+                NorthUp => "north_up",
+                SouthUp => "south_up",
+                EastUp => "east_up",
+            }}
+            enum_property! { AttachFace { Floor => "floor", Wall => "wall", Ceiling => "ceiling" } }
+            enum_property! { BellAttach { Floor => "floor", Ceiling => "ceiling", SingleWall => "single_wall", DoubleWall => "double_wall" } }
+            enum_property! { WallSide { None => "none", Low => "low", Tall => "tall" } }
+            enum_property! { RedstoneSide { Up => "up", None => "none", Side => "side" } }
+            enum_property! { DoubleBlockHalf { Lower => "lower", Upper => "upper" } }
+            enum_property! { Half { Top => "top", Bottom => "bottom" } }
+
+
             block_props!(
+                attached => bool,
+                bottom => bool,
+                conditional => bool,
+                disarmed => bool,
+                drag => bool,
+                enabled => bool,
+                extended => bool,
+                eye => bool,
+                falling => bool,
+                hanging => bool,
+                has_bottle_0 => bool,
+                has_bottle_1 => bool,
+                has_bottle_2 => bool,
+                has_record => bool,
+                has_book => bool,
+                inverted => bool,
+                in_wall => bool,
+                lit => bool,
+                locked => bool,
+                occupied => bool,
+                open => bool,
+                persistent => bool,
+                powered => bool,
+                short => bool,
+                signal_fire => bool,
                 snowy => bool,
-                lit => bool
+                triggered => bool,
+                unstable => bool,
+                waterlogged => bool,
+                vine_end => bool,
+                berries => bool,
+                bloom => bool,
+                shrieking => bool,
+                can_summon => bool,
+                axis,
+                up => bool,
+                down => bool,
+                north,
+                east,
+                south,
+                west,
+                facing,
+                orientation => Orientation,
+                attach_face => AttachFace,
+                attachment => BellAttach,
+                half,
+                shape
+
+
             );
 
             $(
@@ -96,7 +217,7 @@ macro_rules! blocks {
                     pub struct $state_name {
                         $(
                             #[serde(deserialize_with = "from_string")]
-                            pub $field: $field,
+                            pub $field: field_type!($field$(, $prop_ty)?),
                         )*
                     }
 
@@ -132,21 +253,12 @@ blocks!(
             has_collision: false,
             can_occlude: false,
             is_air: true,
-            ..BlockProperties::new(crate::materials::Materials::AIR, None)
-        }
-    },
-    GrassBlock, "minecraft:grass_block" => {
-        BlockProperties {
-            ..BlockProperties::new(crate::materials::Materials::GRASS, None)
+            ..BlockProperties::new(crate::materials::Materials::AIR)
         },
-        GrassBlockState: {
-            snowy: false
+        AirState {
+            axis, Axis: Axis::Y
         }
     }
 );
 
-trait LightLevel {
-    fn get_light_level(&self) -> u8 {
-        0
-    }
-}
+fn e() {}
