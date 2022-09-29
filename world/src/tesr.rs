@@ -6,7 +6,7 @@ use std::{
     time::Instant,
 };
 
-use crate::{blocks::Blocks, materials::Materials};
+use crate::{blocks::BlockState, materials::Materials};
 use serde;
 
 #[derive(Debug)]
@@ -53,7 +53,7 @@ pub enum Palette<T> {
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
 pub enum block {
-    Block(Blocks),
+    Block(BlockState),
     Other(BlockPaletteElement),
 }
 #[derive(Debug, Deserialize)]

@@ -53,14 +53,14 @@ macro_rules! blocks {
 
         #[derive(Deserialize, Debug)]
         #[serde(tag = "Name", content = "Properties")]
-        pub enum Blocks {
+        pub enum BlockState {
             $(
                 #[serde(rename = $id)]
                 $name$((block_states::$state_name))?
             ),*
         }
 
-        impl Blocks {
+        impl BlockState {
             pub fn get_properties(&self) -> &BlockProperties {
                 #[allow(unused_variables, non_snake_case)]
                 match self {
@@ -70,33 +70,6 @@ macro_rules! blocks {
                     ),*
                 }
             }
-        }
-
-        pub mod block {
-            use super::block_states;
-            use super::BlockProperties;
-            use super::block_properties;
-
-            use serde::{Deserialize};
-
-            $(
-                #[derive(Deserialize)]
-                #[serde(default)]
-                pub struct $name {
-                    $(state: block_states::$state_name,)?
-                    #[serde(skip)]
-                    properties: BlockProperties
-                }
-
-                impl Default for $name {
-                    fn default() -> Self {
-                        Self {
-                            $(state: block_states::$state_name::new(),)?
-                            properties: block_properties::$name
-                        }
-                    }
-                }
-            )*
         }
 
         pub mod block_properties {
@@ -175,14 +148,5 @@ blocks!(
 trait LightLevel {
     fn get_light_level(&self) -> u8 {
         0
-    }
-}
-
-impl LightLevel for Blocks {
-    fn get_light_level(&self) -> u8 {
-        match self {
-            Blocks::GrassBlock(_) => 15,
-            _ => 0,
-        }
     }
 }

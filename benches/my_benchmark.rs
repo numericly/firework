@@ -1,5 +1,5 @@
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
-use world::{blocks::Blocks, tesr::Palette};
+use world::{blocks::BlockState, tesr::Palette};
 
 fn criterion_benchmark(c: &mut Criterion) {
     // c.bench_function("serialize region", |a| {
