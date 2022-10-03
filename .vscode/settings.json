@@ -1,8 +1,10 @@
 {
   "cSpell.words": [
+    "basedrum",
     "BUILDABLE",
     "byteorder",
     "consts",
+    "cooldown",
     "dashmap",
     "decryptor",
     "DEEPSLATE",
@@ -15,6 +17,7 @@
     "overworld",
     "Paletted",
     "PKCS",
+    "pling",
     "PODZOL",
     "Pushable",
     "reqwest",
