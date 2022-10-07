@@ -2,12 +2,10 @@ use std::{
     collections::{hash_map::DefaultHasher, HashMap},
     fs,
     hash::{Hash, Hasher},
-    mem::size_of_val,
     sync::Arc,
 };
 
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
-use dashmap::DashMap;
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]

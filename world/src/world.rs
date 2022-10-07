@@ -202,10 +202,10 @@ pub mod region {
                         }
                     };
 
-                    if (block_light.is_some()) {
+                    if block_light.is_some() {
                         println!("block light: {:?}", block_light.unwrap());
                     }
-                    if (sky_light.is_some()) {
+                    if sky_light.is_some() {
                         println!("sky light: {:?}", sky_light.unwrap());
                     }
 

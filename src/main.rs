@@ -19,9 +19,6 @@ use tokio::net::{TcpListener, TcpStream};
 use world::world::ChunkPos;
 use world::world::World;
 
-//mod player;
-//mod server;
-
 async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
     let ip_addr = stream.peer_addr().unwrap().ip().to_owned().to_string();
 
@@ -189,7 +186,7 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
 
                 protocol.write_packet(update_recipes).await.unwrap();
 
-                let set_center_chunk = SetCenterChunk { x: 0, y: 0 };
+                let set_center_chunk = SetCenterChunk { x: 0, z: 0 };
 
                 protocol.write_packet(set_center_chunk).await.unwrap();
 
@@ -199,10 +196,10 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
                         let mut packet_data = OutboundPacketData::new();
                         chunks[0].write(&mut packet_data);
 
-                        let mut sky_light_mask: Vec<u64> = vec![];
-                        let mut block_light_mask: Vec<u64> = vec![];
-                        let mut empty_sky_light_mask: Vec<u64> = vec![];
-                        let mut empty_block_light_mask: Vec<u64> = vec![];
+                        let sky_light_mask: Vec<u64> = vec![];
+                        let block_light_mask: Vec<u64> = vec![];
+                        let empty_sky_light_mask: Vec<u64> = vec![];
+                        let empty_block_light_mask: Vec<u64> = vec![];
 
                         let chunk_data = ChunkDataAndLightUpdate {
                             x: i,
@@ -249,7 +246,8 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) {
 
 #[tokio::main]
 async fn main() {
-    let listener = TcpListener::bind("127.0.0.1:25566").await.unwrap();
+    let listener = TcpListener::bind("127.0.0.1:25565").await.unwrap();
+
     let lobby = Arc::new(Server::new());
 
     loop {

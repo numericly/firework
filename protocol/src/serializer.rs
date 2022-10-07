@@ -2,17 +2,11 @@ use quartz_nbt::{io, NbtCompound};
 
 pub struct OutboundPacketData {
     pub data: Vec<u8>,
-    pub sky_light_data: Vec<[u8; 2048]>,
-    pub block_light_data: Vec<[u8; 2048]>,
 }
 
 impl OutboundPacketData {
     pub fn new() -> OutboundPacketData {
-        OutboundPacketData {
-            data: Vec::new(),
-            sky_light_data: Vec::new(),
-            block_light_data: Vec::new(),
-        }
+        OutboundPacketData { data: Vec::new() }
     }
     pub fn write_var_int(&mut self, val: i32) {
         const SEGMENT_BITS: u8 = 0x7F;

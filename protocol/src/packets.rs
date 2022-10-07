@@ -747,13 +747,13 @@ pub mod client_bound {
     #[derive(Debug)]
     pub struct SetCenterChunk {
         pub x: i32,
-        pub y: i32,
+        pub z: i32,
     }
 
     impl Serialize for SetCenterChunk {
         fn serialize_into(&self, packet_data: &mut OutboundPacketData) {
             packet_data.write_var_int(self.x);
-            packet_data.write_var_int(self.y);
+            packet_data.write_var_int(self.z);
         }
         fn packet_id(&self) -> i32 {
             75
