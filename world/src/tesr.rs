@@ -1,19 +1,20 @@
 use byteorder::{BigEndian, ReadBytesExt};
-use nbt::{from_zlib_reader, Blob, Map, Value};
-use serde::Deserialize;
-use std::{
-    io::{Cursor, Read},
-    time::Instant,
-};
-
-use crate::{blocks::BlockState, materials::Materials};
+use data::data_1_19_2::BlockState;
+use nbt::{from_zlib_reader, Blob, Value};
 use serde;
+use serde::Deserialize;
+use std::cell::RefCell;
+use std::collections::hash_map::Entry;
+use std::collections::HashMap;
+use std::io::{Cursor, Read};
+use std::sync::Arc;
 
 #[derive(Debug)]
 pub struct Region {
     chunk_positions: [ChunkOffset; 1024],
     chunk_timestamps: [u32; 1024],
     data: Vec<u8>,
+    chunk_cache: RefCell<HashMap<ChunkPos, Arc<Chunk>>>,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -23,18 +24,19 @@ pub struct ChunkOffset {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct ChunkNBT {
-    pub sections: Vec<SectionNBT>,
+pub struct Chunk {
+    pub sections: Vec<ChunkSection>,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct SectionNBT {
-    pub block_states: PalettedContainer<block>,
-    biomes: PalettedContainer<String>,
+pub struct ChunkSection {
+    //pub block_states: HashMap<String, nbt::Value>,
+    pub block_states: PalettedContainer<BlockState>,
+    pub biomes: PalettedContainer<String>,
     #[serde(rename = "SkyLight")]
-    sky_light: Option<Vec<i8>>,
+    pub sky_light: Option<Vec<i8>>,
     #[serde(rename = "BlockLight")]
-    block_light: Option<Vec<i8>>,
+    pub block_light: Option<Vec<i8>>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -51,33 +53,15 @@ pub enum Palette<T> {
 }
 
 #[derive(Debug, Deserialize)]
-#[serde(untagged)]
-pub enum block {
-    Block(BlockState),
-    Other(BlockPaletteElement),
-}
-#[derive(Debug, Deserialize)]
-pub struct BlockPaletteElement {
-    #[serde(rename = "Name")]
-    name: String,
-    #[serde(rename = "Properties")]
-    pub properties: Option<Map<String, String>>,
-}
-
-// fn deserialize_str<'de, T, D>(deserializer: D) -> Result<T, D::Error>
-// where
-//     D: serde::Deserializer<'de>,
-//     T: std::str::FromStr + serde::de::Deserialize<'de> + std::fmt::Debug,
-//     <T as std::str::FromStr>::Err: std::fmt::Debug,
-// {
-//     let s = String::deserialize(deserializer)?;
-//     Ok(s.parse().unwrap())
-// }
-
-#[derive(Debug, Deserialize)]
 pub struct Property {
     pub name: String,
     pub value: Value,
+}
+
+#[derive(PartialEq, Eq, Hash, Debug)]
+pub struct ChunkPos {
+    pub x: u8,
+    pub z: u8,
 }
 
 impl Region {
@@ -107,9 +91,11 @@ impl Region {
             chunk_positions: chunk_poses.as_slice().try_into().unwrap(),
             chunk_timestamps: chunk_times.as_slice().try_into().unwrap(),
             data,
+            chunk_cache: RefCell::new(HashMap::new()),
         })
     }
-    pub fn get_chunk<'a>(&self, x: u8, z: u8) -> Result<Option<ChunkNBT>, String> {
+    /// Gets and caches a chunk from the region at the given position.
+    pub fn get_chunk<'a>(&'a self, x: u8, z: u8) -> Result<Option<Arc<Chunk>>, String> {
         let index = ((x % 32) as usize) + ((z % 32) as usize) * 32;
 
         let offset = self.chunk_positions[index];
@@ -118,24 +104,35 @@ impl Region {
             return Ok(None);
         }
 
-        let offset_bytes = ((offset.offset as usize - 2) * 4096) + 5;
+        let pos = ChunkPos { x, z };
 
-        let mut cursor = Cursor::new(&self.data[offset_bytes..]);
-
-        let nbt: ChunkNBT = from_zlib_reader(&mut cursor).map_err(|e| e.to_string())?;
-        Ok(Some(nbt))
+        let mut binding = self.chunk_cache.borrow_mut();
+        let entry = match binding.entry(pos) {
+            Entry::Vacant(e) => Arc::clone({
+                let offset_bytes = ((offset.offset as usize - 2) * 4096) + 5;
+                let mut reader = Cursor::new(&self.data[offset_bytes..]);
+                let chunk = from_zlib_reader(&mut reader).map_err(|e| e.to_string())?;
+                e.insert(Arc::new(chunk))
+            }),
+            Entry::Occupied(e) => Arc::clone(e.get()),
+        };
+        Ok(Some(entry))
+    }
+    pub fn get_chunk_timestamp(&self, x: u8, z: u8) -> u32 {
+        let index = ((x % 32) as usize) + ((z % 32) as usize) * 32;
+        self.chunk_timestamps[index]
     }
 }
 
-impl ChunkNBT {
-    pub fn get_block<'a>(&'a self, x: usize, y: usize, z: usize) -> Option<&'a block> {
+impl Chunk {
+    pub fn get_block<'a>(&'a self, x: usize, y: usize, z: usize) -> Option<&'a BlockState> {
         let section = (y / 16) - SECTION_OFFSET;
         let section = &self.sections[section];
 
         //FIXME: This might not work
         let index = (x * 16 + z) * 16 + (y % 16);
-
-        section.block_states.get(index, 4096)
+        None
+        //section.block_states.get(index, 4096)
     }
 }
 

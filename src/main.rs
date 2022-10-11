@@ -1,6 +1,4 @@
 use authentication::authentication::authenticate;
-use miniz_oxide::deflate::compress_to_vec_zlib;
-use miniz_oxide::inflate::decompress_to_vec_zlib;
 use protocol::packets::client_bound::{
     ChangeDifficulty, ChunkDataAndLightUpdate, ClientBoundKeepAlive, Disconnect, EncryptionRequest,
     LoginSuccess, PingResponse, PlayerAbilities, PlayerFlags, ServerStatus, SetCenterChunk,
@@ -15,12 +13,10 @@ use quartz_nbt::{snbt, NbtCompound};
 use rand::rngs::{OsRng, ThreadRng};
 use rand::RngCore;
 use server_state::server::Server;
-use std::io::{self, Cursor};
 use std::sync::Arc;
 use std::time::Instant;
 use tokio::fs;
-use tokio::net::{TcpListener, TcpStream};
-use world::tesr::ChunkNBT;
+use tokio::net::TcpStream;
 use world::world::ChunkPos;
 use world::world::World;
 

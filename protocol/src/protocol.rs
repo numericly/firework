@@ -75,7 +75,6 @@ impl Protocol<'_> {
         let mut full_packet = if !self.compression_enabled {
             [&data_length[..], &packet_data.data[..]].concat()
         } else {
-            let start = std::time::Instant::now();
             let compressed_data = compress_to_vec_zlib(&packet_data.data, 10);
             //println!("Compression took: {:?}", start.elapsed());
             let full_data_length =
@@ -90,7 +89,6 @@ impl Protocol<'_> {
         };
 
         if let Some(cipher) = &mut self.encryption {
-            let start = std::time::Instant::now();
             cipher.encrypt(&mut full_packet);
             //println!("Encryption took: {:?}", start.elapsed());
         }
