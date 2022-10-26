@@ -28,6 +28,7 @@ miniz_oxide = "0.6.2"
 byteorder = "1.4.3"
 hematite-nbt = "0.5.2"
 futures = "0.3.24"
+cipher = "0.4.3"
 
 [dev-dependencies]
 criterion = "0.4.0"

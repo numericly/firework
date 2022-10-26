@@ -14,4 +14,6 @@ server_state = {path = "../server_state", version = "*"}
 byteorder = "1.4.3"
 hematite-nbt = "0.5.2"
 data = {path = "../data", version = "*"}
-elsa = "1.7.0"
+
+[profile.release]
+opt-level = 0

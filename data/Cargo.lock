@@ -7,6 +7,8 @@ name = "data"
 version = "0.1.0"
 dependencies = [
  "get-size",
+ "lazy_static",
+ "loop_chain",
  "serde",
 ]
 
@@ -15,6 +17,18 @@ name = "get-size"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ffff7b577402f46b6e0069ae9c31a7859ab3f2abe7ff0fb614fe6441a1d6c306"
+
+[[package]]
+name = "lazy_static"
+version = "1.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
+
+[[package]]
+name = "loop_chain"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "452ebe4cd90ccf9babf24ded1c5893c3b0a1b27fd78a2ead5d41934317d76bb1"
 
 [[package]]
 name = "proc-macro2"

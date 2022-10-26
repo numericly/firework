@@ -1,13 +1,12 @@
 use dashmap::DashMap;
 use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
 
-use crate::{game_settings::GameSettings, player::Player, registry::Registry};
+use crate::{game_settings::GameSettings, player::Player};
 
 pub struct Server {
     pub player_list: DashMap<i32, Player>,
     pub encryption: Encryption,
     pub game_settings: GameSettings,
-    pub registry: Registry,
 }
 
 impl Server {
@@ -16,7 +15,6 @@ impl Server {
             player_list: DashMap::new(),
             encryption: Encryption::new(),
             game_settings: GameSettings::from("game_settings.json".to_string()),
-            registry: Registry::new(),
         }
     }
 }

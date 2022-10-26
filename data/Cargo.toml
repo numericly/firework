@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 get-size = "0.1.1"
+lazy_static = "1.4.0"
+loop_chain = "0.1.1"
 serde = { version = "1.0.145", features = ["derive"] }
-
-[build]
-rustc-wrapper = "/Users/williamheestand/.cargo/bin/sccache"
+hematite-nbt = "0.5.2"

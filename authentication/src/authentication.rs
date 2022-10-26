@@ -4,7 +4,6 @@ use sha1::{Digest, Sha1};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Profile {
-    #[serde(rename = "id")]
     pub id: String,
     pub name: String,
     pub properties: Vec<ProfileProperty>,

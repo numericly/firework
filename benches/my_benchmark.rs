@@ -1,29 +1,34 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use world::{self, tesr::Region};
+use protocol::serializer::OutboundPacketData;
+use world::world::{Region, Write};
 
 fn criterion_benchmark(c: &mut Criterion) {
-    let mut data = std::fs::File::open("./world/region/r.0.0.mca").unwrap();
-    let region = world::tesr::Region::deserialize(black_box(&mut data)).unwrap();
+    let data = std::fs::File::open("./world/region/r.0.0.mca").unwrap();
+    let region = Region::deserialize(data).unwrap();
 
-    let chunk = &region.get_chunk(0, 0).unwrap().unwrap().sections[0];
-
-    let start = std::time::Instant::now();
     for x in 0..1 {
         for z in 0..1 {
-            for section in &region.get_chunk(x, z).unwrap().unwrap().sections {
-                println!("{:?}", section.block_states);
-                black_box(section);
-            }
+            let chunk = &region.get_chunk(x, z).unwrap();
+            let mut data = OutboundPacketData::new();
+            chunk.as_ref().unwrap().write(&mut data);
+            // for data in data.data {
+            //     print!("{:08b} ", data);
+            // }
+            println!("{:?}", data.data.len());
+            black_box(chunk);
         }
     }
-    println!("Time: {:?}", start.elapsed());
-    // c.bench_function("read container", |a| {
-    //     a.iter(|| {
-    //         for i in 0..4096 {
-    //             //black_box(chunk.block_states.get(i, 4096));
-    //         }
-    //     });
-    // });
+
+    c.bench_function("deserialize chunk", |a| {
+        a.iter(|| {
+            for x in 0..32 {
+                for z in 0..32 {
+                    let chunk = &region.get_chunk(x, z).unwrap();
+                    black_box(chunk);
+                }
+            }
+        });
+    });
 }
 
 criterion_group!(benches, criterion_benchmark);

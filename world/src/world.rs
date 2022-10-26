@@ -1,380 +1,233 @@
-use self::region::{chunk::Chunk, Region};
-use server_state::registry::Registry;
+use byteorder::{BigEndian, ReadBytesExt};
+use data::v1_19_2::chunk::{Chunk, ChunkSection};
+use data::v1_19_2::data_structure::PalettedContainer;
+use data::v1_19_2::Palette;
+use protocol::serializer::OutboundPacketData;
+use std::cell::RefCell;
+use std::collections::hash_map::Entry;
 use std::collections::HashMap;
-
+use std::fmt::Debug;
+use std::fs::File;
 use std::hash::Hash;
+use std::io::Read;
+use std::sync::{Arc, Mutex};
 
-pub struct World<'a> {
-    pub path: String,
-    pub loaded_chunks: HashMap<ChunkPos, Chunk<'a>>,
-    registry: &'a Registry,
+pub struct World {
+    pub path: &'static str,
+    regions: RefCell<HashMap<(i32, i32), Arc<Region>>>,
 }
 
-#[derive(Hash, Debug)]
+#[derive(Debug)]
+pub struct Region {
+    chunk_timestamps: [u32; 1024],
+    sections: Mutex<[RegionChunk; 1024]>,
+}
+
+#[derive(Debug)]
+pub enum RegionChunk {
+    None,
+    ChunkBytes(Box<Vec<u8>>),
+    Chunk(Box<Arc<Chunk>>),
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct ChunkOffset {
+    pub offset: u32,
+    pub size: u8,
+}
+
+#[derive(PartialEq, Eq, Hash, Debug)]
 pub struct ChunkPos {
-    pub x: i32,
-    pub z: i32,
+    pub x: u8,
+    pub z: u8,
 }
 
-#[derive(Hash, Debug, PartialEq, Eq, Clone, Copy)]
-pub struct RegionPos {
-    pub x: i32,
-    pub z: i32,
-}
-
-impl World<'_> {
-    pub fn new<'a>(path: String, registry: &'a Registry) -> World<'a> {
+impl World {
+    pub fn new(path: &'static str) -> World {
         World {
             path,
-            loaded_chunks: HashMap::new(),
-            registry,
+            regions: RefCell::new(HashMap::new()),
         }
     }
-    pub fn get_chunks(&mut self, chunk_positions: Vec<ChunkPos>) -> Vec<Chunk> {
-        let mut cached_regions: HashMap<RegionPos, Region> = HashMap::new();
-        let mut return_chunks: Vec<Chunk> = Vec::new();
-        for chunk_pos in chunk_positions {
-            let region_pos = RegionPos {
-                x: (chunk_pos.x as f32 / 32.0).floor() as i32,
-                z: (chunk_pos.z as f32 / 32.0).floor() as i32,
-            };
+    pub fn get_chunk(&self, x: i32, z: i32) -> Result<Option<Arc<Chunk>>, String> {
+        let region = self.get_region(x >> 5, z >> 5)?;
 
-            let region = cached_regions.entry(region_pos).or_insert_with(|| {
-                Region::new(format!(
-                    "{}/r.{}.{}.mca",
-                    self.path.clone(),
-                    region_pos.x,
-                    region_pos.z
-                ))
-            });
-
-            let start = std::time::Instant::now();
-            let chunk = region.get_chunk(chunk_pos.x, chunk_pos.z, self.registry);
-            println!("Fetched chunk in {:?}", start.elapsed());
-            return_chunks.push(chunk.unwrap());
+        if let Some(region) = region {
+            Ok(region.get_chunk(x, z)?)
+        } else {
+            Ok(None)
         }
-        return_chunks
+    }
+    pub fn get_region(&self, x: i32, z: i32) -> Result<Option<Arc<Region>>, String> {
+        let mut region_cache = self.regions.borrow_mut();
+
+        Ok(Some(match region_cache.entry((x, z)) {
+            Entry::Occupied(region) => Arc::clone(region.get()),
+            Entry::Vacant(entry) => Arc::clone({
+                let file = match File::open(format!("{}/r.{}.{}.mca", self.path, x, z)) {
+                    Ok(file) => file,
+                    Err(err) => match err.kind() {
+                        std::io::ErrorKind::NotFound => return Ok(None),
+                        _ => return Err(format!("Error opening region file: {}", err)),
+                    },
+                };
+                let region = Region::deserialize(file)?;
+                entry.insert(Arc::new(region))
+            }),
+        }))
     }
 }
 
-pub mod region {
-    use std::{
-        fs,
-        io::{Cursor, Read},
-    };
+impl Region {
+    pub fn deserialize(mut reader: File) -> Result<Region, String> {
+        #[derive(Debug)]
+        struct ChunkInfo {
+            size: u8,
+            index: usize,
+        }
 
-    use quartz_nbt::io::{self, Flavor};
-    use server_state::registry::Registry;
+        fn read_bytes_exact<R: Read>(reader: R, bytes: u64) -> Vec<u8> {
+            let mut buf = Vec::with_capacity(bytes as usize);
+            let mut section = reader.take(bytes);
+            section.read_to_end(&mut buf).unwrap();
+            buf
+        }
 
-    use self::chunk::Chunk;
+        let mut info_map = HashMap::new();
 
-    #[derive(Debug)]
-    pub struct Region {
-        pub data: Cursor<Vec<u8>>,
-        chunk_positions: [u8; 4096],
-        _chunk_timestamps: [u8; 4096],
+        for i in 0..1024 {
+            let offset = reader.read_u24::<BigEndian>().unwrap();
+            let size = reader.read_u8().unwrap();
+            if size != 0 {
+                info_map.insert(offset, ChunkInfo { size, index: i });
+            }
+        }
+
+        let mut chunk_times = [0; 1024];
+
+        for i in 0..1024 {
+            let timestamp = reader.read_u32::<BigEndian>().unwrap();
+            chunk_times[i] = timestamp;
+        }
+
+        const INIT: RegionChunk = RegionChunk::None;
+        let mut sections = [INIT; 1024];
+
+        let mut pos = 2;
+        loop {
+            if let Some(info) = info_map.get(&pos) {
+                let data = read_bytes_exact(&mut reader, info.size as u64 * 4096);
+
+                sections[info.index] = RegionChunk::ChunkBytes(Box::new(data));
+
+                pos += info.size as u32;
+            } else {
+                let mut unused_data = [0; 4096];
+                if let Err(err) = reader.read_exact(&mut unused_data) {
+                    match err.kind() {
+                        std::io::ErrorKind::UnexpectedEof => break,
+                        _ => return Err(format!("Error reading unused data: {}", err)),
+                    }
+                }
+                pos += 1;
+            }
+        }
+
+        Ok(Region {
+            sections: Mutex::new(sections),
+            chunk_timestamps: chunk_times.try_into().unwrap(),
+        })
     }
+    /// Gets and caches a chunk from the region at the given position.
+    pub fn get_chunk<'a>(&self, x: i32, z: i32) -> Result<Option<Arc<Chunk>>, String> {
+        let index = x.rem_euclid(32) as usize + (z.rem_euclid(32) as usize * 32);
 
-    impl Region {
-        pub fn new(path: String) -> Region {
-            let mut data_cursor = Cursor::new(fs::read(path.clone()).unwrap());
+        let sections = self.sections.lock().unwrap();
 
-            let mut chunk_positions = [0u8; 4096];
-            data_cursor.read_exact(&mut chunk_positions).unwrap();
-
-            let mut chunk_timestamps = [0u8; 4096];
-            data_cursor.read_exact(&mut chunk_timestamps).unwrap();
-
-            Region {
-                data: data_cursor,
-                chunk_positions,
-                _chunk_timestamps: chunk_timestamps,
+        match &sections[index] {
+            RegionChunk::None => Ok(None),
+            RegionChunk::ChunkBytes(bytes) => {
+                // Cut off the first 4 bits as they are the header and must be ignored
+                // in order to deserialize the chunk.
+                let reader = bytes[5..].to_vec();
+                drop(sections);
+                let chunk = Arc::new(Chunk::from_zlib_reader(reader.as_slice())?);
+                let chunk_ref = Arc::clone(&chunk);
+                self.sections.lock().unwrap()[index] = RegionChunk::Chunk(Box::new(chunk));
+                Ok(Some(chunk_ref))
             }
-        }
-        pub fn get_chunk<'a>(
-            &mut self,
-            x: i32,
-            z: i32,
-            registry: &'a Registry,
-        ) -> Result<Chunk<'a>, String> {
-            let chunk_pos = (x.rem_euclid(32) as usize + (z.rem_euclid(32) as usize * 32)) * 4;
-
-            let mut bytes = [0u8; 4];
-            bytes[1..].clone_from_slice(&self.chunk_positions[chunk_pos..chunk_pos + 3]);
-
-            let chunk_pos = u32::from_be_bytes(bytes);
-
-            let file_position = 5 + (chunk_pos * 4096) as u64;
-
-            self.data.set_position(file_position);
-
-            let chunk_nbt = match io::read_nbt(&mut self.data, Flavor::ZlibCompressed) {
-                //nbt data for the current chunk
-                Ok(chunk_nbt) => chunk_nbt.0,
-                Err(e) => {
-                    return Err(format!("Error reading NBT: {e}"));
-                }
-            };
-            Chunk::from_nbt(chunk_nbt, registry, super::ChunkPos { x, z })
+            RegionChunk::Chunk(chunk) => Ok(Some(Arc::clone(&chunk))),
         }
     }
+    pub fn get_chunk_timestamp(&self, x: u8, z: u8) -> u32 {
+        let index = ((x % 32) as usize) + ((z % 32) as usize) * 32;
+        self.chunk_timestamps[index]
+    }
+}
+pub trait Write {
+    fn write(&self, packet_data: &mut OutboundPacketData);
+}
 
-    pub mod chunk {
-        use std::{
-            collections::{hash_map::DefaultHasher, HashMap},
-            hash::{Hash, Hasher},
-        };
+impl Write for Chunk {
+    fn write(&self, packet_data: &mut OutboundPacketData) {
+        for section in &self.sections {
+            section.write(packet_data);
+        }
+    }
+}
 
-        use protocol::serializer::OutboundPacketData;
-        use quartz_nbt::{NbtCompound, NbtList, NbtTag};
-        use server_state::registry::Registry;
-
-        use crate::world::ChunkPos;
-
-        #[derive(Debug)]
-        pub struct Chunk<'a> {
-            pub sections: Vec<ChunkSection<'a>>,
-            pub pos: ChunkPos,
+impl Write for ChunkSection {
+    fn write(&self, packet_data: &mut OutboundPacketData) {
+        //FIXME: This code is here because I don't want to calculate the number of non-air blocks
+        if self.block_states.as_ref().unwrap().palette.len() > 1 {
+            packet_data.write_short(4096);
+        } else {
+            packet_data.write_short(0);
         }
 
-        impl Chunk<'_> {
-            pub fn from_nbt<'a>(
-                chunk_nbt: NbtCompound,
-                registry: &'a Registry,
-                pos: ChunkPos,
-            ) -> Result<Chunk<'a>, String> {
-                let sections = chunk_nbt.get::<_, &NbtList>("sections").unwrap().clone();
-                drop(chunk_nbt);
+        self.block_states.as_ref().unwrap().write(packet_data);
+        self.biomes.as_ref().unwrap().write(packet_data);
+    }
+}
 
-                let mut chunk: Vec<ChunkSection> = Vec::new();
+impl<T, const CONTAINER_SIZE: usize> Write for PalettedContainer<T, CONTAINER_SIZE>
+where
+    T: Hash + Palette + Eq + Debug,
+{
+    fn write(&self, packet_data: &mut OutboundPacketData) {
+        match &self.bits_per_value() {
+            // If the container only contains one value send it to the client as a single value palette type
+            0 => {
+                // Bits per value
+                packet_data.write_unsigned_byte(0);
+                // We don't need to write the container size since the client now knows that there is only
+                // one value in this paletted container
 
-                for i in 0..24 {
-                    let section = sections.get::<&NbtCompound>(i).unwrap();
+                // Paletted item
+                let paletted_item = T::get_palette(&self.palette[0]);
+                packet_data.write_var_int(paletted_item);
 
-                    let biomes = match section.get::<_, &NbtCompound>("biomes") {
-                        Ok(block_data) => PalettedContainer::from_nbt(
-                            block_data,
-                            64,
-                            &registry.global_biome_palette,
-                        ),
-                        Err(_) => {
-                            println!("An error occurred while reading biomes");
-                            continue;
-                        }
-                    };
-                    let block_states = match section.get::<_, &NbtCompound>("block_states") {
-                        Ok(block_data) => PalettedContainer::from_nbt(
-                            block_data,
-                            4096,
-                            &registry.global_block_palette,
-                        ),
-                        Err(_) => {
-                            println!("An error occurred while reading block states");
-                            continue;
-                        }
-                    };
-
-                    let chunk_section = ChunkSection {
-                        block_states,
-                        biomes,
-                    };
-                    chunk.push(chunk_section);
-                }
-                Ok(Chunk {
-                    sections: chunk,
-                    pos,
-                })
+                // Empty long array
+                packet_data.write_var_int(0);
             }
-            pub fn write(&self, packet: &mut OutboundPacketData) {
-                for section in &self.sections {
-                    section.write(packet);
-                }
-                packet.write_bytes(&vec![
-                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                ]);
-            }
-        }
+            bits_per_value => {
+                // Bits per value
+                packet_data.write_unsigned_byte(*bits_per_value as u8);
 
-        #[derive(Debug)]
-        pub struct ChunkSection<'a> {
-            pub block_states: PalettedContainer<'a>,
-            pub biomes: PalettedContainer<'a>,
-        }
-
-        impl ChunkSection<'_> {
-            pub fn write(&self, packet: &mut OutboundPacketData) {
-                if self.block_states.palette.len() > 1 {
-                    packet.write_short(1024);
-                } else {
-                    packet.write_short(0);
+                // Palette size
+                packet_data.write_var_int(self.palette.len() as i32);
+                // Palette data
+                for item in &self.palette {
+                    let paletted_item = T::get_palette(item);
+                    packet_data.write_var_int(paletted_item);
                 }
 
-                self.block_states.write_packet(packet);
-                self.biomes.write_packet(packet);
-            }
-        }
-
-        #[derive(Debug)]
-        pub struct PalettedContainer<'a> {
-            pub palette: Vec<PaletteElement>,
-            pub data: Option<BitArray>,
-            pub size: usize,
-            pub registry: &'a HashMap<u64, i32>,
-        }
-
-        #[derive(Debug)]
-        pub struct PaletteElement {
-            pub name: String,
-            pub properties: Option<Vec<PaletteProperty>>,
-        }
-
-        #[derive(Debug, Hash)]
-        pub struct PaletteProperty {
-            pub name: String,
-            pub value: String,
-        }
-
-        impl Hash for PaletteElement {
-            fn hash<H: Hasher>(&self, state: &mut H) {
-                self.name.hash(state);
-                if let Some(properties) = &self.properties {
-                    properties.hash(state);
+                // Container size
+                packet_data.write_var_int(self.data.as_ref().unwrap().len() as i32);
+                // Container data
+                for item in self.data.as_ref().unwrap() {
+                    packet_data.write_signed_long(item.clone());
                 }
-            }
-        }
-
-        impl PalettedContainer<'_> {
-            fn from_nbt<'a>(
-                nbt: &NbtCompound,
-                size: usize,
-                registry: &'a HashMap<u64, i32>,
-            ) -> PalettedContainer<'a> {
-                let data = match nbt.get::<_, &[i64]>("data") {
-                    Ok(data) => Some(BitArray::new(data.to_vec(), size.clone())),
-                    Err(_) => None,
-                };
-                let palette = {
-                    let palette_nbt = nbt.get::<_, &NbtList>("palette").unwrap();
-
-                    let mut palette = Vec::new();
-                    for i in 0..palette_nbt.len() {
-                        let palette_element_nbt = palette_nbt.get::<&NbtTag>(i).unwrap();
-
-                        let palette_element_deserialized = match palette_element_nbt {
-                            NbtTag::Compound(element_data) => {
-                                let name = element_data.get::<_, &String>("Name").unwrap();
-                                let nbt_properties =
-                                    element_data.get::<_, &NbtCompound>("Properties");
-                                let mut properties = Vec::new();
-                                if let Ok(properties_nbt) = nbt_properties {
-                                    for (key, value) in properties_nbt {
-                                        properties.push(PaletteProperty {
-                                            name: key.clone(),
-                                            value: value.to_string(),
-                                        });
-                                    }
-                                }
-                                PaletteElement {
-                                    name: name.clone(),
-                                    properties: if properties.len() > 0 {
-                                        properties.sort_by(|a, b| a.name.cmp(&b.name));
-                                        Some(properties)
-                                    } else {
-                                        None
-                                    },
-                                }
-                            }
-                            NbtTag::String(name) => PaletteElement {
-                                name: name.clone(),
-                                properties: None,
-                            },
-                            tag_type => {
-                                panic!("Unknown Type {}", tag_type);
-                            }
-                        };
-
-                        palette.push(palette_element_deserialized);
-                    }
-                    palette
-                };
-
-                PalettedContainer::new(data, palette, size, registry)
-            }
-            fn new<'a>(
-                data: Option<BitArray>,
-                palette: Vec<PaletteElement>,
-                size: usize,
-                registry: &'a HashMap<u64, i32>,
-            ) -> PalettedContainer<'a> {
-                PalettedContainer {
-                    palette,
-                    data,
-                    size,
-                    registry,
-                }
-            }
-            fn write_packet(&self, packet_data: &mut OutboundPacketData) {
-                if let Some(bit_array) = self.data.as_ref() {
-                    packet_data.write_unsigned_byte(bit_array.bits_per_value as u8);
-
-                    packet_data.write_var_int(self.palette.len() as i32);
-                    if self.palette.len() > 16 {
-                        println!("Bit array {}", bit_array.bits_per_value)
-                    }
-                    for i in 0..self.palette.len() {
-                        let block_data = &self.palette[i];
-
-                        let mut hasher = DefaultHasher::new();
-                        block_data.hash(&mut hasher);
-                        let hash = hasher.finish();
-                        packet_data.write_var_int(self.registry.get(&hash).unwrap().clone());
-                    }
-
-                    packet_data.write_var_int(bit_array.data.len() as i32);
-                    for i in 0..bit_array.data.len() {
-                        packet_data.write_signed_long(bit_array.data[i]);
-                    }
-                } else {
-                    packet_data.write_unsigned_byte(0);
-
-                    let block_data = &self.palette[0];
-
-                    let mut hasher = DefaultHasher::new();
-                    block_data.hash(&mut hasher);
-                    let hash = hasher.finish();
-
-                    packet_data.write_var_int(self.registry.get(&hash).unwrap().clone());
-
-                    // Write empty long array
-                    packet_data.write_var_int(0);
-                }
-            }
-        }
-
-        #[derive(Debug)]
-        pub struct BitArray {
-            pub data: Vec<i64>,
-            pub bits_per_value: usize,
-            individual_value_mask: i64,
-        }
-
-        impl BitArray {
-            fn new(data: Vec<i64>, size: usize) -> BitArray {
-                let bits_per_value = ((data.len() * 64) + size - 1) / size;
-                let individual_value_mask = (1 << bits_per_value) - 1;
-                BitArray {
-                    data,
-                    bits_per_value,
-                    individual_value_mask,
-                }
-            }
-            pub fn get(&self, index: usize) -> usize {
-                let values_per_long = 64 / self.bits_per_value;
-                let long_index = index / values_per_long;
-                let long_value = self.data[long_index];
-                let value_index = index % values_per_long;
-                ((long_value >> (value_index * self.bits_per_value)) & self.individual_value_mask)
-                    as usize
             }
         }
     }

@@ -1,6 +1,7 @@
 {
   "cSpell.words": [
     "basedrum",
+    "bitfield",
     "BUILDABLE",
     "byteorder",
     "Composter",
@@ -16,10 +17,16 @@
     "gamemode",
     "Glowstone",
     "hasher",
+    "heightmaps",
+    "keystream",
+    "memmap",
+    "metavar",
     "minecraft",
     "miniz",
+    "Mmap",
     "Netherite",
     "Netherrack",
+    "noteblock",
     "Nylium",
     "overworld",
     "Paletted",
@@ -30,6 +37,7 @@
     "Propagule",
     "Purpur",
     "Pushable",
+    "repr",
     "reqwest",
     "respawn",
     "rngs",
@@ -38,6 +46,14 @@
     "SHULKER",
     "Smithing",
     "snbt",
+    "structureblock",
+    "thiserror",
     "varint"
-  ]
+  ],
+  "terminal.integrated.profiles.osx": {
+    "zsh": {
+      "path": "/bin/zsh", // your path here
+      "args": ["-l"]
+    }
+  },
 }
