@@ -862,7 +862,10 @@ dependencies = [
  "serde_json",
  "server_state",
  "sha1",
+ "thiserror",
  "tokio",
+ "tokio-scoped",
+ "tokio-util",
  "world",
 ]
 
@@ -1205,6 +1208,7 @@ dependencies = [
  "byteorder",
  "cfb-mode",
  "cfb8",
+ "data",
  "miniz_oxide 0.6.2",
  "modular-bitfield",
  "quartz_nbt",
@@ -1729,10 +1733,31 @@ dependencies = [
 ]
 
 [[package]]
-name = "tokio-util"
-version = "0.7.3"
+name = "tokio-scoped"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc463cd8deddc3770d20f9852143d50bf6094e640b485cb2e189a2099085ff45"
+checksum = "e4beb8ba13bc53ac53ce1d52b42f02e5d8060f0f42138862869beb769722b256"
+dependencies = [
+ "tokio",
+ "tokio-stream",
+]
+
+[[package]]
+name = "tokio-stream"
+version = "0.1.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d660770404473ccd7bc9f8b28494a811bc18542b915c0855c51e8f419d5223ce"
+dependencies = [
+ "futures-core",
+ "pin-project-lite",
+ "tokio",
+]
+
+[[package]]
+name = "tokio-util"
+version = "0.7.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0bb2e075f03b3d66d8d8785356224ba688d2906a371015e225beeb65ca92c740"
 dependencies = [
  "bytes",
  "futures-core",

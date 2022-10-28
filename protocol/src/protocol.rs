@@ -1,8 +1,9 @@
 use std::{
-    error::Error,
-    fmt::{Debug, Display},
-    io::{self, Cursor, ErrorKind, Read},
-    string::FromUtf8Error,
+    fmt::Debug,
+    future::Future,
+    io::{self, Cursor, ErrorKind},
+    pin::Pin,
+    task::{Context, Poll},
 };
 
 use crate::{
@@ -10,18 +11,21 @@ use crate::{
     tesr::{
         client_bound::{SerializeField, SerializePacket},
         data_types::VarInt,
-        server_bound::{DeserializeError, ServerBoundPacket},
+        server_bound::{DeserializeError, DeserializeField, ServerBoundPacket},
     },
 };
 use aes::cipher::{inout::InOutBuf, BlockDecryptMut, BlockEncryptMut};
 use aes::{cipher::KeyIvInit, Aes128};
-use byteorder::ReadBytesExt;
 use cfb8::{self, Decryptor, Encryptor};
 use miniz_oxide::{deflate::compress_to_vec_zlib, inflate::decompress_to_vec_zlib};
 use thiserror::Error;
 use tokio::{
-    io::{AsyncReadExt, AsyncWriteExt},
-    net::TcpStream,
+    io::{AsyncRead, AsyncReadExt, AsyncWriteExt, ReadBuf},
+    net::{
+        tcp::{OwnedReadHalf, OwnedWriteHalf},
+        TcpStream,
+    },
+    sync::Mutex,
 };
 
 #[derive(Debug, Error)]
@@ -38,25 +42,36 @@ pub enum ProtocolError {
     DeserializeError(#[from] DeserializeError),
 }
 
-pub struct Protocol<'a> {
+pub struct Protocol {
     pub connection_state: ConnectionState,
-
-    stream: &'a mut TcpStream,
+    writer: Mutex<OwnedWriteHalf>,
+    reader: Mutex<OwnedReadHalf>,
     compression_enabled: bool,
     cipher: Option<ProtocolCipher>,
 }
 
 pub struct ProtocolCipher {
-    encryption: Encryptor<Aes128>,
-    decryption: Decryptor<Aes128>,
+    encryption: Mutex<Encryptor<Aes128>>,
+    decryption: Mutex<Decryptor<Aes128>>,
 }
 
-impl<'a> Read for Protocol<'a> {
-    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        self.stream.read(buf);
-        Ok(0)
-    }
-}
+// Maybe ill figure out how to make this work
+// impl<'a> AsyncRead for Protocol {
+//     fn poll_read(
+//         mut self: Pin<&mut Self>,
+//         cx: &mut Context<'_>,
+//         buf: &mut ReadBuf<'_>,
+//     ) -> Poll<Result<(), io::Error>> {
+//         let mut lock_fut = Box::pin(self.reader.lock());
+//         match lock_fut.as_mut().poll(cx) {
+//             Poll::Ready(mut guard) => {
+//                 println!("Read lock acquired");
+//                 Poll::Ready(Ok(()))
+//             }
+//             Poll::Pending => Poll::Pending,
+//         }
+//     }
+// }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum ConnectionState {
@@ -66,51 +81,36 @@ pub enum ConnectionState {
     Play,
 }
 
-impl Protocol<'_> {
-    pub fn new(stream: &mut TcpStream) -> Protocol {
+impl Protocol {
+    pub fn new(stream: TcpStream) -> Protocol {
+        let (reader, writer) = stream.into_split();
         Protocol {
             compression_enabled: false,
-            stream: stream,
+            writer: Mutex::new(writer),
+            reader: Mutex::new(reader),
             connection_state: ConnectionState::HandShaking,
             cipher: None,
         }
     }
-    pub async fn read_and_serialize(
-        &mut self,
-    ) -> Result<crate::packets::server_bound::ServerBoundPacket, ProtocolError> {
+    pub async fn read_and_serialize(&self) -> Result<ServerBoundPacket, ProtocolError> {
         let packet_data = self.read_packet().await?;
-        let packet = crate::packets::server_bound::ServerBoundPacket::from(
-            &self.connection_state,
-            packet_data,
-        )?;
+        let packet = ServerBoundPacket::deserialize(&packet_data.data[..], &self.connection_state)?;
         Ok(packet)
     }
-    // pub async fn read_and_serialize(&mut self) -> Result<ServerBoundPacket, ProtocolError> {
-    //     let packet_data = self.read_packet().await?;
-
-    //     // let r = Cursor::new(Vec::new());
-
-    //     let packet = ServerBoundPacket::deserialize(&packet_data.data[..], &self.connection_state)?;
-
-    //     Ok(packet)
-    // }
-    pub async fn read_packet(&mut self) -> Result<IncomingPacketData, ProtocolError> {
+    pub async fn read_packet(&self) -> Result<IncomingPacketData, ProtocolError> {
         let packet_length = self.read_packet_length().await? as usize;
 
         let mut buffer = vec![0; packet_length];
         self.read_bytes_exact(&mut buffer).await?;
 
         if self.compression_enabled {
-            let mut packet_data = IncomingPacketData::new(buffer);
+            let mut packet_data = Cursor::new(&buffer[..]);
+            VarInt::deserialize(&mut packet_data)?;
 
-            packet_data.read_var_int().unwrap();
+            let decompressed =
+                decompress_to_vec_zlib(&buffer[packet_data.position() as usize..]).unwrap();
 
-            let decoded = decompress_to_vec_zlib(
-                &packet_data.data[packet_data.index..packet_data.data.len()].to_vec(),
-            )
-            .unwrap();
-
-            Ok(IncomingPacketData::new(decoded))
+            Ok(IncomingPacketData::new(decompressed))
         } else {
             Ok(IncomingPacketData::new(buffer))
         }
@@ -145,7 +145,7 @@ impl Protocol<'_> {
     //     Ok(())
     // }
     pub async fn write_packet(
-        &mut self,
+        &self,
         packet: impl SerializePacket + Debug,
     ) -> Result<(), ProtocolError> {
         let packet_data = packet.serialize();
@@ -169,12 +169,17 @@ impl Protocol<'_> {
             }
         };
 
-        if let Some(cipher) = &mut self.cipher {
-            let buf = InOutBuf::from(packet.as_mut_slice()).into_chunks();
-            cipher.encryption.encrypt_blocks_inout_mut(buf.0);
+        if let Some(cipher) = &self.cipher {
+            let mut encryption = cipher.encryption.lock().await;
+            {
+                let buf = InOutBuf::from(packet.as_mut_slice()).into_chunks().0;
+                encryption.encrypt_blocks_inout_mut(buf);
+            }
         }
 
-        self.stream
+        self.writer
+            .lock()
+            .await
             .write_all(&packet)
             .await
             .map_err(|err| ProtocolError::WriteError(err))?;
@@ -183,14 +188,14 @@ impl Protocol<'_> {
     }
     pub fn enable_encryption(&mut self, key: &[u8], iv: &[u8]) {
         self.cipher = Some(ProtocolCipher {
-            encryption: Encryptor::new_from_slices(key, iv).unwrap(),
-            decryption: Decryptor::new_from_slices(key, iv).unwrap(),
+            encryption: Mutex::new(Encryptor::new_from_slices(key, iv).unwrap()),
+            decryption: Mutex::new(Decryptor::new_from_slices(key, iv).unwrap()),
         });
     }
     pub fn enable_compression(&mut self) {
         self.compression_enabled = true;
     }
-    async fn read_packet_length(&mut self) -> Result<i32, ProtocolError> {
+    async fn read_packet_length(&self) -> Result<i32, ProtocolError> {
         const SEGMENT_BITS: u8 = 0x7F;
         const CONTINUE_BIT: u8 = 0x80;
 
@@ -211,35 +216,45 @@ impl Protocol<'_> {
         }
         Ok(val)
     }
-    async fn read_bytes_exact(&mut self, buf: &mut [u8]) -> Result<(), ProtocolError> {
-        if let Err(err) = self.stream.read_exact(buf).await {
+    async fn read_bytes_exact(&self, buf: &mut [u8]) -> Result<(), ProtocolError> {
+        let mut reader = self.reader.lock().await;
+        if let Err(err) = reader.read_exact(buf).await {
             return match err.kind() {
                 ErrorKind::UnexpectedEof => Err(ProtocolError::ClientDisconnect),
                 ErrorKind::Interrupted => Err(ProtocolError::ClientDisconnect),
                 _ => Err(ProtocolError::ReadError(err)),
             };
         }
+        drop(reader);
 
-        if let Some(cipher) = &mut self.cipher {
-            let buf = InOutBuf::from(buf).into_chunks();
-            cipher.decryption.decrypt_blocks_inout_mut(buf.0);
+        if let Some(cipher) = &self.cipher {
+            let mut decryption = cipher.decryption.lock().await;
+            {
+                let buf = InOutBuf::from(buf).into_chunks().0;
+                decryption.decrypt_blocks_inout_mut(buf);
+            }
         }
         Ok(())
     }
-    async fn read_byte(&mut self) -> Result<u8, ProtocolError> {
+    async fn read_byte(&self) -> Result<u8, ProtocolError> {
         let mut buf = [0u8; 1];
 
-        if let Err(err) = self.stream.read_exact(&mut buf).await {
+        let mut reader = self.reader.lock().await;
+        if let Err(err) = reader.read_exact(&mut buf).await {
             return match err.kind() {
                 std::io::ErrorKind::UnexpectedEof => Err(ProtocolError::ClientDisconnect),
                 std::io::ErrorKind::Interrupted => Err(ProtocolError::ClientForceDisconnect),
                 _ => Err(ProtocolError::ReadError(err)),
             };
         };
+        drop(reader);
 
-        if let Some(cipher) = &mut self.cipher {
-            let buf = InOutBuf::from(buf.as_mut_slice()).into_chunks();
-            cipher.decryption.decrypt_blocks_inout_mut(buf.0);
+        if let Some(cipher) = &self.cipher {
+            let mut decryption = cipher.decryption.lock().await;
+            {
+                let buf = InOutBuf::from(&mut buf[..]).into_chunks().0;
+                decryption.decrypt_blocks_inout_mut(buf);
+            }
         }
 
         Ok(buf[0])

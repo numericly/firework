@@ -20,10 +20,14 @@ pub async fn authenticate(
     shared_secret: &[u8],
     pub_key: &Vec<u8>,
     username: &String,
-    ip: &String,
+    _ip: &String,
 ) -> Profile {
     let server_hash = hash_server("", shared_secret, pub_key);
-    let formatted_url = format!("https://sessionserver.mojang.com/session/minecraft/hasJoined?username={}&serverId={}&ip={}", username, server_hash, ip);
+    println!("server_hash: {:?}", server_hash);
+    let formatted_url = format!(
+        "https://sessionserver.mojang.com/session/minecraft/hasJoined?username={}&serverId={}",
+        username, server_hash
+    );
     let text = reqwest::get(&formatted_url).await.unwrap().text().await;
 
     serde_json::from_str::<Profile>(&text.unwrap()).unwrap()

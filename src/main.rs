@@ -1,24 +1,29 @@
 use authentication::authentication::authenticate;
-use protocol::packets::server_bound::ServerBoundPacket;
+use data::v1_19_2::tags::TAGS;
 use protocol::protocol::{ConnectionState, Protocol, ProtocolError};
 use protocol::tesr::client_bound::{
-    ChangeDifficulty, ChunkUpdateAndLightUpdate, EncryptionRequest, LoginSuccess, LoginWorld,
-    PlayDisconnect, PlayerAbilities, Pong, ServerStatus, SetCenterChunk, SetCompression,
-    SetHeldItem, SetRecipes, SynchronizePlayerPosition,
+    ChangeDifficulty, ChunkUpdateAndLightUpdate, ClientBoundKeepAlive, EncryptionRequest,
+    InitializeWorldBorder, LoginSuccess, LoginWorld, PlayDisconnect, PlayerAbilities, Pong,
+    ServerStatus, SetCenterChunk, SetCompression, SetHeldItem, SetRecipes, SetTags,
+    SynchronizePlayerPosition,
 };
+use protocol::tesr::server_bound::ServerBoundPacket;
 
 use protocol::serializer::OutboundPacketData;
-use protocol::tesr::data_types::{Bytes, PlayerAbilityFlags, PlayerPositionFlags, VarInt};
+use protocol::tesr::data_types::{PlayerAbilityFlags, PlayerPositionFlags, TestBytes, VarInt};
 use quartz_nbt::{snbt, NbtCompound};
 use rand::rngs::OsRng;
-use rand::RngCore;
+use rand::{Rng, RngCore};
 use server_state::player::{Player, Rotation, Vec3};
 use server_state::server::Server;
-use std::error::Error;
-use std::fmt::{Display, Formatter};
 use std::sync::Arc;
-use tokio::fs;
+use std::time::Duration;
+use thiserror::Error;
 use tokio::net::{TcpListener, TcpStream};
+use tokio::sync::Mutex;
+use tokio::time::sleep;
+use tokio::{fs, select};
+use tokio_util::sync::CancellationToken;
 use world::world::{World, Write};
 
 macro_rules! read_packet_or_err {
@@ -38,41 +43,23 @@ macro_rules! read_packet_or_err {
     };
 }
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum ConnectionError {
-    ProtocolError(ProtocolError),
-    InvalidSharedSecretLength,
+    #[error("Protocol error: {0}")]
+    ProtocolError(#[from] ProtocolError),
+    #[error("Invalid shared secret length, expected 16, got {0}")]
+    InvalidSharedSecretLength(usize),
+    #[error("Unexpected packet: expected {expected}, got {got}")]
     UnexpectedPacket { got: String, expected: &'static str },
 }
 
-impl From<ProtocolError> for ConnectionError {
-    fn from(err: ProtocolError) -> Self {
-        ConnectionError::ProtocolError(err)
-    }
-}
-
-impl Display for ConnectionError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ConnectionError::ProtocolError(err) => write!(f, "Protocol error: {:?}", err),
-            ConnectionError::UnexpectedPacket { got, expected } => {
-                write!(f, "Unexpected packet: expected {}, got {}", expected, got)
-            }
-            ConnectionError::InvalidSharedSecretLength => {
-                write!(f, "Invalid shared secret length")
-            }
-        }
-    }
-}
-
-impl Error for ConnectionError {}
-
-async fn handle_client(mut stream: TcpStream, server: Arc<Server>) -> Result<(), ConnectionError> {
+async fn handle_client<'a>(stream: TcpStream, server: Arc<Server>) -> Result<(), ConnectionError> {
     let ip_addr = stream.peer_addr().unwrap().ip().to_owned().to_string();
 
     println!("Connection from {}", ip_addr);
 
-    let mut connection = Protocol::new(&mut stream);
+    let mut connection = Protocol::new(stream);
+
     let temp_username;
 
     let world = World::new("./world/region");
@@ -81,10 +68,6 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) -> Result<(),
     player.can_fly = true;
 
     let handshake = read_packet_or_err!(Handshake, connection);
-    println!(
-        "{:?} -> {:?}",
-        connection.connection_state, handshake.next_state
-    );
 
     connection.connection_state = handshake.next_state;
 
@@ -99,7 +82,7 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) -> Result<(),
 
         connection.write_packet(server_status).await?;
 
-        let ping_request = read_packet_or_err!(PingRequest, connection);
+        let ping_request = read_packet_or_err!(Ping, connection);
         println!("<- Ping");
         let pong = Pong {
             payload: ping_request.payload,
@@ -117,7 +100,7 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) -> Result<(),
 
     rng.fill_bytes(&mut bytes);
 
-    temp_username = login_start.username;
+    temp_username = login_start.name;
 
     let encryption_request = EncryptionRequest {
         server_id: "".to_string(), // deprecated after 1.7
@@ -140,7 +123,9 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) -> Result<(),
         .unwrap();
 
     if shared_secret.len() != 16usize {
-        return Err(ConnectionError::InvalidSharedSecretLength);
+        return Err(ConnectionError::InvalidSharedSecretLength(
+            shared_secret.len(),
+        ));
     }
 
     let profile = authenticate(
@@ -243,6 +228,11 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) -> Result<(),
     connection.write_packet(update_recipes).await.unwrap();
 
     println!("-> UpdateRecipes");
+
+    let update_tags = SetTags { tags: &TAGS };
+
+    connection.write_packet(update_tags).await.unwrap();
+    println!("-> UpdateTags");
 
     let set_center_chunk = SetCenterChunk {
         x: VarInt((player.position.x as i32).rem_euclid(16)),
@@ -473,8 +463,8 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) -> Result<(),
         255, 255, 255, 255, 255, 255, 255, 0,
     ];
 
-    for x in -8..=8 {
-        for z in -8..=8 {
+    for x in -5..=5 {
+        for z in -5..=5 {
             let chunk = world.get_chunk(x, z).unwrap().unwrap();
             let mut packet_data = OutboundPacketData::new();
             chunk.write(&mut packet_data);
@@ -484,12 +474,29 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) -> Result<(),
                 heightmaps: NbtCompound::new(),
                 data: packet_data.data,
                 block_entities: Vec::new(),
-                manual_data: Bytes(lighting_data.clone()),
+                manual_data: TestBytes(lighting_data.clone()),
             };
             connection.write_packet(chunk_data).await.unwrap();
         }
     }
     println!("-> chunk (-8,-8) - (8,8)");
+
+    let initialize_world_border = InitializeWorldBorder {
+        x: 0.0,
+        z: 0.0,
+        old_diameter: 0.0,
+        new_diameter: 1000000.0,
+        speed: VarInt(0),
+        portal_teleport_boundary: VarInt(29999984),
+        warning_blocks: VarInt(5),
+        warning_time: VarInt(15),
+    };
+
+    connection
+        .write_packet(initialize_world_border)
+        .await
+        .unwrap();
+    println!("-> world border");
 
     player.position = Vec3::new(0.0, 100.0, 0.0);
     player.rotation = Rotation::new(0.0, 0.0);
@@ -510,25 +517,24 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) -> Result<(),
 
     // This doesn't work (FIX LATER)
 
-    let plugin_message = read_packet_or_err!(PluginMessage, connection);
+    let plugin_message = read_packet_or_err!(PluginMessageServerBound, connection);
     if plugin_message.channel == "minecraft:brand" {
-        let brand = String::from_utf8(plugin_message.data).unwrap();
+        let brand = String::from_utf8(plugin_message.data.0).unwrap();
         println!("<- brand: {}", brand);
         player.brand = Some(brand);
     }
-    // let server_brand = PluginMessage {
-    //     channel: "minecraft:brand".to_string(),
-    //     data: "rusty".as_bytes().to_vec(),
-    // };
 
-    // connection.write_packet(server_brand).await?;
+    let ping = ClientBoundKeepAlive {
+        id: rand::thread_rng().gen(),
+    };
 
-    // let ping = ClientBoundKeepAlive {
-    //     id: rand::thread_rng().gen(),
-    // };
-
-    // connection.write_packet(ping).await.unwrap();
+    connection.write_packet(ping).await.unwrap();
     println!("-> KeepAlive");
+
+    let token = CancellationToken::new();
+
+    let connection = Arc::new(connection);
+
     loop {
         let packet = match connection.read_and_serialize().await {
             Ok(packet) => packet,
@@ -537,7 +543,7 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) -> Result<(),
                     reason: format!(r#"{{"text": "Error: {}"}}"#, err),
                 };
                 connection.write_packet(disconnect).await.unwrap();
-                println!("{:?}", err);
+                println!("{}", err);
                 break;
             }
         };
@@ -546,13 +552,11 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) -> Result<(),
             ServerBoundPacket::SetPlayerRotation(rotation) => {
                 player.rotation.pitch = rotation.pitch;
                 player.rotation.yaw = rotation.yaw;
-                println!("<- rotation: {:?}", rotation);
             }
             ServerBoundPacket::SetPlayerPosition(position) => {
                 player.position.x = position.x;
                 player.position.y = position.y;
                 player.position.z = position.z;
-                println!("<- position: {:?}", position);
             }
             ServerBoundPacket::SetPlayerAndRotationPosition(position_rotation) => {
                 player.position.x = position_rotation.x;
@@ -560,20 +564,30 @@ async fn handle_client(mut stream: TcpStream, server: Arc<Server>) -> Result<(),
                 player.position.z = position_rotation.z;
                 player.rotation.pitch = position_rotation.pitch;
                 player.rotation.yaw = position_rotation.yaw;
-                println!("<- position and rotation: {:?}", position_rotation);
             }
-            ServerBoundPacket::ClientKeepAlive(_keep_alive) => {
-                // println!("<- KeepAlive");
-                // let _keep_alive = ClientBoundKeepAlive {
-                //     id: rand::thread_rng().gen(),
-                // };
-                // println!("-> KeepAlive");
+            ServerBoundPacket::ServerBoundKeepAlive(_ping) => {
+                let connection = Arc::clone(&connection);
+                let cloned_token = token.clone();
+                println!("<- KeepAlive");
+                tokio::task::spawn(async move {
+                    select! {
+                        _ = cloned_token.cancelled() => (),
+                        _ = sleep(Duration::from_secs(10)) => {
+                            let keep_alive = ClientBoundKeepAlive {
+                                id: rand::thread_rng().gen(),
+                            };
+                            connection.write_packet(keep_alive).await;
+                            println!("-> KeepAlive");
+                        }
+                    }
+                });
             }
             packet => {
                 println!("Unhandled packet: {:?}", packet);
             }
         };
     }
+    token.cancel();
     Ok(())
 }
 
@@ -589,7 +603,9 @@ async fn main() {
         let server = Arc::clone(&server);
 
         tokio::task::spawn(async move {
-            handle_client(stream, server).await.unwrap();
+            if let Err(e) = handle_client(stream, server).await {
+                println!("Error: {}", e);
+            }
         });
     }
 }

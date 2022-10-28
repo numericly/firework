@@ -103,7 +103,7 @@ pub mod server_bound {
             let next_state = match packet_data.read_var_int()? {
                 1 => ConnectionState::Status,
                 2 => ConnectionState::Login,
-                state => return Err(DeserializeError::InvalidNextState(state)),
+                state => return Err(DeserializeError::InvalidNextConnectionState(state)),
             };
 
             Ok(ServerBoundPacket::Handshake(Handshake {

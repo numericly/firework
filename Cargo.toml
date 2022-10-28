@@ -29,6 +29,9 @@ byteorder = "1.4.3"
 hematite-nbt = "0.5.2"
 futures = "0.3.24"
 cipher = "0.4.3"
+thiserror = "1.0.37"
+tokio-scoped = "0.2.0"
+tokio-util = "0.7.4"
 
 [dev-dependencies]
 criterion = "0.4.0"
