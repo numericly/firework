@@ -1,24 +1,63 @@
 {
   "cSpell.words": [
+    "basedrum",
+    "bitfield",
+    "BUILDABLE",
+    "byteorder",
+    "Composter",
     "consts",
+    "cooldown",
     "dashmap",
     "decryptor",
+    "DEEPSLATE",
+    "Dripleaf",
     "Elytra",
     "encryptor",
+    "FROGLIGHT",
     "gamemode",
+    "Glowstone",
     "hasher",
+    "heightmaps",
+    "keystream",
+    "memmap",
+    "metavar",
     "minecraft",
+    "miniz",
+    "Mmap",
+    "Netherite",
+    "Netherrack",
+    "noteblock",
+    "Nylium",
     "overworld",
     "Paletted",
     "PKCS",
+    "pling",
+    "PODZOL",
+    "Prismarine",
+    "Propagule",
+    "Purpur",
+    "Pushable",
+    "repr",
     "reqwest",
     "respawn",
     "rngs",
+    "Seagrass",
+    "Shroomlight",
+    "SHULKER",
+    "Smithing",
     "snbt",
+    "structureblock",
+    "thiserror",
     "varint"
   ],
   "[rust]": {
     "editor.defaultFormatter": "rust-lang.rust-analyzer", // Makes the magic
     "editor.formatOnSave": true // Optional
-  }
+  },
+  "terminal.integrated.profiles.osx": {
+    "zsh": {
+      "path": "/bin/zsh", // your path here
+      "args": ["-l"]
+    }
+  },
 }

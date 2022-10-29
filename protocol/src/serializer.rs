@@ -90,3 +90,7 @@ impl OutboundPacketData {
         data
     }
 }
+
+pub trait Write {
+    fn write(&mut self, data: &mut OutboundPacketData);
+}

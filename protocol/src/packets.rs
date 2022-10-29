@@ -1,6 +1,9 @@
 pub mod server_bound {
 
-    use crate::{deserializer::IncomingPacketData, protocol::ConnectionState};
+    use crate::{
+        deserializer::IncomingPacketData, protocol::ConnectionState,
+        tesr::server_bound::DeserializeError,
+    };
 
     #[derive(Debug)]
     pub enum ServerBoundPacket {
@@ -28,32 +31,32 @@ pub mod server_bound {
         pub fn from(
             state: &ConnectionState,
             mut packet_data: IncomingPacketData,
-        ) -> Result<ServerBoundPacket, String> {
+        ) -> Result<ServerBoundPacket, DeserializeError> {
             let packet_id = packet_data.read_var_int()?;
 
             match state {
                 ConnectionState::HandShaking => match packet_id {
                     0 => Handshake::deserialize(packet_data),
-                    _ => Err(format!(
-                        "Unknown packet id {} for state {:?}",
-                        packet_id, state
-                    )),
+                    _ => Err(DeserializeError::InvalidPacketID {
+                        id: packet_id,
+                        state: ConnectionState::HandShaking,
+                    }),
                 },
                 ConnectionState::Status => match packet_id {
                     0 => StatusRequest::deserialize(packet_data),
                     1 => PingRequest::deserialize(packet_data),
-                    _ => Err(format!(
-                        "Unknown packet id {} for state {:?}",
-                        packet_id, state
-                    )),
+                    _ => Err(DeserializeError::InvalidPacketID {
+                        id: packet_id,
+                        state: ConnectionState::Status,
+                    }),
                 },
                 ConnectionState::Login => match packet_id {
                     0 => LoginStart::deserialize(packet_data),
                     1 => EncryptionResponse::deserialize(packet_data),
-                    _ => Err(format!(
-                        "Unknown packet id {} for state {:?}",
-                        packet_id, state
-                    )),
+                    _ => Err(DeserializeError::InvalidPacketID {
+                        id: packet_id,
+                        state: ConnectionState::Login,
+                    }),
                 },
                 ConnectionState::Play => match packet_id {
                     0 => ConfirmTeleport::deserialize(packet_data),
@@ -67,17 +70,19 @@ pub mod server_bound {
                     28 => SetAbilities::deserialize(packet_data),
                     30 => PlayerCommand::deserialize(packet_data),
                     40 => SetHeldItem::deserialize(packet_data),
-                    _ => Err(format!(
-                        "Unknown packet id {} for state {:?}",
-                        packet_id, state
-                    )),
+                    _ => Err(DeserializeError::InvalidPacketID {
+                        id: packet_id,
+                        state: ConnectionState::Play,
+                    }),
                 },
             }
         }
     }
 
     pub trait Deserialize {
-        fn deserialize(packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String>;
+        fn deserialize(
+            packet_data: IncomingPacketData,
+        ) -> Result<ServerBoundPacket, DeserializeError>;
     }
 
     #[derive(Debug)]
@@ -89,14 +94,16 @@ pub mod server_bound {
     }
 
     impl Deserialize for Handshake {
-        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+        fn deserialize(
+            mut packet_data: IncomingPacketData,
+        ) -> Result<ServerBoundPacket, DeserializeError> {
             let protocol_version = packet_data.read_var_int()?;
             let server_address = packet_data.read_string()?;
             let server_port = packet_data.read_u16()?;
             let next_state = match packet_data.read_var_int()? {
                 1 => ConnectionState::Status,
                 2 => ConnectionState::Login,
-                _ => return Err("Invalid next state".to_string()),
+                state => return Err(DeserializeError::InvalidNextConnectionState(state)),
             };
 
             Ok(ServerBoundPacket::Handshake(Handshake {
@@ -114,7 +121,9 @@ pub mod server_bound {
     }
 
     impl Deserialize for LoginStart {
-        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+        fn deserialize(
+            mut packet_data: IncomingPacketData,
+        ) -> Result<ServerBoundPacket, DeserializeError> {
             let username = packet_data.read_string()?;
 
             Ok(ServerBoundPacket::LoginStart(LoginStart { username }))
@@ -125,7 +134,9 @@ pub mod server_bound {
     pub struct StatusRequest {}
 
     impl Deserialize for StatusRequest {
-        fn deserialize(_packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+        fn deserialize(
+            _packet_data: IncomingPacketData,
+        ) -> Result<ServerBoundPacket, DeserializeError> {
             Ok(ServerBoundPacket::StatusRequest(StatusRequest {}))
         }
     }
@@ -136,7 +147,9 @@ pub mod server_bound {
     }
 
     impl Deserialize for PingRequest {
-        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+        fn deserialize(
+            mut packet_data: IncomingPacketData,
+        ) -> Result<ServerBoundPacket, DeserializeError> {
             let payload = packet_data.read_long()?;
 
             Ok(ServerBoundPacket::PingRequest(PingRequest { payload }))
@@ -150,7 +163,9 @@ pub mod server_bound {
     }
 
     impl Deserialize for EncryptionResponse {
-        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+        fn deserialize(
+            mut packet_data: IncomingPacketData,
+        ) -> Result<ServerBoundPacket, DeserializeError> {
             let shared_secret_length = packet_data.read_var_int()?;
             let shared_secret = packet_data.read_bytes(shared_secret_length as usize)?;
             let verify_token_length = packet_data.read_var_int()?;
@@ -169,7 +184,9 @@ pub mod server_bound {
     }
 
     impl Deserialize for ConfirmTeleport {
-        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+        fn deserialize(
+            mut packet_data: IncomingPacketData,
+        ) -> Result<ServerBoundPacket, DeserializeError> {
             let id = packet_data.read_var_int()?;
 
             Ok(ServerBoundPacket::ConfirmTeleport(ConfirmTeleport { id }))
@@ -202,21 +219,23 @@ pub mod server_bound {
     }
 
     impl Deserialize for ClientInformation {
-        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+        fn deserialize(
+            mut packet_data: IncomingPacketData,
+        ) -> Result<ServerBoundPacket, DeserializeError> {
             let locale = packet_data.read_string()?;
             let view_distance = packet_data.read_unsigned_byte()?;
             let chat_mode = match packet_data.read_var_int()? {
                 0 => ChatMode::Enabled,
                 1 => ChatMode::CommandsOnly,
                 2 => ChatMode::Hidden,
-                _ => return Err("Invalid chat mode".to_string()),
+                mode => return Err(DeserializeError::InvalidChatMode(mode)),
             };
             let chat_colors = packet_data.read_boolean()?;
             let displayed_skin_parts = packet_data.read_unsigned_byte()?;
             let main_hand = match packet_data.read_var_int()? {
                 0 => MainHand::Left,
                 1 => MainHand::Right,
-                _ => return Err("Invalid main hand".to_string()),
+                hand => return Err(DeserializeError::InvalidMainHand(hand)),
             };
             let enable_text_filtering = packet_data.read_boolean()?;
             let allow_server_listings = packet_data.read_boolean()?;
@@ -240,7 +259,9 @@ pub mod server_bound {
     }
 
     impl Deserialize for CloseContainer {
-        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+        fn deserialize(
+            mut packet_data: IncomingPacketData,
+        ) -> Result<ServerBoundPacket, DeserializeError> {
             let window_id = packet_data.read_unsigned_byte()?;
 
             Ok(ServerBoundPacket::CloseContainer(CloseContainer {
@@ -255,7 +276,9 @@ pub mod server_bound {
     }
 
     impl Deserialize for ClientKeepAlive {
-        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+        fn deserialize(
+            mut packet_data: IncomingPacketData,
+        ) -> Result<ServerBoundPacket, DeserializeError> {
             let id = packet_data.read_long()?;
 
             Ok(ServerBoundPacket::ClientKeepAlive(ClientKeepAlive { id }))
@@ -268,7 +291,9 @@ pub mod server_bound {
     }
 
     impl Deserialize for PluginMessage {
-        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+        fn deserialize(
+            mut packet_data: IncomingPacketData,
+        ) -> Result<ServerBoundPacket, DeserializeError> {
             let channel = packet_data.read_string()?;
             let data_length = packet_data.read_var_int()?;
             let data = packet_data.read_bytes(data_length as usize)?;
@@ -289,7 +314,9 @@ pub mod server_bound {
     }
 
     impl Deserialize for SetPlayerPosition {
-        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+        fn deserialize(
+            mut packet_data: IncomingPacketData,
+        ) -> Result<ServerBoundPacket, DeserializeError> {
             let x = packet_data.read_double()?;
             let y = packet_data.read_double()?;
             let z = packet_data.read_double()?;
@@ -315,7 +342,9 @@ pub mod server_bound {
     }
 
     impl Deserialize for SetPlayerAndRotationPosition {
-        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+        fn deserialize(
+            mut packet_data: IncomingPacketData,
+        ) -> Result<ServerBoundPacket, DeserializeError> {
             let x = packet_data.read_double()?;
             let y = packet_data.read_double()?;
             let z = packet_data.read_double()?;
@@ -343,7 +372,9 @@ pub mod server_bound {
     }
 
     impl Deserialize for SetPlayerRotation {
-        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+        fn deserialize(
+            mut packet_data: IncomingPacketData,
+        ) -> Result<ServerBoundPacket, DeserializeError> {
             let yaw = packet_data.read_float()?;
             let pitch = packet_data.read_float()?;
 
@@ -360,7 +391,9 @@ pub mod server_bound {
     }
 
     impl Deserialize for SetAbilities {
-        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+        fn deserialize(
+            mut packet_data: IncomingPacketData,
+        ) -> Result<ServerBoundPacket, DeserializeError> {
             let flags = packet_data.read_unsigned_byte()?;
 
             Ok(ServerBoundPacket::SetAbilities(SetAbilities { flags }))
@@ -373,7 +406,9 @@ pub mod server_bound {
     }
 
     impl Deserialize for SetHeldItem {
-        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+        fn deserialize(
+            mut packet_data: IncomingPacketData,
+        ) -> Result<ServerBoundPacket, DeserializeError> {
             let slot = packet_data.read_short()?;
 
             Ok(ServerBoundPacket::SetHeldItem(SetHeldItem {
@@ -403,7 +438,9 @@ pub mod server_bound {
     }
 
     impl Deserialize for PlayerCommand {
-        fn deserialize(mut packet_data: IncomingPacketData) -> Result<ServerBoundPacket, String> {
+        fn deserialize(
+            mut packet_data: IncomingPacketData,
+        ) -> Result<ServerBoundPacket, DeserializeError> {
             let entity_id = packet_data.read_var_int()?;
             let action = match packet_data.read_var_int()? {
                 0 => PlayerCommandAction::StartSneaking,
@@ -415,7 +452,7 @@ pub mod server_bound {
                 6 => PlayerCommandAction::StopJumpWithHorse,
                 7 => PlayerCommandAction::OpenHorseInventory,
                 8 => PlayerCommandAction::StartFlyingWithElytra,
-                _ => return Err("Invalid player command action".to_string()),
+                action => return Err(DeserializeError::InvalidPlayerCommandAction(action)),
             };
             let jump_boost = packet_data.read_var_int()?;
 
@@ -543,6 +580,22 @@ pub mod client_bound {
         }
         fn packet_id(&self) -> i32 {
             3
+        }
+    }
+
+    #[derive(Debug)]
+    pub struct PluginMessage {
+        pub channel: String,
+        pub data: Vec<u8>,
+    }
+
+    impl Serialize for PluginMessage {
+        fn serialize_into(&self, packet_data: &mut OutboundPacketData) {
+            packet_data.write_string(&self.channel);
+            packet_data.write_bytes(&self.data);
+        }
+        fn packet_id(&self) -> i32 {
+            22
         }
     }
 
@@ -711,6 +764,7 @@ pub mod client_bound {
         pub yaw: f32,
         pub pitch: f32,
         pub flags: SynchronizePlayerPositionFlags,
+        pub teleport_id: i32,
     }
 
     #[derive(Debug)]
@@ -736,7 +790,7 @@ pub mod client_bound {
                     | ((self.flags.yaw as u8) << 3)
                     | ((self.flags.pitch as u8) << 4),
             );
-            packet_data.write_var_int(0);
+            packet_data.write_var_int(self.teleport_id);
             packet_data.write_bool(true);
         }
         fn packet_id(&self) -> i32 {
