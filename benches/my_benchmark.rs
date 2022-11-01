@@ -1,5 +1,4 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use protocol::serializer::OutboundPacketData;
 use world::world::{Region, Write};
 
 fn criterion_benchmark(c: &mut Criterion) {
@@ -9,12 +8,12 @@ fn criterion_benchmark(c: &mut Criterion) {
     for x in 0..1 {
         for z in 0..1 {
             let chunk = &region.get_chunk(x, z).unwrap();
-            let mut data = OutboundPacketData::new();
+            let mut data = Vec::new();
             chunk.as_ref().unwrap().write(&mut data);
             // for data in data.data {
             //     print!("{:08b} ", data);
             // }
-            println!("{:?}", data.data.len());
+            println!("{:?}", data.len());
             black_box(chunk);
         }
     }

@@ -2,7 +2,8 @@ use byteorder::{BigEndian, ReadBytesExt};
 use data::v1_19_2::chunk::{Chunk, ChunkSection};
 use data::v1_19_2::data_structure::PalettedContainer;
 use data::v1_19_2::Palette;
-use protocol::serializer::OutboundPacketData;
+use protocol::client_bound::SerializeField;
+use protocol::data_types::VarInt;
 use std::cell::RefCell;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
@@ -165,11 +166,11 @@ impl Region {
     }
 }
 pub trait Write {
-    fn write(&self, packet_data: &mut OutboundPacketData);
+    fn write(&self, packet_data: &mut Vec<u8>);
 }
 
 impl Write for Chunk {
-    fn write(&self, packet_data: &mut OutboundPacketData) {
+    fn write(&self, packet_data: &mut Vec<u8>) {
         for section in &self.sections {
             section.write(packet_data);
         }
@@ -177,16 +178,16 @@ impl Write for Chunk {
 }
 
 impl Write for ChunkSection {
-    fn write(&self, packet_data: &mut OutboundPacketData) {
+    fn write(&self, mut packet_data: &mut Vec<u8>) {
         //FIXME: This code is here because I don't want to calculate the number of non-air blocks
         if self.block_states.as_ref().unwrap().palette.len() > 1 {
-            packet_data.write_short(4096);
+            4096u16.serialize(&mut packet_data);
         } else {
-            packet_data.write_short(0);
+            0u16.serialize(&mut packet_data);
         }
 
-        self.block_states.as_ref().unwrap().write(packet_data);
-        self.biomes.as_ref().unwrap().write(packet_data);
+        self.block_states.as_ref().unwrap().write(&mut packet_data);
+        self.biomes.as_ref().unwrap().write(&mut packet_data);
     }
 }
 
@@ -194,39 +195,39 @@ impl<T, const CONTAINER_SIZE: usize> Write for PalettedContainer<T, CONTAINER_SI
 where
     T: Hash + Palette + Eq + Debug,
 {
-    fn write(&self, packet_data: &mut OutboundPacketData) {
+    fn write(&self, mut packet_data: &mut Vec<u8>) {
         match &self.bits_per_value() {
             // If the container only contains one value send it to the client as a single value palette type
             0 => {
                 // Bits per value
-                packet_data.write_unsigned_byte(0);
+                0u8.serialize(&mut packet_data);
                 // We don't need to write the container size since the client now knows that there is only
                 // one value in this paletted container
 
                 // Paletted item
                 let paletted_item = T::get_palette(&self.palette[0]);
-                packet_data.write_var_int(paletted_item);
+                VarInt(paletted_item).serialize(&mut packet_data);
 
                 // Empty long array
-                packet_data.write_var_int(0);
+                VarInt(0).serialize(&mut packet_data);
             }
             bits_per_value => {
                 // Bits per value
-                packet_data.write_unsigned_byte(*bits_per_value as u8);
+                (*bits_per_value as u8).serialize(&mut packet_data);
 
                 // Palette size
-                packet_data.write_var_int(self.palette.len() as i32);
+                VarInt(self.palette.len() as i32).serialize(&mut packet_data);
                 // Palette data
                 for item in &self.palette {
                     let paletted_item = T::get_palette(item);
-                    packet_data.write_var_int(paletted_item);
+                    VarInt(paletted_item).serialize(&mut packet_data);
                 }
 
                 // Container size
-                packet_data.write_var_int(self.data.as_ref().unwrap().len() as i32);
+                VarInt(self.data.as_ref().unwrap().len() as i32).serialize(&mut packet_data);
                 // Container data
                 for item in self.data.as_ref().unwrap() {
-                    packet_data.write_signed_long(item.clone());
+                    item.serialize(&mut packet_data);
                 }
             }
         }
