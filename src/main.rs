@@ -1,16 +1,15 @@
 use authentication::authentication::authenticate;
 use data::v1_19_2::tags::TAGS;
-use protocol::protocol::{ConnectionState, Protocol, ProtocolError};
-use protocol::tesr::client_bound::{
+use protocol::client_bound::{
     ChangeDifficulty, ChunkUpdateAndLightUpdate, ClientBoundKeepAlive, EncryptionRequest,
     InitializeWorldBorder, LoginSuccess, LoginWorld, PlayDisconnect, PlayerAbilities, Pong,
     ServerStatus, SetCenterChunk, SetCompression, SetHeldItem, SetRecipes, SetTags,
     SynchronizePlayerPosition,
 };
-use protocol::tesr::server_bound::ServerBoundPacket;
+use protocol::protocol::{ConnectionState, Protocol, ProtocolError};
+use protocol::server_bound::ServerBoundPacket;
 
-use protocol::serializer::OutboundPacketData;
-use protocol::tesr::data_types::{PlayerAbilityFlags, PlayerPositionFlags, TestBytes, VarInt};
+use protocol::data_types::{PlayerAbilityFlags, PlayerPositionFlags, TestBytes, VarInt};
 use quartz_nbt::{snbt, NbtCompound};
 use rand::rngs::OsRng;
 use rand::{Rng, RngCore};
@@ -20,7 +19,6 @@ use std::sync::Arc;
 use std::time::Duration;
 use thiserror::Error;
 use tokio::net::{TcpListener, TcpStream};
-use tokio::sync::Mutex;
 use tokio::time::sleep;
 use tokio::{fs, select};
 use tokio_util::sync::CancellationToken;
@@ -136,7 +134,10 @@ async fn handle_client<'a>(stream: TcpStream, server: Arc<Server>) -> Result<(),
     )
     .await;
 
-    connection.enable_encryption(shared_secret.as_slice(), shared_secret.as_slice());
+    connection
+        .enable_encryption(shared_secret.as_slice(), shared_secret.as_slice())
+        .await;
+
     println!("Encryption enabled");
 
     let set_compression = SetCompression {
@@ -466,13 +467,13 @@ async fn handle_client<'a>(stream: TcpStream, server: Arc<Server>) -> Result<(),
     for x in -5..=5 {
         for z in -5..=5 {
             let chunk = world.get_chunk(x, z).unwrap().unwrap();
-            let mut packet_data = OutboundPacketData::new();
+            let mut packet_data = Vec::new();
             chunk.write(&mut packet_data);
             let chunk_data = ChunkUpdateAndLightUpdate {
                 x,
                 z,
                 heightmaps: NbtCompound::new(),
-                data: packet_data.data,
+                data: packet_data,
                 block_entities: Vec::new(),
                 manual_data: TestBytes(lighting_data.clone()),
             };
@@ -576,8 +577,9 @@ async fn handle_client<'a>(stream: TcpStream, server: Arc<Server>) -> Result<(),
                             let keep_alive = ClientBoundKeepAlive {
                                 id: rand::thread_rng().gen(),
                             };
-                            connection.write_packet(keep_alive).await;
-                            println!("-> KeepAlive");
+                            if let Ok(_) = connection.write_packet(keep_alive).await {
+                                println!("-> KeepAlive");
+                            }
                         }
                     }
                 });

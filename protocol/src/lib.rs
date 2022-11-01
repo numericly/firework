@@ -1,5 +1,12 @@
-pub mod deserializer;
-pub mod packets;
+pub enum ConnectionState {
+    Handshake,
+    Status,
+    Login,
+    Play,
+}
+
 pub mod protocol;
-pub mod serializer;
-pub mod tesr;
+
+pub mod client_bound;
+pub mod data_types;
+pub mod server_bound;
