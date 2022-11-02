@@ -3,7 +3,7 @@ use data::v1_19_2::chunk::{Chunk, ChunkSection};
 use data::v1_19_2::data_structure::PalettedContainer;
 use data::v1_19_2::Palette;
 use protocol::client_bound::SerializeField;
-use protocol::data_types::VarInt;
+use protocol::data_types::{VarInt, BitSet};
 use std::cell::RefCell;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
@@ -171,9 +171,61 @@ pub trait Write {
 
 impl Write for Chunk {
     fn write(&self, packet_data: &mut Vec<u8>) {
+        //write section data
         for section in &self.sections {
             section.write(packet_data);
         }
+
+        //write block entity data
+        //yeah this doesn't exist yet
+        VarInt(0).serialize(packet_data);
+
+        //write lighting data
+        //TODO: make sure zeroed out data works properly
+        let mut sky_light = Vec::new();
+        let mut block_light = Vec::new();
+        for section in &self.sections {
+            sky_light.push(&section.sky_light);
+            block_light.push(&section.block_light);
+        }
+        //create bitmasks
+        let mut sky_light_mask = BitSet::new();
+        let mut block_light_mask = BitSet::new();
+        for i in 0..22 { //height + 2
+            sky_light_mask.push(sky_light[i].is_some());
+            block_light_mask.push(block_light[i].is_some());
+        }
+        let mut empty_sky_light_mask = BitSet::new();
+        let mut empty_block_light_mask = BitSet::new();
+        for i in 0..22 { //height + 2
+            empty_sky_light_mask.push(
+                match sky_light[i] {
+                    Some(val) => val.iter().any(|&x| x != 0),
+                    None => false
+                }
+            );
+            empty_block_light_mask.push(
+                match block_light[i] {
+                    Some(val) => val.iter().any(|&x| x != 0),
+                    None => false
+                }
+            );
+        }
+        //calculate outgoing lighting data
+        let mut sky_light_data = Vec::new();
+        let mut block_light_data = Vec::new();
+        for i in 0..22 { //height + 2
+            if let Some(val) = sky_light[i] {
+                
+            }
+        }
+        //write bitmasks
+        sky_light_mask.write(packet_data);
+        block_light_mask.write(packet_data);
+        empty_sky_light_mask.write(packet_data);
+        empty_block_light_mask.write(packet_data);
+        //write light data
+        
     }
 }
 

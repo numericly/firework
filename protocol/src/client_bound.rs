@@ -111,8 +111,6 @@ define_client_bound_protocol! {
         z: i32,
         heightmaps: NbtCompound,
         data: Vec<u8>,
-        block_entities: Vec<BlockEntity>,
-        manual_data: TestBytes
     },
     LoginWorld, 0x25, Play => {
         entity_id: i32,
