@@ -30,8 +30,6 @@ pub struct ChunkSection {
     pub sky_light: Option<Vec<i8>>,
     #[serde(rename = "BlockLight")]
     pub block_light: Option<Vec<i8>>,
-    #[serde(skip_serializing)]
-    pub y: i8,
 }
 
 impl Chunk {

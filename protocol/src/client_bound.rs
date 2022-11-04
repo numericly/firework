@@ -111,6 +111,14 @@ define_client_bound_protocol! {
         z: i32,
         heightmaps: NbtCompound,
         data: Vec<u8>,
+        block_entities: Vec<NbtCompound>,
+        trust_edges: bool,
+        sky_light_mask: BitSet,
+        block_light_mask: BitSet,
+        empty_sky_light_mask: BitSet,
+        empty_block_light_mask: BitSet,
+        sky_light: Vec<Vec<i8>>,
+        block_light: Vec<Vec<i8>>
     },
     LoginWorld, 0x25, Play => {
         entity_id: i32,
@@ -386,6 +394,12 @@ impl SerializeField for f64 {
 impl SerializeField for bool {
     fn serialize<W: Write>(&self, mut writer: W) {
         writer.write(&[*self as u8]).unwrap();
+    }
+}
+
+impl SerializeField for BitSet {
+    fn serialize<W: Write>(&self, mut writer: W) {
+        self.0.serialize(&mut writer);
     }
 }
 

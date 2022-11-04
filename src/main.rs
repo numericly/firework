@@ -9,7 +9,7 @@ use protocol::client_bound::{
 use protocol::protocol::{ConnectionState, Protocol, ProtocolError};
 use protocol::server_bound::ServerBoundPacket;
 
-use protocol::data_types::{PlayerAbilityFlags, PlayerPositionFlags, TestBytes, VarInt};
+use protocol::data_types::{BitSet, PlayerAbilityFlags, PlayerPositionFlags, TestBytes, VarInt};
 use quartz_nbt::{snbt, NbtCompound};
 use rand::rngs::OsRng;
 use rand::{Rng, RngCore};
@@ -243,16 +243,58 @@ async fn handle_client<'a>(stream: TcpStream, server: Arc<Server>) -> Result<(),
     connection.write_packet(set_center_chunk).await.unwrap();
     println!("-> SetCenterChunk");
 
-    for x in -5..=5 {
-        for z in -5..=5 {
+    for x in -16..=16 {
+        for z in -16..=16 {
             let chunk = world.get_chunk(x, z).unwrap().unwrap();
             let mut packet_data = Vec::new();
             chunk.write(&mut packet_data);
+            let mut sky_light_refs = Vec::new();
+            let mut block_light_refs = Vec::new();
+            for i in 0..22 {
+                sky_light_refs.push(&chunk.sections[i].sky_light);
+                block_light_refs.push(&chunk.sections[i].block_light);
+            }
+            //create bitmasks
+            let mut sky_light_mask = BitSet::new();
+            let mut block_light_mask = BitSet::new();
+            //height + 2
+            for i in 0..22 {
+                sky_light_mask.push(sky_light_refs[i].is_some()); // sky_light_refs[i].is_some()
+                block_light_mask.push(block_light_refs[i].is_some()); // block_light_refs[i].is_some()
+            }
+            let mut empty_sky_light_mask = BitSet::new();
+            let mut empty_block_light_mask = BitSet::new();
+            for _i in 0..22 {
+                empty_sky_light_mask.push(false); // sky_light_refs[i].is_some()
+                empty_block_light_mask.push(false); // block_light_refs[i].is_some()
+            }
+            // TODO: implement support for zeroed out chunks instead of sending empty light arrays
+            //calculate outgoing lighting data
+            let mut sky_light: Vec<Vec<i8>> = Vec::new();
+            let mut block_light: Vec<Vec<i8>> = Vec::new();
+            for section_data in sky_light_refs {
+                if let Some(data) = section_data {
+                    sky_light.push(data.clone());
+                }
+            }
+            for section_data in block_light_refs {
+                if let Some(data) = section_data {
+                    block_light.push(data.clone());
+                }
+            }
             let chunk_data = ChunkUpdateAndLightUpdate {
                 x,
                 z,
                 heightmaps: NbtCompound::new(),
                 data: packet_data,
+                block_entities: Vec::new(),
+                trust_edges: true,
+                sky_light_mask,
+                block_light_mask,
+                empty_sky_light_mask,
+                empty_block_light_mask,
+                sky_light,
+                block_light,
             };
             connection.write_packet(chunk_data).await.unwrap();
         }

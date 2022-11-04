@@ -155,9 +155,11 @@ pub struct BlockEntity {}
 #[derive(Debug, PartialEq)]
 pub struct TestBytes(pub Vec<u8>);
 
+#[derive(Debug, PartialEq)]
+
 pub struct BitSet(
     pub Vec<u64>, // data
-    pub usize, // number of bits
+    pub usize,    // number of bits
 );
 impl BitSet {
     ///Create a new BitSet
