@@ -3,7 +3,7 @@ use data::v1_19_2::chunk::{Chunk, ChunkSection};
 use data::v1_19_2::data_structure::PalettedContainer;
 use data::v1_19_2::Palette;
 use protocol::client_bound::SerializeField;
-use protocol::data_types::VarInt;
+use protocol::data_types::{BitSet, VarInt};
 use std::cell::RefCell;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
@@ -171,6 +171,7 @@ pub trait Write {
 
 impl Write for Chunk {
     fn write(&self, packet_data: &mut Vec<u8>) {
+        //write section data
         for section in &self.sections {
             section.write(packet_data);
         }
@@ -179,6 +180,10 @@ impl Write for Chunk {
 
 impl Write for ChunkSection {
     fn write(&self, mut packet_data: &mut Vec<u8>) {
+        if self.block_states.is_none() {
+            println!("No block states");
+            return;
+        }
         //FIXME: This code is here because I don't want to calculate the number of non-air blocks
         if self.block_states.as_ref().unwrap().palette.len() > 1 {
             4096u16.serialize(&mut packet_data);
@@ -231,5 +236,11 @@ where
                 }
             }
         }
+    }
+}
+
+impl Write for BitSet {
+    fn write(&self, buf: &mut Vec<u8>) {
+        self.0.serialize(buf);
     }
 }

@@ -154,3 +154,40 @@ pub struct BlockEntity {}
 
 #[derive(Debug, PartialEq)]
 pub struct TestBytes(pub Vec<u8>);
+
+#[derive(Debug, PartialEq)]
+
+pub struct BitSet(
+    pub Vec<u64>, // data
+    pub usize,    // number of bits
+);
+impl BitSet {
+    ///Create a new BitSet
+    pub fn new() -> BitSet {
+        BitSet(Vec::new(), 0)
+    }
+    ///Set the bit at the given index
+    pub fn set(&mut self, index: usize, value: bool) {
+        let byte_index = index / 64;
+        let bit_index = index % 64;
+        if self.0.len() <= byte_index {
+            self.0.resize(byte_index + 1, 0);
+        }
+        self.0[byte_index] |= (value as u64) << bit_index;
+    }
+    ///Get the bit at the given index
+    pub fn get(&self, index: usize) -> bool {
+        let byte_index = index / 64;
+        let bit_index = index % 64;
+        if self.0.len() <= byte_index {
+            false
+        } else {
+            self.0[byte_index] & (1 << bit_index) != 0
+        }
+    }
+    ///Push a bit to the end of the BitSet
+    pub fn push(&mut self, value: bool) {
+        self.set(self.1, value);
+        self.1 += 1;
+    }
+}
