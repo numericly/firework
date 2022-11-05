@@ -252,8 +252,8 @@ async fn handle_client<'a>(stream: TcpStream, server: Arc<Server>) -> Result<(),
         dimension_name: "minecraft:overworld".to_string(),
         hashed_seed: 0,
         max_players: VarInt(10),
-        view_distance: VarInt(8),
-        simulation_distance: VarInt(8),
+        view_distance: VarInt(4),
+        simulation_distance: VarInt(2),
         reduced_debug_info: player.reduced_debug_info,
         enable_respawn_screen: true,
         is_debug: false,
@@ -402,6 +402,27 @@ async fn handle_client<'a>(stream: TcpStream, server: Arc<Server>) -> Result<(),
                 player.position.x = position.x;
                 player.position.y = position.y;
                 player.position.z = position.z;
+                if !(player.chunk_x == (player.position.x / 16.0).floor() as i32
+                    && player.chunk_z == (player.position.z / 16.0).floor() as i32)
+                {
+                    let connection = Arc::clone(&connection);
+                    player.chunk_x = (player.position.x / 16.0).floor() as i32;
+                    player.chunk_z = (player.position.z / 16.0).floor() as i32;
+                    println!("-> SetCenterChunk({}, {})", player.chunk_x, player.chunk_z);
+                    // connection
+                    //     .write_packet(SetCenterChunk {
+                    //         x: VarInt(player.chunk_x),
+                    //         z: VarInt(player.chunk_z),
+                    //     })
+                    //     .await
+                    //     .unwrap();
+                    // let chunk = &world
+                    //     .get_chunk(player.chunk_x, player.chunk_z)
+                    //     .unwrap()
+                    //     .unwrap();
+                    // let chunk_packet = chunk.to_packet();
+                    // connection.write_packet(chunk_packet).await.unwrap();
+                }
             }
             ServerBoundPacket::SetPlayerAndRotationPosition(position_rotation) => {
                 player.position.x = position_rotation.x;
@@ -409,6 +430,27 @@ async fn handle_client<'a>(stream: TcpStream, server: Arc<Server>) -> Result<(),
                 player.position.z = position_rotation.z;
                 player.rotation.pitch = position_rotation.pitch;
                 player.rotation.yaw = position_rotation.yaw;
+                if !(player.chunk_x == (player.position.x / 16.0).floor() as i32
+                    && player.chunk_z == (player.position.z / 16.0).floor() as i32)
+                {
+                    let connection = Arc::clone(&connection);
+                    player.chunk_x = (player.position.x / 16.0).floor() as i32;
+                    player.chunk_z = (player.position.z / 16.0).floor() as i32;
+                    println!("-> SetCenterChunk({}, {})", player.chunk_x, player.chunk_z);
+                    // connection
+                    //     .write_packet(SetCenterChunk {
+                    //         x: VarInt(player.chunk_x),
+                    //         z: VarInt(player.chunk_z),
+                    //     })
+                    //     .await
+                    //     .unwrap();
+                    // let chunk = &world
+                    //     .get_chunk(player.chunk_x, player.chunk_z)
+                    //     .unwrap()
+                    //     .unwrap();
+                    // let chunk_packet = chunk.to_packet();
+                    // connection.write_packet(chunk_packet).await.unwrap();
+                }
             }
             ServerBoundPacket::ServerBoundKeepAlive(_ping) => {
                 let connection = Arc::clone(&connection);

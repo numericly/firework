@@ -12,6 +12,8 @@ pub struct Player {
     pub flying_speed: f32,
     pub fov_modifier: f32,
     pub brand: Option<String>,
+    pub chunk_x: i32,
+    pub chunk_z: i32,
 }
 
 impl Player {
@@ -30,6 +32,8 @@ impl Player {
             flying_speed: 0.05,
             fov_modifier: 0.1,
             brand: None,
+            chunk_x: 0,
+            chunk_z: 0,
         }
     }
 }
