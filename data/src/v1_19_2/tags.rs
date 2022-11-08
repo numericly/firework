@@ -23,3 +23,7 @@ lazy_static! {
         map
     };
 }
+
+lazy_static! {
+    pub static ref REGISTRY: Vec<u8> = std::fs::read("registry.nbt").unwrap();
+}

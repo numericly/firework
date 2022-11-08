@@ -14,6 +14,8 @@ server_state = {path = "../server_state", version = "*"}
 byteorder = "1.4.3"
 hematite-nbt = "0.5.2"
 data = {path = "../data", version = "*"}
+dashmap = "5.4.0"
+tokio = "1.21.2"
 
 [profile.release]
 opt-level = 0

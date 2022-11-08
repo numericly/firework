@@ -1,1 +1,53 @@
-pub mod authentication;
+use num_bigint::BigInt;
+use serde::{Deserialize, Serialize};
+use sha1::{Digest, Sha1};
+use thiserror::Error;
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Profile {
+    pub id: String,
+    pub name: String,
+    pub properties: Vec<ProfileProperty>,
+}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+pub struct ProfileProperty {
+    pub name: String,
+    pub value: String,
+    pub signature: Option<String>,
+}
+
+#[derive(Debug, Error)]
+pub enum AuthenticationError {
+    #[error("Failed to make request")]
+    RequestError(#[from] reqwest::Error),
+    #[error("Failed to parse response")]
+    ParseError(#[from] serde_json::Error),
+}
+
+pub async fn authenticate(
+    shared_secret: &[u8],
+    pub_key: &[u8],
+    username: String,
+) -> Result<Profile, AuthenticationError> {
+    let server_hash = hash_server("", shared_secret, pub_key);
+    let formatted_url = format!(
+        "https://sessionserver.mojang.com/session/minecraft/hasJoined?username={}&serverId={}",
+        username, server_hash
+    );
+    let text = reqwest::get(&formatted_url).await?.text().await?;
+
+    Ok(serde_json::from_str::<Profile>(&text)?)
+}
+
+fn hash_server(server_id: &str, shared_secret: &[u8], pub_key: &[u8]) -> String {
+    let mut hash = Sha1::new();
+
+    hash.update(server_id.as_bytes());
+    hash.update(&shared_secret);
+    hash.update(pub_key);
+
+    let formatted = BigInt::from_signed_bytes_be(hash.finalize().as_slice());
+
+    format!("{:x}", formatted)
+}

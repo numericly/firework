@@ -1,10 +1,3 @@
-pub enum ConnectionState {
-    Handshake,
-    Status,
-    Login,
-    Play,
-}
-
 pub mod protocol;
 
 pub mod client_bound;

@@ -107,10 +107,9 @@ macro_rules! define_props {
                 )
                 $$($field_name:ident),*
             ) => {
-                #[derive(Debug, /*Serialize,*/ Hash, PartialEq, Eq)]
+                #[derive(Debug, Hash, PartialEq, Eq)]
                 pub struct $struct_name {
                     $$(
-                        //#[serde(serialize_with = "prop_types::serialize_to_string")]
                         pub $field_name: $field_ty,
                     )*
                 }
@@ -307,12 +306,11 @@ pub mod state {
         use serde::{Deserialize, Serialize};
         use std::{array, str::FromStr, vec};
 
-        pub trait PossibleValues
-        where
-            Self: Sized,
-        {
+        pub trait PossibleValues {
             type ValueIterator: Iterator;
-            fn possible_values() -> Self::ValueIterator;
+            fn possible_values() -> Self::ValueIterator
+            where
+                Self: Sized;
         }
 
         impl PossibleValues for bool {

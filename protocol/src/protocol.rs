@@ -13,7 +13,7 @@ use crate::{
 use aes::cipher::{inout::InOutBuf, BlockDecryptMut, BlockEncryptMut};
 use aes::{cipher::KeyIvInit, Aes128};
 use cfb8::{self, Decryptor, Encryptor};
-use miniz_oxide::{deflate::compress_to_vec_zlib, inflate::decompress_to_vec_zlib};
+use miniz_oxide::{deflate::compress_to_vec_zlib, inflate::{decompress_to_vec_zlib, DecompressError}};
 use thiserror::Error;
 use tokio::{
     io::{AsyncRead, AsyncReadExt, AsyncWriteExt, ReadBuf, AsyncWrite},
@@ -36,6 +36,8 @@ pub enum ProtocolError {
     WriteError(io::Error),
     #[error("Failed to deserialize packet {0}")]
     DeserializeError(#[from] DeserializeError),
+    #[error("Failed to decompress packet")]
+    DecompressError(DecompressError),
 }
 
 pub struct Protocol {
@@ -159,7 +161,9 @@ impl Protocol {
             VarInt::deserialize(&mut packet_data)?;
 
             let decompressed =
-                decompress_to_vec_zlib(&buffer[packet_data.position() as usize..]).unwrap();
+                decompress_to_vec_zlib(&buffer[packet_data.position() as usize..]).map_err(|e| {
+                    ProtocolError::DecompressError(e)
+                })?;
 
             Ok(decompressed)
         } else {
@@ -191,7 +195,13 @@ impl Protocol {
             }
         };
 
-        self.writer.lock().await.write_all(&packet).await.unwrap();
+        self.writer.lock().await.write_all(&packet).await.map_err(|err| {
+            if err.kind() == ErrorKind::BrokenPipe {
+                ProtocolError::ClientDisconnect
+            } else {
+                ProtocolError::WriteError(err).into()
+            }
+        })?;
 
         Ok(())
     }

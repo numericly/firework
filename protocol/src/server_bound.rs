@@ -160,7 +160,7 @@ define_server_bound_protocol! {
         z: f64,
         on_ground: bool
     },
-    SetPlayerAndRotationPosition, 0x15, Play => {
+    SetPlayerPositionAndRotation, 0x15, Play => {
         x: f64,
         y: f64,
         z: f64,

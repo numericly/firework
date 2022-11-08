@@ -347,6 +347,7 @@ dependencies = [
  "cfb-mode",
  "cfb8",
  "data",
+ "hematite-nbt",
  "miniz_oxide 0.6.2",
  "modular-bitfield",
  "quartz_nbt",

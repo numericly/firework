@@ -35,14 +35,12 @@ macro_rules! define_client_bound_protocol {
     };
 }
 
+use authentication::ProfileProperty;
 use std::{collections::HashMap, io::Write};
 
 use byteorder::{BigEndian, WriteBytesExt};
-use data::v1_19_2::tags::VarIntList;
-use quartz_nbt::{
-    io::{write_nbt, Flavor},
-    NbtCompound,
-};
+use data::v1_19_2::{data_structure::BitSet, tags::VarIntList};
+use nbt::{Blob, Value};
 
 use super::data_types::*;
 
@@ -109,9 +107,9 @@ define_client_bound_protocol! {
     ChunkUpdateAndLightUpdate, 0x21, Play => {
         x: i32,
         z: i32,
-        heightmaps: NbtCompound,
+        heightmaps: Blob,
         data: Vec<u8>,
-        block_entities: Vec<NbtCompound>,
+        block_entities: Vec<Blob>,
         trust_edges: bool,
         sky_light_mask: BitSet,
         block_light_mask: BitSet,
@@ -126,7 +124,7 @@ define_client_bound_protocol! {
         game_mode: u8,
         previous_game_mode: i8,
         dimensions: Vec<String>,
-        registry_codec: NbtCompound,
+        registry_codec: TestBytes,
         dimension_type: String,
         dimension_name: String,
         hashed_seed: i64,
@@ -305,9 +303,15 @@ impl SerializeField for PlayerPositionFlags {
     }
 }
 
-impl SerializeField for NbtCompound {
+impl SerializeField for Value {
     fn serialize<W: Write>(&self, mut writer: W) {
-        write_nbt(&mut writer, None, self, Flavor::Uncompressed).expect("Failed to serialize NBT");
+        self.to_writer(&mut writer).unwrap();
+    }
+}
+
+impl SerializeField for Blob {
+    fn serialize<W: Write>(&self, mut writer: W) {
+        self.to_writer(&mut writer).unwrap();
     }
 }
 

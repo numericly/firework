@@ -1,21 +1,33 @@
 use byteorder::{BigEndian, ReadBytesExt};
+use dashmap::DashMap;
+use data::v1_19_2::blocks::state::BlockStates;
 use data::v1_19_2::chunk::{Chunk, ChunkSection};
-use data::v1_19_2::data_structure::PalettedContainer;
+use data::v1_19_2::data_structure::{BitSet, PalettedContainer};
 use data::v1_19_2::Palette;
-use protocol::client_bound::SerializeField;
-use protocol::data_types::{BitSet, VarInt};
-use std::cell::RefCell;
-use std::collections::hash_map::Entry;
+use nbt::Blob;
+use protocol::client_bound::{ChunkUpdateAndLightUpdate, SerializeField, SerializePacket};
+use protocol::data_types::VarInt;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::fs::File;
 use std::hash::Hash;
 use std::io::Read;
 use std::sync::{Arc, Mutex};
+use tokio::sync::RwLock;
+
+#[repr(u8)]
+pub enum Difficulty {
+    Peaceful = 0,
+    Easy = 1,
+    Normal = 2,
+    Hard = 3,
+}
 
 pub struct World {
     pub path: &'static str,
-    regions: RefCell<HashMap<(i32, i32), Arc<Region>>>,
+    regions: DashMap<(i32, i32), Arc<Region>>,
+    pub difficulty: RwLock<u8>,
+    pub difficulty_locked: RwLock<bool>,
 }
 
 #[derive(Debug)]
@@ -43,11 +55,17 @@ pub struct ChunkPos {
     pub z: u8,
 }
 
+pub trait ToPacket<T: SerializePacket> {
+    fn to_packet(&self) -> T;
+}
+
 impl World {
     pub fn new(path: &'static str) -> World {
         World {
             path,
-            regions: RefCell::new(HashMap::new()),
+            difficulty: RwLock::new(1),
+            difficulty_locked: RwLock::new(false),
+            regions: DashMap::new(),
         }
     }
     pub fn get_chunk(&self, x: i32, z: i32) -> Result<Option<Arc<Chunk>>, String> {
@@ -60,11 +78,9 @@ impl World {
         }
     }
     pub fn get_region(&self, x: i32, z: i32) -> Result<Option<Arc<Region>>, String> {
-        let mut region_cache = self.regions.borrow_mut();
-
-        Ok(Some(match region_cache.entry((x, z)) {
-            Entry::Occupied(region) => Arc::clone(region.get()),
-            Entry::Vacant(entry) => Arc::clone({
+        Ok(match self.regions.get(&(x, z)) {
+            Some(region) => Some(region.clone()),
+            None => {
                 let file = match File::open(format!("{}/r.{}.{}.mca", self.path, x, z)) {
                     Ok(file) => file,
                     Err(err) => match err.kind() {
@@ -72,10 +88,12 @@ impl World {
                         _ => return Err(format!("Error opening region file: {}", err)),
                     },
                 };
-                let region = Region::deserialize(file)?;
-                entry.insert(Arc::new(region))
-            }),
-        }))
+                let region = Arc::new(Region::deserialize(file)?);
+                let region_ref = region.clone();
+                self.regions.insert((x, z), region);
+                Some(region_ref)
+            }
+        })
     }
 }
 
@@ -165,6 +183,7 @@ impl Region {
         self.chunk_timestamps[index]
     }
 }
+
 pub trait Write {
     fn write(&self, packet_data: &mut Vec<u8>);
 }
@@ -185,8 +204,16 @@ impl Write for ChunkSection {
             return;
         }
         //FIXME: This code is here because I don't want to calculate the number of non-air blocks
-        if self.block_states.as_ref().unwrap().palette.len() > 1 {
-            4096u16.serialize(&mut packet_data);
+        if let Some(block_states) = self.block_states.as_ref() {
+            if let Some(block) = block_states.get(0) {
+                if block == &BlockStates::Air && block_states.palette.len() == 1 {
+                    0u16.serialize(&mut packet_data);
+                } else {
+                    4096u16.serialize(&mut packet_data);
+                }
+            } else {
+                4096u16.serialize(&mut packet_data);
+            }
         } else {
             0u16.serialize(&mut packet_data);
         }
@@ -242,5 +269,70 @@ where
 impl Write for BitSet {
     fn write(&self, buf: &mut Vec<u8>) {
         self.0.serialize(buf);
+    }
+}
+
+impl ToPacket<ChunkUpdateAndLightUpdate> for Chunk {
+    fn to_packet(&self) -> ChunkUpdateAndLightUpdate {
+        let mut packet_data = Vec::new();
+        self.write(&mut packet_data);
+        let mut sky_light_refs = Vec::new();
+        let mut block_light_refs = Vec::new();
+        for i in 0..22 {
+            sky_light_refs.push(&self.sections[i].sky_light);
+            block_light_refs.push(&self.sections[i].block_light);
+        }
+        //create bitmasks
+        let mut sky_light_mask = BitSet::new();
+        let mut block_light_mask = BitSet::new();
+        //height + 2
+        for i in 0..22 {
+            sky_light_mask.push(sky_light_refs[i].is_some());
+            block_light_mask.push(block_light_refs[i].is_some());
+        }
+        let mut empty_sky_light_mask = BitSet::new();
+        let mut empty_block_light_mask = BitSet::new();
+        for i in 0..22 {
+            empty_sky_light_mask.push(
+                sky_light_refs[i].is_some()
+                    && sky_light_refs[i].as_ref().unwrap().iter().all(|&x| x == 0),
+            );
+            empty_block_light_mask.push(
+                block_light_refs[i].is_some()
+                    && block_light_refs[i]
+                        .as_ref()
+                        .unwrap()
+                        .iter()
+                        .all(|&x| x == 0),
+            );
+        }
+        // TODO: implement support for zeroed out chunks instead of sending empty light arrays
+        //calculate outgoing lighting data
+        let mut sky_light: Vec<Vec<i8>> = Vec::new();
+        let mut block_light: Vec<Vec<i8>> = Vec::new();
+        for i in 0..sky_light_refs.len() {
+            if sky_light_mask.get(i) && !empty_sky_light_mask.get(i) {
+                sky_light.push(sky_light_refs[i].as_ref().unwrap().clone());
+            }
+        }
+        for i in 0..block_light_refs.len() {
+            if block_light_mask.get(i) && !empty_block_light_mask.get(i) {
+                block_light.push(block_light_refs[i].as_ref().unwrap().clone());
+            }
+        }
+        ChunkUpdateAndLightUpdate {
+            x: self.x,
+            z: self.z,
+            heightmaps: Blob::new(),
+            data: packet_data,
+            block_entities: Vec::new(),
+            trust_edges: true,
+            sky_light_mask,
+            block_light_mask,
+            empty_sky_light_mask,
+            empty_block_light_mask,
+            sky_light,
+            block_light,
+        }
     }
 }

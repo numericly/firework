@@ -20,6 +20,7 @@
     "hasher",
     "heightmaps",
     "keystream",
+    "mapref",
     "memmap",
     "metavar",
     "minecraft",

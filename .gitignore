@@ -1,3 +1,4 @@
 **/target
 /test-crate
 *.DS_STORE
+.lock
