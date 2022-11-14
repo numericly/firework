@@ -6,7 +6,7 @@ use std::{
 };
 
 use crate::{
-        client_bound::{SerializeField, SerializePacket},
+        client_bound::{SerializeField, SerializePacket, ClientBoundPacketID},
         data_types::VarInt,
     server_bound::{DeserializeError, DeserializeField, ServerBoundPacket}
 };
@@ -170,9 +170,9 @@ impl Protocol {
             Ok(buffer)
         }
     }
-    pub async fn write_packet(
+    pub async fn write_packet<T: SerializePacket + ClientBoundPacketID + Debug>(
         &self,
-        packet: impl SerializePacket + Debug,
+        packet: T,
     ) -> Result<(), ProtocolError> {
         let packet_data = packet.serialize();
 

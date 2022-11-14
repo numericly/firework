@@ -6,10 +6,9 @@ use dashmap::mapref::entry::Entry::Vacant;
 use dashmap::DashMap;
 use data::v1_19_2::tags::{REGISTRY, TAGS};
 use protocol::client_bound::{
-    ChangeDifficulty, ChunkUpdateAndLightUpdate, ClientBoundKeepAlive, EncryptionRequest,
-    InitializeWorldBorder, LoginDisconnect, LoginSuccess, LoginWorld, PlayDisconnect,
-    PlayerAbilities, Pong, ServerStatus, SetCenterChunk, SetCompression, SetHeldItem, SetRecipes,
-    SetTags, SynchronizePlayerPosition,
+    ChangeDifficulty, ClientBoundKeepAlive, EncryptionRequest, InitializeWorldBorder,
+    LoginDisconnect, LoginSuccess, LoginWorld, PlayDisconnect, PlayerAbilities, Pong, ServerStatus,
+    SetCenterChunk, SetCompression, SetHeldItem, SetRecipes, SetTags, SynchronizePlayerPosition,
 };
 use protocol::data_types::{PlayerAbilityFlags, PlayerPositionFlags, TestBytes, VarInt};
 use protocol::protocol::{ConnectionState, Protocol, ProtocolError};
@@ -17,10 +16,11 @@ use protocol::server_bound::ServerBoundPacket;
 use rand::Rng;
 use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
 use thiserror::Error;
+use tokio::sync::{broadcast, mpsc};
 use tokio::time::sleep;
 use tokio::{net::TcpListener, select};
 use tokio_util::sync::CancellationToken;
-use world::world::{ToPacket, World, Write};
+use world::world::{ToPacket, World};
 
 macro_rules! read_packet_or_err {
     ($packet:ident, $stream:expr, $connection_state:expr) => {
@@ -77,7 +77,7 @@ pub enum ConnectionError {
     PlayerUnregisteredError,
 }
 
-pub struct Server {
+pub struct ServerManager {
     token: CancellationToken,
 }
 
@@ -85,7 +85,7 @@ pub struct VanillaServerHandler {
     world: World,
     player_list: DashMap<i32, Player>,
 }
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Vec3 {
     pub x: f64,
     pub y: f64,
@@ -120,6 +120,8 @@ pub struct Player {
     pub selected_slot: u8,
     pub position: Vec3,
     pub rotation: Rotation,
+    pub rx: Option<mpsc::Sender<ClientCommand>>,
+    pub tx: Option<broadcast::Receiver<ClientEvent>>,
 }
 
 impl Player {
@@ -133,12 +135,21 @@ impl Player {
             selected_slot: 0,
             position: Vec3::new(0.0, 0.0, 0.0),
             rotation: Rotation::new(0.0, 0.0),
+            rx: None,
+            tx: None,
         }
     }
 }
 
+#[derive(Debug, Clone)]
+pub enum ClientEvent {
+    ClientDisconnect,
+    Move,
+    MoveChunk,
+}
+
 #[derive(Debug)]
-pub enum ClientEvent {}
+pub enum ClientCommand {}
 
 impl VanillaServerHandler {
     fn new() -> Self {
@@ -259,6 +270,7 @@ impl VanillaServerHandler {
         connection.write_packet(set_compression).await.unwrap();
 
         connection.enable_compression();
+        println!("Compression enabled");
 
         let uuid = u128::from_str_radix(&profile.id, 16).unwrap();
 
@@ -315,8 +327,8 @@ impl VanillaServerHandler {
         connection.connection_state = ConnectionState::Play;
 
         let change_difficulty = ChangeDifficulty {
-            difficulty: *self.world.difficulty.read().await,
-            locked: *self.world.difficulty_locked.read().await,
+            difficulty: *self.world.difficulty.read().unwrap(),
+            locked: *self.world.difficulty_locked.read().unwrap(),
         };
 
         connection.write_packet(change_difficulty).await.unwrap();
@@ -364,10 +376,14 @@ impl VanillaServerHandler {
             };
             connection.write_packet(set_center_chunk).await.unwrap();
         }
-        for x in -5..=5 {
-            for z in -5..=5 {
-                let chunk = self.world.get_chunk(x, z).unwrap().unwrap();
-                let packet = chunk.to_packet();
+        for x in -10..=10 {
+            for z in -10..=10 {
+                let packet;
+                {
+                    let chunk_lock = self.world.get_chunk(x, z).await.unwrap().unwrap();
+                    let chunk = chunk_lock.read().unwrap();
+                    packet = chunk.to_packet();
+                }
                 connection.write_packet(packet).await.unwrap();
             }
         }
@@ -432,112 +448,29 @@ impl VanillaServerHandler {
 
         connection.write_packet(ping).await.unwrap();
 
+        let (tx, rx) = broadcast::channel::<ClientEvent>(10);
+
         let connection = Arc::new(connection);
         let token = CancellationToken::new();
         loop {
-            let packet = match connection.read_and_serialize().await {
-                Ok(packet) => packet,
-                Err(err) => {
-                    let disconnect = PlayDisconnect {
-                        reason: format!(r#"{{"text": "Error: {}"}}"#, err),
-                    };
-                    connection.write_packet(disconnect).await.unwrap();
-                    token.cancel();
-                    return Err(ConnectionError::ProtocolError(err));
-                }
-            };
-
-            match packet {
-                ServerBoundPacket::SetPlayerRotation(rot) => {
-                    let mut player = self
-                        .player_list
-                        .get_mut(&entity_id)
-                        .ok_or_else(|| ConnectionError::PlayerUnregisteredError)?;
-
-                    player.rotation.yaw = rot.yaw;
-                    player.rotation.pitch = rot.pitch;
-                }
-                ServerBoundPacket::SetPlayerPosition(pos) => {
-                    let moved_chunks;
-                    {
-                        let mut player = self
-                            .player_list
-                            .get_mut(&entity_id)
-                            .ok_or_else(|| ConnectionError::PlayerUnregisteredError)?;
-
-                        moved_chunks = (player.position.x / 16.0).floor() as i32
-                            != (pos.x / 16.0).floor() as i32
-                            || (player.position.z / 16.0).floor() as i32
-                                != (pos.z / 16.0).floor() as i32;
-                        player.position.x = pos.x;
-                        player.position.y = pos.y;
-                        player.position.z = pos.z;
-                    }
-                    if moved_chunks {
-                        let player = self
-                            .player_list
-                            .get(&entity_id)
-                            .ok_or_else(|| ConnectionError::PlayerUnregisteredError)?;
-                        let set_center_chunk = SetCenterChunk {
-                            x: VarInt((player.position.x / 16.0).floor() as i32),
-                            z: VarInt((player.position.z / 16.0).floor() as i32),
-                        };
-                        println!("Sending set center chunk {:?}", set_center_chunk);
-                        connection.write_packet(set_center_chunk).await.unwrap();
-                    }
-                }
-                ServerBoundPacket::SetPlayerPositionAndRotation(pos_rot) => {
-                    let moved_chunks;
-                    {
-                        let mut player = self
-                            .player_list
-                            .get_mut(&entity_id)
-                            .ok_or_else(|| ConnectionError::PlayerUnregisteredError)?;
-
-                        moved_chunks = (player.position.x / 16.0).floor() as i32
-                            != (pos_rot.x / 16.0).floor() as i32
-                            || (player.position.z / 16.0).floor() as i32
-                                != (pos_rot.z / 16.0).floor() as i32;
-                        player.position.x = pos_rot.x;
-                        player.position.y = pos_rot.y;
-                        player.position.z = pos_rot.z;
-                        player.rotation.yaw = pos_rot.yaw;
-                        player.rotation.pitch = pos_rot.pitch;
-                    }
-                    if moved_chunks {
-                        let player = self
-                            .player_list
-                            .get(&entity_id)
-                            .ok_or_else(|| ConnectionError::PlayerUnregisteredError)?;
-                        let set_center_chunk = SetCenterChunk {
-                            x: VarInt((player.position.x / 16.0).floor() as i32),
-                            z: VarInt((player.position.z / 16.0).floor() as i32),
-                        };
-
-                        println!("Sending set center chunk {:?}", set_center_chunk);
-                        connection.write_packet(set_center_chunk).await.unwrap();
-                    }
-                }
-                ServerBoundPacket::ServerBoundKeepAlive(_) => {
-                    let connection = Arc::clone(&connection);
-                    let cloned_token = token.clone();
-                    #[allow(unused_must_use)]
-                    tokio::task::spawn(async move {
-                        select! {
-                            _ = cloned_token.cancelled() => (),
-                            _ = sleep(Duration::from_secs(15)) => {
-                                let keep_alive = ClientBoundKeepAlive {
-                                    id: rand::thread_rng().gen(),
-                                };
-                                connection.write_packet(keep_alive).await;
-                            }
+            select! {
+                packet = connection.read_and_serialize() => async {
+                    // Add type annotation for rust analyzer
+                    let packet: Result<ServerBoundPacket, ProtocolError> = packet;
+                    let packet = match packet {
+                        Ok(packet) => packet,
+                        Err(err) => {
+                            let disconnect = PlayDisconnect {
+                                reason: format!(r#"{{"text": "Error: {}"}}"#, err),
+                            };
+                            connection.write_packet(disconnect).await.unwrap();
+                            token.cancel();
+                            return Err(ConnectionError::ProtocolError(err));
                         }
-                    });
-                }
-                _ => {
-                    println!("Received packet: {:?}", packet);
-                }
-            }
+                    };
+                    self.handle_packet(packet, connection.clone(), entity_id, token.clone()).await
+                }.await?
+            };
         }
     }
     fn get_lowest_entity_id(&self) -> Option<i32> {
@@ -563,6 +496,106 @@ impl VanillaServerHandler {
     }
     fn remove_client(&self, entity_id: i32) {
         self.player_list.remove(&entity_id);
+    }
+    async fn handle_packet(
+        &self,
+        packet: ServerBoundPacket,
+        connection: Arc<Protocol>,
+        entity_id: i32,
+        token: CancellationToken,
+    ) -> Result<(), ConnectionError> {
+        match packet {
+            ServerBoundPacket::SetPlayerRotation(rot) => {
+                let mut player = self
+                    .player_list
+                    .get_mut(&entity_id)
+                    .ok_or_else(|| ConnectionError::PlayerUnregisteredError)?;
+
+                player.rotation.yaw = rot.yaw;
+                player.rotation.pitch = rot.pitch;
+            }
+            ServerBoundPacket::SetPlayerPosition(pos) => {
+                let moved_chunks;
+                {
+                    let mut player = self
+                        .player_list
+                        .get_mut(&entity_id)
+                        .ok_or_else(|| ConnectionError::PlayerUnregisteredError)?;
+
+                    moved_chunks = (player.position.x / 16.0).floor() as i32
+                        != (pos.x / 16.0).floor() as i32
+                        || (player.position.z / 16.0).floor() as i32
+                            != (pos.z / 16.0).floor() as i32;
+                    player.position.x = pos.x;
+                    player.position.y = pos.y;
+                    player.position.z = pos.z;
+                }
+                if moved_chunks {
+                    let player = self
+                        .player_list
+                        .get(&entity_id)
+                        .ok_or_else(|| ConnectionError::PlayerUnregisteredError)?;
+                    let set_center_chunk = SetCenterChunk {
+                        x: VarInt((player.position.x / 16.0).floor() as i32),
+                        z: VarInt((player.position.z / 16.0).floor() as i32),
+                    };
+                    println!("Sending set center chunk {:?}", set_center_chunk);
+                    connection.write_packet(set_center_chunk).await.unwrap();
+                }
+            }
+            ServerBoundPacket::SetPlayerPositionAndRotation(pos_rot) => {
+                let moved_chunks;
+                {
+                    let mut player = self
+                        .player_list
+                        .get_mut(&entity_id)
+                        .ok_or_else(|| ConnectionError::PlayerUnregisteredError)?;
+
+                    moved_chunks = (player.position.x / 16.0).floor() as i32
+                        != (pos_rot.x / 16.0).floor() as i32
+                        || (player.position.z / 16.0).floor() as i32
+                            != (pos_rot.z / 16.0).floor() as i32;
+                    player.position.x = pos_rot.x;
+                    player.position.y = pos_rot.y;
+                    player.position.z = pos_rot.z;
+                    player.rotation.yaw = pos_rot.yaw;
+                    player.rotation.pitch = pos_rot.pitch;
+                }
+                if moved_chunks {
+                    let player = self
+                        .player_list
+                        .get(&entity_id)
+                        .ok_or_else(|| ConnectionError::PlayerUnregisteredError)?;
+                    let set_center_chunk = SetCenterChunk {
+                        x: VarInt((player.position.x / 16.0).floor() as i32),
+                        z: VarInt((player.position.z / 16.0).floor() as i32),
+                    };
+
+                    println!("Sending set center chunk {:?}", set_center_chunk);
+                    connection.write_packet(set_center_chunk).await.unwrap();
+                }
+            }
+            ServerBoundPacket::ServerBoundKeepAlive(_) => {
+                let connection = Arc::clone(&connection);
+                let cloned_token = token.clone();
+                #[allow(unused_must_use)]
+                tokio::task::spawn(async move {
+                    select! {
+                        _ = cloned_token.cancelled() => (),
+                        _ = sleep(Duration::from_secs(15)) => {
+                            let keep_alive = ClientBoundKeepAlive {
+                                id: rand::thread_rng().gen(),
+                            };
+                            connection.write_packet(keep_alive).await;
+                        }
+                    }
+                });
+            }
+            _ => {
+                println!("Received packet: {:?}", packet);
+            }
+        };
+        Ok(())
     }
 }
 pub struct Encryption {
@@ -590,11 +623,11 @@ impl Encryption {
     }
 }
 
-impl Server {
-    pub fn new() -> Arc<Server> {
+impl ServerManager {
+    pub fn new() -> Arc<ServerManager> {
         let token = CancellationToken::new();
 
-        let server = Arc::new(Server { token });
+        let server = Arc::new(ServerManager { token });
         let server_handler = Arc::new(VanillaServerHandler::new());
         let encryption = Arc::new(Encryption::new());
 
@@ -634,14 +667,14 @@ impl Server {
     }
 }
 
-impl Drop for Server {
+impl Drop for ServerManager {
     fn drop(&mut self) {
         self.token.cancel();
     }
 }
 
 pub trait MOTD {
-    fn motd(server: Arc<Server>) -> String;
+    fn motd(server: Arc<ServerManager>) -> String;
 }
 
 #[derive(Debug)]

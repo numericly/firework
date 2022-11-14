@@ -15,13 +15,16 @@ where
     T: std::fmt::Debug + Eq + Hash + Palette,
 {
     pub fn get(&self, index: usize) -> Option<&T> {
-        let bits_per_value = self.bits_per_value();
-        if bits_per_value == 0 && self.palette.len() == 1 {
+        let Some(data) = self.data.as_ref() else {
+            if self.palette.len() != 1 {
+                panic!("Palette length is not 1");
+            }
             return Some(&self.palette[0]);
-        }
+        };
+        let bits_per_value = data.len() * BITS_PER_ENTRY / CONTAINER_SIZE;
         let values_per_long = BITS_PER_ENTRY / bits_per_value;
         let array_index = index / values_per_long;
-        let long = self.data.as_ref().unwrap()[array_index];
+        let long = data[array_index];
         let offset = (index % values_per_long) * bits_per_value;
         let mask = (1 << bits_per_value) - 1;
         let value_index = (long >> offset) & mask as i64;

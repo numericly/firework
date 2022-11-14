@@ -1,7 +1,8 @@
 use byteorder::{BigEndian, ReadBytesExt};
 use dashmap::DashMap;
+use data::v1_19_2::biomes::Biomes;
 use data::v1_19_2::blocks::state::BlockStates;
-use data::v1_19_2::chunk::{Chunk, ChunkSection};
+use data::v1_19_2::chunk::Chunk;
 use data::v1_19_2::data_structure::{BitSet, PalettedContainer};
 use data::v1_19_2::Palette;
 use nbt::Blob;
@@ -12,10 +13,8 @@ use std::fmt::Debug;
 use std::fs::File;
 use std::hash::Hash;
 use std::io::Read;
-use std::sync::{Arc, Mutex};
-use tokio::sync::RwLock;
+use std::sync::{Arc, RwLock, Mutex};
 
-#[repr(u8)]
 pub enum Difficulty {
     Peaceful = 0,
     Easy = 1,
@@ -40,7 +39,7 @@ pub struct Region {
 pub enum RegionChunk {
     None,
     ChunkBytes(Box<Vec<u8>>),
-    Chunk(Box<Arc<Chunk>>),
+    Chunk(Arc<RwLock<ChunkNew>>),
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -59,6 +58,78 @@ pub trait ToPacket<T: SerializePacket> {
     fn to_packet(&self) -> T;
 }
 
+#[derive(Debug)]
+pub struct ChunkNew {
+    pub data_version: i32,
+    pub x: i32,
+    pub z: i32,
+    pub inhabited_time: i64,
+    pub last_update: i64,
+    pub post_processing: Option<Vec<Vec<i16>>>,
+    pub status: Option<String>,
+    pub sections: Vec<ChunkSectionNew>,
+}
+
+#[derive(Debug)]
+pub struct ChunkSectionNew {
+    pub non_air_blocks_count: u16,
+    pub block_states: Option<PalettedContainer<BlockStates, 4096>>,
+    pub biomes: Option<PalettedContainer<Biomes, 64>>,
+    pub sky_light: Option<Vec<i8>>,
+    pub block_light: Option<Vec<i8>>,
+}
+
+impl From<Chunk> for ChunkNew {
+    fn from(chunk: Chunk) -> Self {
+        fn non_air_blocks(container: &PalettedContainer<BlockStates, 4096>) -> u16 {
+            if container.palette.is_empty() {
+                return 0;
+            }
+
+            if !container.palette.contains(&BlockStates::Air) {
+                return 4096;
+            }
+
+            let mut count = 0;
+            for i in 0..4096 {
+                let block = container.get(i).unwrap();
+                if *block != BlockStates::Air {
+                    count += 1;
+                }
+            }
+            count
+        }
+        ChunkNew {
+            data_version: chunk.data_version,
+            x: chunk.x,
+            z: chunk.z,
+            inhabited_time: chunk.inhabited_time,
+            last_update: chunk.last_update,
+            post_processing: chunk.post_processing,
+            status: chunk.status,
+            sections: {
+                let mut sections = Vec::new();
+                for section in chunk.sections {
+                    sections.push(ChunkSectionNew {
+                        non_air_blocks_count: {
+                            if let Some(block_states) = &section.block_states {
+                                non_air_blocks(&block_states)
+                            } else {
+                                0
+                            }
+                        },
+                        block_states: section.block_states,
+                        biomes: section.biomes,
+                        sky_light: section.sky_light,
+                        block_light: section.block_light,
+                    });
+                }
+                sections
+            },
+        }
+    }
+}
+
 impl World {
     pub fn new(path: &'static str) -> World {
         World {
@@ -68,7 +139,7 @@ impl World {
             regions: DashMap::new(),
         }
     }
-    pub fn get_chunk(&self, x: i32, z: i32) -> Result<Option<Arc<Chunk>>, String> {
+    pub async fn get_chunk(&self, x: i32, z: i32) -> Result<Option<Arc<RwLock<ChunkNew>>>, String> {
         let region = self.get_region(x >> 5, z >> 5)?;
 
         if let Some(region) = region {
@@ -158,7 +229,7 @@ impl Region {
         })
     }
     /// Gets and caches a chunk from the region at the given position.
-    pub fn get_chunk<'a>(&self, x: i32, z: i32) -> Result<Option<Arc<Chunk>>, String> {
+    pub fn get_chunk(& self, x: i32, z: i32) -> Result<Option<Arc<RwLock<ChunkNew>>>, String> {
         let index = x.rem_euclid(32) as usize + (z.rem_euclid(32) as usize * 32);
 
         let sections = self.sections.lock().unwrap();
@@ -170,12 +241,13 @@ impl Region {
                 // in order to deserialize the chunk.
                 let reader = bytes[5..].to_vec();
                 drop(sections);
-                let chunk = Arc::new(Chunk::from_zlib_reader(reader.as_slice())?);
-                let chunk_ref = Arc::clone(&chunk);
-                self.sections.lock().unwrap()[index] = RegionChunk::Chunk(Box::new(chunk));
-                Ok(Some(chunk_ref))
-            }
-            RegionChunk::Chunk(chunk) => Ok(Some(Arc::clone(&chunk))),
+                let chunk_data = ChunkNew::from(Chunk::from_zlib_reader(reader.as_slice())?);
+                let chunk = Arc::new(RwLock::new(chunk_data));
+                let cloned = chunk.clone();
+                self.sections.lock().unwrap()[index] = RegionChunk::Chunk(chunk);
+                Ok(Some(cloned))
+            },
+            RegionChunk::Chunk(chunk) => Ok(Some(chunk.clone())),
         }
     }
     pub fn get_chunk_timestamp(&self, x: u8, z: u8) -> u32 {
@@ -184,39 +256,24 @@ impl Region {
     }
 }
 
-pub trait Write {
+trait Write {
     fn write(&self, packet_data: &mut Vec<u8>);
 }
 
-impl Write for Chunk {
+impl Write for ChunkNew {
     fn write(&self, packet_data: &mut Vec<u8>) {
-        //write section data
         for section in &self.sections {
             section.write(packet_data);
         }
     }
 }
 
-impl Write for ChunkSection {
+impl Write for ChunkSectionNew {
     fn write(&self, mut packet_data: &mut Vec<u8>) {
         if self.block_states.is_none() {
-            println!("No block states");
             return;
         }
-        //FIXME: This code is here because I don't want to calculate the number of non-air blocks
-        if let Some(block_states) = self.block_states.as_ref() {
-            if let Some(block) = block_states.get(0) {
-                if block == &BlockStates::Air && block_states.palette.len() == 1 {
-                    0u16.serialize(&mut packet_data);
-                } else {
-                    4096u16.serialize(&mut packet_data);
-                }
-            } else {
-                4096u16.serialize(&mut packet_data);
-            }
-        } else {
-            0u16.serialize(&mut packet_data);
-        }
+        self.non_air_blocks_count.serialize(&mut packet_data);
 
         self.block_states.as_ref().unwrap().write(&mut packet_data);
         self.biomes.as_ref().unwrap().write(&mut packet_data);
@@ -272,7 +329,7 @@ impl Write for BitSet {
     }
 }
 
-impl ToPacket<ChunkUpdateAndLightUpdate> for Chunk {
+impl ToPacket<ChunkUpdateAndLightUpdate> for ChunkNew {
     fn to_packet(&self) -> ChunkUpdateAndLightUpdate {
         let mut packet_data = Vec::new();
         self.write(&mut packet_data);
@@ -320,6 +377,7 @@ impl ToPacket<ChunkUpdateAndLightUpdate> for Chunk {
                 block_light.push(block_light_refs[i].as_ref().unwrap().clone());
             }
         }
+        // println!("Lighting calculation took {:?}", start.elapsed());
         ChunkUpdateAndLightUpdate {
             x: self.x,
             z: self.z,
