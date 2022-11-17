@@ -21,6 +21,7 @@ protocol = { path = "./protocol", version = "*"}
 authentication = { path = "./authentication", version = "*"}
 data = { path = "./data", version = "*"}
 world = { path = "./world", version = "*"}
+web_interface = { path = "./web_interface", version = "*"}
 quartz_nbt = "0.2.6"
 dashmap = "5.4.0"
 server_state = { path = "./server_state", version = "*"}

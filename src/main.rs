@@ -11,20 +11,11 @@ async fn main() {
 
     let server = server::ServerManager::new();
 
+    tokio::spawn(async move {
+        web_interface::web_interface::run_web_interface()
+            .await
+            .unwrap();
+    });
+
     sleep(Duration::from_secs(10000000000)).await;
-
-    // let listener = TcpListener::bind("127.0.0.1:25566").await.unwrap();
-    // let server = Arc::new(Server::new());
-
-    // loop {
-    //     let stream = listener.accept().await.unwrap().0;
-    //     let server = Arc::clone(&server);
-
-    //     tokio::task::spawn(async move {
-    //         Client::handle(stream).await.unwrap();
-    //         // if let Err(e) = handle_client(stream, server).await {
-    //         //     println!("Error: {}", e);
-    //         // }
-    //     });
-    // }
 }
