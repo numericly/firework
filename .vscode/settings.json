@@ -11,6 +11,7 @@
     "dashmap",
     "decryptor",
     "DEEPSLATE",
+    "diggable",
     "Dripleaf",
     "Elytra",
     "encryptor",
@@ -48,6 +49,7 @@
     "SHULKER",
     "Smithing",
     "snbt",
+    "stacksize",
     "structureblock",
     "thiserror",
     "varint"
