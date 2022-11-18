@@ -1,26 +1,19 @@
 <script>
   import { onMount } from "svelte";
-  import { apiData, players, world, server } from "./store";
+  import { players, world, server } from "./store";
   import healthIcon from "./assets/health.png";
   import hungerIcon from "./assets/hunger.png";
 
+  let socket;
+
   onMount(async () => {
-    fetch("/data")
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        apiData.set(data);
-      });
+    socket = new WebSocket("ws://127.0.0.1:8080/ws");
+    window.setInterval(async () => {
+      socket.send("ping");
+    }, 1000);
   });
 
-  window.setInterval(async () => {
-    fetch("/data")
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        apiData.set(data);
-      });
-  }, 1000);
+  
 </script>
 
 <main>
