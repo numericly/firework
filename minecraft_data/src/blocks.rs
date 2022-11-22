@@ -1,10 +1,12 @@
 // This code was generated using data provided by PrismarineJS/minecraft-data
 
 use crate::ConstrainedInt;
-use serde::de::{MapAccess, self};
-use std::{collections::HashMap, str::FromStr};
+use crate::Values;
+use crate::BlockProperties;
+use serde::de::MapAccess;
+use std::collections::HashMap;
 
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub enum Block {
 	Air(Air),
 	Stone(Stone),
@@ -940,6 +942,3758 @@ pub enum Block {
 	Frogspawn(Frogspawn),
 	ReinforcedDeepslate(ReinforcedDeepslate),
 }
+
+impl Block {
+	pub fn get_display_name(&self) -> &'static str {
+		match self {
+			Block::Air(_) => Air::DISPLAY_NAME,
+			Block::Stone(_) => Stone::DISPLAY_NAME,
+			Block::Granite(_) => Granite::DISPLAY_NAME,
+			Block::PolishedGranite(_) => PolishedGranite::DISPLAY_NAME,
+			Block::Diorite(_) => Diorite::DISPLAY_NAME,
+			Block::PolishedDiorite(_) => PolishedDiorite::DISPLAY_NAME,
+			Block::Andesite(_) => Andesite::DISPLAY_NAME,
+			Block::PolishedAndesite(_) => PolishedAndesite::DISPLAY_NAME,
+			Block::GrassBlock(_) => GrassBlock::DISPLAY_NAME,
+			Block::Dirt(_) => Dirt::DISPLAY_NAME,
+			Block::CoarseDirt(_) => CoarseDirt::DISPLAY_NAME,
+			Block::Podzol(_) => Podzol::DISPLAY_NAME,
+			Block::Cobblestone(_) => Cobblestone::DISPLAY_NAME,
+			Block::OakPlanks(_) => OakPlanks::DISPLAY_NAME,
+			Block::SprucePlanks(_) => SprucePlanks::DISPLAY_NAME,
+			Block::BirchPlanks(_) => BirchPlanks::DISPLAY_NAME,
+			Block::JunglePlanks(_) => JunglePlanks::DISPLAY_NAME,
+			Block::AcaciaPlanks(_) => AcaciaPlanks::DISPLAY_NAME,
+			Block::DarkOakPlanks(_) => DarkOakPlanks::DISPLAY_NAME,
+			Block::MangrovePlanks(_) => MangrovePlanks::DISPLAY_NAME,
+			Block::OakSapling(_) => OakSapling::DISPLAY_NAME,
+			Block::SpruceSapling(_) => SpruceSapling::DISPLAY_NAME,
+			Block::BirchSapling(_) => BirchSapling::DISPLAY_NAME,
+			Block::JungleSapling(_) => JungleSapling::DISPLAY_NAME,
+			Block::AcaciaSapling(_) => AcaciaSapling::DISPLAY_NAME,
+			Block::DarkOakSapling(_) => DarkOakSapling::DISPLAY_NAME,
+			Block::MangrovePropagule(_) => MangrovePropagule::DISPLAY_NAME,
+			Block::Bedrock(_) => Bedrock::DISPLAY_NAME,
+			Block::Water(_) => Water::DISPLAY_NAME,
+			Block::Lava(_) => Lava::DISPLAY_NAME,
+			Block::Sand(_) => Sand::DISPLAY_NAME,
+			Block::RedSand(_) => RedSand::DISPLAY_NAME,
+			Block::Gravel(_) => Gravel::DISPLAY_NAME,
+			Block::GoldOre(_) => GoldOre::DISPLAY_NAME,
+			Block::DeepslateGoldOre(_) => DeepslateGoldOre::DISPLAY_NAME,
+			Block::IronOre(_) => IronOre::DISPLAY_NAME,
+			Block::DeepslateIronOre(_) => DeepslateIronOre::DISPLAY_NAME,
+			Block::CoalOre(_) => CoalOre::DISPLAY_NAME,
+			Block::DeepslateCoalOre(_) => DeepslateCoalOre::DISPLAY_NAME,
+			Block::NetherGoldOre(_) => NetherGoldOre::DISPLAY_NAME,
+			Block::OakLog(_) => OakLog::DISPLAY_NAME,
+			Block::SpruceLog(_) => SpruceLog::DISPLAY_NAME,
+			Block::BirchLog(_) => BirchLog::DISPLAY_NAME,
+			Block::JungleLog(_) => JungleLog::DISPLAY_NAME,
+			Block::AcaciaLog(_) => AcaciaLog::DISPLAY_NAME,
+			Block::DarkOakLog(_) => DarkOakLog::DISPLAY_NAME,
+			Block::MangroveLog(_) => MangroveLog::DISPLAY_NAME,
+			Block::MangroveRoots(_) => MangroveRoots::DISPLAY_NAME,
+			Block::MuddyMangroveRoots(_) => MuddyMangroveRoots::DISPLAY_NAME,
+			Block::StrippedSpruceLog(_) => StrippedSpruceLog::DISPLAY_NAME,
+			Block::StrippedBirchLog(_) => StrippedBirchLog::DISPLAY_NAME,
+			Block::StrippedJungleLog(_) => StrippedJungleLog::DISPLAY_NAME,
+			Block::StrippedAcaciaLog(_) => StrippedAcaciaLog::DISPLAY_NAME,
+			Block::StrippedDarkOakLog(_) => StrippedDarkOakLog::DISPLAY_NAME,
+			Block::StrippedOakLog(_) => StrippedOakLog::DISPLAY_NAME,
+			Block::StrippedMangroveLog(_) => StrippedMangroveLog::DISPLAY_NAME,
+			Block::OakWood(_) => OakWood::DISPLAY_NAME,
+			Block::SpruceWood(_) => SpruceWood::DISPLAY_NAME,
+			Block::BirchWood(_) => BirchWood::DISPLAY_NAME,
+			Block::JungleWood(_) => JungleWood::DISPLAY_NAME,
+			Block::AcaciaWood(_) => AcaciaWood::DISPLAY_NAME,
+			Block::DarkOakWood(_) => DarkOakWood::DISPLAY_NAME,
+			Block::MangroveWood(_) => MangroveWood::DISPLAY_NAME,
+			Block::StrippedOakWood(_) => StrippedOakWood::DISPLAY_NAME,
+			Block::StrippedSpruceWood(_) => StrippedSpruceWood::DISPLAY_NAME,
+			Block::StrippedBirchWood(_) => StrippedBirchWood::DISPLAY_NAME,
+			Block::StrippedJungleWood(_) => StrippedJungleWood::DISPLAY_NAME,
+			Block::StrippedAcaciaWood(_) => StrippedAcaciaWood::DISPLAY_NAME,
+			Block::StrippedDarkOakWood(_) => StrippedDarkOakWood::DISPLAY_NAME,
+			Block::StrippedMangroveWood(_) => StrippedMangroveWood::DISPLAY_NAME,
+			Block::OakLeaves(_) => OakLeaves::DISPLAY_NAME,
+			Block::SpruceLeaves(_) => SpruceLeaves::DISPLAY_NAME,
+			Block::BirchLeaves(_) => BirchLeaves::DISPLAY_NAME,
+			Block::JungleLeaves(_) => JungleLeaves::DISPLAY_NAME,
+			Block::AcaciaLeaves(_) => AcaciaLeaves::DISPLAY_NAME,
+			Block::DarkOakLeaves(_) => DarkOakLeaves::DISPLAY_NAME,
+			Block::MangroveLeaves(_) => MangroveLeaves::DISPLAY_NAME,
+			Block::AzaleaLeaves(_) => AzaleaLeaves::DISPLAY_NAME,
+			Block::FloweringAzaleaLeaves(_) => FloweringAzaleaLeaves::DISPLAY_NAME,
+			Block::Sponge(_) => Sponge::DISPLAY_NAME,
+			Block::WetSponge(_) => WetSponge::DISPLAY_NAME,
+			Block::Glass(_) => Glass::DISPLAY_NAME,
+			Block::LapisOre(_) => LapisOre::DISPLAY_NAME,
+			Block::DeepslateLapisOre(_) => DeepslateLapisOre::DISPLAY_NAME,
+			Block::LapisBlock(_) => LapisBlock::DISPLAY_NAME,
+			Block::Dispenser(_) => Dispenser::DISPLAY_NAME,
+			Block::Sandstone(_) => Sandstone::DISPLAY_NAME,
+			Block::ChiseledSandstone(_) => ChiseledSandstone::DISPLAY_NAME,
+			Block::CutSandstone(_) => CutSandstone::DISPLAY_NAME,
+			Block::NoteBlock(_) => NoteBlock::DISPLAY_NAME,
+			Block::WhiteBed(_) => WhiteBed::DISPLAY_NAME,
+			Block::OrangeBed(_) => OrangeBed::DISPLAY_NAME,
+			Block::MagentaBed(_) => MagentaBed::DISPLAY_NAME,
+			Block::LightBlueBed(_) => LightBlueBed::DISPLAY_NAME,
+			Block::YellowBed(_) => YellowBed::DISPLAY_NAME,
+			Block::LimeBed(_) => LimeBed::DISPLAY_NAME,
+			Block::PinkBed(_) => PinkBed::DISPLAY_NAME,
+			Block::GrayBed(_) => GrayBed::DISPLAY_NAME,
+			Block::LightGrayBed(_) => LightGrayBed::DISPLAY_NAME,
+			Block::CyanBed(_) => CyanBed::DISPLAY_NAME,
+			Block::PurpleBed(_) => PurpleBed::DISPLAY_NAME,
+			Block::BlueBed(_) => BlueBed::DISPLAY_NAME,
+			Block::BrownBed(_) => BrownBed::DISPLAY_NAME,
+			Block::GreenBed(_) => GreenBed::DISPLAY_NAME,
+			Block::RedBed(_) => RedBed::DISPLAY_NAME,
+			Block::BlackBed(_) => BlackBed::DISPLAY_NAME,
+			Block::PoweredRail(_) => PoweredRail::DISPLAY_NAME,
+			Block::DetectorRail(_) => DetectorRail::DISPLAY_NAME,
+			Block::StickyPiston(_) => StickyPiston::DISPLAY_NAME,
+			Block::Cobweb(_) => Cobweb::DISPLAY_NAME,
+			Block::Grass(_) => Grass::DISPLAY_NAME,
+			Block::Fern(_) => Fern::DISPLAY_NAME,
+			Block::DeadBush(_) => DeadBush::DISPLAY_NAME,
+			Block::Seagrass(_) => Seagrass::DISPLAY_NAME,
+			Block::TallSeagrass(_) => TallSeagrass::DISPLAY_NAME,
+			Block::Piston(_) => Piston::DISPLAY_NAME,
+			Block::PistonHead(_) => PistonHead::DISPLAY_NAME,
+			Block::WhiteWool(_) => WhiteWool::DISPLAY_NAME,
+			Block::OrangeWool(_) => OrangeWool::DISPLAY_NAME,
+			Block::MagentaWool(_) => MagentaWool::DISPLAY_NAME,
+			Block::LightBlueWool(_) => LightBlueWool::DISPLAY_NAME,
+			Block::YellowWool(_) => YellowWool::DISPLAY_NAME,
+			Block::LimeWool(_) => LimeWool::DISPLAY_NAME,
+			Block::PinkWool(_) => PinkWool::DISPLAY_NAME,
+			Block::GrayWool(_) => GrayWool::DISPLAY_NAME,
+			Block::LightGrayWool(_) => LightGrayWool::DISPLAY_NAME,
+			Block::CyanWool(_) => CyanWool::DISPLAY_NAME,
+			Block::PurpleWool(_) => PurpleWool::DISPLAY_NAME,
+			Block::BlueWool(_) => BlueWool::DISPLAY_NAME,
+			Block::BrownWool(_) => BrownWool::DISPLAY_NAME,
+			Block::GreenWool(_) => GreenWool::DISPLAY_NAME,
+			Block::RedWool(_) => RedWool::DISPLAY_NAME,
+			Block::BlackWool(_) => BlackWool::DISPLAY_NAME,
+			Block::MovingPiston(_) => MovingPiston::DISPLAY_NAME,
+			Block::Dandelion(_) => Dandelion::DISPLAY_NAME,
+			Block::Poppy(_) => Poppy::DISPLAY_NAME,
+			Block::BlueOrchid(_) => BlueOrchid::DISPLAY_NAME,
+			Block::Allium(_) => Allium::DISPLAY_NAME,
+			Block::AzureBluet(_) => AzureBluet::DISPLAY_NAME,
+			Block::RedTulip(_) => RedTulip::DISPLAY_NAME,
+			Block::OrangeTulip(_) => OrangeTulip::DISPLAY_NAME,
+			Block::WhiteTulip(_) => WhiteTulip::DISPLAY_NAME,
+			Block::PinkTulip(_) => PinkTulip::DISPLAY_NAME,
+			Block::OxeyeDaisy(_) => OxeyeDaisy::DISPLAY_NAME,
+			Block::Cornflower(_) => Cornflower::DISPLAY_NAME,
+			Block::WitherRose(_) => WitherRose::DISPLAY_NAME,
+			Block::LilyOfTheValley(_) => LilyOfTheValley::DISPLAY_NAME,
+			Block::BrownMushroom(_) => BrownMushroom::DISPLAY_NAME,
+			Block::RedMushroom(_) => RedMushroom::DISPLAY_NAME,
+			Block::GoldBlock(_) => GoldBlock::DISPLAY_NAME,
+			Block::IronBlock(_) => IronBlock::DISPLAY_NAME,
+			Block::Bricks(_) => Bricks::DISPLAY_NAME,
+			Block::Tnt(_) => Tnt::DISPLAY_NAME,
+			Block::Bookshelf(_) => Bookshelf::DISPLAY_NAME,
+			Block::MossyCobblestone(_) => MossyCobblestone::DISPLAY_NAME,
+			Block::Obsidian(_) => Obsidian::DISPLAY_NAME,
+			Block::Torch(_) => Torch::DISPLAY_NAME,
+			Block::WallTorch(_) => WallTorch::DISPLAY_NAME,
+			Block::Fire(_) => Fire::DISPLAY_NAME,
+			Block::SoulFire(_) => SoulFire::DISPLAY_NAME,
+			Block::Spawner(_) => Spawner::DISPLAY_NAME,
+			Block::OakStairs(_) => OakStairs::DISPLAY_NAME,
+			Block::Chest(_) => Chest::DISPLAY_NAME,
+			Block::RedstoneWire(_) => RedstoneWire::DISPLAY_NAME,
+			Block::DiamondOre(_) => DiamondOre::DISPLAY_NAME,
+			Block::DeepslateDiamondOre(_) => DeepslateDiamondOre::DISPLAY_NAME,
+			Block::DiamondBlock(_) => DiamondBlock::DISPLAY_NAME,
+			Block::CraftingTable(_) => CraftingTable::DISPLAY_NAME,
+			Block::Wheat(_) => Wheat::DISPLAY_NAME,
+			Block::Farmland(_) => Farmland::DISPLAY_NAME,
+			Block::Furnace(_) => Furnace::DISPLAY_NAME,
+			Block::OakSign(_) => OakSign::DISPLAY_NAME,
+			Block::SpruceSign(_) => SpruceSign::DISPLAY_NAME,
+			Block::BirchSign(_) => BirchSign::DISPLAY_NAME,
+			Block::AcaciaSign(_) => AcaciaSign::DISPLAY_NAME,
+			Block::JungleSign(_) => JungleSign::DISPLAY_NAME,
+			Block::DarkOakSign(_) => DarkOakSign::DISPLAY_NAME,
+			Block::MangroveSign(_) => MangroveSign::DISPLAY_NAME,
+			Block::OakDoor(_) => OakDoor::DISPLAY_NAME,
+			Block::Ladder(_) => Ladder::DISPLAY_NAME,
+			Block::Rail(_) => Rail::DISPLAY_NAME,
+			Block::CobblestoneStairs(_) => CobblestoneStairs::DISPLAY_NAME,
+			Block::OakWallSign(_) => OakWallSign::DISPLAY_NAME,
+			Block::SpruceWallSign(_) => SpruceWallSign::DISPLAY_NAME,
+			Block::BirchWallSign(_) => BirchWallSign::DISPLAY_NAME,
+			Block::AcaciaWallSign(_) => AcaciaWallSign::DISPLAY_NAME,
+			Block::JungleWallSign(_) => JungleWallSign::DISPLAY_NAME,
+			Block::DarkOakWallSign(_) => DarkOakWallSign::DISPLAY_NAME,
+			Block::MangroveWallSign(_) => MangroveWallSign::DISPLAY_NAME,
+			Block::Lever(_) => Lever::DISPLAY_NAME,
+			Block::StonePressurePlate(_) => StonePressurePlate::DISPLAY_NAME,
+			Block::IronDoor(_) => IronDoor::DISPLAY_NAME,
+			Block::OakPressurePlate(_) => OakPressurePlate::DISPLAY_NAME,
+			Block::SprucePressurePlate(_) => SprucePressurePlate::DISPLAY_NAME,
+			Block::BirchPressurePlate(_) => BirchPressurePlate::DISPLAY_NAME,
+			Block::JunglePressurePlate(_) => JunglePressurePlate::DISPLAY_NAME,
+			Block::AcaciaPressurePlate(_) => AcaciaPressurePlate::DISPLAY_NAME,
+			Block::DarkOakPressurePlate(_) => DarkOakPressurePlate::DISPLAY_NAME,
+			Block::MangrovePressurePlate(_) => MangrovePressurePlate::DISPLAY_NAME,
+			Block::RedstoneOre(_) => RedstoneOre::DISPLAY_NAME,
+			Block::DeepslateRedstoneOre(_) => DeepslateRedstoneOre::DISPLAY_NAME,
+			Block::RedstoneTorch(_) => RedstoneTorch::DISPLAY_NAME,
+			Block::RedstoneWallTorch(_) => RedstoneWallTorch::DISPLAY_NAME,
+			Block::StoneButton(_) => StoneButton::DISPLAY_NAME,
+			Block::Snow(_) => Snow::DISPLAY_NAME,
+			Block::Ice(_) => Ice::DISPLAY_NAME,
+			Block::SnowBlock(_) => SnowBlock::DISPLAY_NAME,
+			Block::Cactus(_) => Cactus::DISPLAY_NAME,
+			Block::Clay(_) => Clay::DISPLAY_NAME,
+			Block::SugarCane(_) => SugarCane::DISPLAY_NAME,
+			Block::Jukebox(_) => Jukebox::DISPLAY_NAME,
+			Block::OakFence(_) => OakFence::DISPLAY_NAME,
+			Block::Pumpkin(_) => Pumpkin::DISPLAY_NAME,
+			Block::Netherrack(_) => Netherrack::DISPLAY_NAME,
+			Block::SoulSand(_) => SoulSand::DISPLAY_NAME,
+			Block::SoulSoil(_) => SoulSoil::DISPLAY_NAME,
+			Block::Basalt(_) => Basalt::DISPLAY_NAME,
+			Block::PolishedBasalt(_) => PolishedBasalt::DISPLAY_NAME,
+			Block::SoulTorch(_) => SoulTorch::DISPLAY_NAME,
+			Block::SoulWallTorch(_) => SoulWallTorch::DISPLAY_NAME,
+			Block::Glowstone(_) => Glowstone::DISPLAY_NAME,
+			Block::NetherPortal(_) => NetherPortal::DISPLAY_NAME,
+			Block::CarvedPumpkin(_) => CarvedPumpkin::DISPLAY_NAME,
+			Block::JackOLantern(_) => JackOLantern::DISPLAY_NAME,
+			Block::Cake(_) => Cake::DISPLAY_NAME,
+			Block::Repeater(_) => Repeater::DISPLAY_NAME,
+			Block::WhiteStainedGlass(_) => WhiteStainedGlass::DISPLAY_NAME,
+			Block::OrangeStainedGlass(_) => OrangeStainedGlass::DISPLAY_NAME,
+			Block::MagentaStainedGlass(_) => MagentaStainedGlass::DISPLAY_NAME,
+			Block::LightBlueStainedGlass(_) => LightBlueStainedGlass::DISPLAY_NAME,
+			Block::YellowStainedGlass(_) => YellowStainedGlass::DISPLAY_NAME,
+			Block::LimeStainedGlass(_) => LimeStainedGlass::DISPLAY_NAME,
+			Block::PinkStainedGlass(_) => PinkStainedGlass::DISPLAY_NAME,
+			Block::GrayStainedGlass(_) => GrayStainedGlass::DISPLAY_NAME,
+			Block::LightGrayStainedGlass(_) => LightGrayStainedGlass::DISPLAY_NAME,
+			Block::CyanStainedGlass(_) => CyanStainedGlass::DISPLAY_NAME,
+			Block::PurpleStainedGlass(_) => PurpleStainedGlass::DISPLAY_NAME,
+			Block::BlueStainedGlass(_) => BlueStainedGlass::DISPLAY_NAME,
+			Block::BrownStainedGlass(_) => BrownStainedGlass::DISPLAY_NAME,
+			Block::GreenStainedGlass(_) => GreenStainedGlass::DISPLAY_NAME,
+			Block::RedStainedGlass(_) => RedStainedGlass::DISPLAY_NAME,
+			Block::BlackStainedGlass(_) => BlackStainedGlass::DISPLAY_NAME,
+			Block::OakTrapdoor(_) => OakTrapdoor::DISPLAY_NAME,
+			Block::SpruceTrapdoor(_) => SpruceTrapdoor::DISPLAY_NAME,
+			Block::BirchTrapdoor(_) => BirchTrapdoor::DISPLAY_NAME,
+			Block::JungleTrapdoor(_) => JungleTrapdoor::DISPLAY_NAME,
+			Block::AcaciaTrapdoor(_) => AcaciaTrapdoor::DISPLAY_NAME,
+			Block::DarkOakTrapdoor(_) => DarkOakTrapdoor::DISPLAY_NAME,
+			Block::MangroveTrapdoor(_) => MangroveTrapdoor::DISPLAY_NAME,
+			Block::StoneBricks(_) => StoneBricks::DISPLAY_NAME,
+			Block::MossyStoneBricks(_) => MossyStoneBricks::DISPLAY_NAME,
+			Block::CrackedStoneBricks(_) => CrackedStoneBricks::DISPLAY_NAME,
+			Block::ChiseledStoneBricks(_) => ChiseledStoneBricks::DISPLAY_NAME,
+			Block::PackedMud(_) => PackedMud::DISPLAY_NAME,
+			Block::MudBricks(_) => MudBricks::DISPLAY_NAME,
+			Block::InfestedStone(_) => InfestedStone::DISPLAY_NAME,
+			Block::InfestedCobblestone(_) => InfestedCobblestone::DISPLAY_NAME,
+			Block::InfestedStoneBricks(_) => InfestedStoneBricks::DISPLAY_NAME,
+			Block::InfestedMossyStoneBricks(_) => InfestedMossyStoneBricks::DISPLAY_NAME,
+			Block::InfestedCrackedStoneBricks(_) => InfestedCrackedStoneBricks::DISPLAY_NAME,
+			Block::InfestedChiseledStoneBricks(_) => InfestedChiseledStoneBricks::DISPLAY_NAME,
+			Block::BrownMushroomBlock(_) => BrownMushroomBlock::DISPLAY_NAME,
+			Block::RedMushroomBlock(_) => RedMushroomBlock::DISPLAY_NAME,
+			Block::MushroomStem(_) => MushroomStem::DISPLAY_NAME,
+			Block::IronBars(_) => IronBars::DISPLAY_NAME,
+			Block::Chain(_) => Chain::DISPLAY_NAME,
+			Block::GlassPane(_) => GlassPane::DISPLAY_NAME,
+			Block::Melon(_) => Melon::DISPLAY_NAME,
+			Block::AttachedPumpkinStem(_) => AttachedPumpkinStem::DISPLAY_NAME,
+			Block::AttachedMelonStem(_) => AttachedMelonStem::DISPLAY_NAME,
+			Block::PumpkinStem(_) => PumpkinStem::DISPLAY_NAME,
+			Block::MelonStem(_) => MelonStem::DISPLAY_NAME,
+			Block::Vine(_) => Vine::DISPLAY_NAME,
+			Block::GlowLichen(_) => GlowLichen::DISPLAY_NAME,
+			Block::OakFenceGate(_) => OakFenceGate::DISPLAY_NAME,
+			Block::BrickStairs(_) => BrickStairs::DISPLAY_NAME,
+			Block::StoneBrickStairs(_) => StoneBrickStairs::DISPLAY_NAME,
+			Block::MudBrickStairs(_) => MudBrickStairs::DISPLAY_NAME,
+			Block::Mycelium(_) => Mycelium::DISPLAY_NAME,
+			Block::LilyPad(_) => LilyPad::DISPLAY_NAME,
+			Block::NetherBricks(_) => NetherBricks::DISPLAY_NAME,
+			Block::NetherBrickFence(_) => NetherBrickFence::DISPLAY_NAME,
+			Block::NetherBrickStairs(_) => NetherBrickStairs::DISPLAY_NAME,
+			Block::NetherWart(_) => NetherWart::DISPLAY_NAME,
+			Block::EnchantingTable(_) => EnchantingTable::DISPLAY_NAME,
+			Block::BrewingStand(_) => BrewingStand::DISPLAY_NAME,
+			Block::Cauldron(_) => Cauldron::DISPLAY_NAME,
+			Block::WaterCauldron(_) => WaterCauldron::DISPLAY_NAME,
+			Block::LavaCauldron(_) => LavaCauldron::DISPLAY_NAME,
+			Block::PowderSnowCauldron(_) => PowderSnowCauldron::DISPLAY_NAME,
+			Block::EndPortal(_) => EndPortal::DISPLAY_NAME,
+			Block::EndPortalFrame(_) => EndPortalFrame::DISPLAY_NAME,
+			Block::EndStone(_) => EndStone::DISPLAY_NAME,
+			Block::DragonEgg(_) => DragonEgg::DISPLAY_NAME,
+			Block::RedstoneLamp(_) => RedstoneLamp::DISPLAY_NAME,
+			Block::Cocoa(_) => Cocoa::DISPLAY_NAME,
+			Block::SandstoneStairs(_) => SandstoneStairs::DISPLAY_NAME,
+			Block::EmeraldOre(_) => EmeraldOre::DISPLAY_NAME,
+			Block::DeepslateEmeraldOre(_) => DeepslateEmeraldOre::DISPLAY_NAME,
+			Block::EnderChest(_) => EnderChest::DISPLAY_NAME,
+			Block::TripwireHook(_) => TripwireHook::DISPLAY_NAME,
+			Block::Tripwire(_) => Tripwire::DISPLAY_NAME,
+			Block::EmeraldBlock(_) => EmeraldBlock::DISPLAY_NAME,
+			Block::SpruceStairs(_) => SpruceStairs::DISPLAY_NAME,
+			Block::BirchStairs(_) => BirchStairs::DISPLAY_NAME,
+			Block::JungleStairs(_) => JungleStairs::DISPLAY_NAME,
+			Block::CommandBlock(_) => CommandBlock::DISPLAY_NAME,
+			Block::Beacon(_) => Beacon::DISPLAY_NAME,
+			Block::CobblestoneWall(_) => CobblestoneWall::DISPLAY_NAME,
+			Block::MossyCobblestoneWall(_) => MossyCobblestoneWall::DISPLAY_NAME,
+			Block::FlowerPot(_) => FlowerPot::DISPLAY_NAME,
+			Block::PottedOakSapling(_) => PottedOakSapling::DISPLAY_NAME,
+			Block::PottedSpruceSapling(_) => PottedSpruceSapling::DISPLAY_NAME,
+			Block::PottedBirchSapling(_) => PottedBirchSapling::DISPLAY_NAME,
+			Block::PottedJungleSapling(_) => PottedJungleSapling::DISPLAY_NAME,
+			Block::PottedAcaciaSapling(_) => PottedAcaciaSapling::DISPLAY_NAME,
+			Block::PottedDarkOakSapling(_) => PottedDarkOakSapling::DISPLAY_NAME,
+			Block::PottedMangrovePropagule(_) => PottedMangrovePropagule::DISPLAY_NAME,
+			Block::PottedFern(_) => PottedFern::DISPLAY_NAME,
+			Block::PottedDandelion(_) => PottedDandelion::DISPLAY_NAME,
+			Block::PottedPoppy(_) => PottedPoppy::DISPLAY_NAME,
+			Block::PottedBlueOrchid(_) => PottedBlueOrchid::DISPLAY_NAME,
+			Block::PottedAllium(_) => PottedAllium::DISPLAY_NAME,
+			Block::PottedAzureBluet(_) => PottedAzureBluet::DISPLAY_NAME,
+			Block::PottedRedTulip(_) => PottedRedTulip::DISPLAY_NAME,
+			Block::PottedOrangeTulip(_) => PottedOrangeTulip::DISPLAY_NAME,
+			Block::PottedWhiteTulip(_) => PottedWhiteTulip::DISPLAY_NAME,
+			Block::PottedPinkTulip(_) => PottedPinkTulip::DISPLAY_NAME,
+			Block::PottedOxeyeDaisy(_) => PottedOxeyeDaisy::DISPLAY_NAME,
+			Block::PottedCornflower(_) => PottedCornflower::DISPLAY_NAME,
+			Block::PottedLilyOfTheValley(_) => PottedLilyOfTheValley::DISPLAY_NAME,
+			Block::PottedWitherRose(_) => PottedWitherRose::DISPLAY_NAME,
+			Block::PottedRedMushroom(_) => PottedRedMushroom::DISPLAY_NAME,
+			Block::PottedBrownMushroom(_) => PottedBrownMushroom::DISPLAY_NAME,
+			Block::PottedDeadBush(_) => PottedDeadBush::DISPLAY_NAME,
+			Block::PottedCactus(_) => PottedCactus::DISPLAY_NAME,
+			Block::Carrots(_) => Carrots::DISPLAY_NAME,
+			Block::Potatoes(_) => Potatoes::DISPLAY_NAME,
+			Block::OakButton(_) => OakButton::DISPLAY_NAME,
+			Block::SpruceButton(_) => SpruceButton::DISPLAY_NAME,
+			Block::BirchButton(_) => BirchButton::DISPLAY_NAME,
+			Block::JungleButton(_) => JungleButton::DISPLAY_NAME,
+			Block::AcaciaButton(_) => AcaciaButton::DISPLAY_NAME,
+			Block::DarkOakButton(_) => DarkOakButton::DISPLAY_NAME,
+			Block::MangroveButton(_) => MangroveButton::DISPLAY_NAME,
+			Block::SkeletonSkull(_) => SkeletonSkull::DISPLAY_NAME,
+			Block::SkeletonWallSkull(_) => SkeletonWallSkull::DISPLAY_NAME,
+			Block::WitherSkeletonSkull(_) => WitherSkeletonSkull::DISPLAY_NAME,
+			Block::WitherSkeletonWallSkull(_) => WitherSkeletonWallSkull::DISPLAY_NAME,
+			Block::ZombieHead(_) => ZombieHead::DISPLAY_NAME,
+			Block::ZombieWallHead(_) => ZombieWallHead::DISPLAY_NAME,
+			Block::PlayerHead(_) => PlayerHead::DISPLAY_NAME,
+			Block::PlayerWallHead(_) => PlayerWallHead::DISPLAY_NAME,
+			Block::CreeperHead(_) => CreeperHead::DISPLAY_NAME,
+			Block::CreeperWallHead(_) => CreeperWallHead::DISPLAY_NAME,
+			Block::DragonHead(_) => DragonHead::DISPLAY_NAME,
+			Block::DragonWallHead(_) => DragonWallHead::DISPLAY_NAME,
+			Block::Anvil(_) => Anvil::DISPLAY_NAME,
+			Block::ChippedAnvil(_) => ChippedAnvil::DISPLAY_NAME,
+			Block::DamagedAnvil(_) => DamagedAnvil::DISPLAY_NAME,
+			Block::TrappedChest(_) => TrappedChest::DISPLAY_NAME,
+			Block::LightWeightedPressurePlate(_) => LightWeightedPressurePlate::DISPLAY_NAME,
+			Block::HeavyWeightedPressurePlate(_) => HeavyWeightedPressurePlate::DISPLAY_NAME,
+			Block::Comparator(_) => Comparator::DISPLAY_NAME,
+			Block::DaylightDetector(_) => DaylightDetector::DISPLAY_NAME,
+			Block::RedstoneBlock(_) => RedstoneBlock::DISPLAY_NAME,
+			Block::NetherQuartzOre(_) => NetherQuartzOre::DISPLAY_NAME,
+			Block::Hopper(_) => Hopper::DISPLAY_NAME,
+			Block::QuartzBlock(_) => QuartzBlock::DISPLAY_NAME,
+			Block::ChiseledQuartzBlock(_) => ChiseledQuartzBlock::DISPLAY_NAME,
+			Block::QuartzPillar(_) => QuartzPillar::DISPLAY_NAME,
+			Block::QuartzStairs(_) => QuartzStairs::DISPLAY_NAME,
+			Block::ActivatorRail(_) => ActivatorRail::DISPLAY_NAME,
+			Block::Dropper(_) => Dropper::DISPLAY_NAME,
+			Block::WhiteTerracotta(_) => WhiteTerracotta::DISPLAY_NAME,
+			Block::OrangeTerracotta(_) => OrangeTerracotta::DISPLAY_NAME,
+			Block::MagentaTerracotta(_) => MagentaTerracotta::DISPLAY_NAME,
+			Block::LightBlueTerracotta(_) => LightBlueTerracotta::DISPLAY_NAME,
+			Block::YellowTerracotta(_) => YellowTerracotta::DISPLAY_NAME,
+			Block::LimeTerracotta(_) => LimeTerracotta::DISPLAY_NAME,
+			Block::PinkTerracotta(_) => PinkTerracotta::DISPLAY_NAME,
+			Block::GrayTerracotta(_) => GrayTerracotta::DISPLAY_NAME,
+			Block::LightGrayTerracotta(_) => LightGrayTerracotta::DISPLAY_NAME,
+			Block::CyanTerracotta(_) => CyanTerracotta::DISPLAY_NAME,
+			Block::PurpleTerracotta(_) => PurpleTerracotta::DISPLAY_NAME,
+			Block::BlueTerracotta(_) => BlueTerracotta::DISPLAY_NAME,
+			Block::BrownTerracotta(_) => BrownTerracotta::DISPLAY_NAME,
+			Block::GreenTerracotta(_) => GreenTerracotta::DISPLAY_NAME,
+			Block::RedTerracotta(_) => RedTerracotta::DISPLAY_NAME,
+			Block::BlackTerracotta(_) => BlackTerracotta::DISPLAY_NAME,
+			Block::WhiteStainedGlassPane(_) => WhiteStainedGlassPane::DISPLAY_NAME,
+			Block::OrangeStainedGlassPane(_) => OrangeStainedGlassPane::DISPLAY_NAME,
+			Block::MagentaStainedGlassPane(_) => MagentaStainedGlassPane::DISPLAY_NAME,
+			Block::LightBlueStainedGlassPane(_) => LightBlueStainedGlassPane::DISPLAY_NAME,
+			Block::YellowStainedGlassPane(_) => YellowStainedGlassPane::DISPLAY_NAME,
+			Block::LimeStainedGlassPane(_) => LimeStainedGlassPane::DISPLAY_NAME,
+			Block::PinkStainedGlassPane(_) => PinkStainedGlassPane::DISPLAY_NAME,
+			Block::GrayStainedGlassPane(_) => GrayStainedGlassPane::DISPLAY_NAME,
+			Block::LightGrayStainedGlassPane(_) => LightGrayStainedGlassPane::DISPLAY_NAME,
+			Block::CyanStainedGlassPane(_) => CyanStainedGlassPane::DISPLAY_NAME,
+			Block::PurpleStainedGlassPane(_) => PurpleStainedGlassPane::DISPLAY_NAME,
+			Block::BlueStainedGlassPane(_) => BlueStainedGlassPane::DISPLAY_NAME,
+			Block::BrownStainedGlassPane(_) => BrownStainedGlassPane::DISPLAY_NAME,
+			Block::GreenStainedGlassPane(_) => GreenStainedGlassPane::DISPLAY_NAME,
+			Block::RedStainedGlassPane(_) => RedStainedGlassPane::DISPLAY_NAME,
+			Block::BlackStainedGlassPane(_) => BlackStainedGlassPane::DISPLAY_NAME,
+			Block::AcaciaStairs(_) => AcaciaStairs::DISPLAY_NAME,
+			Block::DarkOakStairs(_) => DarkOakStairs::DISPLAY_NAME,
+			Block::MangroveStairs(_) => MangroveStairs::DISPLAY_NAME,
+			Block::SlimeBlock(_) => SlimeBlock::DISPLAY_NAME,
+			Block::Barrier(_) => Barrier::DISPLAY_NAME,
+			Block::Light(_) => Light::DISPLAY_NAME,
+			Block::IronTrapdoor(_) => IronTrapdoor::DISPLAY_NAME,
+			Block::Prismarine(_) => Prismarine::DISPLAY_NAME,
+			Block::PrismarineBricks(_) => PrismarineBricks::DISPLAY_NAME,
+			Block::DarkPrismarine(_) => DarkPrismarine::DISPLAY_NAME,
+			Block::PrismarineStairs(_) => PrismarineStairs::DISPLAY_NAME,
+			Block::PrismarineBrickStairs(_) => PrismarineBrickStairs::DISPLAY_NAME,
+			Block::DarkPrismarineStairs(_) => DarkPrismarineStairs::DISPLAY_NAME,
+			Block::PrismarineSlab(_) => PrismarineSlab::DISPLAY_NAME,
+			Block::PrismarineBrickSlab(_) => PrismarineBrickSlab::DISPLAY_NAME,
+			Block::DarkPrismarineSlab(_) => DarkPrismarineSlab::DISPLAY_NAME,
+			Block::SeaLantern(_) => SeaLantern::DISPLAY_NAME,
+			Block::HayBlock(_) => HayBlock::DISPLAY_NAME,
+			Block::WhiteCarpet(_) => WhiteCarpet::DISPLAY_NAME,
+			Block::OrangeCarpet(_) => OrangeCarpet::DISPLAY_NAME,
+			Block::MagentaCarpet(_) => MagentaCarpet::DISPLAY_NAME,
+			Block::LightBlueCarpet(_) => LightBlueCarpet::DISPLAY_NAME,
+			Block::YellowCarpet(_) => YellowCarpet::DISPLAY_NAME,
+			Block::LimeCarpet(_) => LimeCarpet::DISPLAY_NAME,
+			Block::PinkCarpet(_) => PinkCarpet::DISPLAY_NAME,
+			Block::GrayCarpet(_) => GrayCarpet::DISPLAY_NAME,
+			Block::LightGrayCarpet(_) => LightGrayCarpet::DISPLAY_NAME,
+			Block::CyanCarpet(_) => CyanCarpet::DISPLAY_NAME,
+			Block::PurpleCarpet(_) => PurpleCarpet::DISPLAY_NAME,
+			Block::BlueCarpet(_) => BlueCarpet::DISPLAY_NAME,
+			Block::BrownCarpet(_) => BrownCarpet::DISPLAY_NAME,
+			Block::GreenCarpet(_) => GreenCarpet::DISPLAY_NAME,
+			Block::RedCarpet(_) => RedCarpet::DISPLAY_NAME,
+			Block::BlackCarpet(_) => BlackCarpet::DISPLAY_NAME,
+			Block::Terracotta(_) => Terracotta::DISPLAY_NAME,
+			Block::CoalBlock(_) => CoalBlock::DISPLAY_NAME,
+			Block::PackedIce(_) => PackedIce::DISPLAY_NAME,
+			Block::Sunflower(_) => Sunflower::DISPLAY_NAME,
+			Block::Lilac(_) => Lilac::DISPLAY_NAME,
+			Block::RoseBush(_) => RoseBush::DISPLAY_NAME,
+			Block::Peony(_) => Peony::DISPLAY_NAME,
+			Block::TallGrass(_) => TallGrass::DISPLAY_NAME,
+			Block::LargeFern(_) => LargeFern::DISPLAY_NAME,
+			Block::WhiteBanner(_) => WhiteBanner::DISPLAY_NAME,
+			Block::OrangeBanner(_) => OrangeBanner::DISPLAY_NAME,
+			Block::MagentaBanner(_) => MagentaBanner::DISPLAY_NAME,
+			Block::LightBlueBanner(_) => LightBlueBanner::DISPLAY_NAME,
+			Block::YellowBanner(_) => YellowBanner::DISPLAY_NAME,
+			Block::LimeBanner(_) => LimeBanner::DISPLAY_NAME,
+			Block::PinkBanner(_) => PinkBanner::DISPLAY_NAME,
+			Block::GrayBanner(_) => GrayBanner::DISPLAY_NAME,
+			Block::LightGrayBanner(_) => LightGrayBanner::DISPLAY_NAME,
+			Block::CyanBanner(_) => CyanBanner::DISPLAY_NAME,
+			Block::PurpleBanner(_) => PurpleBanner::DISPLAY_NAME,
+			Block::BlueBanner(_) => BlueBanner::DISPLAY_NAME,
+			Block::BrownBanner(_) => BrownBanner::DISPLAY_NAME,
+			Block::GreenBanner(_) => GreenBanner::DISPLAY_NAME,
+			Block::RedBanner(_) => RedBanner::DISPLAY_NAME,
+			Block::BlackBanner(_) => BlackBanner::DISPLAY_NAME,
+			Block::WhiteWallBanner(_) => WhiteWallBanner::DISPLAY_NAME,
+			Block::OrangeWallBanner(_) => OrangeWallBanner::DISPLAY_NAME,
+			Block::MagentaWallBanner(_) => MagentaWallBanner::DISPLAY_NAME,
+			Block::LightBlueWallBanner(_) => LightBlueWallBanner::DISPLAY_NAME,
+			Block::YellowWallBanner(_) => YellowWallBanner::DISPLAY_NAME,
+			Block::LimeWallBanner(_) => LimeWallBanner::DISPLAY_NAME,
+			Block::PinkWallBanner(_) => PinkWallBanner::DISPLAY_NAME,
+			Block::GrayWallBanner(_) => GrayWallBanner::DISPLAY_NAME,
+			Block::LightGrayWallBanner(_) => LightGrayWallBanner::DISPLAY_NAME,
+			Block::CyanWallBanner(_) => CyanWallBanner::DISPLAY_NAME,
+			Block::PurpleWallBanner(_) => PurpleWallBanner::DISPLAY_NAME,
+			Block::BlueWallBanner(_) => BlueWallBanner::DISPLAY_NAME,
+			Block::BrownWallBanner(_) => BrownWallBanner::DISPLAY_NAME,
+			Block::GreenWallBanner(_) => GreenWallBanner::DISPLAY_NAME,
+			Block::RedWallBanner(_) => RedWallBanner::DISPLAY_NAME,
+			Block::BlackWallBanner(_) => BlackWallBanner::DISPLAY_NAME,
+			Block::RedSandstone(_) => RedSandstone::DISPLAY_NAME,
+			Block::ChiseledRedSandstone(_) => ChiseledRedSandstone::DISPLAY_NAME,
+			Block::CutRedSandstone(_) => CutRedSandstone::DISPLAY_NAME,
+			Block::RedSandstoneStairs(_) => RedSandstoneStairs::DISPLAY_NAME,
+			Block::OakSlab(_) => OakSlab::DISPLAY_NAME,
+			Block::SpruceSlab(_) => SpruceSlab::DISPLAY_NAME,
+			Block::BirchSlab(_) => BirchSlab::DISPLAY_NAME,
+			Block::JungleSlab(_) => JungleSlab::DISPLAY_NAME,
+			Block::AcaciaSlab(_) => AcaciaSlab::DISPLAY_NAME,
+			Block::DarkOakSlab(_) => DarkOakSlab::DISPLAY_NAME,
+			Block::MangroveSlab(_) => MangroveSlab::DISPLAY_NAME,
+			Block::StoneSlab(_) => StoneSlab::DISPLAY_NAME,
+			Block::SmoothStoneSlab(_) => SmoothStoneSlab::DISPLAY_NAME,
+			Block::SandstoneSlab(_) => SandstoneSlab::DISPLAY_NAME,
+			Block::CutSandstoneSlab(_) => CutSandstoneSlab::DISPLAY_NAME,
+			Block::PetrifiedOakSlab(_) => PetrifiedOakSlab::DISPLAY_NAME,
+			Block::CobblestoneSlab(_) => CobblestoneSlab::DISPLAY_NAME,
+			Block::BrickSlab(_) => BrickSlab::DISPLAY_NAME,
+			Block::StoneBrickSlab(_) => StoneBrickSlab::DISPLAY_NAME,
+			Block::MudBrickSlab(_) => MudBrickSlab::DISPLAY_NAME,
+			Block::NetherBrickSlab(_) => NetherBrickSlab::DISPLAY_NAME,
+			Block::QuartzSlab(_) => QuartzSlab::DISPLAY_NAME,
+			Block::RedSandstoneSlab(_) => RedSandstoneSlab::DISPLAY_NAME,
+			Block::CutRedSandstoneSlab(_) => CutRedSandstoneSlab::DISPLAY_NAME,
+			Block::PurpurSlab(_) => PurpurSlab::DISPLAY_NAME,
+			Block::SmoothStone(_) => SmoothStone::DISPLAY_NAME,
+			Block::SmoothSandstone(_) => SmoothSandstone::DISPLAY_NAME,
+			Block::SmoothQuartz(_) => SmoothQuartz::DISPLAY_NAME,
+			Block::SmoothRedSandstone(_) => SmoothRedSandstone::DISPLAY_NAME,
+			Block::SpruceFenceGate(_) => SpruceFenceGate::DISPLAY_NAME,
+			Block::BirchFenceGate(_) => BirchFenceGate::DISPLAY_NAME,
+			Block::JungleFenceGate(_) => JungleFenceGate::DISPLAY_NAME,
+			Block::AcaciaFenceGate(_) => AcaciaFenceGate::DISPLAY_NAME,
+			Block::DarkOakFenceGate(_) => DarkOakFenceGate::DISPLAY_NAME,
+			Block::MangroveFenceGate(_) => MangroveFenceGate::DISPLAY_NAME,
+			Block::SpruceFence(_) => SpruceFence::DISPLAY_NAME,
+			Block::BirchFence(_) => BirchFence::DISPLAY_NAME,
+			Block::JungleFence(_) => JungleFence::DISPLAY_NAME,
+			Block::AcaciaFence(_) => AcaciaFence::DISPLAY_NAME,
+			Block::DarkOakFence(_) => DarkOakFence::DISPLAY_NAME,
+			Block::MangroveFence(_) => MangroveFence::DISPLAY_NAME,
+			Block::SpruceDoor(_) => SpruceDoor::DISPLAY_NAME,
+			Block::BirchDoor(_) => BirchDoor::DISPLAY_NAME,
+			Block::JungleDoor(_) => JungleDoor::DISPLAY_NAME,
+			Block::AcaciaDoor(_) => AcaciaDoor::DISPLAY_NAME,
+			Block::DarkOakDoor(_) => DarkOakDoor::DISPLAY_NAME,
+			Block::MangroveDoor(_) => MangroveDoor::DISPLAY_NAME,
+			Block::EndRod(_) => EndRod::DISPLAY_NAME,
+			Block::ChorusPlant(_) => ChorusPlant::DISPLAY_NAME,
+			Block::ChorusFlower(_) => ChorusFlower::DISPLAY_NAME,
+			Block::PurpurBlock(_) => PurpurBlock::DISPLAY_NAME,
+			Block::PurpurPillar(_) => PurpurPillar::DISPLAY_NAME,
+			Block::PurpurStairs(_) => PurpurStairs::DISPLAY_NAME,
+			Block::EndStoneBricks(_) => EndStoneBricks::DISPLAY_NAME,
+			Block::Beetroots(_) => Beetroots::DISPLAY_NAME,
+			Block::DirtPath(_) => DirtPath::DISPLAY_NAME,
+			Block::EndGateway(_) => EndGateway::DISPLAY_NAME,
+			Block::RepeatingCommandBlock(_) => RepeatingCommandBlock::DISPLAY_NAME,
+			Block::ChainCommandBlock(_) => ChainCommandBlock::DISPLAY_NAME,
+			Block::FrostedIce(_) => FrostedIce::DISPLAY_NAME,
+			Block::MagmaBlock(_) => MagmaBlock::DISPLAY_NAME,
+			Block::NetherWartBlock(_) => NetherWartBlock::DISPLAY_NAME,
+			Block::RedNetherBricks(_) => RedNetherBricks::DISPLAY_NAME,
+			Block::BoneBlock(_) => BoneBlock::DISPLAY_NAME,
+			Block::StructureVoid(_) => StructureVoid::DISPLAY_NAME,
+			Block::Observer(_) => Observer::DISPLAY_NAME,
+			Block::ShulkerBox(_) => ShulkerBox::DISPLAY_NAME,
+			Block::WhiteShulkerBox(_) => WhiteShulkerBox::DISPLAY_NAME,
+			Block::OrangeShulkerBox(_) => OrangeShulkerBox::DISPLAY_NAME,
+			Block::MagentaShulkerBox(_) => MagentaShulkerBox::DISPLAY_NAME,
+			Block::LightBlueShulkerBox(_) => LightBlueShulkerBox::DISPLAY_NAME,
+			Block::YellowShulkerBox(_) => YellowShulkerBox::DISPLAY_NAME,
+			Block::LimeShulkerBox(_) => LimeShulkerBox::DISPLAY_NAME,
+			Block::PinkShulkerBox(_) => PinkShulkerBox::DISPLAY_NAME,
+			Block::GrayShulkerBox(_) => GrayShulkerBox::DISPLAY_NAME,
+			Block::LightGrayShulkerBox(_) => LightGrayShulkerBox::DISPLAY_NAME,
+			Block::CyanShulkerBox(_) => CyanShulkerBox::DISPLAY_NAME,
+			Block::PurpleShulkerBox(_) => PurpleShulkerBox::DISPLAY_NAME,
+			Block::BlueShulkerBox(_) => BlueShulkerBox::DISPLAY_NAME,
+			Block::BrownShulkerBox(_) => BrownShulkerBox::DISPLAY_NAME,
+			Block::GreenShulkerBox(_) => GreenShulkerBox::DISPLAY_NAME,
+			Block::RedShulkerBox(_) => RedShulkerBox::DISPLAY_NAME,
+			Block::BlackShulkerBox(_) => BlackShulkerBox::DISPLAY_NAME,
+			Block::WhiteGlazedTerracotta(_) => WhiteGlazedTerracotta::DISPLAY_NAME,
+			Block::OrangeGlazedTerracotta(_) => OrangeGlazedTerracotta::DISPLAY_NAME,
+			Block::MagentaGlazedTerracotta(_) => MagentaGlazedTerracotta::DISPLAY_NAME,
+			Block::LightBlueGlazedTerracotta(_) => LightBlueGlazedTerracotta::DISPLAY_NAME,
+			Block::YellowGlazedTerracotta(_) => YellowGlazedTerracotta::DISPLAY_NAME,
+			Block::LimeGlazedTerracotta(_) => LimeGlazedTerracotta::DISPLAY_NAME,
+			Block::PinkGlazedTerracotta(_) => PinkGlazedTerracotta::DISPLAY_NAME,
+			Block::GrayGlazedTerracotta(_) => GrayGlazedTerracotta::DISPLAY_NAME,
+			Block::LightGrayGlazedTerracotta(_) => LightGrayGlazedTerracotta::DISPLAY_NAME,
+			Block::CyanGlazedTerracotta(_) => CyanGlazedTerracotta::DISPLAY_NAME,
+			Block::PurpleGlazedTerracotta(_) => PurpleGlazedTerracotta::DISPLAY_NAME,
+			Block::BlueGlazedTerracotta(_) => BlueGlazedTerracotta::DISPLAY_NAME,
+			Block::BrownGlazedTerracotta(_) => BrownGlazedTerracotta::DISPLAY_NAME,
+			Block::GreenGlazedTerracotta(_) => GreenGlazedTerracotta::DISPLAY_NAME,
+			Block::RedGlazedTerracotta(_) => RedGlazedTerracotta::DISPLAY_NAME,
+			Block::BlackGlazedTerracotta(_) => BlackGlazedTerracotta::DISPLAY_NAME,
+			Block::WhiteConcrete(_) => WhiteConcrete::DISPLAY_NAME,
+			Block::OrangeConcrete(_) => OrangeConcrete::DISPLAY_NAME,
+			Block::MagentaConcrete(_) => MagentaConcrete::DISPLAY_NAME,
+			Block::LightBlueConcrete(_) => LightBlueConcrete::DISPLAY_NAME,
+			Block::YellowConcrete(_) => YellowConcrete::DISPLAY_NAME,
+			Block::LimeConcrete(_) => LimeConcrete::DISPLAY_NAME,
+			Block::PinkConcrete(_) => PinkConcrete::DISPLAY_NAME,
+			Block::GrayConcrete(_) => GrayConcrete::DISPLAY_NAME,
+			Block::LightGrayConcrete(_) => LightGrayConcrete::DISPLAY_NAME,
+			Block::CyanConcrete(_) => CyanConcrete::DISPLAY_NAME,
+			Block::PurpleConcrete(_) => PurpleConcrete::DISPLAY_NAME,
+			Block::BlueConcrete(_) => BlueConcrete::DISPLAY_NAME,
+			Block::BrownConcrete(_) => BrownConcrete::DISPLAY_NAME,
+			Block::GreenConcrete(_) => GreenConcrete::DISPLAY_NAME,
+			Block::RedConcrete(_) => RedConcrete::DISPLAY_NAME,
+			Block::BlackConcrete(_) => BlackConcrete::DISPLAY_NAME,
+			Block::WhiteConcretePowder(_) => WhiteConcretePowder::DISPLAY_NAME,
+			Block::OrangeConcretePowder(_) => OrangeConcretePowder::DISPLAY_NAME,
+			Block::MagentaConcretePowder(_) => MagentaConcretePowder::DISPLAY_NAME,
+			Block::LightBlueConcretePowder(_) => LightBlueConcretePowder::DISPLAY_NAME,
+			Block::YellowConcretePowder(_) => YellowConcretePowder::DISPLAY_NAME,
+			Block::LimeConcretePowder(_) => LimeConcretePowder::DISPLAY_NAME,
+			Block::PinkConcretePowder(_) => PinkConcretePowder::DISPLAY_NAME,
+			Block::GrayConcretePowder(_) => GrayConcretePowder::DISPLAY_NAME,
+			Block::LightGrayConcretePowder(_) => LightGrayConcretePowder::DISPLAY_NAME,
+			Block::CyanConcretePowder(_) => CyanConcretePowder::DISPLAY_NAME,
+			Block::PurpleConcretePowder(_) => PurpleConcretePowder::DISPLAY_NAME,
+			Block::BlueConcretePowder(_) => BlueConcretePowder::DISPLAY_NAME,
+			Block::BrownConcretePowder(_) => BrownConcretePowder::DISPLAY_NAME,
+			Block::GreenConcretePowder(_) => GreenConcretePowder::DISPLAY_NAME,
+			Block::RedConcretePowder(_) => RedConcretePowder::DISPLAY_NAME,
+			Block::BlackConcretePowder(_) => BlackConcretePowder::DISPLAY_NAME,
+			Block::Kelp(_) => Kelp::DISPLAY_NAME,
+			Block::KelpPlant(_) => KelpPlant::DISPLAY_NAME,
+			Block::DriedKelpBlock(_) => DriedKelpBlock::DISPLAY_NAME,
+			Block::TurtleEgg(_) => TurtleEgg::DISPLAY_NAME,
+			Block::DeadTubeCoralBlock(_) => DeadTubeCoralBlock::DISPLAY_NAME,
+			Block::DeadBrainCoralBlock(_) => DeadBrainCoralBlock::DISPLAY_NAME,
+			Block::DeadBubbleCoralBlock(_) => DeadBubbleCoralBlock::DISPLAY_NAME,
+			Block::DeadFireCoralBlock(_) => DeadFireCoralBlock::DISPLAY_NAME,
+			Block::DeadHornCoralBlock(_) => DeadHornCoralBlock::DISPLAY_NAME,
+			Block::TubeCoralBlock(_) => TubeCoralBlock::DISPLAY_NAME,
+			Block::BrainCoralBlock(_) => BrainCoralBlock::DISPLAY_NAME,
+			Block::BubbleCoralBlock(_) => BubbleCoralBlock::DISPLAY_NAME,
+			Block::FireCoralBlock(_) => FireCoralBlock::DISPLAY_NAME,
+			Block::HornCoralBlock(_) => HornCoralBlock::DISPLAY_NAME,
+			Block::DeadTubeCoral(_) => DeadTubeCoral::DISPLAY_NAME,
+			Block::DeadBrainCoral(_) => DeadBrainCoral::DISPLAY_NAME,
+			Block::DeadBubbleCoral(_) => DeadBubbleCoral::DISPLAY_NAME,
+			Block::DeadFireCoral(_) => DeadFireCoral::DISPLAY_NAME,
+			Block::DeadHornCoral(_) => DeadHornCoral::DISPLAY_NAME,
+			Block::TubeCoral(_) => TubeCoral::DISPLAY_NAME,
+			Block::BrainCoral(_) => BrainCoral::DISPLAY_NAME,
+			Block::BubbleCoral(_) => BubbleCoral::DISPLAY_NAME,
+			Block::FireCoral(_) => FireCoral::DISPLAY_NAME,
+			Block::HornCoral(_) => HornCoral::DISPLAY_NAME,
+			Block::DeadTubeCoralFan(_) => DeadTubeCoralFan::DISPLAY_NAME,
+			Block::DeadBrainCoralFan(_) => DeadBrainCoralFan::DISPLAY_NAME,
+			Block::DeadBubbleCoralFan(_) => DeadBubbleCoralFan::DISPLAY_NAME,
+			Block::DeadFireCoralFan(_) => DeadFireCoralFan::DISPLAY_NAME,
+			Block::DeadHornCoralFan(_) => DeadHornCoralFan::DISPLAY_NAME,
+			Block::TubeCoralFan(_) => TubeCoralFan::DISPLAY_NAME,
+			Block::BrainCoralFan(_) => BrainCoralFan::DISPLAY_NAME,
+			Block::BubbleCoralFan(_) => BubbleCoralFan::DISPLAY_NAME,
+			Block::FireCoralFan(_) => FireCoralFan::DISPLAY_NAME,
+			Block::HornCoralFan(_) => HornCoralFan::DISPLAY_NAME,
+			Block::DeadTubeCoralWallFan(_) => DeadTubeCoralWallFan::DISPLAY_NAME,
+			Block::DeadBrainCoralWallFan(_) => DeadBrainCoralWallFan::DISPLAY_NAME,
+			Block::DeadBubbleCoralWallFan(_) => DeadBubbleCoralWallFan::DISPLAY_NAME,
+			Block::DeadFireCoralWallFan(_) => DeadFireCoralWallFan::DISPLAY_NAME,
+			Block::DeadHornCoralWallFan(_) => DeadHornCoralWallFan::DISPLAY_NAME,
+			Block::TubeCoralWallFan(_) => TubeCoralWallFan::DISPLAY_NAME,
+			Block::BrainCoralWallFan(_) => BrainCoralWallFan::DISPLAY_NAME,
+			Block::BubbleCoralWallFan(_) => BubbleCoralWallFan::DISPLAY_NAME,
+			Block::FireCoralWallFan(_) => FireCoralWallFan::DISPLAY_NAME,
+			Block::HornCoralWallFan(_) => HornCoralWallFan::DISPLAY_NAME,
+			Block::SeaPickle(_) => SeaPickle::DISPLAY_NAME,
+			Block::BlueIce(_) => BlueIce::DISPLAY_NAME,
+			Block::Conduit(_) => Conduit::DISPLAY_NAME,
+			Block::BambooSapling(_) => BambooSapling::DISPLAY_NAME,
+			Block::Bamboo(_) => Bamboo::DISPLAY_NAME,
+			Block::PottedBamboo(_) => PottedBamboo::DISPLAY_NAME,
+			Block::VoidAir(_) => VoidAir::DISPLAY_NAME,
+			Block::CaveAir(_) => CaveAir::DISPLAY_NAME,
+			Block::BubbleColumn(_) => BubbleColumn::DISPLAY_NAME,
+			Block::PolishedGraniteStairs(_) => PolishedGraniteStairs::DISPLAY_NAME,
+			Block::SmoothRedSandstoneStairs(_) => SmoothRedSandstoneStairs::DISPLAY_NAME,
+			Block::MossyStoneBrickStairs(_) => MossyStoneBrickStairs::DISPLAY_NAME,
+			Block::PolishedDioriteStairs(_) => PolishedDioriteStairs::DISPLAY_NAME,
+			Block::MossyCobblestoneStairs(_) => MossyCobblestoneStairs::DISPLAY_NAME,
+			Block::EndStoneBrickStairs(_) => EndStoneBrickStairs::DISPLAY_NAME,
+			Block::StoneStairs(_) => StoneStairs::DISPLAY_NAME,
+			Block::SmoothSandstoneStairs(_) => SmoothSandstoneStairs::DISPLAY_NAME,
+			Block::SmoothQuartzStairs(_) => SmoothQuartzStairs::DISPLAY_NAME,
+			Block::GraniteStairs(_) => GraniteStairs::DISPLAY_NAME,
+			Block::AndesiteStairs(_) => AndesiteStairs::DISPLAY_NAME,
+			Block::RedNetherBrickStairs(_) => RedNetherBrickStairs::DISPLAY_NAME,
+			Block::PolishedAndesiteStairs(_) => PolishedAndesiteStairs::DISPLAY_NAME,
+			Block::DioriteStairs(_) => DioriteStairs::DISPLAY_NAME,
+			Block::PolishedGraniteSlab(_) => PolishedGraniteSlab::DISPLAY_NAME,
+			Block::SmoothRedSandstoneSlab(_) => SmoothRedSandstoneSlab::DISPLAY_NAME,
+			Block::MossyStoneBrickSlab(_) => MossyStoneBrickSlab::DISPLAY_NAME,
+			Block::PolishedDioriteSlab(_) => PolishedDioriteSlab::DISPLAY_NAME,
+			Block::MossyCobblestoneSlab(_) => MossyCobblestoneSlab::DISPLAY_NAME,
+			Block::EndStoneBrickSlab(_) => EndStoneBrickSlab::DISPLAY_NAME,
+			Block::SmoothSandstoneSlab(_) => SmoothSandstoneSlab::DISPLAY_NAME,
+			Block::SmoothQuartzSlab(_) => SmoothQuartzSlab::DISPLAY_NAME,
+			Block::GraniteSlab(_) => GraniteSlab::DISPLAY_NAME,
+			Block::AndesiteSlab(_) => AndesiteSlab::DISPLAY_NAME,
+			Block::RedNetherBrickSlab(_) => RedNetherBrickSlab::DISPLAY_NAME,
+			Block::PolishedAndesiteSlab(_) => PolishedAndesiteSlab::DISPLAY_NAME,
+			Block::DioriteSlab(_) => DioriteSlab::DISPLAY_NAME,
+			Block::BrickWall(_) => BrickWall::DISPLAY_NAME,
+			Block::PrismarineWall(_) => PrismarineWall::DISPLAY_NAME,
+			Block::RedSandstoneWall(_) => RedSandstoneWall::DISPLAY_NAME,
+			Block::MossyStoneBrickWall(_) => MossyStoneBrickWall::DISPLAY_NAME,
+			Block::GraniteWall(_) => GraniteWall::DISPLAY_NAME,
+			Block::StoneBrickWall(_) => StoneBrickWall::DISPLAY_NAME,
+			Block::MudBrickWall(_) => MudBrickWall::DISPLAY_NAME,
+			Block::NetherBrickWall(_) => NetherBrickWall::DISPLAY_NAME,
+			Block::AndesiteWall(_) => AndesiteWall::DISPLAY_NAME,
+			Block::RedNetherBrickWall(_) => RedNetherBrickWall::DISPLAY_NAME,
+			Block::SandstoneWall(_) => SandstoneWall::DISPLAY_NAME,
+			Block::EndStoneBrickWall(_) => EndStoneBrickWall::DISPLAY_NAME,
+			Block::DioriteWall(_) => DioriteWall::DISPLAY_NAME,
+			Block::Scaffolding(_) => Scaffolding::DISPLAY_NAME,
+			Block::Loom(_) => Loom::DISPLAY_NAME,
+			Block::Barrel(_) => Barrel::DISPLAY_NAME,
+			Block::Smoker(_) => Smoker::DISPLAY_NAME,
+			Block::BlastFurnace(_) => BlastFurnace::DISPLAY_NAME,
+			Block::CartographyTable(_) => CartographyTable::DISPLAY_NAME,
+			Block::FletchingTable(_) => FletchingTable::DISPLAY_NAME,
+			Block::Grindstone(_) => Grindstone::DISPLAY_NAME,
+			Block::Lectern(_) => Lectern::DISPLAY_NAME,
+			Block::SmithingTable(_) => SmithingTable::DISPLAY_NAME,
+			Block::Stonecutter(_) => Stonecutter::DISPLAY_NAME,
+			Block::Bell(_) => Bell::DISPLAY_NAME,
+			Block::Lantern(_) => Lantern::DISPLAY_NAME,
+			Block::SoulLantern(_) => SoulLantern::DISPLAY_NAME,
+			Block::Campfire(_) => Campfire::DISPLAY_NAME,
+			Block::SoulCampfire(_) => SoulCampfire::DISPLAY_NAME,
+			Block::SweetBerryBush(_) => SweetBerryBush::DISPLAY_NAME,
+			Block::WarpedStem(_) => WarpedStem::DISPLAY_NAME,
+			Block::StrippedWarpedStem(_) => StrippedWarpedStem::DISPLAY_NAME,
+			Block::WarpedHyphae(_) => WarpedHyphae::DISPLAY_NAME,
+			Block::StrippedWarpedHyphae(_) => StrippedWarpedHyphae::DISPLAY_NAME,
+			Block::WarpedNylium(_) => WarpedNylium::DISPLAY_NAME,
+			Block::WarpedFungus(_) => WarpedFungus::DISPLAY_NAME,
+			Block::WarpedWartBlock(_) => WarpedWartBlock::DISPLAY_NAME,
+			Block::WarpedRoots(_) => WarpedRoots::DISPLAY_NAME,
+			Block::NetherSprouts(_) => NetherSprouts::DISPLAY_NAME,
+			Block::CrimsonStem(_) => CrimsonStem::DISPLAY_NAME,
+			Block::StrippedCrimsonStem(_) => StrippedCrimsonStem::DISPLAY_NAME,
+			Block::CrimsonHyphae(_) => CrimsonHyphae::DISPLAY_NAME,
+			Block::StrippedCrimsonHyphae(_) => StrippedCrimsonHyphae::DISPLAY_NAME,
+			Block::CrimsonNylium(_) => CrimsonNylium::DISPLAY_NAME,
+			Block::CrimsonFungus(_) => CrimsonFungus::DISPLAY_NAME,
+			Block::Shroomlight(_) => Shroomlight::DISPLAY_NAME,
+			Block::WeepingVines(_) => WeepingVines::DISPLAY_NAME,
+			Block::WeepingVinesPlant(_) => WeepingVinesPlant::DISPLAY_NAME,
+			Block::TwistingVines(_) => TwistingVines::DISPLAY_NAME,
+			Block::TwistingVinesPlant(_) => TwistingVinesPlant::DISPLAY_NAME,
+			Block::CrimsonRoots(_) => CrimsonRoots::DISPLAY_NAME,
+			Block::CrimsonPlanks(_) => CrimsonPlanks::DISPLAY_NAME,
+			Block::WarpedPlanks(_) => WarpedPlanks::DISPLAY_NAME,
+			Block::CrimsonSlab(_) => CrimsonSlab::DISPLAY_NAME,
+			Block::WarpedSlab(_) => WarpedSlab::DISPLAY_NAME,
+			Block::CrimsonPressurePlate(_) => CrimsonPressurePlate::DISPLAY_NAME,
+			Block::WarpedPressurePlate(_) => WarpedPressurePlate::DISPLAY_NAME,
+			Block::CrimsonFence(_) => CrimsonFence::DISPLAY_NAME,
+			Block::WarpedFence(_) => WarpedFence::DISPLAY_NAME,
+			Block::CrimsonTrapdoor(_) => CrimsonTrapdoor::DISPLAY_NAME,
+			Block::WarpedTrapdoor(_) => WarpedTrapdoor::DISPLAY_NAME,
+			Block::CrimsonFenceGate(_) => CrimsonFenceGate::DISPLAY_NAME,
+			Block::WarpedFenceGate(_) => WarpedFenceGate::DISPLAY_NAME,
+			Block::CrimsonStairs(_) => CrimsonStairs::DISPLAY_NAME,
+			Block::WarpedStairs(_) => WarpedStairs::DISPLAY_NAME,
+			Block::CrimsonButton(_) => CrimsonButton::DISPLAY_NAME,
+			Block::WarpedButton(_) => WarpedButton::DISPLAY_NAME,
+			Block::CrimsonDoor(_) => CrimsonDoor::DISPLAY_NAME,
+			Block::WarpedDoor(_) => WarpedDoor::DISPLAY_NAME,
+			Block::CrimsonSign(_) => CrimsonSign::DISPLAY_NAME,
+			Block::WarpedSign(_) => WarpedSign::DISPLAY_NAME,
+			Block::CrimsonWallSign(_) => CrimsonWallSign::DISPLAY_NAME,
+			Block::WarpedWallSign(_) => WarpedWallSign::DISPLAY_NAME,
+			Block::StructureBlock(_) => StructureBlock::DISPLAY_NAME,
+			Block::Jigsaw(_) => Jigsaw::DISPLAY_NAME,
+			Block::Composter(_) => Composter::DISPLAY_NAME,
+			Block::Target(_) => Target::DISPLAY_NAME,
+			Block::BeeNest(_) => BeeNest::DISPLAY_NAME,
+			Block::Beehive(_) => Beehive::DISPLAY_NAME,
+			Block::HoneyBlock(_) => HoneyBlock::DISPLAY_NAME,
+			Block::HoneycombBlock(_) => HoneycombBlock::DISPLAY_NAME,
+			Block::NetheriteBlock(_) => NetheriteBlock::DISPLAY_NAME,
+			Block::AncientDebris(_) => AncientDebris::DISPLAY_NAME,
+			Block::CryingObsidian(_) => CryingObsidian::DISPLAY_NAME,
+			Block::RespawnAnchor(_) => RespawnAnchor::DISPLAY_NAME,
+			Block::PottedCrimsonFungus(_) => PottedCrimsonFungus::DISPLAY_NAME,
+			Block::PottedWarpedFungus(_) => PottedWarpedFungus::DISPLAY_NAME,
+			Block::PottedCrimsonRoots(_) => PottedCrimsonRoots::DISPLAY_NAME,
+			Block::PottedWarpedRoots(_) => PottedWarpedRoots::DISPLAY_NAME,
+			Block::Lodestone(_) => Lodestone::DISPLAY_NAME,
+			Block::Blackstone(_) => Blackstone::DISPLAY_NAME,
+			Block::BlackstoneStairs(_) => BlackstoneStairs::DISPLAY_NAME,
+			Block::BlackstoneWall(_) => BlackstoneWall::DISPLAY_NAME,
+			Block::BlackstoneSlab(_) => BlackstoneSlab::DISPLAY_NAME,
+			Block::PolishedBlackstone(_) => PolishedBlackstone::DISPLAY_NAME,
+			Block::PolishedBlackstoneBricks(_) => PolishedBlackstoneBricks::DISPLAY_NAME,
+			Block::CrackedPolishedBlackstoneBricks(_) => CrackedPolishedBlackstoneBricks::DISPLAY_NAME,
+			Block::ChiseledPolishedBlackstone(_) => ChiseledPolishedBlackstone::DISPLAY_NAME,
+			Block::PolishedBlackstoneBrickSlab(_) => PolishedBlackstoneBrickSlab::DISPLAY_NAME,
+			Block::PolishedBlackstoneBrickStairs(_) => PolishedBlackstoneBrickStairs::DISPLAY_NAME,
+			Block::PolishedBlackstoneBrickWall(_) => PolishedBlackstoneBrickWall::DISPLAY_NAME,
+			Block::GildedBlackstone(_) => GildedBlackstone::DISPLAY_NAME,
+			Block::PolishedBlackstoneStairs(_) => PolishedBlackstoneStairs::DISPLAY_NAME,
+			Block::PolishedBlackstoneSlab(_) => PolishedBlackstoneSlab::DISPLAY_NAME,
+			Block::PolishedBlackstonePressurePlate(_) => PolishedBlackstonePressurePlate::DISPLAY_NAME,
+			Block::PolishedBlackstoneButton(_) => PolishedBlackstoneButton::DISPLAY_NAME,
+			Block::PolishedBlackstoneWall(_) => PolishedBlackstoneWall::DISPLAY_NAME,
+			Block::ChiseledNetherBricks(_) => ChiseledNetherBricks::DISPLAY_NAME,
+			Block::CrackedNetherBricks(_) => CrackedNetherBricks::DISPLAY_NAME,
+			Block::QuartzBricks(_) => QuartzBricks::DISPLAY_NAME,
+			Block::Candle(_) => Candle::DISPLAY_NAME,
+			Block::WhiteCandle(_) => WhiteCandle::DISPLAY_NAME,
+			Block::OrangeCandle(_) => OrangeCandle::DISPLAY_NAME,
+			Block::MagentaCandle(_) => MagentaCandle::DISPLAY_NAME,
+			Block::LightBlueCandle(_) => LightBlueCandle::DISPLAY_NAME,
+			Block::YellowCandle(_) => YellowCandle::DISPLAY_NAME,
+			Block::LimeCandle(_) => LimeCandle::DISPLAY_NAME,
+			Block::PinkCandle(_) => PinkCandle::DISPLAY_NAME,
+			Block::GrayCandle(_) => GrayCandle::DISPLAY_NAME,
+			Block::LightGrayCandle(_) => LightGrayCandle::DISPLAY_NAME,
+			Block::CyanCandle(_) => CyanCandle::DISPLAY_NAME,
+			Block::PurpleCandle(_) => PurpleCandle::DISPLAY_NAME,
+			Block::BlueCandle(_) => BlueCandle::DISPLAY_NAME,
+			Block::BrownCandle(_) => BrownCandle::DISPLAY_NAME,
+			Block::GreenCandle(_) => GreenCandle::DISPLAY_NAME,
+			Block::RedCandle(_) => RedCandle::DISPLAY_NAME,
+			Block::BlackCandle(_) => BlackCandle::DISPLAY_NAME,
+			Block::CandleCake(_) => CandleCake::DISPLAY_NAME,
+			Block::WhiteCandleCake(_) => WhiteCandleCake::DISPLAY_NAME,
+			Block::OrangeCandleCake(_) => OrangeCandleCake::DISPLAY_NAME,
+			Block::MagentaCandleCake(_) => MagentaCandleCake::DISPLAY_NAME,
+			Block::LightBlueCandleCake(_) => LightBlueCandleCake::DISPLAY_NAME,
+			Block::YellowCandleCake(_) => YellowCandleCake::DISPLAY_NAME,
+			Block::LimeCandleCake(_) => LimeCandleCake::DISPLAY_NAME,
+			Block::PinkCandleCake(_) => PinkCandleCake::DISPLAY_NAME,
+			Block::GrayCandleCake(_) => GrayCandleCake::DISPLAY_NAME,
+			Block::LightGrayCandleCake(_) => LightGrayCandleCake::DISPLAY_NAME,
+			Block::CyanCandleCake(_) => CyanCandleCake::DISPLAY_NAME,
+			Block::PurpleCandleCake(_) => PurpleCandleCake::DISPLAY_NAME,
+			Block::BlueCandleCake(_) => BlueCandleCake::DISPLAY_NAME,
+			Block::BrownCandleCake(_) => BrownCandleCake::DISPLAY_NAME,
+			Block::GreenCandleCake(_) => GreenCandleCake::DISPLAY_NAME,
+			Block::RedCandleCake(_) => RedCandleCake::DISPLAY_NAME,
+			Block::BlackCandleCake(_) => BlackCandleCake::DISPLAY_NAME,
+			Block::AmethystBlock(_) => AmethystBlock::DISPLAY_NAME,
+			Block::BuddingAmethyst(_) => BuddingAmethyst::DISPLAY_NAME,
+			Block::AmethystCluster(_) => AmethystCluster::DISPLAY_NAME,
+			Block::LargeAmethystBud(_) => LargeAmethystBud::DISPLAY_NAME,
+			Block::MediumAmethystBud(_) => MediumAmethystBud::DISPLAY_NAME,
+			Block::SmallAmethystBud(_) => SmallAmethystBud::DISPLAY_NAME,
+			Block::Tuff(_) => Tuff::DISPLAY_NAME,
+			Block::Calcite(_) => Calcite::DISPLAY_NAME,
+			Block::TintedGlass(_) => TintedGlass::DISPLAY_NAME,
+			Block::PowderSnow(_) => PowderSnow::DISPLAY_NAME,
+			Block::SculkSensor(_) => SculkSensor::DISPLAY_NAME,
+			Block::Sculk(_) => Sculk::DISPLAY_NAME,
+			Block::SculkVein(_) => SculkVein::DISPLAY_NAME,
+			Block::SculkCatalyst(_) => SculkCatalyst::DISPLAY_NAME,
+			Block::SculkShrieker(_) => SculkShrieker::DISPLAY_NAME,
+			Block::OxidizedCopper(_) => OxidizedCopper::DISPLAY_NAME,
+			Block::WeatheredCopper(_) => WeatheredCopper::DISPLAY_NAME,
+			Block::ExposedCopper(_) => ExposedCopper::DISPLAY_NAME,
+			Block::CopperBlock(_) => CopperBlock::DISPLAY_NAME,
+			Block::CopperOre(_) => CopperOre::DISPLAY_NAME,
+			Block::DeepslateCopperOre(_) => DeepslateCopperOre::DISPLAY_NAME,
+			Block::OxidizedCutCopper(_) => OxidizedCutCopper::DISPLAY_NAME,
+			Block::WeatheredCutCopper(_) => WeatheredCutCopper::DISPLAY_NAME,
+			Block::ExposedCutCopper(_) => ExposedCutCopper::DISPLAY_NAME,
+			Block::CutCopper(_) => CutCopper::DISPLAY_NAME,
+			Block::OxidizedCutCopperStairs(_) => OxidizedCutCopperStairs::DISPLAY_NAME,
+			Block::WeatheredCutCopperStairs(_) => WeatheredCutCopperStairs::DISPLAY_NAME,
+			Block::ExposedCutCopperStairs(_) => ExposedCutCopperStairs::DISPLAY_NAME,
+			Block::CutCopperStairs(_) => CutCopperStairs::DISPLAY_NAME,
+			Block::OxidizedCutCopperSlab(_) => OxidizedCutCopperSlab::DISPLAY_NAME,
+			Block::WeatheredCutCopperSlab(_) => WeatheredCutCopperSlab::DISPLAY_NAME,
+			Block::ExposedCutCopperSlab(_) => ExposedCutCopperSlab::DISPLAY_NAME,
+			Block::CutCopperSlab(_) => CutCopperSlab::DISPLAY_NAME,
+			Block::WaxedCopperBlock(_) => WaxedCopperBlock::DISPLAY_NAME,
+			Block::WaxedWeatheredCopper(_) => WaxedWeatheredCopper::DISPLAY_NAME,
+			Block::WaxedExposedCopper(_) => WaxedExposedCopper::DISPLAY_NAME,
+			Block::WaxedOxidizedCopper(_) => WaxedOxidizedCopper::DISPLAY_NAME,
+			Block::WaxedOxidizedCutCopper(_) => WaxedOxidizedCutCopper::DISPLAY_NAME,
+			Block::WaxedWeatheredCutCopper(_) => WaxedWeatheredCutCopper::DISPLAY_NAME,
+			Block::WaxedExposedCutCopper(_) => WaxedExposedCutCopper::DISPLAY_NAME,
+			Block::WaxedCutCopper(_) => WaxedCutCopper::DISPLAY_NAME,
+			Block::WaxedOxidizedCutCopperStairs(_) => WaxedOxidizedCutCopperStairs::DISPLAY_NAME,
+			Block::WaxedWeatheredCutCopperStairs(_) => WaxedWeatheredCutCopperStairs::DISPLAY_NAME,
+			Block::WaxedExposedCutCopperStairs(_) => WaxedExposedCutCopperStairs::DISPLAY_NAME,
+			Block::WaxedCutCopperStairs(_) => WaxedCutCopperStairs::DISPLAY_NAME,
+			Block::WaxedOxidizedCutCopperSlab(_) => WaxedOxidizedCutCopperSlab::DISPLAY_NAME,
+			Block::WaxedWeatheredCutCopperSlab(_) => WaxedWeatheredCutCopperSlab::DISPLAY_NAME,
+			Block::WaxedExposedCutCopperSlab(_) => WaxedExposedCutCopperSlab::DISPLAY_NAME,
+			Block::WaxedCutCopperSlab(_) => WaxedCutCopperSlab::DISPLAY_NAME,
+			Block::LightningRod(_) => LightningRod::DISPLAY_NAME,
+			Block::PointedDripstone(_) => PointedDripstone::DISPLAY_NAME,
+			Block::DripstoneBlock(_) => DripstoneBlock::DISPLAY_NAME,
+			Block::CaveVines(_) => CaveVines::DISPLAY_NAME,
+			Block::CaveVinesPlant(_) => CaveVinesPlant::DISPLAY_NAME,
+			Block::SporeBlossom(_) => SporeBlossom::DISPLAY_NAME,
+			Block::Azalea(_) => Azalea::DISPLAY_NAME,
+			Block::FloweringAzalea(_) => FloweringAzalea::DISPLAY_NAME,
+			Block::MossCarpet(_) => MossCarpet::DISPLAY_NAME,
+			Block::MossBlock(_) => MossBlock::DISPLAY_NAME,
+			Block::BigDripleaf(_) => BigDripleaf::DISPLAY_NAME,
+			Block::BigDripleafStem(_) => BigDripleafStem::DISPLAY_NAME,
+			Block::SmallDripleaf(_) => SmallDripleaf::DISPLAY_NAME,
+			Block::HangingRoots(_) => HangingRoots::DISPLAY_NAME,
+			Block::RootedDirt(_) => RootedDirt::DISPLAY_NAME,
+			Block::Mud(_) => Mud::DISPLAY_NAME,
+			Block::Deepslate(_) => Deepslate::DISPLAY_NAME,
+			Block::CobbledDeepslate(_) => CobbledDeepslate::DISPLAY_NAME,
+			Block::CobbledDeepslateStairs(_) => CobbledDeepslateStairs::DISPLAY_NAME,
+			Block::CobbledDeepslateSlab(_) => CobbledDeepslateSlab::DISPLAY_NAME,
+			Block::CobbledDeepslateWall(_) => CobbledDeepslateWall::DISPLAY_NAME,
+			Block::PolishedDeepslate(_) => PolishedDeepslate::DISPLAY_NAME,
+			Block::PolishedDeepslateStairs(_) => PolishedDeepslateStairs::DISPLAY_NAME,
+			Block::PolishedDeepslateSlab(_) => PolishedDeepslateSlab::DISPLAY_NAME,
+			Block::PolishedDeepslateWall(_) => PolishedDeepslateWall::DISPLAY_NAME,
+			Block::DeepslateTiles(_) => DeepslateTiles::DISPLAY_NAME,
+			Block::DeepslateTileStairs(_) => DeepslateTileStairs::DISPLAY_NAME,
+			Block::DeepslateTileSlab(_) => DeepslateTileSlab::DISPLAY_NAME,
+			Block::DeepslateTileWall(_) => DeepslateTileWall::DISPLAY_NAME,
+			Block::DeepslateBricks(_) => DeepslateBricks::DISPLAY_NAME,
+			Block::DeepslateBrickStairs(_) => DeepslateBrickStairs::DISPLAY_NAME,
+			Block::DeepslateBrickSlab(_) => DeepslateBrickSlab::DISPLAY_NAME,
+			Block::DeepslateBrickWall(_) => DeepslateBrickWall::DISPLAY_NAME,
+			Block::ChiseledDeepslate(_) => ChiseledDeepslate::DISPLAY_NAME,
+			Block::CrackedDeepslateBricks(_) => CrackedDeepslateBricks::DISPLAY_NAME,
+			Block::CrackedDeepslateTiles(_) => CrackedDeepslateTiles::DISPLAY_NAME,
+			Block::InfestedDeepslate(_) => InfestedDeepslate::DISPLAY_NAME,
+			Block::SmoothBasalt(_) => SmoothBasalt::DISPLAY_NAME,
+			Block::RawIronBlock(_) => RawIronBlock::DISPLAY_NAME,
+			Block::RawCopperBlock(_) => RawCopperBlock::DISPLAY_NAME,
+			Block::RawGoldBlock(_) => RawGoldBlock::DISPLAY_NAME,
+			Block::PottedAzaleaBush(_) => PottedAzaleaBush::DISPLAY_NAME,
+			Block::PottedFloweringAzaleaBush(_) => PottedFloweringAzaleaBush::DISPLAY_NAME,
+			Block::OchreFroglight(_) => OchreFroglight::DISPLAY_NAME,
+			Block::VerdantFroglight(_) => VerdantFroglight::DISPLAY_NAME,
+			Block::PearlescentFroglight(_) => PearlescentFroglight::DISPLAY_NAME,
+			Block::Frogspawn(_) => Frogspawn::DISPLAY_NAME,
+			Block::ReinforcedDeepslate(_) => ReinforcedDeepslate::DISPLAY_NAME,
+		}
+	}
+	pub fn get_transparency(&self) -> bool {
+		match self {
+			Block::Air(_) => Air::TRANSPARENT,
+			Block::Stone(_) => Stone::TRANSPARENT,
+			Block::Granite(_) => Granite::TRANSPARENT,
+			Block::PolishedGranite(_) => PolishedGranite::TRANSPARENT,
+			Block::Diorite(_) => Diorite::TRANSPARENT,
+			Block::PolishedDiorite(_) => PolishedDiorite::TRANSPARENT,
+			Block::Andesite(_) => Andesite::TRANSPARENT,
+			Block::PolishedAndesite(_) => PolishedAndesite::TRANSPARENT,
+			Block::GrassBlock(_) => GrassBlock::TRANSPARENT,
+			Block::Dirt(_) => Dirt::TRANSPARENT,
+			Block::CoarseDirt(_) => CoarseDirt::TRANSPARENT,
+			Block::Podzol(_) => Podzol::TRANSPARENT,
+			Block::Cobblestone(_) => Cobblestone::TRANSPARENT,
+			Block::OakPlanks(_) => OakPlanks::TRANSPARENT,
+			Block::SprucePlanks(_) => SprucePlanks::TRANSPARENT,
+			Block::BirchPlanks(_) => BirchPlanks::TRANSPARENT,
+			Block::JunglePlanks(_) => JunglePlanks::TRANSPARENT,
+			Block::AcaciaPlanks(_) => AcaciaPlanks::TRANSPARENT,
+			Block::DarkOakPlanks(_) => DarkOakPlanks::TRANSPARENT,
+			Block::MangrovePlanks(_) => MangrovePlanks::TRANSPARENT,
+			Block::OakSapling(_) => OakSapling::TRANSPARENT,
+			Block::SpruceSapling(_) => SpruceSapling::TRANSPARENT,
+			Block::BirchSapling(_) => BirchSapling::TRANSPARENT,
+			Block::JungleSapling(_) => JungleSapling::TRANSPARENT,
+			Block::AcaciaSapling(_) => AcaciaSapling::TRANSPARENT,
+			Block::DarkOakSapling(_) => DarkOakSapling::TRANSPARENT,
+			Block::MangrovePropagule(_) => MangrovePropagule::TRANSPARENT,
+			Block::Bedrock(_) => Bedrock::TRANSPARENT,
+			Block::Water(_) => Water::TRANSPARENT,
+			Block::Lava(_) => Lava::TRANSPARENT,
+			Block::Sand(_) => Sand::TRANSPARENT,
+			Block::RedSand(_) => RedSand::TRANSPARENT,
+			Block::Gravel(_) => Gravel::TRANSPARENT,
+			Block::GoldOre(_) => GoldOre::TRANSPARENT,
+			Block::DeepslateGoldOre(_) => DeepslateGoldOre::TRANSPARENT,
+			Block::IronOre(_) => IronOre::TRANSPARENT,
+			Block::DeepslateIronOre(_) => DeepslateIronOre::TRANSPARENT,
+			Block::CoalOre(_) => CoalOre::TRANSPARENT,
+			Block::DeepslateCoalOre(_) => DeepslateCoalOre::TRANSPARENT,
+			Block::NetherGoldOre(_) => NetherGoldOre::TRANSPARENT,
+			Block::OakLog(_) => OakLog::TRANSPARENT,
+			Block::SpruceLog(_) => SpruceLog::TRANSPARENT,
+			Block::BirchLog(_) => BirchLog::TRANSPARENT,
+			Block::JungleLog(_) => JungleLog::TRANSPARENT,
+			Block::AcaciaLog(_) => AcaciaLog::TRANSPARENT,
+			Block::DarkOakLog(_) => DarkOakLog::TRANSPARENT,
+			Block::MangroveLog(_) => MangroveLog::TRANSPARENT,
+			Block::MangroveRoots(_) => MangroveRoots::TRANSPARENT,
+			Block::MuddyMangroveRoots(_) => MuddyMangroveRoots::TRANSPARENT,
+			Block::StrippedSpruceLog(_) => StrippedSpruceLog::TRANSPARENT,
+			Block::StrippedBirchLog(_) => StrippedBirchLog::TRANSPARENT,
+			Block::StrippedJungleLog(_) => StrippedJungleLog::TRANSPARENT,
+			Block::StrippedAcaciaLog(_) => StrippedAcaciaLog::TRANSPARENT,
+			Block::StrippedDarkOakLog(_) => StrippedDarkOakLog::TRANSPARENT,
+			Block::StrippedOakLog(_) => StrippedOakLog::TRANSPARENT,
+			Block::StrippedMangroveLog(_) => StrippedMangroveLog::TRANSPARENT,
+			Block::OakWood(_) => OakWood::TRANSPARENT,
+			Block::SpruceWood(_) => SpruceWood::TRANSPARENT,
+			Block::BirchWood(_) => BirchWood::TRANSPARENT,
+			Block::JungleWood(_) => JungleWood::TRANSPARENT,
+			Block::AcaciaWood(_) => AcaciaWood::TRANSPARENT,
+			Block::DarkOakWood(_) => DarkOakWood::TRANSPARENT,
+			Block::MangroveWood(_) => MangroveWood::TRANSPARENT,
+			Block::StrippedOakWood(_) => StrippedOakWood::TRANSPARENT,
+			Block::StrippedSpruceWood(_) => StrippedSpruceWood::TRANSPARENT,
+			Block::StrippedBirchWood(_) => StrippedBirchWood::TRANSPARENT,
+			Block::StrippedJungleWood(_) => StrippedJungleWood::TRANSPARENT,
+			Block::StrippedAcaciaWood(_) => StrippedAcaciaWood::TRANSPARENT,
+			Block::StrippedDarkOakWood(_) => StrippedDarkOakWood::TRANSPARENT,
+			Block::StrippedMangroveWood(_) => StrippedMangroveWood::TRANSPARENT,
+			Block::OakLeaves(_) => OakLeaves::TRANSPARENT,
+			Block::SpruceLeaves(_) => SpruceLeaves::TRANSPARENT,
+			Block::BirchLeaves(_) => BirchLeaves::TRANSPARENT,
+			Block::JungleLeaves(_) => JungleLeaves::TRANSPARENT,
+			Block::AcaciaLeaves(_) => AcaciaLeaves::TRANSPARENT,
+			Block::DarkOakLeaves(_) => DarkOakLeaves::TRANSPARENT,
+			Block::MangroveLeaves(_) => MangroveLeaves::TRANSPARENT,
+			Block::AzaleaLeaves(_) => AzaleaLeaves::TRANSPARENT,
+			Block::FloweringAzaleaLeaves(_) => FloweringAzaleaLeaves::TRANSPARENT,
+			Block::Sponge(_) => Sponge::TRANSPARENT,
+			Block::WetSponge(_) => WetSponge::TRANSPARENT,
+			Block::Glass(_) => Glass::TRANSPARENT,
+			Block::LapisOre(_) => LapisOre::TRANSPARENT,
+			Block::DeepslateLapisOre(_) => DeepslateLapisOre::TRANSPARENT,
+			Block::LapisBlock(_) => LapisBlock::TRANSPARENT,
+			Block::Dispenser(_) => Dispenser::TRANSPARENT,
+			Block::Sandstone(_) => Sandstone::TRANSPARENT,
+			Block::ChiseledSandstone(_) => ChiseledSandstone::TRANSPARENT,
+			Block::CutSandstone(_) => CutSandstone::TRANSPARENT,
+			Block::NoteBlock(_) => NoteBlock::TRANSPARENT,
+			Block::WhiteBed(_) => WhiteBed::TRANSPARENT,
+			Block::OrangeBed(_) => OrangeBed::TRANSPARENT,
+			Block::MagentaBed(_) => MagentaBed::TRANSPARENT,
+			Block::LightBlueBed(_) => LightBlueBed::TRANSPARENT,
+			Block::YellowBed(_) => YellowBed::TRANSPARENT,
+			Block::LimeBed(_) => LimeBed::TRANSPARENT,
+			Block::PinkBed(_) => PinkBed::TRANSPARENT,
+			Block::GrayBed(_) => GrayBed::TRANSPARENT,
+			Block::LightGrayBed(_) => LightGrayBed::TRANSPARENT,
+			Block::CyanBed(_) => CyanBed::TRANSPARENT,
+			Block::PurpleBed(_) => PurpleBed::TRANSPARENT,
+			Block::BlueBed(_) => BlueBed::TRANSPARENT,
+			Block::BrownBed(_) => BrownBed::TRANSPARENT,
+			Block::GreenBed(_) => GreenBed::TRANSPARENT,
+			Block::RedBed(_) => RedBed::TRANSPARENT,
+			Block::BlackBed(_) => BlackBed::TRANSPARENT,
+			Block::PoweredRail(_) => PoweredRail::TRANSPARENT,
+			Block::DetectorRail(_) => DetectorRail::TRANSPARENT,
+			Block::StickyPiston(_) => StickyPiston::TRANSPARENT,
+			Block::Cobweb(_) => Cobweb::TRANSPARENT,
+			Block::Grass(_) => Grass::TRANSPARENT,
+			Block::Fern(_) => Fern::TRANSPARENT,
+			Block::DeadBush(_) => DeadBush::TRANSPARENT,
+			Block::Seagrass(_) => Seagrass::TRANSPARENT,
+			Block::TallSeagrass(_) => TallSeagrass::TRANSPARENT,
+			Block::Piston(_) => Piston::TRANSPARENT,
+			Block::PistonHead(_) => PistonHead::TRANSPARENT,
+			Block::WhiteWool(_) => WhiteWool::TRANSPARENT,
+			Block::OrangeWool(_) => OrangeWool::TRANSPARENT,
+			Block::MagentaWool(_) => MagentaWool::TRANSPARENT,
+			Block::LightBlueWool(_) => LightBlueWool::TRANSPARENT,
+			Block::YellowWool(_) => YellowWool::TRANSPARENT,
+			Block::LimeWool(_) => LimeWool::TRANSPARENT,
+			Block::PinkWool(_) => PinkWool::TRANSPARENT,
+			Block::GrayWool(_) => GrayWool::TRANSPARENT,
+			Block::LightGrayWool(_) => LightGrayWool::TRANSPARENT,
+			Block::CyanWool(_) => CyanWool::TRANSPARENT,
+			Block::PurpleWool(_) => PurpleWool::TRANSPARENT,
+			Block::BlueWool(_) => BlueWool::TRANSPARENT,
+			Block::BrownWool(_) => BrownWool::TRANSPARENT,
+			Block::GreenWool(_) => GreenWool::TRANSPARENT,
+			Block::RedWool(_) => RedWool::TRANSPARENT,
+			Block::BlackWool(_) => BlackWool::TRANSPARENT,
+			Block::MovingPiston(_) => MovingPiston::TRANSPARENT,
+			Block::Dandelion(_) => Dandelion::TRANSPARENT,
+			Block::Poppy(_) => Poppy::TRANSPARENT,
+			Block::BlueOrchid(_) => BlueOrchid::TRANSPARENT,
+			Block::Allium(_) => Allium::TRANSPARENT,
+			Block::AzureBluet(_) => AzureBluet::TRANSPARENT,
+			Block::RedTulip(_) => RedTulip::TRANSPARENT,
+			Block::OrangeTulip(_) => OrangeTulip::TRANSPARENT,
+			Block::WhiteTulip(_) => WhiteTulip::TRANSPARENT,
+			Block::PinkTulip(_) => PinkTulip::TRANSPARENT,
+			Block::OxeyeDaisy(_) => OxeyeDaisy::TRANSPARENT,
+			Block::Cornflower(_) => Cornflower::TRANSPARENT,
+			Block::WitherRose(_) => WitherRose::TRANSPARENT,
+			Block::LilyOfTheValley(_) => LilyOfTheValley::TRANSPARENT,
+			Block::BrownMushroom(_) => BrownMushroom::TRANSPARENT,
+			Block::RedMushroom(_) => RedMushroom::TRANSPARENT,
+			Block::GoldBlock(_) => GoldBlock::TRANSPARENT,
+			Block::IronBlock(_) => IronBlock::TRANSPARENT,
+			Block::Bricks(_) => Bricks::TRANSPARENT,
+			Block::Tnt(_) => Tnt::TRANSPARENT,
+			Block::Bookshelf(_) => Bookshelf::TRANSPARENT,
+			Block::MossyCobblestone(_) => MossyCobblestone::TRANSPARENT,
+			Block::Obsidian(_) => Obsidian::TRANSPARENT,
+			Block::Torch(_) => Torch::TRANSPARENT,
+			Block::WallTorch(_) => WallTorch::TRANSPARENT,
+			Block::Fire(_) => Fire::TRANSPARENT,
+			Block::SoulFire(_) => SoulFire::TRANSPARENT,
+			Block::Spawner(_) => Spawner::TRANSPARENT,
+			Block::OakStairs(_) => OakStairs::TRANSPARENT,
+			Block::Chest(_) => Chest::TRANSPARENT,
+			Block::RedstoneWire(_) => RedstoneWire::TRANSPARENT,
+			Block::DiamondOre(_) => DiamondOre::TRANSPARENT,
+			Block::DeepslateDiamondOre(_) => DeepslateDiamondOre::TRANSPARENT,
+			Block::DiamondBlock(_) => DiamondBlock::TRANSPARENT,
+			Block::CraftingTable(_) => CraftingTable::TRANSPARENT,
+			Block::Wheat(_) => Wheat::TRANSPARENT,
+			Block::Farmland(_) => Farmland::TRANSPARENT,
+			Block::Furnace(_) => Furnace::TRANSPARENT,
+			Block::OakSign(_) => OakSign::TRANSPARENT,
+			Block::SpruceSign(_) => SpruceSign::TRANSPARENT,
+			Block::BirchSign(_) => BirchSign::TRANSPARENT,
+			Block::AcaciaSign(_) => AcaciaSign::TRANSPARENT,
+			Block::JungleSign(_) => JungleSign::TRANSPARENT,
+			Block::DarkOakSign(_) => DarkOakSign::TRANSPARENT,
+			Block::MangroveSign(_) => MangroveSign::TRANSPARENT,
+			Block::OakDoor(_) => OakDoor::TRANSPARENT,
+			Block::Ladder(_) => Ladder::TRANSPARENT,
+			Block::Rail(_) => Rail::TRANSPARENT,
+			Block::CobblestoneStairs(_) => CobblestoneStairs::TRANSPARENT,
+			Block::OakWallSign(_) => OakWallSign::TRANSPARENT,
+			Block::SpruceWallSign(_) => SpruceWallSign::TRANSPARENT,
+			Block::BirchWallSign(_) => BirchWallSign::TRANSPARENT,
+			Block::AcaciaWallSign(_) => AcaciaWallSign::TRANSPARENT,
+			Block::JungleWallSign(_) => JungleWallSign::TRANSPARENT,
+			Block::DarkOakWallSign(_) => DarkOakWallSign::TRANSPARENT,
+			Block::MangroveWallSign(_) => MangroveWallSign::TRANSPARENT,
+			Block::Lever(_) => Lever::TRANSPARENT,
+			Block::StonePressurePlate(_) => StonePressurePlate::TRANSPARENT,
+			Block::IronDoor(_) => IronDoor::TRANSPARENT,
+			Block::OakPressurePlate(_) => OakPressurePlate::TRANSPARENT,
+			Block::SprucePressurePlate(_) => SprucePressurePlate::TRANSPARENT,
+			Block::BirchPressurePlate(_) => BirchPressurePlate::TRANSPARENT,
+			Block::JunglePressurePlate(_) => JunglePressurePlate::TRANSPARENT,
+			Block::AcaciaPressurePlate(_) => AcaciaPressurePlate::TRANSPARENT,
+			Block::DarkOakPressurePlate(_) => DarkOakPressurePlate::TRANSPARENT,
+			Block::MangrovePressurePlate(_) => MangrovePressurePlate::TRANSPARENT,
+			Block::RedstoneOre(_) => RedstoneOre::TRANSPARENT,
+			Block::DeepslateRedstoneOre(_) => DeepslateRedstoneOre::TRANSPARENT,
+			Block::RedstoneTorch(_) => RedstoneTorch::TRANSPARENT,
+			Block::RedstoneWallTorch(_) => RedstoneWallTorch::TRANSPARENT,
+			Block::StoneButton(_) => StoneButton::TRANSPARENT,
+			Block::Snow(_) => Snow::TRANSPARENT,
+			Block::Ice(_) => Ice::TRANSPARENT,
+			Block::SnowBlock(_) => SnowBlock::TRANSPARENT,
+			Block::Cactus(_) => Cactus::TRANSPARENT,
+			Block::Clay(_) => Clay::TRANSPARENT,
+			Block::SugarCane(_) => SugarCane::TRANSPARENT,
+			Block::Jukebox(_) => Jukebox::TRANSPARENT,
+			Block::OakFence(_) => OakFence::TRANSPARENT,
+			Block::Pumpkin(_) => Pumpkin::TRANSPARENT,
+			Block::Netherrack(_) => Netherrack::TRANSPARENT,
+			Block::SoulSand(_) => SoulSand::TRANSPARENT,
+			Block::SoulSoil(_) => SoulSoil::TRANSPARENT,
+			Block::Basalt(_) => Basalt::TRANSPARENT,
+			Block::PolishedBasalt(_) => PolishedBasalt::TRANSPARENT,
+			Block::SoulTorch(_) => SoulTorch::TRANSPARENT,
+			Block::SoulWallTorch(_) => SoulWallTorch::TRANSPARENT,
+			Block::Glowstone(_) => Glowstone::TRANSPARENT,
+			Block::NetherPortal(_) => NetherPortal::TRANSPARENT,
+			Block::CarvedPumpkin(_) => CarvedPumpkin::TRANSPARENT,
+			Block::JackOLantern(_) => JackOLantern::TRANSPARENT,
+			Block::Cake(_) => Cake::TRANSPARENT,
+			Block::Repeater(_) => Repeater::TRANSPARENT,
+			Block::WhiteStainedGlass(_) => WhiteStainedGlass::TRANSPARENT,
+			Block::OrangeStainedGlass(_) => OrangeStainedGlass::TRANSPARENT,
+			Block::MagentaStainedGlass(_) => MagentaStainedGlass::TRANSPARENT,
+			Block::LightBlueStainedGlass(_) => LightBlueStainedGlass::TRANSPARENT,
+			Block::YellowStainedGlass(_) => YellowStainedGlass::TRANSPARENT,
+			Block::LimeStainedGlass(_) => LimeStainedGlass::TRANSPARENT,
+			Block::PinkStainedGlass(_) => PinkStainedGlass::TRANSPARENT,
+			Block::GrayStainedGlass(_) => GrayStainedGlass::TRANSPARENT,
+			Block::LightGrayStainedGlass(_) => LightGrayStainedGlass::TRANSPARENT,
+			Block::CyanStainedGlass(_) => CyanStainedGlass::TRANSPARENT,
+			Block::PurpleStainedGlass(_) => PurpleStainedGlass::TRANSPARENT,
+			Block::BlueStainedGlass(_) => BlueStainedGlass::TRANSPARENT,
+			Block::BrownStainedGlass(_) => BrownStainedGlass::TRANSPARENT,
+			Block::GreenStainedGlass(_) => GreenStainedGlass::TRANSPARENT,
+			Block::RedStainedGlass(_) => RedStainedGlass::TRANSPARENT,
+			Block::BlackStainedGlass(_) => BlackStainedGlass::TRANSPARENT,
+			Block::OakTrapdoor(_) => OakTrapdoor::TRANSPARENT,
+			Block::SpruceTrapdoor(_) => SpruceTrapdoor::TRANSPARENT,
+			Block::BirchTrapdoor(_) => BirchTrapdoor::TRANSPARENT,
+			Block::JungleTrapdoor(_) => JungleTrapdoor::TRANSPARENT,
+			Block::AcaciaTrapdoor(_) => AcaciaTrapdoor::TRANSPARENT,
+			Block::DarkOakTrapdoor(_) => DarkOakTrapdoor::TRANSPARENT,
+			Block::MangroveTrapdoor(_) => MangroveTrapdoor::TRANSPARENT,
+			Block::StoneBricks(_) => StoneBricks::TRANSPARENT,
+			Block::MossyStoneBricks(_) => MossyStoneBricks::TRANSPARENT,
+			Block::CrackedStoneBricks(_) => CrackedStoneBricks::TRANSPARENT,
+			Block::ChiseledStoneBricks(_) => ChiseledStoneBricks::TRANSPARENT,
+			Block::PackedMud(_) => PackedMud::TRANSPARENT,
+			Block::MudBricks(_) => MudBricks::TRANSPARENT,
+			Block::InfestedStone(_) => InfestedStone::TRANSPARENT,
+			Block::InfestedCobblestone(_) => InfestedCobblestone::TRANSPARENT,
+			Block::InfestedStoneBricks(_) => InfestedStoneBricks::TRANSPARENT,
+			Block::InfestedMossyStoneBricks(_) => InfestedMossyStoneBricks::TRANSPARENT,
+			Block::InfestedCrackedStoneBricks(_) => InfestedCrackedStoneBricks::TRANSPARENT,
+			Block::InfestedChiseledStoneBricks(_) => InfestedChiseledStoneBricks::TRANSPARENT,
+			Block::BrownMushroomBlock(_) => BrownMushroomBlock::TRANSPARENT,
+			Block::RedMushroomBlock(_) => RedMushroomBlock::TRANSPARENT,
+			Block::MushroomStem(_) => MushroomStem::TRANSPARENT,
+			Block::IronBars(_) => IronBars::TRANSPARENT,
+			Block::Chain(_) => Chain::TRANSPARENT,
+			Block::GlassPane(_) => GlassPane::TRANSPARENT,
+			Block::Melon(_) => Melon::TRANSPARENT,
+			Block::AttachedPumpkinStem(_) => AttachedPumpkinStem::TRANSPARENT,
+			Block::AttachedMelonStem(_) => AttachedMelonStem::TRANSPARENT,
+			Block::PumpkinStem(_) => PumpkinStem::TRANSPARENT,
+			Block::MelonStem(_) => MelonStem::TRANSPARENT,
+			Block::Vine(_) => Vine::TRANSPARENT,
+			Block::GlowLichen(_) => GlowLichen::TRANSPARENT,
+			Block::OakFenceGate(_) => OakFenceGate::TRANSPARENT,
+			Block::BrickStairs(_) => BrickStairs::TRANSPARENT,
+			Block::StoneBrickStairs(_) => StoneBrickStairs::TRANSPARENT,
+			Block::MudBrickStairs(_) => MudBrickStairs::TRANSPARENT,
+			Block::Mycelium(_) => Mycelium::TRANSPARENT,
+			Block::LilyPad(_) => LilyPad::TRANSPARENT,
+			Block::NetherBricks(_) => NetherBricks::TRANSPARENT,
+			Block::NetherBrickFence(_) => NetherBrickFence::TRANSPARENT,
+			Block::NetherBrickStairs(_) => NetherBrickStairs::TRANSPARENT,
+			Block::NetherWart(_) => NetherWart::TRANSPARENT,
+			Block::EnchantingTable(_) => EnchantingTable::TRANSPARENT,
+			Block::BrewingStand(_) => BrewingStand::TRANSPARENT,
+			Block::Cauldron(_) => Cauldron::TRANSPARENT,
+			Block::WaterCauldron(_) => WaterCauldron::TRANSPARENT,
+			Block::LavaCauldron(_) => LavaCauldron::TRANSPARENT,
+			Block::PowderSnowCauldron(_) => PowderSnowCauldron::TRANSPARENT,
+			Block::EndPortal(_) => EndPortal::TRANSPARENT,
+			Block::EndPortalFrame(_) => EndPortalFrame::TRANSPARENT,
+			Block::EndStone(_) => EndStone::TRANSPARENT,
+			Block::DragonEgg(_) => DragonEgg::TRANSPARENT,
+			Block::RedstoneLamp(_) => RedstoneLamp::TRANSPARENT,
+			Block::Cocoa(_) => Cocoa::TRANSPARENT,
+			Block::SandstoneStairs(_) => SandstoneStairs::TRANSPARENT,
+			Block::EmeraldOre(_) => EmeraldOre::TRANSPARENT,
+			Block::DeepslateEmeraldOre(_) => DeepslateEmeraldOre::TRANSPARENT,
+			Block::EnderChest(_) => EnderChest::TRANSPARENT,
+			Block::TripwireHook(_) => TripwireHook::TRANSPARENT,
+			Block::Tripwire(_) => Tripwire::TRANSPARENT,
+			Block::EmeraldBlock(_) => EmeraldBlock::TRANSPARENT,
+			Block::SpruceStairs(_) => SpruceStairs::TRANSPARENT,
+			Block::BirchStairs(_) => BirchStairs::TRANSPARENT,
+			Block::JungleStairs(_) => JungleStairs::TRANSPARENT,
+			Block::CommandBlock(_) => CommandBlock::TRANSPARENT,
+			Block::Beacon(_) => Beacon::TRANSPARENT,
+			Block::CobblestoneWall(_) => CobblestoneWall::TRANSPARENT,
+			Block::MossyCobblestoneWall(_) => MossyCobblestoneWall::TRANSPARENT,
+			Block::FlowerPot(_) => FlowerPot::TRANSPARENT,
+			Block::PottedOakSapling(_) => PottedOakSapling::TRANSPARENT,
+			Block::PottedSpruceSapling(_) => PottedSpruceSapling::TRANSPARENT,
+			Block::PottedBirchSapling(_) => PottedBirchSapling::TRANSPARENT,
+			Block::PottedJungleSapling(_) => PottedJungleSapling::TRANSPARENT,
+			Block::PottedAcaciaSapling(_) => PottedAcaciaSapling::TRANSPARENT,
+			Block::PottedDarkOakSapling(_) => PottedDarkOakSapling::TRANSPARENT,
+			Block::PottedMangrovePropagule(_) => PottedMangrovePropagule::TRANSPARENT,
+			Block::PottedFern(_) => PottedFern::TRANSPARENT,
+			Block::PottedDandelion(_) => PottedDandelion::TRANSPARENT,
+			Block::PottedPoppy(_) => PottedPoppy::TRANSPARENT,
+			Block::PottedBlueOrchid(_) => PottedBlueOrchid::TRANSPARENT,
+			Block::PottedAllium(_) => PottedAllium::TRANSPARENT,
+			Block::PottedAzureBluet(_) => PottedAzureBluet::TRANSPARENT,
+			Block::PottedRedTulip(_) => PottedRedTulip::TRANSPARENT,
+			Block::PottedOrangeTulip(_) => PottedOrangeTulip::TRANSPARENT,
+			Block::PottedWhiteTulip(_) => PottedWhiteTulip::TRANSPARENT,
+			Block::PottedPinkTulip(_) => PottedPinkTulip::TRANSPARENT,
+			Block::PottedOxeyeDaisy(_) => PottedOxeyeDaisy::TRANSPARENT,
+			Block::PottedCornflower(_) => PottedCornflower::TRANSPARENT,
+			Block::PottedLilyOfTheValley(_) => PottedLilyOfTheValley::TRANSPARENT,
+			Block::PottedWitherRose(_) => PottedWitherRose::TRANSPARENT,
+			Block::PottedRedMushroom(_) => PottedRedMushroom::TRANSPARENT,
+			Block::PottedBrownMushroom(_) => PottedBrownMushroom::TRANSPARENT,
+			Block::PottedDeadBush(_) => PottedDeadBush::TRANSPARENT,
+			Block::PottedCactus(_) => PottedCactus::TRANSPARENT,
+			Block::Carrots(_) => Carrots::TRANSPARENT,
+			Block::Potatoes(_) => Potatoes::TRANSPARENT,
+			Block::OakButton(_) => OakButton::TRANSPARENT,
+			Block::SpruceButton(_) => SpruceButton::TRANSPARENT,
+			Block::BirchButton(_) => BirchButton::TRANSPARENT,
+			Block::JungleButton(_) => JungleButton::TRANSPARENT,
+			Block::AcaciaButton(_) => AcaciaButton::TRANSPARENT,
+			Block::DarkOakButton(_) => DarkOakButton::TRANSPARENT,
+			Block::MangroveButton(_) => MangroveButton::TRANSPARENT,
+			Block::SkeletonSkull(_) => SkeletonSkull::TRANSPARENT,
+			Block::SkeletonWallSkull(_) => SkeletonWallSkull::TRANSPARENT,
+			Block::WitherSkeletonSkull(_) => WitherSkeletonSkull::TRANSPARENT,
+			Block::WitherSkeletonWallSkull(_) => WitherSkeletonWallSkull::TRANSPARENT,
+			Block::ZombieHead(_) => ZombieHead::TRANSPARENT,
+			Block::ZombieWallHead(_) => ZombieWallHead::TRANSPARENT,
+			Block::PlayerHead(_) => PlayerHead::TRANSPARENT,
+			Block::PlayerWallHead(_) => PlayerWallHead::TRANSPARENT,
+			Block::CreeperHead(_) => CreeperHead::TRANSPARENT,
+			Block::CreeperWallHead(_) => CreeperWallHead::TRANSPARENT,
+			Block::DragonHead(_) => DragonHead::TRANSPARENT,
+			Block::DragonWallHead(_) => DragonWallHead::TRANSPARENT,
+			Block::Anvil(_) => Anvil::TRANSPARENT,
+			Block::ChippedAnvil(_) => ChippedAnvil::TRANSPARENT,
+			Block::DamagedAnvil(_) => DamagedAnvil::TRANSPARENT,
+			Block::TrappedChest(_) => TrappedChest::TRANSPARENT,
+			Block::LightWeightedPressurePlate(_) => LightWeightedPressurePlate::TRANSPARENT,
+			Block::HeavyWeightedPressurePlate(_) => HeavyWeightedPressurePlate::TRANSPARENT,
+			Block::Comparator(_) => Comparator::TRANSPARENT,
+			Block::DaylightDetector(_) => DaylightDetector::TRANSPARENT,
+			Block::RedstoneBlock(_) => RedstoneBlock::TRANSPARENT,
+			Block::NetherQuartzOre(_) => NetherQuartzOre::TRANSPARENT,
+			Block::Hopper(_) => Hopper::TRANSPARENT,
+			Block::QuartzBlock(_) => QuartzBlock::TRANSPARENT,
+			Block::ChiseledQuartzBlock(_) => ChiseledQuartzBlock::TRANSPARENT,
+			Block::QuartzPillar(_) => QuartzPillar::TRANSPARENT,
+			Block::QuartzStairs(_) => QuartzStairs::TRANSPARENT,
+			Block::ActivatorRail(_) => ActivatorRail::TRANSPARENT,
+			Block::Dropper(_) => Dropper::TRANSPARENT,
+			Block::WhiteTerracotta(_) => WhiteTerracotta::TRANSPARENT,
+			Block::OrangeTerracotta(_) => OrangeTerracotta::TRANSPARENT,
+			Block::MagentaTerracotta(_) => MagentaTerracotta::TRANSPARENT,
+			Block::LightBlueTerracotta(_) => LightBlueTerracotta::TRANSPARENT,
+			Block::YellowTerracotta(_) => YellowTerracotta::TRANSPARENT,
+			Block::LimeTerracotta(_) => LimeTerracotta::TRANSPARENT,
+			Block::PinkTerracotta(_) => PinkTerracotta::TRANSPARENT,
+			Block::GrayTerracotta(_) => GrayTerracotta::TRANSPARENT,
+			Block::LightGrayTerracotta(_) => LightGrayTerracotta::TRANSPARENT,
+			Block::CyanTerracotta(_) => CyanTerracotta::TRANSPARENT,
+			Block::PurpleTerracotta(_) => PurpleTerracotta::TRANSPARENT,
+			Block::BlueTerracotta(_) => BlueTerracotta::TRANSPARENT,
+			Block::BrownTerracotta(_) => BrownTerracotta::TRANSPARENT,
+			Block::GreenTerracotta(_) => GreenTerracotta::TRANSPARENT,
+			Block::RedTerracotta(_) => RedTerracotta::TRANSPARENT,
+			Block::BlackTerracotta(_) => BlackTerracotta::TRANSPARENT,
+			Block::WhiteStainedGlassPane(_) => WhiteStainedGlassPane::TRANSPARENT,
+			Block::OrangeStainedGlassPane(_) => OrangeStainedGlassPane::TRANSPARENT,
+			Block::MagentaStainedGlassPane(_) => MagentaStainedGlassPane::TRANSPARENT,
+			Block::LightBlueStainedGlassPane(_) => LightBlueStainedGlassPane::TRANSPARENT,
+			Block::YellowStainedGlassPane(_) => YellowStainedGlassPane::TRANSPARENT,
+			Block::LimeStainedGlassPane(_) => LimeStainedGlassPane::TRANSPARENT,
+			Block::PinkStainedGlassPane(_) => PinkStainedGlassPane::TRANSPARENT,
+			Block::GrayStainedGlassPane(_) => GrayStainedGlassPane::TRANSPARENT,
+			Block::LightGrayStainedGlassPane(_) => LightGrayStainedGlassPane::TRANSPARENT,
+			Block::CyanStainedGlassPane(_) => CyanStainedGlassPane::TRANSPARENT,
+			Block::PurpleStainedGlassPane(_) => PurpleStainedGlassPane::TRANSPARENT,
+			Block::BlueStainedGlassPane(_) => BlueStainedGlassPane::TRANSPARENT,
+			Block::BrownStainedGlassPane(_) => BrownStainedGlassPane::TRANSPARENT,
+			Block::GreenStainedGlassPane(_) => GreenStainedGlassPane::TRANSPARENT,
+			Block::RedStainedGlassPane(_) => RedStainedGlassPane::TRANSPARENT,
+			Block::BlackStainedGlassPane(_) => BlackStainedGlassPane::TRANSPARENT,
+			Block::AcaciaStairs(_) => AcaciaStairs::TRANSPARENT,
+			Block::DarkOakStairs(_) => DarkOakStairs::TRANSPARENT,
+			Block::MangroveStairs(_) => MangroveStairs::TRANSPARENT,
+			Block::SlimeBlock(_) => SlimeBlock::TRANSPARENT,
+			Block::Barrier(_) => Barrier::TRANSPARENT,
+			Block::Light(_) => Light::TRANSPARENT,
+			Block::IronTrapdoor(_) => IronTrapdoor::TRANSPARENT,
+			Block::Prismarine(_) => Prismarine::TRANSPARENT,
+			Block::PrismarineBricks(_) => PrismarineBricks::TRANSPARENT,
+			Block::DarkPrismarine(_) => DarkPrismarine::TRANSPARENT,
+			Block::PrismarineStairs(_) => PrismarineStairs::TRANSPARENT,
+			Block::PrismarineBrickStairs(_) => PrismarineBrickStairs::TRANSPARENT,
+			Block::DarkPrismarineStairs(_) => DarkPrismarineStairs::TRANSPARENT,
+			Block::PrismarineSlab(_) => PrismarineSlab::TRANSPARENT,
+			Block::PrismarineBrickSlab(_) => PrismarineBrickSlab::TRANSPARENT,
+			Block::DarkPrismarineSlab(_) => DarkPrismarineSlab::TRANSPARENT,
+			Block::SeaLantern(_) => SeaLantern::TRANSPARENT,
+			Block::HayBlock(_) => HayBlock::TRANSPARENT,
+			Block::WhiteCarpet(_) => WhiteCarpet::TRANSPARENT,
+			Block::OrangeCarpet(_) => OrangeCarpet::TRANSPARENT,
+			Block::MagentaCarpet(_) => MagentaCarpet::TRANSPARENT,
+			Block::LightBlueCarpet(_) => LightBlueCarpet::TRANSPARENT,
+			Block::YellowCarpet(_) => YellowCarpet::TRANSPARENT,
+			Block::LimeCarpet(_) => LimeCarpet::TRANSPARENT,
+			Block::PinkCarpet(_) => PinkCarpet::TRANSPARENT,
+			Block::GrayCarpet(_) => GrayCarpet::TRANSPARENT,
+			Block::LightGrayCarpet(_) => LightGrayCarpet::TRANSPARENT,
+			Block::CyanCarpet(_) => CyanCarpet::TRANSPARENT,
+			Block::PurpleCarpet(_) => PurpleCarpet::TRANSPARENT,
+			Block::BlueCarpet(_) => BlueCarpet::TRANSPARENT,
+			Block::BrownCarpet(_) => BrownCarpet::TRANSPARENT,
+			Block::GreenCarpet(_) => GreenCarpet::TRANSPARENT,
+			Block::RedCarpet(_) => RedCarpet::TRANSPARENT,
+			Block::BlackCarpet(_) => BlackCarpet::TRANSPARENT,
+			Block::Terracotta(_) => Terracotta::TRANSPARENT,
+			Block::CoalBlock(_) => CoalBlock::TRANSPARENT,
+			Block::PackedIce(_) => PackedIce::TRANSPARENT,
+			Block::Sunflower(_) => Sunflower::TRANSPARENT,
+			Block::Lilac(_) => Lilac::TRANSPARENT,
+			Block::RoseBush(_) => RoseBush::TRANSPARENT,
+			Block::Peony(_) => Peony::TRANSPARENT,
+			Block::TallGrass(_) => TallGrass::TRANSPARENT,
+			Block::LargeFern(_) => LargeFern::TRANSPARENT,
+			Block::WhiteBanner(_) => WhiteBanner::TRANSPARENT,
+			Block::OrangeBanner(_) => OrangeBanner::TRANSPARENT,
+			Block::MagentaBanner(_) => MagentaBanner::TRANSPARENT,
+			Block::LightBlueBanner(_) => LightBlueBanner::TRANSPARENT,
+			Block::YellowBanner(_) => YellowBanner::TRANSPARENT,
+			Block::LimeBanner(_) => LimeBanner::TRANSPARENT,
+			Block::PinkBanner(_) => PinkBanner::TRANSPARENT,
+			Block::GrayBanner(_) => GrayBanner::TRANSPARENT,
+			Block::LightGrayBanner(_) => LightGrayBanner::TRANSPARENT,
+			Block::CyanBanner(_) => CyanBanner::TRANSPARENT,
+			Block::PurpleBanner(_) => PurpleBanner::TRANSPARENT,
+			Block::BlueBanner(_) => BlueBanner::TRANSPARENT,
+			Block::BrownBanner(_) => BrownBanner::TRANSPARENT,
+			Block::GreenBanner(_) => GreenBanner::TRANSPARENT,
+			Block::RedBanner(_) => RedBanner::TRANSPARENT,
+			Block::BlackBanner(_) => BlackBanner::TRANSPARENT,
+			Block::WhiteWallBanner(_) => WhiteWallBanner::TRANSPARENT,
+			Block::OrangeWallBanner(_) => OrangeWallBanner::TRANSPARENT,
+			Block::MagentaWallBanner(_) => MagentaWallBanner::TRANSPARENT,
+			Block::LightBlueWallBanner(_) => LightBlueWallBanner::TRANSPARENT,
+			Block::YellowWallBanner(_) => YellowWallBanner::TRANSPARENT,
+			Block::LimeWallBanner(_) => LimeWallBanner::TRANSPARENT,
+			Block::PinkWallBanner(_) => PinkWallBanner::TRANSPARENT,
+			Block::GrayWallBanner(_) => GrayWallBanner::TRANSPARENT,
+			Block::LightGrayWallBanner(_) => LightGrayWallBanner::TRANSPARENT,
+			Block::CyanWallBanner(_) => CyanWallBanner::TRANSPARENT,
+			Block::PurpleWallBanner(_) => PurpleWallBanner::TRANSPARENT,
+			Block::BlueWallBanner(_) => BlueWallBanner::TRANSPARENT,
+			Block::BrownWallBanner(_) => BrownWallBanner::TRANSPARENT,
+			Block::GreenWallBanner(_) => GreenWallBanner::TRANSPARENT,
+			Block::RedWallBanner(_) => RedWallBanner::TRANSPARENT,
+			Block::BlackWallBanner(_) => BlackWallBanner::TRANSPARENT,
+			Block::RedSandstone(_) => RedSandstone::TRANSPARENT,
+			Block::ChiseledRedSandstone(_) => ChiseledRedSandstone::TRANSPARENT,
+			Block::CutRedSandstone(_) => CutRedSandstone::TRANSPARENT,
+			Block::RedSandstoneStairs(_) => RedSandstoneStairs::TRANSPARENT,
+			Block::OakSlab(_) => OakSlab::TRANSPARENT,
+			Block::SpruceSlab(_) => SpruceSlab::TRANSPARENT,
+			Block::BirchSlab(_) => BirchSlab::TRANSPARENT,
+			Block::JungleSlab(_) => JungleSlab::TRANSPARENT,
+			Block::AcaciaSlab(_) => AcaciaSlab::TRANSPARENT,
+			Block::DarkOakSlab(_) => DarkOakSlab::TRANSPARENT,
+			Block::MangroveSlab(_) => MangroveSlab::TRANSPARENT,
+			Block::StoneSlab(_) => StoneSlab::TRANSPARENT,
+			Block::SmoothStoneSlab(_) => SmoothStoneSlab::TRANSPARENT,
+			Block::SandstoneSlab(_) => SandstoneSlab::TRANSPARENT,
+			Block::CutSandstoneSlab(_) => CutSandstoneSlab::TRANSPARENT,
+			Block::PetrifiedOakSlab(_) => PetrifiedOakSlab::TRANSPARENT,
+			Block::CobblestoneSlab(_) => CobblestoneSlab::TRANSPARENT,
+			Block::BrickSlab(_) => BrickSlab::TRANSPARENT,
+			Block::StoneBrickSlab(_) => StoneBrickSlab::TRANSPARENT,
+			Block::MudBrickSlab(_) => MudBrickSlab::TRANSPARENT,
+			Block::NetherBrickSlab(_) => NetherBrickSlab::TRANSPARENT,
+			Block::QuartzSlab(_) => QuartzSlab::TRANSPARENT,
+			Block::RedSandstoneSlab(_) => RedSandstoneSlab::TRANSPARENT,
+			Block::CutRedSandstoneSlab(_) => CutRedSandstoneSlab::TRANSPARENT,
+			Block::PurpurSlab(_) => PurpurSlab::TRANSPARENT,
+			Block::SmoothStone(_) => SmoothStone::TRANSPARENT,
+			Block::SmoothSandstone(_) => SmoothSandstone::TRANSPARENT,
+			Block::SmoothQuartz(_) => SmoothQuartz::TRANSPARENT,
+			Block::SmoothRedSandstone(_) => SmoothRedSandstone::TRANSPARENT,
+			Block::SpruceFenceGate(_) => SpruceFenceGate::TRANSPARENT,
+			Block::BirchFenceGate(_) => BirchFenceGate::TRANSPARENT,
+			Block::JungleFenceGate(_) => JungleFenceGate::TRANSPARENT,
+			Block::AcaciaFenceGate(_) => AcaciaFenceGate::TRANSPARENT,
+			Block::DarkOakFenceGate(_) => DarkOakFenceGate::TRANSPARENT,
+			Block::MangroveFenceGate(_) => MangroveFenceGate::TRANSPARENT,
+			Block::SpruceFence(_) => SpruceFence::TRANSPARENT,
+			Block::BirchFence(_) => BirchFence::TRANSPARENT,
+			Block::JungleFence(_) => JungleFence::TRANSPARENT,
+			Block::AcaciaFence(_) => AcaciaFence::TRANSPARENT,
+			Block::DarkOakFence(_) => DarkOakFence::TRANSPARENT,
+			Block::MangroveFence(_) => MangroveFence::TRANSPARENT,
+			Block::SpruceDoor(_) => SpruceDoor::TRANSPARENT,
+			Block::BirchDoor(_) => BirchDoor::TRANSPARENT,
+			Block::JungleDoor(_) => JungleDoor::TRANSPARENT,
+			Block::AcaciaDoor(_) => AcaciaDoor::TRANSPARENT,
+			Block::DarkOakDoor(_) => DarkOakDoor::TRANSPARENT,
+			Block::MangroveDoor(_) => MangroveDoor::TRANSPARENT,
+			Block::EndRod(_) => EndRod::TRANSPARENT,
+			Block::ChorusPlant(_) => ChorusPlant::TRANSPARENT,
+			Block::ChorusFlower(_) => ChorusFlower::TRANSPARENT,
+			Block::PurpurBlock(_) => PurpurBlock::TRANSPARENT,
+			Block::PurpurPillar(_) => PurpurPillar::TRANSPARENT,
+			Block::PurpurStairs(_) => PurpurStairs::TRANSPARENT,
+			Block::EndStoneBricks(_) => EndStoneBricks::TRANSPARENT,
+			Block::Beetroots(_) => Beetroots::TRANSPARENT,
+			Block::DirtPath(_) => DirtPath::TRANSPARENT,
+			Block::EndGateway(_) => EndGateway::TRANSPARENT,
+			Block::RepeatingCommandBlock(_) => RepeatingCommandBlock::TRANSPARENT,
+			Block::ChainCommandBlock(_) => ChainCommandBlock::TRANSPARENT,
+			Block::FrostedIce(_) => FrostedIce::TRANSPARENT,
+			Block::MagmaBlock(_) => MagmaBlock::TRANSPARENT,
+			Block::NetherWartBlock(_) => NetherWartBlock::TRANSPARENT,
+			Block::RedNetherBricks(_) => RedNetherBricks::TRANSPARENT,
+			Block::BoneBlock(_) => BoneBlock::TRANSPARENT,
+			Block::StructureVoid(_) => StructureVoid::TRANSPARENT,
+			Block::Observer(_) => Observer::TRANSPARENT,
+			Block::ShulkerBox(_) => ShulkerBox::TRANSPARENT,
+			Block::WhiteShulkerBox(_) => WhiteShulkerBox::TRANSPARENT,
+			Block::OrangeShulkerBox(_) => OrangeShulkerBox::TRANSPARENT,
+			Block::MagentaShulkerBox(_) => MagentaShulkerBox::TRANSPARENT,
+			Block::LightBlueShulkerBox(_) => LightBlueShulkerBox::TRANSPARENT,
+			Block::YellowShulkerBox(_) => YellowShulkerBox::TRANSPARENT,
+			Block::LimeShulkerBox(_) => LimeShulkerBox::TRANSPARENT,
+			Block::PinkShulkerBox(_) => PinkShulkerBox::TRANSPARENT,
+			Block::GrayShulkerBox(_) => GrayShulkerBox::TRANSPARENT,
+			Block::LightGrayShulkerBox(_) => LightGrayShulkerBox::TRANSPARENT,
+			Block::CyanShulkerBox(_) => CyanShulkerBox::TRANSPARENT,
+			Block::PurpleShulkerBox(_) => PurpleShulkerBox::TRANSPARENT,
+			Block::BlueShulkerBox(_) => BlueShulkerBox::TRANSPARENT,
+			Block::BrownShulkerBox(_) => BrownShulkerBox::TRANSPARENT,
+			Block::GreenShulkerBox(_) => GreenShulkerBox::TRANSPARENT,
+			Block::RedShulkerBox(_) => RedShulkerBox::TRANSPARENT,
+			Block::BlackShulkerBox(_) => BlackShulkerBox::TRANSPARENT,
+			Block::WhiteGlazedTerracotta(_) => WhiteGlazedTerracotta::TRANSPARENT,
+			Block::OrangeGlazedTerracotta(_) => OrangeGlazedTerracotta::TRANSPARENT,
+			Block::MagentaGlazedTerracotta(_) => MagentaGlazedTerracotta::TRANSPARENT,
+			Block::LightBlueGlazedTerracotta(_) => LightBlueGlazedTerracotta::TRANSPARENT,
+			Block::YellowGlazedTerracotta(_) => YellowGlazedTerracotta::TRANSPARENT,
+			Block::LimeGlazedTerracotta(_) => LimeGlazedTerracotta::TRANSPARENT,
+			Block::PinkGlazedTerracotta(_) => PinkGlazedTerracotta::TRANSPARENT,
+			Block::GrayGlazedTerracotta(_) => GrayGlazedTerracotta::TRANSPARENT,
+			Block::LightGrayGlazedTerracotta(_) => LightGrayGlazedTerracotta::TRANSPARENT,
+			Block::CyanGlazedTerracotta(_) => CyanGlazedTerracotta::TRANSPARENT,
+			Block::PurpleGlazedTerracotta(_) => PurpleGlazedTerracotta::TRANSPARENT,
+			Block::BlueGlazedTerracotta(_) => BlueGlazedTerracotta::TRANSPARENT,
+			Block::BrownGlazedTerracotta(_) => BrownGlazedTerracotta::TRANSPARENT,
+			Block::GreenGlazedTerracotta(_) => GreenGlazedTerracotta::TRANSPARENT,
+			Block::RedGlazedTerracotta(_) => RedGlazedTerracotta::TRANSPARENT,
+			Block::BlackGlazedTerracotta(_) => BlackGlazedTerracotta::TRANSPARENT,
+			Block::WhiteConcrete(_) => WhiteConcrete::TRANSPARENT,
+			Block::OrangeConcrete(_) => OrangeConcrete::TRANSPARENT,
+			Block::MagentaConcrete(_) => MagentaConcrete::TRANSPARENT,
+			Block::LightBlueConcrete(_) => LightBlueConcrete::TRANSPARENT,
+			Block::YellowConcrete(_) => YellowConcrete::TRANSPARENT,
+			Block::LimeConcrete(_) => LimeConcrete::TRANSPARENT,
+			Block::PinkConcrete(_) => PinkConcrete::TRANSPARENT,
+			Block::GrayConcrete(_) => GrayConcrete::TRANSPARENT,
+			Block::LightGrayConcrete(_) => LightGrayConcrete::TRANSPARENT,
+			Block::CyanConcrete(_) => CyanConcrete::TRANSPARENT,
+			Block::PurpleConcrete(_) => PurpleConcrete::TRANSPARENT,
+			Block::BlueConcrete(_) => BlueConcrete::TRANSPARENT,
+			Block::BrownConcrete(_) => BrownConcrete::TRANSPARENT,
+			Block::GreenConcrete(_) => GreenConcrete::TRANSPARENT,
+			Block::RedConcrete(_) => RedConcrete::TRANSPARENT,
+			Block::BlackConcrete(_) => BlackConcrete::TRANSPARENT,
+			Block::WhiteConcretePowder(_) => WhiteConcretePowder::TRANSPARENT,
+			Block::OrangeConcretePowder(_) => OrangeConcretePowder::TRANSPARENT,
+			Block::MagentaConcretePowder(_) => MagentaConcretePowder::TRANSPARENT,
+			Block::LightBlueConcretePowder(_) => LightBlueConcretePowder::TRANSPARENT,
+			Block::YellowConcretePowder(_) => YellowConcretePowder::TRANSPARENT,
+			Block::LimeConcretePowder(_) => LimeConcretePowder::TRANSPARENT,
+			Block::PinkConcretePowder(_) => PinkConcretePowder::TRANSPARENT,
+			Block::GrayConcretePowder(_) => GrayConcretePowder::TRANSPARENT,
+			Block::LightGrayConcretePowder(_) => LightGrayConcretePowder::TRANSPARENT,
+			Block::CyanConcretePowder(_) => CyanConcretePowder::TRANSPARENT,
+			Block::PurpleConcretePowder(_) => PurpleConcretePowder::TRANSPARENT,
+			Block::BlueConcretePowder(_) => BlueConcretePowder::TRANSPARENT,
+			Block::BrownConcretePowder(_) => BrownConcretePowder::TRANSPARENT,
+			Block::GreenConcretePowder(_) => GreenConcretePowder::TRANSPARENT,
+			Block::RedConcretePowder(_) => RedConcretePowder::TRANSPARENT,
+			Block::BlackConcretePowder(_) => BlackConcretePowder::TRANSPARENT,
+			Block::Kelp(_) => Kelp::TRANSPARENT,
+			Block::KelpPlant(_) => KelpPlant::TRANSPARENT,
+			Block::DriedKelpBlock(_) => DriedKelpBlock::TRANSPARENT,
+			Block::TurtleEgg(_) => TurtleEgg::TRANSPARENT,
+			Block::DeadTubeCoralBlock(_) => DeadTubeCoralBlock::TRANSPARENT,
+			Block::DeadBrainCoralBlock(_) => DeadBrainCoralBlock::TRANSPARENT,
+			Block::DeadBubbleCoralBlock(_) => DeadBubbleCoralBlock::TRANSPARENT,
+			Block::DeadFireCoralBlock(_) => DeadFireCoralBlock::TRANSPARENT,
+			Block::DeadHornCoralBlock(_) => DeadHornCoralBlock::TRANSPARENT,
+			Block::TubeCoralBlock(_) => TubeCoralBlock::TRANSPARENT,
+			Block::BrainCoralBlock(_) => BrainCoralBlock::TRANSPARENT,
+			Block::BubbleCoralBlock(_) => BubbleCoralBlock::TRANSPARENT,
+			Block::FireCoralBlock(_) => FireCoralBlock::TRANSPARENT,
+			Block::HornCoralBlock(_) => HornCoralBlock::TRANSPARENT,
+			Block::DeadTubeCoral(_) => DeadTubeCoral::TRANSPARENT,
+			Block::DeadBrainCoral(_) => DeadBrainCoral::TRANSPARENT,
+			Block::DeadBubbleCoral(_) => DeadBubbleCoral::TRANSPARENT,
+			Block::DeadFireCoral(_) => DeadFireCoral::TRANSPARENT,
+			Block::DeadHornCoral(_) => DeadHornCoral::TRANSPARENT,
+			Block::TubeCoral(_) => TubeCoral::TRANSPARENT,
+			Block::BrainCoral(_) => BrainCoral::TRANSPARENT,
+			Block::BubbleCoral(_) => BubbleCoral::TRANSPARENT,
+			Block::FireCoral(_) => FireCoral::TRANSPARENT,
+			Block::HornCoral(_) => HornCoral::TRANSPARENT,
+			Block::DeadTubeCoralFan(_) => DeadTubeCoralFan::TRANSPARENT,
+			Block::DeadBrainCoralFan(_) => DeadBrainCoralFan::TRANSPARENT,
+			Block::DeadBubbleCoralFan(_) => DeadBubbleCoralFan::TRANSPARENT,
+			Block::DeadFireCoralFan(_) => DeadFireCoralFan::TRANSPARENT,
+			Block::DeadHornCoralFan(_) => DeadHornCoralFan::TRANSPARENT,
+			Block::TubeCoralFan(_) => TubeCoralFan::TRANSPARENT,
+			Block::BrainCoralFan(_) => BrainCoralFan::TRANSPARENT,
+			Block::BubbleCoralFan(_) => BubbleCoralFan::TRANSPARENT,
+			Block::FireCoralFan(_) => FireCoralFan::TRANSPARENT,
+			Block::HornCoralFan(_) => HornCoralFan::TRANSPARENT,
+			Block::DeadTubeCoralWallFan(_) => DeadTubeCoralWallFan::TRANSPARENT,
+			Block::DeadBrainCoralWallFan(_) => DeadBrainCoralWallFan::TRANSPARENT,
+			Block::DeadBubbleCoralWallFan(_) => DeadBubbleCoralWallFan::TRANSPARENT,
+			Block::DeadFireCoralWallFan(_) => DeadFireCoralWallFan::TRANSPARENT,
+			Block::DeadHornCoralWallFan(_) => DeadHornCoralWallFan::TRANSPARENT,
+			Block::TubeCoralWallFan(_) => TubeCoralWallFan::TRANSPARENT,
+			Block::BrainCoralWallFan(_) => BrainCoralWallFan::TRANSPARENT,
+			Block::BubbleCoralWallFan(_) => BubbleCoralWallFan::TRANSPARENT,
+			Block::FireCoralWallFan(_) => FireCoralWallFan::TRANSPARENT,
+			Block::HornCoralWallFan(_) => HornCoralWallFan::TRANSPARENT,
+			Block::SeaPickle(_) => SeaPickle::TRANSPARENT,
+			Block::BlueIce(_) => BlueIce::TRANSPARENT,
+			Block::Conduit(_) => Conduit::TRANSPARENT,
+			Block::BambooSapling(_) => BambooSapling::TRANSPARENT,
+			Block::Bamboo(_) => Bamboo::TRANSPARENT,
+			Block::PottedBamboo(_) => PottedBamboo::TRANSPARENT,
+			Block::VoidAir(_) => VoidAir::TRANSPARENT,
+			Block::CaveAir(_) => CaveAir::TRANSPARENT,
+			Block::BubbleColumn(_) => BubbleColumn::TRANSPARENT,
+			Block::PolishedGraniteStairs(_) => PolishedGraniteStairs::TRANSPARENT,
+			Block::SmoothRedSandstoneStairs(_) => SmoothRedSandstoneStairs::TRANSPARENT,
+			Block::MossyStoneBrickStairs(_) => MossyStoneBrickStairs::TRANSPARENT,
+			Block::PolishedDioriteStairs(_) => PolishedDioriteStairs::TRANSPARENT,
+			Block::MossyCobblestoneStairs(_) => MossyCobblestoneStairs::TRANSPARENT,
+			Block::EndStoneBrickStairs(_) => EndStoneBrickStairs::TRANSPARENT,
+			Block::StoneStairs(_) => StoneStairs::TRANSPARENT,
+			Block::SmoothSandstoneStairs(_) => SmoothSandstoneStairs::TRANSPARENT,
+			Block::SmoothQuartzStairs(_) => SmoothQuartzStairs::TRANSPARENT,
+			Block::GraniteStairs(_) => GraniteStairs::TRANSPARENT,
+			Block::AndesiteStairs(_) => AndesiteStairs::TRANSPARENT,
+			Block::RedNetherBrickStairs(_) => RedNetherBrickStairs::TRANSPARENT,
+			Block::PolishedAndesiteStairs(_) => PolishedAndesiteStairs::TRANSPARENT,
+			Block::DioriteStairs(_) => DioriteStairs::TRANSPARENT,
+			Block::PolishedGraniteSlab(_) => PolishedGraniteSlab::TRANSPARENT,
+			Block::SmoothRedSandstoneSlab(_) => SmoothRedSandstoneSlab::TRANSPARENT,
+			Block::MossyStoneBrickSlab(_) => MossyStoneBrickSlab::TRANSPARENT,
+			Block::PolishedDioriteSlab(_) => PolishedDioriteSlab::TRANSPARENT,
+			Block::MossyCobblestoneSlab(_) => MossyCobblestoneSlab::TRANSPARENT,
+			Block::EndStoneBrickSlab(_) => EndStoneBrickSlab::TRANSPARENT,
+			Block::SmoothSandstoneSlab(_) => SmoothSandstoneSlab::TRANSPARENT,
+			Block::SmoothQuartzSlab(_) => SmoothQuartzSlab::TRANSPARENT,
+			Block::GraniteSlab(_) => GraniteSlab::TRANSPARENT,
+			Block::AndesiteSlab(_) => AndesiteSlab::TRANSPARENT,
+			Block::RedNetherBrickSlab(_) => RedNetherBrickSlab::TRANSPARENT,
+			Block::PolishedAndesiteSlab(_) => PolishedAndesiteSlab::TRANSPARENT,
+			Block::DioriteSlab(_) => DioriteSlab::TRANSPARENT,
+			Block::BrickWall(_) => BrickWall::TRANSPARENT,
+			Block::PrismarineWall(_) => PrismarineWall::TRANSPARENT,
+			Block::RedSandstoneWall(_) => RedSandstoneWall::TRANSPARENT,
+			Block::MossyStoneBrickWall(_) => MossyStoneBrickWall::TRANSPARENT,
+			Block::GraniteWall(_) => GraniteWall::TRANSPARENT,
+			Block::StoneBrickWall(_) => StoneBrickWall::TRANSPARENT,
+			Block::MudBrickWall(_) => MudBrickWall::TRANSPARENT,
+			Block::NetherBrickWall(_) => NetherBrickWall::TRANSPARENT,
+			Block::AndesiteWall(_) => AndesiteWall::TRANSPARENT,
+			Block::RedNetherBrickWall(_) => RedNetherBrickWall::TRANSPARENT,
+			Block::SandstoneWall(_) => SandstoneWall::TRANSPARENT,
+			Block::EndStoneBrickWall(_) => EndStoneBrickWall::TRANSPARENT,
+			Block::DioriteWall(_) => DioriteWall::TRANSPARENT,
+			Block::Scaffolding(_) => Scaffolding::TRANSPARENT,
+			Block::Loom(_) => Loom::TRANSPARENT,
+			Block::Barrel(_) => Barrel::TRANSPARENT,
+			Block::Smoker(_) => Smoker::TRANSPARENT,
+			Block::BlastFurnace(_) => BlastFurnace::TRANSPARENT,
+			Block::CartographyTable(_) => CartographyTable::TRANSPARENT,
+			Block::FletchingTable(_) => FletchingTable::TRANSPARENT,
+			Block::Grindstone(_) => Grindstone::TRANSPARENT,
+			Block::Lectern(_) => Lectern::TRANSPARENT,
+			Block::SmithingTable(_) => SmithingTable::TRANSPARENT,
+			Block::Stonecutter(_) => Stonecutter::TRANSPARENT,
+			Block::Bell(_) => Bell::TRANSPARENT,
+			Block::Lantern(_) => Lantern::TRANSPARENT,
+			Block::SoulLantern(_) => SoulLantern::TRANSPARENT,
+			Block::Campfire(_) => Campfire::TRANSPARENT,
+			Block::SoulCampfire(_) => SoulCampfire::TRANSPARENT,
+			Block::SweetBerryBush(_) => SweetBerryBush::TRANSPARENT,
+			Block::WarpedStem(_) => WarpedStem::TRANSPARENT,
+			Block::StrippedWarpedStem(_) => StrippedWarpedStem::TRANSPARENT,
+			Block::WarpedHyphae(_) => WarpedHyphae::TRANSPARENT,
+			Block::StrippedWarpedHyphae(_) => StrippedWarpedHyphae::TRANSPARENT,
+			Block::WarpedNylium(_) => WarpedNylium::TRANSPARENT,
+			Block::WarpedFungus(_) => WarpedFungus::TRANSPARENT,
+			Block::WarpedWartBlock(_) => WarpedWartBlock::TRANSPARENT,
+			Block::WarpedRoots(_) => WarpedRoots::TRANSPARENT,
+			Block::NetherSprouts(_) => NetherSprouts::TRANSPARENT,
+			Block::CrimsonStem(_) => CrimsonStem::TRANSPARENT,
+			Block::StrippedCrimsonStem(_) => StrippedCrimsonStem::TRANSPARENT,
+			Block::CrimsonHyphae(_) => CrimsonHyphae::TRANSPARENT,
+			Block::StrippedCrimsonHyphae(_) => StrippedCrimsonHyphae::TRANSPARENT,
+			Block::CrimsonNylium(_) => CrimsonNylium::TRANSPARENT,
+			Block::CrimsonFungus(_) => CrimsonFungus::TRANSPARENT,
+			Block::Shroomlight(_) => Shroomlight::TRANSPARENT,
+			Block::WeepingVines(_) => WeepingVines::TRANSPARENT,
+			Block::WeepingVinesPlant(_) => WeepingVinesPlant::TRANSPARENT,
+			Block::TwistingVines(_) => TwistingVines::TRANSPARENT,
+			Block::TwistingVinesPlant(_) => TwistingVinesPlant::TRANSPARENT,
+			Block::CrimsonRoots(_) => CrimsonRoots::TRANSPARENT,
+			Block::CrimsonPlanks(_) => CrimsonPlanks::TRANSPARENT,
+			Block::WarpedPlanks(_) => WarpedPlanks::TRANSPARENT,
+			Block::CrimsonSlab(_) => CrimsonSlab::TRANSPARENT,
+			Block::WarpedSlab(_) => WarpedSlab::TRANSPARENT,
+			Block::CrimsonPressurePlate(_) => CrimsonPressurePlate::TRANSPARENT,
+			Block::WarpedPressurePlate(_) => WarpedPressurePlate::TRANSPARENT,
+			Block::CrimsonFence(_) => CrimsonFence::TRANSPARENT,
+			Block::WarpedFence(_) => WarpedFence::TRANSPARENT,
+			Block::CrimsonTrapdoor(_) => CrimsonTrapdoor::TRANSPARENT,
+			Block::WarpedTrapdoor(_) => WarpedTrapdoor::TRANSPARENT,
+			Block::CrimsonFenceGate(_) => CrimsonFenceGate::TRANSPARENT,
+			Block::WarpedFenceGate(_) => WarpedFenceGate::TRANSPARENT,
+			Block::CrimsonStairs(_) => CrimsonStairs::TRANSPARENT,
+			Block::WarpedStairs(_) => WarpedStairs::TRANSPARENT,
+			Block::CrimsonButton(_) => CrimsonButton::TRANSPARENT,
+			Block::WarpedButton(_) => WarpedButton::TRANSPARENT,
+			Block::CrimsonDoor(_) => CrimsonDoor::TRANSPARENT,
+			Block::WarpedDoor(_) => WarpedDoor::TRANSPARENT,
+			Block::CrimsonSign(_) => CrimsonSign::TRANSPARENT,
+			Block::WarpedSign(_) => WarpedSign::TRANSPARENT,
+			Block::CrimsonWallSign(_) => CrimsonWallSign::TRANSPARENT,
+			Block::WarpedWallSign(_) => WarpedWallSign::TRANSPARENT,
+			Block::StructureBlock(_) => StructureBlock::TRANSPARENT,
+			Block::Jigsaw(_) => Jigsaw::TRANSPARENT,
+			Block::Composter(_) => Composter::TRANSPARENT,
+			Block::Target(_) => Target::TRANSPARENT,
+			Block::BeeNest(_) => BeeNest::TRANSPARENT,
+			Block::Beehive(_) => Beehive::TRANSPARENT,
+			Block::HoneyBlock(_) => HoneyBlock::TRANSPARENT,
+			Block::HoneycombBlock(_) => HoneycombBlock::TRANSPARENT,
+			Block::NetheriteBlock(_) => NetheriteBlock::TRANSPARENT,
+			Block::AncientDebris(_) => AncientDebris::TRANSPARENT,
+			Block::CryingObsidian(_) => CryingObsidian::TRANSPARENT,
+			Block::RespawnAnchor(_) => RespawnAnchor::TRANSPARENT,
+			Block::PottedCrimsonFungus(_) => PottedCrimsonFungus::TRANSPARENT,
+			Block::PottedWarpedFungus(_) => PottedWarpedFungus::TRANSPARENT,
+			Block::PottedCrimsonRoots(_) => PottedCrimsonRoots::TRANSPARENT,
+			Block::PottedWarpedRoots(_) => PottedWarpedRoots::TRANSPARENT,
+			Block::Lodestone(_) => Lodestone::TRANSPARENT,
+			Block::Blackstone(_) => Blackstone::TRANSPARENT,
+			Block::BlackstoneStairs(_) => BlackstoneStairs::TRANSPARENT,
+			Block::BlackstoneWall(_) => BlackstoneWall::TRANSPARENT,
+			Block::BlackstoneSlab(_) => BlackstoneSlab::TRANSPARENT,
+			Block::PolishedBlackstone(_) => PolishedBlackstone::TRANSPARENT,
+			Block::PolishedBlackstoneBricks(_) => PolishedBlackstoneBricks::TRANSPARENT,
+			Block::CrackedPolishedBlackstoneBricks(_) => CrackedPolishedBlackstoneBricks::TRANSPARENT,
+			Block::ChiseledPolishedBlackstone(_) => ChiseledPolishedBlackstone::TRANSPARENT,
+			Block::PolishedBlackstoneBrickSlab(_) => PolishedBlackstoneBrickSlab::TRANSPARENT,
+			Block::PolishedBlackstoneBrickStairs(_) => PolishedBlackstoneBrickStairs::TRANSPARENT,
+			Block::PolishedBlackstoneBrickWall(_) => PolishedBlackstoneBrickWall::TRANSPARENT,
+			Block::GildedBlackstone(_) => GildedBlackstone::TRANSPARENT,
+			Block::PolishedBlackstoneStairs(_) => PolishedBlackstoneStairs::TRANSPARENT,
+			Block::PolishedBlackstoneSlab(_) => PolishedBlackstoneSlab::TRANSPARENT,
+			Block::PolishedBlackstonePressurePlate(_) => PolishedBlackstonePressurePlate::TRANSPARENT,
+			Block::PolishedBlackstoneButton(_) => PolishedBlackstoneButton::TRANSPARENT,
+			Block::PolishedBlackstoneWall(_) => PolishedBlackstoneWall::TRANSPARENT,
+			Block::ChiseledNetherBricks(_) => ChiseledNetherBricks::TRANSPARENT,
+			Block::CrackedNetherBricks(_) => CrackedNetherBricks::TRANSPARENT,
+			Block::QuartzBricks(_) => QuartzBricks::TRANSPARENT,
+			Block::Candle(_) => Candle::TRANSPARENT,
+			Block::WhiteCandle(_) => WhiteCandle::TRANSPARENT,
+			Block::OrangeCandle(_) => OrangeCandle::TRANSPARENT,
+			Block::MagentaCandle(_) => MagentaCandle::TRANSPARENT,
+			Block::LightBlueCandle(_) => LightBlueCandle::TRANSPARENT,
+			Block::YellowCandle(_) => YellowCandle::TRANSPARENT,
+			Block::LimeCandle(_) => LimeCandle::TRANSPARENT,
+			Block::PinkCandle(_) => PinkCandle::TRANSPARENT,
+			Block::GrayCandle(_) => GrayCandle::TRANSPARENT,
+			Block::LightGrayCandle(_) => LightGrayCandle::TRANSPARENT,
+			Block::CyanCandle(_) => CyanCandle::TRANSPARENT,
+			Block::PurpleCandle(_) => PurpleCandle::TRANSPARENT,
+			Block::BlueCandle(_) => BlueCandle::TRANSPARENT,
+			Block::BrownCandle(_) => BrownCandle::TRANSPARENT,
+			Block::GreenCandle(_) => GreenCandle::TRANSPARENT,
+			Block::RedCandle(_) => RedCandle::TRANSPARENT,
+			Block::BlackCandle(_) => BlackCandle::TRANSPARENT,
+			Block::CandleCake(_) => CandleCake::TRANSPARENT,
+			Block::WhiteCandleCake(_) => WhiteCandleCake::TRANSPARENT,
+			Block::OrangeCandleCake(_) => OrangeCandleCake::TRANSPARENT,
+			Block::MagentaCandleCake(_) => MagentaCandleCake::TRANSPARENT,
+			Block::LightBlueCandleCake(_) => LightBlueCandleCake::TRANSPARENT,
+			Block::YellowCandleCake(_) => YellowCandleCake::TRANSPARENT,
+			Block::LimeCandleCake(_) => LimeCandleCake::TRANSPARENT,
+			Block::PinkCandleCake(_) => PinkCandleCake::TRANSPARENT,
+			Block::GrayCandleCake(_) => GrayCandleCake::TRANSPARENT,
+			Block::LightGrayCandleCake(_) => LightGrayCandleCake::TRANSPARENT,
+			Block::CyanCandleCake(_) => CyanCandleCake::TRANSPARENT,
+			Block::PurpleCandleCake(_) => PurpleCandleCake::TRANSPARENT,
+			Block::BlueCandleCake(_) => BlueCandleCake::TRANSPARENT,
+			Block::BrownCandleCake(_) => BrownCandleCake::TRANSPARENT,
+			Block::GreenCandleCake(_) => GreenCandleCake::TRANSPARENT,
+			Block::RedCandleCake(_) => RedCandleCake::TRANSPARENT,
+			Block::BlackCandleCake(_) => BlackCandleCake::TRANSPARENT,
+			Block::AmethystBlock(_) => AmethystBlock::TRANSPARENT,
+			Block::BuddingAmethyst(_) => BuddingAmethyst::TRANSPARENT,
+			Block::AmethystCluster(_) => AmethystCluster::TRANSPARENT,
+			Block::LargeAmethystBud(_) => LargeAmethystBud::TRANSPARENT,
+			Block::MediumAmethystBud(_) => MediumAmethystBud::TRANSPARENT,
+			Block::SmallAmethystBud(_) => SmallAmethystBud::TRANSPARENT,
+			Block::Tuff(_) => Tuff::TRANSPARENT,
+			Block::Calcite(_) => Calcite::TRANSPARENT,
+			Block::TintedGlass(_) => TintedGlass::TRANSPARENT,
+			Block::PowderSnow(_) => PowderSnow::TRANSPARENT,
+			Block::SculkSensor(_) => SculkSensor::TRANSPARENT,
+			Block::Sculk(_) => Sculk::TRANSPARENT,
+			Block::SculkVein(_) => SculkVein::TRANSPARENT,
+			Block::SculkCatalyst(_) => SculkCatalyst::TRANSPARENT,
+			Block::SculkShrieker(_) => SculkShrieker::TRANSPARENT,
+			Block::OxidizedCopper(_) => OxidizedCopper::TRANSPARENT,
+			Block::WeatheredCopper(_) => WeatheredCopper::TRANSPARENT,
+			Block::ExposedCopper(_) => ExposedCopper::TRANSPARENT,
+			Block::CopperBlock(_) => CopperBlock::TRANSPARENT,
+			Block::CopperOre(_) => CopperOre::TRANSPARENT,
+			Block::DeepslateCopperOre(_) => DeepslateCopperOre::TRANSPARENT,
+			Block::OxidizedCutCopper(_) => OxidizedCutCopper::TRANSPARENT,
+			Block::WeatheredCutCopper(_) => WeatheredCutCopper::TRANSPARENT,
+			Block::ExposedCutCopper(_) => ExposedCutCopper::TRANSPARENT,
+			Block::CutCopper(_) => CutCopper::TRANSPARENT,
+			Block::OxidizedCutCopperStairs(_) => OxidizedCutCopperStairs::TRANSPARENT,
+			Block::WeatheredCutCopperStairs(_) => WeatheredCutCopperStairs::TRANSPARENT,
+			Block::ExposedCutCopperStairs(_) => ExposedCutCopperStairs::TRANSPARENT,
+			Block::CutCopperStairs(_) => CutCopperStairs::TRANSPARENT,
+			Block::OxidizedCutCopperSlab(_) => OxidizedCutCopperSlab::TRANSPARENT,
+			Block::WeatheredCutCopperSlab(_) => WeatheredCutCopperSlab::TRANSPARENT,
+			Block::ExposedCutCopperSlab(_) => ExposedCutCopperSlab::TRANSPARENT,
+			Block::CutCopperSlab(_) => CutCopperSlab::TRANSPARENT,
+			Block::WaxedCopperBlock(_) => WaxedCopperBlock::TRANSPARENT,
+			Block::WaxedWeatheredCopper(_) => WaxedWeatheredCopper::TRANSPARENT,
+			Block::WaxedExposedCopper(_) => WaxedExposedCopper::TRANSPARENT,
+			Block::WaxedOxidizedCopper(_) => WaxedOxidizedCopper::TRANSPARENT,
+			Block::WaxedOxidizedCutCopper(_) => WaxedOxidizedCutCopper::TRANSPARENT,
+			Block::WaxedWeatheredCutCopper(_) => WaxedWeatheredCutCopper::TRANSPARENT,
+			Block::WaxedExposedCutCopper(_) => WaxedExposedCutCopper::TRANSPARENT,
+			Block::WaxedCutCopper(_) => WaxedCutCopper::TRANSPARENT,
+			Block::WaxedOxidizedCutCopperStairs(_) => WaxedOxidizedCutCopperStairs::TRANSPARENT,
+			Block::WaxedWeatheredCutCopperStairs(_) => WaxedWeatheredCutCopperStairs::TRANSPARENT,
+			Block::WaxedExposedCutCopperStairs(_) => WaxedExposedCutCopperStairs::TRANSPARENT,
+			Block::WaxedCutCopperStairs(_) => WaxedCutCopperStairs::TRANSPARENT,
+			Block::WaxedOxidizedCutCopperSlab(_) => WaxedOxidizedCutCopperSlab::TRANSPARENT,
+			Block::WaxedWeatheredCutCopperSlab(_) => WaxedWeatheredCutCopperSlab::TRANSPARENT,
+			Block::WaxedExposedCutCopperSlab(_) => WaxedExposedCutCopperSlab::TRANSPARENT,
+			Block::WaxedCutCopperSlab(_) => WaxedCutCopperSlab::TRANSPARENT,
+			Block::LightningRod(_) => LightningRod::TRANSPARENT,
+			Block::PointedDripstone(_) => PointedDripstone::TRANSPARENT,
+			Block::DripstoneBlock(_) => DripstoneBlock::TRANSPARENT,
+			Block::CaveVines(_) => CaveVines::TRANSPARENT,
+			Block::CaveVinesPlant(_) => CaveVinesPlant::TRANSPARENT,
+			Block::SporeBlossom(_) => SporeBlossom::TRANSPARENT,
+			Block::Azalea(_) => Azalea::TRANSPARENT,
+			Block::FloweringAzalea(_) => FloweringAzalea::TRANSPARENT,
+			Block::MossCarpet(_) => MossCarpet::TRANSPARENT,
+			Block::MossBlock(_) => MossBlock::TRANSPARENT,
+			Block::BigDripleaf(_) => BigDripleaf::TRANSPARENT,
+			Block::BigDripleafStem(_) => BigDripleafStem::TRANSPARENT,
+			Block::SmallDripleaf(_) => SmallDripleaf::TRANSPARENT,
+			Block::HangingRoots(_) => HangingRoots::TRANSPARENT,
+			Block::RootedDirt(_) => RootedDirt::TRANSPARENT,
+			Block::Mud(_) => Mud::TRANSPARENT,
+			Block::Deepslate(_) => Deepslate::TRANSPARENT,
+			Block::CobbledDeepslate(_) => CobbledDeepslate::TRANSPARENT,
+			Block::CobbledDeepslateStairs(_) => CobbledDeepslateStairs::TRANSPARENT,
+			Block::CobbledDeepslateSlab(_) => CobbledDeepslateSlab::TRANSPARENT,
+			Block::CobbledDeepslateWall(_) => CobbledDeepslateWall::TRANSPARENT,
+			Block::PolishedDeepslate(_) => PolishedDeepslate::TRANSPARENT,
+			Block::PolishedDeepslateStairs(_) => PolishedDeepslateStairs::TRANSPARENT,
+			Block::PolishedDeepslateSlab(_) => PolishedDeepslateSlab::TRANSPARENT,
+			Block::PolishedDeepslateWall(_) => PolishedDeepslateWall::TRANSPARENT,
+			Block::DeepslateTiles(_) => DeepslateTiles::TRANSPARENT,
+			Block::DeepslateTileStairs(_) => DeepslateTileStairs::TRANSPARENT,
+			Block::DeepslateTileSlab(_) => DeepslateTileSlab::TRANSPARENT,
+			Block::DeepslateTileWall(_) => DeepslateTileWall::TRANSPARENT,
+			Block::DeepslateBricks(_) => DeepslateBricks::TRANSPARENT,
+			Block::DeepslateBrickStairs(_) => DeepslateBrickStairs::TRANSPARENT,
+			Block::DeepslateBrickSlab(_) => DeepslateBrickSlab::TRANSPARENT,
+			Block::DeepslateBrickWall(_) => DeepslateBrickWall::TRANSPARENT,
+			Block::ChiseledDeepslate(_) => ChiseledDeepslate::TRANSPARENT,
+			Block::CrackedDeepslateBricks(_) => CrackedDeepslateBricks::TRANSPARENT,
+			Block::CrackedDeepslateTiles(_) => CrackedDeepslateTiles::TRANSPARENT,
+			Block::InfestedDeepslate(_) => InfestedDeepslate::TRANSPARENT,
+			Block::SmoothBasalt(_) => SmoothBasalt::TRANSPARENT,
+			Block::RawIronBlock(_) => RawIronBlock::TRANSPARENT,
+			Block::RawCopperBlock(_) => RawCopperBlock::TRANSPARENT,
+			Block::RawGoldBlock(_) => RawGoldBlock::TRANSPARENT,
+			Block::PottedAzaleaBush(_) => PottedAzaleaBush::TRANSPARENT,
+			Block::PottedFloweringAzaleaBush(_) => PottedFloweringAzaleaBush::TRANSPARENT,
+			Block::OchreFroglight(_) => OchreFroglight::TRANSPARENT,
+			Block::VerdantFroglight(_) => VerdantFroglight::TRANSPARENT,
+			Block::PearlescentFroglight(_) => PearlescentFroglight::TRANSPARENT,
+			Block::Frogspawn(_) => Frogspawn::TRANSPARENT,
+			Block::ReinforcedDeepslate(_) => ReinforcedDeepslate::TRANSPARENT,
+		}
+	}
+	pub fn get_emit_light(&self) -> u8 {
+		match self {
+			Block::Air(_) => Air::EMIT_LIGHT,
+			Block::Stone(_) => Stone::EMIT_LIGHT,
+			Block::Granite(_) => Granite::EMIT_LIGHT,
+			Block::PolishedGranite(_) => PolishedGranite::EMIT_LIGHT,
+			Block::Diorite(_) => Diorite::EMIT_LIGHT,
+			Block::PolishedDiorite(_) => PolishedDiorite::EMIT_LIGHT,
+			Block::Andesite(_) => Andesite::EMIT_LIGHT,
+			Block::PolishedAndesite(_) => PolishedAndesite::EMIT_LIGHT,
+			Block::GrassBlock(_) => GrassBlock::EMIT_LIGHT,
+			Block::Dirt(_) => Dirt::EMIT_LIGHT,
+			Block::CoarseDirt(_) => CoarseDirt::EMIT_LIGHT,
+			Block::Podzol(_) => Podzol::EMIT_LIGHT,
+			Block::Cobblestone(_) => Cobblestone::EMIT_LIGHT,
+			Block::OakPlanks(_) => OakPlanks::EMIT_LIGHT,
+			Block::SprucePlanks(_) => SprucePlanks::EMIT_LIGHT,
+			Block::BirchPlanks(_) => BirchPlanks::EMIT_LIGHT,
+			Block::JunglePlanks(_) => JunglePlanks::EMIT_LIGHT,
+			Block::AcaciaPlanks(_) => AcaciaPlanks::EMIT_LIGHT,
+			Block::DarkOakPlanks(_) => DarkOakPlanks::EMIT_LIGHT,
+			Block::MangrovePlanks(_) => MangrovePlanks::EMIT_LIGHT,
+			Block::OakSapling(_) => OakSapling::EMIT_LIGHT,
+			Block::SpruceSapling(_) => SpruceSapling::EMIT_LIGHT,
+			Block::BirchSapling(_) => BirchSapling::EMIT_LIGHT,
+			Block::JungleSapling(_) => JungleSapling::EMIT_LIGHT,
+			Block::AcaciaSapling(_) => AcaciaSapling::EMIT_LIGHT,
+			Block::DarkOakSapling(_) => DarkOakSapling::EMIT_LIGHT,
+			Block::MangrovePropagule(_) => MangrovePropagule::EMIT_LIGHT,
+			Block::Bedrock(_) => Bedrock::EMIT_LIGHT,
+			Block::Water(_) => Water::EMIT_LIGHT,
+			Block::Lava(_) => Lava::EMIT_LIGHT,
+			Block::Sand(_) => Sand::EMIT_LIGHT,
+			Block::RedSand(_) => RedSand::EMIT_LIGHT,
+			Block::Gravel(_) => Gravel::EMIT_LIGHT,
+			Block::GoldOre(_) => GoldOre::EMIT_LIGHT,
+			Block::DeepslateGoldOre(_) => DeepslateGoldOre::EMIT_LIGHT,
+			Block::IronOre(_) => IronOre::EMIT_LIGHT,
+			Block::DeepslateIronOre(_) => DeepslateIronOre::EMIT_LIGHT,
+			Block::CoalOre(_) => CoalOre::EMIT_LIGHT,
+			Block::DeepslateCoalOre(_) => DeepslateCoalOre::EMIT_LIGHT,
+			Block::NetherGoldOre(_) => NetherGoldOre::EMIT_LIGHT,
+			Block::OakLog(_) => OakLog::EMIT_LIGHT,
+			Block::SpruceLog(_) => SpruceLog::EMIT_LIGHT,
+			Block::BirchLog(_) => BirchLog::EMIT_LIGHT,
+			Block::JungleLog(_) => JungleLog::EMIT_LIGHT,
+			Block::AcaciaLog(_) => AcaciaLog::EMIT_LIGHT,
+			Block::DarkOakLog(_) => DarkOakLog::EMIT_LIGHT,
+			Block::MangroveLog(_) => MangroveLog::EMIT_LIGHT,
+			Block::MangroveRoots(_) => MangroveRoots::EMIT_LIGHT,
+			Block::MuddyMangroveRoots(_) => MuddyMangroveRoots::EMIT_LIGHT,
+			Block::StrippedSpruceLog(_) => StrippedSpruceLog::EMIT_LIGHT,
+			Block::StrippedBirchLog(_) => StrippedBirchLog::EMIT_LIGHT,
+			Block::StrippedJungleLog(_) => StrippedJungleLog::EMIT_LIGHT,
+			Block::StrippedAcaciaLog(_) => StrippedAcaciaLog::EMIT_LIGHT,
+			Block::StrippedDarkOakLog(_) => StrippedDarkOakLog::EMIT_LIGHT,
+			Block::StrippedOakLog(_) => StrippedOakLog::EMIT_LIGHT,
+			Block::StrippedMangroveLog(_) => StrippedMangroveLog::EMIT_LIGHT,
+			Block::OakWood(_) => OakWood::EMIT_LIGHT,
+			Block::SpruceWood(_) => SpruceWood::EMIT_LIGHT,
+			Block::BirchWood(_) => BirchWood::EMIT_LIGHT,
+			Block::JungleWood(_) => JungleWood::EMIT_LIGHT,
+			Block::AcaciaWood(_) => AcaciaWood::EMIT_LIGHT,
+			Block::DarkOakWood(_) => DarkOakWood::EMIT_LIGHT,
+			Block::MangroveWood(_) => MangroveWood::EMIT_LIGHT,
+			Block::StrippedOakWood(_) => StrippedOakWood::EMIT_LIGHT,
+			Block::StrippedSpruceWood(_) => StrippedSpruceWood::EMIT_LIGHT,
+			Block::StrippedBirchWood(_) => StrippedBirchWood::EMIT_LIGHT,
+			Block::StrippedJungleWood(_) => StrippedJungleWood::EMIT_LIGHT,
+			Block::StrippedAcaciaWood(_) => StrippedAcaciaWood::EMIT_LIGHT,
+			Block::StrippedDarkOakWood(_) => StrippedDarkOakWood::EMIT_LIGHT,
+			Block::StrippedMangroveWood(_) => StrippedMangroveWood::EMIT_LIGHT,
+			Block::OakLeaves(_) => OakLeaves::EMIT_LIGHT,
+			Block::SpruceLeaves(_) => SpruceLeaves::EMIT_LIGHT,
+			Block::BirchLeaves(_) => BirchLeaves::EMIT_LIGHT,
+			Block::JungleLeaves(_) => JungleLeaves::EMIT_LIGHT,
+			Block::AcaciaLeaves(_) => AcaciaLeaves::EMIT_LIGHT,
+			Block::DarkOakLeaves(_) => DarkOakLeaves::EMIT_LIGHT,
+			Block::MangroveLeaves(_) => MangroveLeaves::EMIT_LIGHT,
+			Block::AzaleaLeaves(_) => AzaleaLeaves::EMIT_LIGHT,
+			Block::FloweringAzaleaLeaves(_) => FloweringAzaleaLeaves::EMIT_LIGHT,
+			Block::Sponge(_) => Sponge::EMIT_LIGHT,
+			Block::WetSponge(_) => WetSponge::EMIT_LIGHT,
+			Block::Glass(_) => Glass::EMIT_LIGHT,
+			Block::LapisOre(_) => LapisOre::EMIT_LIGHT,
+			Block::DeepslateLapisOre(_) => DeepslateLapisOre::EMIT_LIGHT,
+			Block::LapisBlock(_) => LapisBlock::EMIT_LIGHT,
+			Block::Dispenser(_) => Dispenser::EMIT_LIGHT,
+			Block::Sandstone(_) => Sandstone::EMIT_LIGHT,
+			Block::ChiseledSandstone(_) => ChiseledSandstone::EMIT_LIGHT,
+			Block::CutSandstone(_) => CutSandstone::EMIT_LIGHT,
+			Block::NoteBlock(_) => NoteBlock::EMIT_LIGHT,
+			Block::WhiteBed(_) => WhiteBed::EMIT_LIGHT,
+			Block::OrangeBed(_) => OrangeBed::EMIT_LIGHT,
+			Block::MagentaBed(_) => MagentaBed::EMIT_LIGHT,
+			Block::LightBlueBed(_) => LightBlueBed::EMIT_LIGHT,
+			Block::YellowBed(_) => YellowBed::EMIT_LIGHT,
+			Block::LimeBed(_) => LimeBed::EMIT_LIGHT,
+			Block::PinkBed(_) => PinkBed::EMIT_LIGHT,
+			Block::GrayBed(_) => GrayBed::EMIT_LIGHT,
+			Block::LightGrayBed(_) => LightGrayBed::EMIT_LIGHT,
+			Block::CyanBed(_) => CyanBed::EMIT_LIGHT,
+			Block::PurpleBed(_) => PurpleBed::EMIT_LIGHT,
+			Block::BlueBed(_) => BlueBed::EMIT_LIGHT,
+			Block::BrownBed(_) => BrownBed::EMIT_LIGHT,
+			Block::GreenBed(_) => GreenBed::EMIT_LIGHT,
+			Block::RedBed(_) => RedBed::EMIT_LIGHT,
+			Block::BlackBed(_) => BlackBed::EMIT_LIGHT,
+			Block::PoweredRail(_) => PoweredRail::EMIT_LIGHT,
+			Block::DetectorRail(_) => DetectorRail::EMIT_LIGHT,
+			Block::StickyPiston(_) => StickyPiston::EMIT_LIGHT,
+			Block::Cobweb(_) => Cobweb::EMIT_LIGHT,
+			Block::Grass(_) => Grass::EMIT_LIGHT,
+			Block::Fern(_) => Fern::EMIT_LIGHT,
+			Block::DeadBush(_) => DeadBush::EMIT_LIGHT,
+			Block::Seagrass(_) => Seagrass::EMIT_LIGHT,
+			Block::TallSeagrass(_) => TallSeagrass::EMIT_LIGHT,
+			Block::Piston(_) => Piston::EMIT_LIGHT,
+			Block::PistonHead(_) => PistonHead::EMIT_LIGHT,
+			Block::WhiteWool(_) => WhiteWool::EMIT_LIGHT,
+			Block::OrangeWool(_) => OrangeWool::EMIT_LIGHT,
+			Block::MagentaWool(_) => MagentaWool::EMIT_LIGHT,
+			Block::LightBlueWool(_) => LightBlueWool::EMIT_LIGHT,
+			Block::YellowWool(_) => YellowWool::EMIT_LIGHT,
+			Block::LimeWool(_) => LimeWool::EMIT_LIGHT,
+			Block::PinkWool(_) => PinkWool::EMIT_LIGHT,
+			Block::GrayWool(_) => GrayWool::EMIT_LIGHT,
+			Block::LightGrayWool(_) => LightGrayWool::EMIT_LIGHT,
+			Block::CyanWool(_) => CyanWool::EMIT_LIGHT,
+			Block::PurpleWool(_) => PurpleWool::EMIT_LIGHT,
+			Block::BlueWool(_) => BlueWool::EMIT_LIGHT,
+			Block::BrownWool(_) => BrownWool::EMIT_LIGHT,
+			Block::GreenWool(_) => GreenWool::EMIT_LIGHT,
+			Block::RedWool(_) => RedWool::EMIT_LIGHT,
+			Block::BlackWool(_) => BlackWool::EMIT_LIGHT,
+			Block::MovingPiston(_) => MovingPiston::EMIT_LIGHT,
+			Block::Dandelion(_) => Dandelion::EMIT_LIGHT,
+			Block::Poppy(_) => Poppy::EMIT_LIGHT,
+			Block::BlueOrchid(_) => BlueOrchid::EMIT_LIGHT,
+			Block::Allium(_) => Allium::EMIT_LIGHT,
+			Block::AzureBluet(_) => AzureBluet::EMIT_LIGHT,
+			Block::RedTulip(_) => RedTulip::EMIT_LIGHT,
+			Block::OrangeTulip(_) => OrangeTulip::EMIT_LIGHT,
+			Block::WhiteTulip(_) => WhiteTulip::EMIT_LIGHT,
+			Block::PinkTulip(_) => PinkTulip::EMIT_LIGHT,
+			Block::OxeyeDaisy(_) => OxeyeDaisy::EMIT_LIGHT,
+			Block::Cornflower(_) => Cornflower::EMIT_LIGHT,
+			Block::WitherRose(_) => WitherRose::EMIT_LIGHT,
+			Block::LilyOfTheValley(_) => LilyOfTheValley::EMIT_LIGHT,
+			Block::BrownMushroom(_) => BrownMushroom::EMIT_LIGHT,
+			Block::RedMushroom(_) => RedMushroom::EMIT_LIGHT,
+			Block::GoldBlock(_) => GoldBlock::EMIT_LIGHT,
+			Block::IronBlock(_) => IronBlock::EMIT_LIGHT,
+			Block::Bricks(_) => Bricks::EMIT_LIGHT,
+			Block::Tnt(_) => Tnt::EMIT_LIGHT,
+			Block::Bookshelf(_) => Bookshelf::EMIT_LIGHT,
+			Block::MossyCobblestone(_) => MossyCobblestone::EMIT_LIGHT,
+			Block::Obsidian(_) => Obsidian::EMIT_LIGHT,
+			Block::Torch(_) => Torch::EMIT_LIGHT,
+			Block::WallTorch(_) => WallTorch::EMIT_LIGHT,
+			Block::Fire(_) => Fire::EMIT_LIGHT,
+			Block::SoulFire(_) => SoulFire::EMIT_LIGHT,
+			Block::Spawner(_) => Spawner::EMIT_LIGHT,
+			Block::OakStairs(_) => OakStairs::EMIT_LIGHT,
+			Block::Chest(_) => Chest::EMIT_LIGHT,
+			Block::RedstoneWire(_) => RedstoneWire::EMIT_LIGHT,
+			Block::DiamondOre(_) => DiamondOre::EMIT_LIGHT,
+			Block::DeepslateDiamondOre(_) => DeepslateDiamondOre::EMIT_LIGHT,
+			Block::DiamondBlock(_) => DiamondBlock::EMIT_LIGHT,
+			Block::CraftingTable(_) => CraftingTable::EMIT_LIGHT,
+			Block::Wheat(_) => Wheat::EMIT_LIGHT,
+			Block::Farmland(_) => Farmland::EMIT_LIGHT,
+			Block::Furnace(_) => Furnace::EMIT_LIGHT,
+			Block::OakSign(_) => OakSign::EMIT_LIGHT,
+			Block::SpruceSign(_) => SpruceSign::EMIT_LIGHT,
+			Block::BirchSign(_) => BirchSign::EMIT_LIGHT,
+			Block::AcaciaSign(_) => AcaciaSign::EMIT_LIGHT,
+			Block::JungleSign(_) => JungleSign::EMIT_LIGHT,
+			Block::DarkOakSign(_) => DarkOakSign::EMIT_LIGHT,
+			Block::MangroveSign(_) => MangroveSign::EMIT_LIGHT,
+			Block::OakDoor(_) => OakDoor::EMIT_LIGHT,
+			Block::Ladder(_) => Ladder::EMIT_LIGHT,
+			Block::Rail(_) => Rail::EMIT_LIGHT,
+			Block::CobblestoneStairs(_) => CobblestoneStairs::EMIT_LIGHT,
+			Block::OakWallSign(_) => OakWallSign::EMIT_LIGHT,
+			Block::SpruceWallSign(_) => SpruceWallSign::EMIT_LIGHT,
+			Block::BirchWallSign(_) => BirchWallSign::EMIT_LIGHT,
+			Block::AcaciaWallSign(_) => AcaciaWallSign::EMIT_LIGHT,
+			Block::JungleWallSign(_) => JungleWallSign::EMIT_LIGHT,
+			Block::DarkOakWallSign(_) => DarkOakWallSign::EMIT_LIGHT,
+			Block::MangroveWallSign(_) => MangroveWallSign::EMIT_LIGHT,
+			Block::Lever(_) => Lever::EMIT_LIGHT,
+			Block::StonePressurePlate(_) => StonePressurePlate::EMIT_LIGHT,
+			Block::IronDoor(_) => IronDoor::EMIT_LIGHT,
+			Block::OakPressurePlate(_) => OakPressurePlate::EMIT_LIGHT,
+			Block::SprucePressurePlate(_) => SprucePressurePlate::EMIT_LIGHT,
+			Block::BirchPressurePlate(_) => BirchPressurePlate::EMIT_LIGHT,
+			Block::JunglePressurePlate(_) => JunglePressurePlate::EMIT_LIGHT,
+			Block::AcaciaPressurePlate(_) => AcaciaPressurePlate::EMIT_LIGHT,
+			Block::DarkOakPressurePlate(_) => DarkOakPressurePlate::EMIT_LIGHT,
+			Block::MangrovePressurePlate(_) => MangrovePressurePlate::EMIT_LIGHT,
+			Block::RedstoneOre(_) => RedstoneOre::EMIT_LIGHT,
+			Block::DeepslateRedstoneOre(_) => DeepslateRedstoneOre::EMIT_LIGHT,
+			Block::RedstoneTorch(_) => RedstoneTorch::EMIT_LIGHT,
+			Block::RedstoneWallTorch(_) => RedstoneWallTorch::EMIT_LIGHT,
+			Block::StoneButton(_) => StoneButton::EMIT_LIGHT,
+			Block::Snow(_) => Snow::EMIT_LIGHT,
+			Block::Ice(_) => Ice::EMIT_LIGHT,
+			Block::SnowBlock(_) => SnowBlock::EMIT_LIGHT,
+			Block::Cactus(_) => Cactus::EMIT_LIGHT,
+			Block::Clay(_) => Clay::EMIT_LIGHT,
+			Block::SugarCane(_) => SugarCane::EMIT_LIGHT,
+			Block::Jukebox(_) => Jukebox::EMIT_LIGHT,
+			Block::OakFence(_) => OakFence::EMIT_LIGHT,
+			Block::Pumpkin(_) => Pumpkin::EMIT_LIGHT,
+			Block::Netherrack(_) => Netherrack::EMIT_LIGHT,
+			Block::SoulSand(_) => SoulSand::EMIT_LIGHT,
+			Block::SoulSoil(_) => SoulSoil::EMIT_LIGHT,
+			Block::Basalt(_) => Basalt::EMIT_LIGHT,
+			Block::PolishedBasalt(_) => PolishedBasalt::EMIT_LIGHT,
+			Block::SoulTorch(_) => SoulTorch::EMIT_LIGHT,
+			Block::SoulWallTorch(_) => SoulWallTorch::EMIT_LIGHT,
+			Block::Glowstone(_) => Glowstone::EMIT_LIGHT,
+			Block::NetherPortal(_) => NetherPortal::EMIT_LIGHT,
+			Block::CarvedPumpkin(_) => CarvedPumpkin::EMIT_LIGHT,
+			Block::JackOLantern(_) => JackOLantern::EMIT_LIGHT,
+			Block::Cake(_) => Cake::EMIT_LIGHT,
+			Block::Repeater(_) => Repeater::EMIT_LIGHT,
+			Block::WhiteStainedGlass(_) => WhiteStainedGlass::EMIT_LIGHT,
+			Block::OrangeStainedGlass(_) => OrangeStainedGlass::EMIT_LIGHT,
+			Block::MagentaStainedGlass(_) => MagentaStainedGlass::EMIT_LIGHT,
+			Block::LightBlueStainedGlass(_) => LightBlueStainedGlass::EMIT_LIGHT,
+			Block::YellowStainedGlass(_) => YellowStainedGlass::EMIT_LIGHT,
+			Block::LimeStainedGlass(_) => LimeStainedGlass::EMIT_LIGHT,
+			Block::PinkStainedGlass(_) => PinkStainedGlass::EMIT_LIGHT,
+			Block::GrayStainedGlass(_) => GrayStainedGlass::EMIT_LIGHT,
+			Block::LightGrayStainedGlass(_) => LightGrayStainedGlass::EMIT_LIGHT,
+			Block::CyanStainedGlass(_) => CyanStainedGlass::EMIT_LIGHT,
+			Block::PurpleStainedGlass(_) => PurpleStainedGlass::EMIT_LIGHT,
+			Block::BlueStainedGlass(_) => BlueStainedGlass::EMIT_LIGHT,
+			Block::BrownStainedGlass(_) => BrownStainedGlass::EMIT_LIGHT,
+			Block::GreenStainedGlass(_) => GreenStainedGlass::EMIT_LIGHT,
+			Block::RedStainedGlass(_) => RedStainedGlass::EMIT_LIGHT,
+			Block::BlackStainedGlass(_) => BlackStainedGlass::EMIT_LIGHT,
+			Block::OakTrapdoor(_) => OakTrapdoor::EMIT_LIGHT,
+			Block::SpruceTrapdoor(_) => SpruceTrapdoor::EMIT_LIGHT,
+			Block::BirchTrapdoor(_) => BirchTrapdoor::EMIT_LIGHT,
+			Block::JungleTrapdoor(_) => JungleTrapdoor::EMIT_LIGHT,
+			Block::AcaciaTrapdoor(_) => AcaciaTrapdoor::EMIT_LIGHT,
+			Block::DarkOakTrapdoor(_) => DarkOakTrapdoor::EMIT_LIGHT,
+			Block::MangroveTrapdoor(_) => MangroveTrapdoor::EMIT_LIGHT,
+			Block::StoneBricks(_) => StoneBricks::EMIT_LIGHT,
+			Block::MossyStoneBricks(_) => MossyStoneBricks::EMIT_LIGHT,
+			Block::CrackedStoneBricks(_) => CrackedStoneBricks::EMIT_LIGHT,
+			Block::ChiseledStoneBricks(_) => ChiseledStoneBricks::EMIT_LIGHT,
+			Block::PackedMud(_) => PackedMud::EMIT_LIGHT,
+			Block::MudBricks(_) => MudBricks::EMIT_LIGHT,
+			Block::InfestedStone(_) => InfestedStone::EMIT_LIGHT,
+			Block::InfestedCobblestone(_) => InfestedCobblestone::EMIT_LIGHT,
+			Block::InfestedStoneBricks(_) => InfestedStoneBricks::EMIT_LIGHT,
+			Block::InfestedMossyStoneBricks(_) => InfestedMossyStoneBricks::EMIT_LIGHT,
+			Block::InfestedCrackedStoneBricks(_) => InfestedCrackedStoneBricks::EMIT_LIGHT,
+			Block::InfestedChiseledStoneBricks(_) => InfestedChiseledStoneBricks::EMIT_LIGHT,
+			Block::BrownMushroomBlock(_) => BrownMushroomBlock::EMIT_LIGHT,
+			Block::RedMushroomBlock(_) => RedMushroomBlock::EMIT_LIGHT,
+			Block::MushroomStem(_) => MushroomStem::EMIT_LIGHT,
+			Block::IronBars(_) => IronBars::EMIT_LIGHT,
+			Block::Chain(_) => Chain::EMIT_LIGHT,
+			Block::GlassPane(_) => GlassPane::EMIT_LIGHT,
+			Block::Melon(_) => Melon::EMIT_LIGHT,
+			Block::AttachedPumpkinStem(_) => AttachedPumpkinStem::EMIT_LIGHT,
+			Block::AttachedMelonStem(_) => AttachedMelonStem::EMIT_LIGHT,
+			Block::PumpkinStem(_) => PumpkinStem::EMIT_LIGHT,
+			Block::MelonStem(_) => MelonStem::EMIT_LIGHT,
+			Block::Vine(_) => Vine::EMIT_LIGHT,
+			Block::GlowLichen(_) => GlowLichen::EMIT_LIGHT,
+			Block::OakFenceGate(_) => OakFenceGate::EMIT_LIGHT,
+			Block::BrickStairs(_) => BrickStairs::EMIT_LIGHT,
+			Block::StoneBrickStairs(_) => StoneBrickStairs::EMIT_LIGHT,
+			Block::MudBrickStairs(_) => MudBrickStairs::EMIT_LIGHT,
+			Block::Mycelium(_) => Mycelium::EMIT_LIGHT,
+			Block::LilyPad(_) => LilyPad::EMIT_LIGHT,
+			Block::NetherBricks(_) => NetherBricks::EMIT_LIGHT,
+			Block::NetherBrickFence(_) => NetherBrickFence::EMIT_LIGHT,
+			Block::NetherBrickStairs(_) => NetherBrickStairs::EMIT_LIGHT,
+			Block::NetherWart(_) => NetherWart::EMIT_LIGHT,
+			Block::EnchantingTable(_) => EnchantingTable::EMIT_LIGHT,
+			Block::BrewingStand(_) => BrewingStand::EMIT_LIGHT,
+			Block::Cauldron(_) => Cauldron::EMIT_LIGHT,
+			Block::WaterCauldron(_) => WaterCauldron::EMIT_LIGHT,
+			Block::LavaCauldron(_) => LavaCauldron::EMIT_LIGHT,
+			Block::PowderSnowCauldron(_) => PowderSnowCauldron::EMIT_LIGHT,
+			Block::EndPortal(_) => EndPortal::EMIT_LIGHT,
+			Block::EndPortalFrame(_) => EndPortalFrame::EMIT_LIGHT,
+			Block::EndStone(_) => EndStone::EMIT_LIGHT,
+			Block::DragonEgg(_) => DragonEgg::EMIT_LIGHT,
+			Block::RedstoneLamp(_) => RedstoneLamp::EMIT_LIGHT,
+			Block::Cocoa(_) => Cocoa::EMIT_LIGHT,
+			Block::SandstoneStairs(_) => SandstoneStairs::EMIT_LIGHT,
+			Block::EmeraldOre(_) => EmeraldOre::EMIT_LIGHT,
+			Block::DeepslateEmeraldOre(_) => DeepslateEmeraldOre::EMIT_LIGHT,
+			Block::EnderChest(_) => EnderChest::EMIT_LIGHT,
+			Block::TripwireHook(_) => TripwireHook::EMIT_LIGHT,
+			Block::Tripwire(_) => Tripwire::EMIT_LIGHT,
+			Block::EmeraldBlock(_) => EmeraldBlock::EMIT_LIGHT,
+			Block::SpruceStairs(_) => SpruceStairs::EMIT_LIGHT,
+			Block::BirchStairs(_) => BirchStairs::EMIT_LIGHT,
+			Block::JungleStairs(_) => JungleStairs::EMIT_LIGHT,
+			Block::CommandBlock(_) => CommandBlock::EMIT_LIGHT,
+			Block::Beacon(_) => Beacon::EMIT_LIGHT,
+			Block::CobblestoneWall(_) => CobblestoneWall::EMIT_LIGHT,
+			Block::MossyCobblestoneWall(_) => MossyCobblestoneWall::EMIT_LIGHT,
+			Block::FlowerPot(_) => FlowerPot::EMIT_LIGHT,
+			Block::PottedOakSapling(_) => PottedOakSapling::EMIT_LIGHT,
+			Block::PottedSpruceSapling(_) => PottedSpruceSapling::EMIT_LIGHT,
+			Block::PottedBirchSapling(_) => PottedBirchSapling::EMIT_LIGHT,
+			Block::PottedJungleSapling(_) => PottedJungleSapling::EMIT_LIGHT,
+			Block::PottedAcaciaSapling(_) => PottedAcaciaSapling::EMIT_LIGHT,
+			Block::PottedDarkOakSapling(_) => PottedDarkOakSapling::EMIT_LIGHT,
+			Block::PottedMangrovePropagule(_) => PottedMangrovePropagule::EMIT_LIGHT,
+			Block::PottedFern(_) => PottedFern::EMIT_LIGHT,
+			Block::PottedDandelion(_) => PottedDandelion::EMIT_LIGHT,
+			Block::PottedPoppy(_) => PottedPoppy::EMIT_LIGHT,
+			Block::PottedBlueOrchid(_) => PottedBlueOrchid::EMIT_LIGHT,
+			Block::PottedAllium(_) => PottedAllium::EMIT_LIGHT,
+			Block::PottedAzureBluet(_) => PottedAzureBluet::EMIT_LIGHT,
+			Block::PottedRedTulip(_) => PottedRedTulip::EMIT_LIGHT,
+			Block::PottedOrangeTulip(_) => PottedOrangeTulip::EMIT_LIGHT,
+			Block::PottedWhiteTulip(_) => PottedWhiteTulip::EMIT_LIGHT,
+			Block::PottedPinkTulip(_) => PottedPinkTulip::EMIT_LIGHT,
+			Block::PottedOxeyeDaisy(_) => PottedOxeyeDaisy::EMIT_LIGHT,
+			Block::PottedCornflower(_) => PottedCornflower::EMIT_LIGHT,
+			Block::PottedLilyOfTheValley(_) => PottedLilyOfTheValley::EMIT_LIGHT,
+			Block::PottedWitherRose(_) => PottedWitherRose::EMIT_LIGHT,
+			Block::PottedRedMushroom(_) => PottedRedMushroom::EMIT_LIGHT,
+			Block::PottedBrownMushroom(_) => PottedBrownMushroom::EMIT_LIGHT,
+			Block::PottedDeadBush(_) => PottedDeadBush::EMIT_LIGHT,
+			Block::PottedCactus(_) => PottedCactus::EMIT_LIGHT,
+			Block::Carrots(_) => Carrots::EMIT_LIGHT,
+			Block::Potatoes(_) => Potatoes::EMIT_LIGHT,
+			Block::OakButton(_) => OakButton::EMIT_LIGHT,
+			Block::SpruceButton(_) => SpruceButton::EMIT_LIGHT,
+			Block::BirchButton(_) => BirchButton::EMIT_LIGHT,
+			Block::JungleButton(_) => JungleButton::EMIT_LIGHT,
+			Block::AcaciaButton(_) => AcaciaButton::EMIT_LIGHT,
+			Block::DarkOakButton(_) => DarkOakButton::EMIT_LIGHT,
+			Block::MangroveButton(_) => MangroveButton::EMIT_LIGHT,
+			Block::SkeletonSkull(_) => SkeletonSkull::EMIT_LIGHT,
+			Block::SkeletonWallSkull(_) => SkeletonWallSkull::EMIT_LIGHT,
+			Block::WitherSkeletonSkull(_) => WitherSkeletonSkull::EMIT_LIGHT,
+			Block::WitherSkeletonWallSkull(_) => WitherSkeletonWallSkull::EMIT_LIGHT,
+			Block::ZombieHead(_) => ZombieHead::EMIT_LIGHT,
+			Block::ZombieWallHead(_) => ZombieWallHead::EMIT_LIGHT,
+			Block::PlayerHead(_) => PlayerHead::EMIT_LIGHT,
+			Block::PlayerWallHead(_) => PlayerWallHead::EMIT_LIGHT,
+			Block::CreeperHead(_) => CreeperHead::EMIT_LIGHT,
+			Block::CreeperWallHead(_) => CreeperWallHead::EMIT_LIGHT,
+			Block::DragonHead(_) => DragonHead::EMIT_LIGHT,
+			Block::DragonWallHead(_) => DragonWallHead::EMIT_LIGHT,
+			Block::Anvil(_) => Anvil::EMIT_LIGHT,
+			Block::ChippedAnvil(_) => ChippedAnvil::EMIT_LIGHT,
+			Block::DamagedAnvil(_) => DamagedAnvil::EMIT_LIGHT,
+			Block::TrappedChest(_) => TrappedChest::EMIT_LIGHT,
+			Block::LightWeightedPressurePlate(_) => LightWeightedPressurePlate::EMIT_LIGHT,
+			Block::HeavyWeightedPressurePlate(_) => HeavyWeightedPressurePlate::EMIT_LIGHT,
+			Block::Comparator(_) => Comparator::EMIT_LIGHT,
+			Block::DaylightDetector(_) => DaylightDetector::EMIT_LIGHT,
+			Block::RedstoneBlock(_) => RedstoneBlock::EMIT_LIGHT,
+			Block::NetherQuartzOre(_) => NetherQuartzOre::EMIT_LIGHT,
+			Block::Hopper(_) => Hopper::EMIT_LIGHT,
+			Block::QuartzBlock(_) => QuartzBlock::EMIT_LIGHT,
+			Block::ChiseledQuartzBlock(_) => ChiseledQuartzBlock::EMIT_LIGHT,
+			Block::QuartzPillar(_) => QuartzPillar::EMIT_LIGHT,
+			Block::QuartzStairs(_) => QuartzStairs::EMIT_LIGHT,
+			Block::ActivatorRail(_) => ActivatorRail::EMIT_LIGHT,
+			Block::Dropper(_) => Dropper::EMIT_LIGHT,
+			Block::WhiteTerracotta(_) => WhiteTerracotta::EMIT_LIGHT,
+			Block::OrangeTerracotta(_) => OrangeTerracotta::EMIT_LIGHT,
+			Block::MagentaTerracotta(_) => MagentaTerracotta::EMIT_LIGHT,
+			Block::LightBlueTerracotta(_) => LightBlueTerracotta::EMIT_LIGHT,
+			Block::YellowTerracotta(_) => YellowTerracotta::EMIT_LIGHT,
+			Block::LimeTerracotta(_) => LimeTerracotta::EMIT_LIGHT,
+			Block::PinkTerracotta(_) => PinkTerracotta::EMIT_LIGHT,
+			Block::GrayTerracotta(_) => GrayTerracotta::EMIT_LIGHT,
+			Block::LightGrayTerracotta(_) => LightGrayTerracotta::EMIT_LIGHT,
+			Block::CyanTerracotta(_) => CyanTerracotta::EMIT_LIGHT,
+			Block::PurpleTerracotta(_) => PurpleTerracotta::EMIT_LIGHT,
+			Block::BlueTerracotta(_) => BlueTerracotta::EMIT_LIGHT,
+			Block::BrownTerracotta(_) => BrownTerracotta::EMIT_LIGHT,
+			Block::GreenTerracotta(_) => GreenTerracotta::EMIT_LIGHT,
+			Block::RedTerracotta(_) => RedTerracotta::EMIT_LIGHT,
+			Block::BlackTerracotta(_) => BlackTerracotta::EMIT_LIGHT,
+			Block::WhiteStainedGlassPane(_) => WhiteStainedGlassPane::EMIT_LIGHT,
+			Block::OrangeStainedGlassPane(_) => OrangeStainedGlassPane::EMIT_LIGHT,
+			Block::MagentaStainedGlassPane(_) => MagentaStainedGlassPane::EMIT_LIGHT,
+			Block::LightBlueStainedGlassPane(_) => LightBlueStainedGlassPane::EMIT_LIGHT,
+			Block::YellowStainedGlassPane(_) => YellowStainedGlassPane::EMIT_LIGHT,
+			Block::LimeStainedGlassPane(_) => LimeStainedGlassPane::EMIT_LIGHT,
+			Block::PinkStainedGlassPane(_) => PinkStainedGlassPane::EMIT_LIGHT,
+			Block::GrayStainedGlassPane(_) => GrayStainedGlassPane::EMIT_LIGHT,
+			Block::LightGrayStainedGlassPane(_) => LightGrayStainedGlassPane::EMIT_LIGHT,
+			Block::CyanStainedGlassPane(_) => CyanStainedGlassPane::EMIT_LIGHT,
+			Block::PurpleStainedGlassPane(_) => PurpleStainedGlassPane::EMIT_LIGHT,
+			Block::BlueStainedGlassPane(_) => BlueStainedGlassPane::EMIT_LIGHT,
+			Block::BrownStainedGlassPane(_) => BrownStainedGlassPane::EMIT_LIGHT,
+			Block::GreenStainedGlassPane(_) => GreenStainedGlassPane::EMIT_LIGHT,
+			Block::RedStainedGlassPane(_) => RedStainedGlassPane::EMIT_LIGHT,
+			Block::BlackStainedGlassPane(_) => BlackStainedGlassPane::EMIT_LIGHT,
+			Block::AcaciaStairs(_) => AcaciaStairs::EMIT_LIGHT,
+			Block::DarkOakStairs(_) => DarkOakStairs::EMIT_LIGHT,
+			Block::MangroveStairs(_) => MangroveStairs::EMIT_LIGHT,
+			Block::SlimeBlock(_) => SlimeBlock::EMIT_LIGHT,
+			Block::Barrier(_) => Barrier::EMIT_LIGHT,
+			Block::Light(_) => Light::EMIT_LIGHT,
+			Block::IronTrapdoor(_) => IronTrapdoor::EMIT_LIGHT,
+			Block::Prismarine(_) => Prismarine::EMIT_LIGHT,
+			Block::PrismarineBricks(_) => PrismarineBricks::EMIT_LIGHT,
+			Block::DarkPrismarine(_) => DarkPrismarine::EMIT_LIGHT,
+			Block::PrismarineStairs(_) => PrismarineStairs::EMIT_LIGHT,
+			Block::PrismarineBrickStairs(_) => PrismarineBrickStairs::EMIT_LIGHT,
+			Block::DarkPrismarineStairs(_) => DarkPrismarineStairs::EMIT_LIGHT,
+			Block::PrismarineSlab(_) => PrismarineSlab::EMIT_LIGHT,
+			Block::PrismarineBrickSlab(_) => PrismarineBrickSlab::EMIT_LIGHT,
+			Block::DarkPrismarineSlab(_) => DarkPrismarineSlab::EMIT_LIGHT,
+			Block::SeaLantern(_) => SeaLantern::EMIT_LIGHT,
+			Block::HayBlock(_) => HayBlock::EMIT_LIGHT,
+			Block::WhiteCarpet(_) => WhiteCarpet::EMIT_LIGHT,
+			Block::OrangeCarpet(_) => OrangeCarpet::EMIT_LIGHT,
+			Block::MagentaCarpet(_) => MagentaCarpet::EMIT_LIGHT,
+			Block::LightBlueCarpet(_) => LightBlueCarpet::EMIT_LIGHT,
+			Block::YellowCarpet(_) => YellowCarpet::EMIT_LIGHT,
+			Block::LimeCarpet(_) => LimeCarpet::EMIT_LIGHT,
+			Block::PinkCarpet(_) => PinkCarpet::EMIT_LIGHT,
+			Block::GrayCarpet(_) => GrayCarpet::EMIT_LIGHT,
+			Block::LightGrayCarpet(_) => LightGrayCarpet::EMIT_LIGHT,
+			Block::CyanCarpet(_) => CyanCarpet::EMIT_LIGHT,
+			Block::PurpleCarpet(_) => PurpleCarpet::EMIT_LIGHT,
+			Block::BlueCarpet(_) => BlueCarpet::EMIT_LIGHT,
+			Block::BrownCarpet(_) => BrownCarpet::EMIT_LIGHT,
+			Block::GreenCarpet(_) => GreenCarpet::EMIT_LIGHT,
+			Block::RedCarpet(_) => RedCarpet::EMIT_LIGHT,
+			Block::BlackCarpet(_) => BlackCarpet::EMIT_LIGHT,
+			Block::Terracotta(_) => Terracotta::EMIT_LIGHT,
+			Block::CoalBlock(_) => CoalBlock::EMIT_LIGHT,
+			Block::PackedIce(_) => PackedIce::EMIT_LIGHT,
+			Block::Sunflower(_) => Sunflower::EMIT_LIGHT,
+			Block::Lilac(_) => Lilac::EMIT_LIGHT,
+			Block::RoseBush(_) => RoseBush::EMIT_LIGHT,
+			Block::Peony(_) => Peony::EMIT_LIGHT,
+			Block::TallGrass(_) => TallGrass::EMIT_LIGHT,
+			Block::LargeFern(_) => LargeFern::EMIT_LIGHT,
+			Block::WhiteBanner(_) => WhiteBanner::EMIT_LIGHT,
+			Block::OrangeBanner(_) => OrangeBanner::EMIT_LIGHT,
+			Block::MagentaBanner(_) => MagentaBanner::EMIT_LIGHT,
+			Block::LightBlueBanner(_) => LightBlueBanner::EMIT_LIGHT,
+			Block::YellowBanner(_) => YellowBanner::EMIT_LIGHT,
+			Block::LimeBanner(_) => LimeBanner::EMIT_LIGHT,
+			Block::PinkBanner(_) => PinkBanner::EMIT_LIGHT,
+			Block::GrayBanner(_) => GrayBanner::EMIT_LIGHT,
+			Block::LightGrayBanner(_) => LightGrayBanner::EMIT_LIGHT,
+			Block::CyanBanner(_) => CyanBanner::EMIT_LIGHT,
+			Block::PurpleBanner(_) => PurpleBanner::EMIT_LIGHT,
+			Block::BlueBanner(_) => BlueBanner::EMIT_LIGHT,
+			Block::BrownBanner(_) => BrownBanner::EMIT_LIGHT,
+			Block::GreenBanner(_) => GreenBanner::EMIT_LIGHT,
+			Block::RedBanner(_) => RedBanner::EMIT_LIGHT,
+			Block::BlackBanner(_) => BlackBanner::EMIT_LIGHT,
+			Block::WhiteWallBanner(_) => WhiteWallBanner::EMIT_LIGHT,
+			Block::OrangeWallBanner(_) => OrangeWallBanner::EMIT_LIGHT,
+			Block::MagentaWallBanner(_) => MagentaWallBanner::EMIT_LIGHT,
+			Block::LightBlueWallBanner(_) => LightBlueWallBanner::EMIT_LIGHT,
+			Block::YellowWallBanner(_) => YellowWallBanner::EMIT_LIGHT,
+			Block::LimeWallBanner(_) => LimeWallBanner::EMIT_LIGHT,
+			Block::PinkWallBanner(_) => PinkWallBanner::EMIT_LIGHT,
+			Block::GrayWallBanner(_) => GrayWallBanner::EMIT_LIGHT,
+			Block::LightGrayWallBanner(_) => LightGrayWallBanner::EMIT_LIGHT,
+			Block::CyanWallBanner(_) => CyanWallBanner::EMIT_LIGHT,
+			Block::PurpleWallBanner(_) => PurpleWallBanner::EMIT_LIGHT,
+			Block::BlueWallBanner(_) => BlueWallBanner::EMIT_LIGHT,
+			Block::BrownWallBanner(_) => BrownWallBanner::EMIT_LIGHT,
+			Block::GreenWallBanner(_) => GreenWallBanner::EMIT_LIGHT,
+			Block::RedWallBanner(_) => RedWallBanner::EMIT_LIGHT,
+			Block::BlackWallBanner(_) => BlackWallBanner::EMIT_LIGHT,
+			Block::RedSandstone(_) => RedSandstone::EMIT_LIGHT,
+			Block::ChiseledRedSandstone(_) => ChiseledRedSandstone::EMIT_LIGHT,
+			Block::CutRedSandstone(_) => CutRedSandstone::EMIT_LIGHT,
+			Block::RedSandstoneStairs(_) => RedSandstoneStairs::EMIT_LIGHT,
+			Block::OakSlab(_) => OakSlab::EMIT_LIGHT,
+			Block::SpruceSlab(_) => SpruceSlab::EMIT_LIGHT,
+			Block::BirchSlab(_) => BirchSlab::EMIT_LIGHT,
+			Block::JungleSlab(_) => JungleSlab::EMIT_LIGHT,
+			Block::AcaciaSlab(_) => AcaciaSlab::EMIT_LIGHT,
+			Block::DarkOakSlab(_) => DarkOakSlab::EMIT_LIGHT,
+			Block::MangroveSlab(_) => MangroveSlab::EMIT_LIGHT,
+			Block::StoneSlab(_) => StoneSlab::EMIT_LIGHT,
+			Block::SmoothStoneSlab(_) => SmoothStoneSlab::EMIT_LIGHT,
+			Block::SandstoneSlab(_) => SandstoneSlab::EMIT_LIGHT,
+			Block::CutSandstoneSlab(_) => CutSandstoneSlab::EMIT_LIGHT,
+			Block::PetrifiedOakSlab(_) => PetrifiedOakSlab::EMIT_LIGHT,
+			Block::CobblestoneSlab(_) => CobblestoneSlab::EMIT_LIGHT,
+			Block::BrickSlab(_) => BrickSlab::EMIT_LIGHT,
+			Block::StoneBrickSlab(_) => StoneBrickSlab::EMIT_LIGHT,
+			Block::MudBrickSlab(_) => MudBrickSlab::EMIT_LIGHT,
+			Block::NetherBrickSlab(_) => NetherBrickSlab::EMIT_LIGHT,
+			Block::QuartzSlab(_) => QuartzSlab::EMIT_LIGHT,
+			Block::RedSandstoneSlab(_) => RedSandstoneSlab::EMIT_LIGHT,
+			Block::CutRedSandstoneSlab(_) => CutRedSandstoneSlab::EMIT_LIGHT,
+			Block::PurpurSlab(_) => PurpurSlab::EMIT_LIGHT,
+			Block::SmoothStone(_) => SmoothStone::EMIT_LIGHT,
+			Block::SmoothSandstone(_) => SmoothSandstone::EMIT_LIGHT,
+			Block::SmoothQuartz(_) => SmoothQuartz::EMIT_LIGHT,
+			Block::SmoothRedSandstone(_) => SmoothRedSandstone::EMIT_LIGHT,
+			Block::SpruceFenceGate(_) => SpruceFenceGate::EMIT_LIGHT,
+			Block::BirchFenceGate(_) => BirchFenceGate::EMIT_LIGHT,
+			Block::JungleFenceGate(_) => JungleFenceGate::EMIT_LIGHT,
+			Block::AcaciaFenceGate(_) => AcaciaFenceGate::EMIT_LIGHT,
+			Block::DarkOakFenceGate(_) => DarkOakFenceGate::EMIT_LIGHT,
+			Block::MangroveFenceGate(_) => MangroveFenceGate::EMIT_LIGHT,
+			Block::SpruceFence(_) => SpruceFence::EMIT_LIGHT,
+			Block::BirchFence(_) => BirchFence::EMIT_LIGHT,
+			Block::JungleFence(_) => JungleFence::EMIT_LIGHT,
+			Block::AcaciaFence(_) => AcaciaFence::EMIT_LIGHT,
+			Block::DarkOakFence(_) => DarkOakFence::EMIT_LIGHT,
+			Block::MangroveFence(_) => MangroveFence::EMIT_LIGHT,
+			Block::SpruceDoor(_) => SpruceDoor::EMIT_LIGHT,
+			Block::BirchDoor(_) => BirchDoor::EMIT_LIGHT,
+			Block::JungleDoor(_) => JungleDoor::EMIT_LIGHT,
+			Block::AcaciaDoor(_) => AcaciaDoor::EMIT_LIGHT,
+			Block::DarkOakDoor(_) => DarkOakDoor::EMIT_LIGHT,
+			Block::MangroveDoor(_) => MangroveDoor::EMIT_LIGHT,
+			Block::EndRod(_) => EndRod::EMIT_LIGHT,
+			Block::ChorusPlant(_) => ChorusPlant::EMIT_LIGHT,
+			Block::ChorusFlower(_) => ChorusFlower::EMIT_LIGHT,
+			Block::PurpurBlock(_) => PurpurBlock::EMIT_LIGHT,
+			Block::PurpurPillar(_) => PurpurPillar::EMIT_LIGHT,
+			Block::PurpurStairs(_) => PurpurStairs::EMIT_LIGHT,
+			Block::EndStoneBricks(_) => EndStoneBricks::EMIT_LIGHT,
+			Block::Beetroots(_) => Beetroots::EMIT_LIGHT,
+			Block::DirtPath(_) => DirtPath::EMIT_LIGHT,
+			Block::EndGateway(_) => EndGateway::EMIT_LIGHT,
+			Block::RepeatingCommandBlock(_) => RepeatingCommandBlock::EMIT_LIGHT,
+			Block::ChainCommandBlock(_) => ChainCommandBlock::EMIT_LIGHT,
+			Block::FrostedIce(_) => FrostedIce::EMIT_LIGHT,
+			Block::MagmaBlock(_) => MagmaBlock::EMIT_LIGHT,
+			Block::NetherWartBlock(_) => NetherWartBlock::EMIT_LIGHT,
+			Block::RedNetherBricks(_) => RedNetherBricks::EMIT_LIGHT,
+			Block::BoneBlock(_) => BoneBlock::EMIT_LIGHT,
+			Block::StructureVoid(_) => StructureVoid::EMIT_LIGHT,
+			Block::Observer(_) => Observer::EMIT_LIGHT,
+			Block::ShulkerBox(_) => ShulkerBox::EMIT_LIGHT,
+			Block::WhiteShulkerBox(_) => WhiteShulkerBox::EMIT_LIGHT,
+			Block::OrangeShulkerBox(_) => OrangeShulkerBox::EMIT_LIGHT,
+			Block::MagentaShulkerBox(_) => MagentaShulkerBox::EMIT_LIGHT,
+			Block::LightBlueShulkerBox(_) => LightBlueShulkerBox::EMIT_LIGHT,
+			Block::YellowShulkerBox(_) => YellowShulkerBox::EMIT_LIGHT,
+			Block::LimeShulkerBox(_) => LimeShulkerBox::EMIT_LIGHT,
+			Block::PinkShulkerBox(_) => PinkShulkerBox::EMIT_LIGHT,
+			Block::GrayShulkerBox(_) => GrayShulkerBox::EMIT_LIGHT,
+			Block::LightGrayShulkerBox(_) => LightGrayShulkerBox::EMIT_LIGHT,
+			Block::CyanShulkerBox(_) => CyanShulkerBox::EMIT_LIGHT,
+			Block::PurpleShulkerBox(_) => PurpleShulkerBox::EMIT_LIGHT,
+			Block::BlueShulkerBox(_) => BlueShulkerBox::EMIT_LIGHT,
+			Block::BrownShulkerBox(_) => BrownShulkerBox::EMIT_LIGHT,
+			Block::GreenShulkerBox(_) => GreenShulkerBox::EMIT_LIGHT,
+			Block::RedShulkerBox(_) => RedShulkerBox::EMIT_LIGHT,
+			Block::BlackShulkerBox(_) => BlackShulkerBox::EMIT_LIGHT,
+			Block::WhiteGlazedTerracotta(_) => WhiteGlazedTerracotta::EMIT_LIGHT,
+			Block::OrangeGlazedTerracotta(_) => OrangeGlazedTerracotta::EMIT_LIGHT,
+			Block::MagentaGlazedTerracotta(_) => MagentaGlazedTerracotta::EMIT_LIGHT,
+			Block::LightBlueGlazedTerracotta(_) => LightBlueGlazedTerracotta::EMIT_LIGHT,
+			Block::YellowGlazedTerracotta(_) => YellowGlazedTerracotta::EMIT_LIGHT,
+			Block::LimeGlazedTerracotta(_) => LimeGlazedTerracotta::EMIT_LIGHT,
+			Block::PinkGlazedTerracotta(_) => PinkGlazedTerracotta::EMIT_LIGHT,
+			Block::GrayGlazedTerracotta(_) => GrayGlazedTerracotta::EMIT_LIGHT,
+			Block::LightGrayGlazedTerracotta(_) => LightGrayGlazedTerracotta::EMIT_LIGHT,
+			Block::CyanGlazedTerracotta(_) => CyanGlazedTerracotta::EMIT_LIGHT,
+			Block::PurpleGlazedTerracotta(_) => PurpleGlazedTerracotta::EMIT_LIGHT,
+			Block::BlueGlazedTerracotta(_) => BlueGlazedTerracotta::EMIT_LIGHT,
+			Block::BrownGlazedTerracotta(_) => BrownGlazedTerracotta::EMIT_LIGHT,
+			Block::GreenGlazedTerracotta(_) => GreenGlazedTerracotta::EMIT_LIGHT,
+			Block::RedGlazedTerracotta(_) => RedGlazedTerracotta::EMIT_LIGHT,
+			Block::BlackGlazedTerracotta(_) => BlackGlazedTerracotta::EMIT_LIGHT,
+			Block::WhiteConcrete(_) => WhiteConcrete::EMIT_LIGHT,
+			Block::OrangeConcrete(_) => OrangeConcrete::EMIT_LIGHT,
+			Block::MagentaConcrete(_) => MagentaConcrete::EMIT_LIGHT,
+			Block::LightBlueConcrete(_) => LightBlueConcrete::EMIT_LIGHT,
+			Block::YellowConcrete(_) => YellowConcrete::EMIT_LIGHT,
+			Block::LimeConcrete(_) => LimeConcrete::EMIT_LIGHT,
+			Block::PinkConcrete(_) => PinkConcrete::EMIT_LIGHT,
+			Block::GrayConcrete(_) => GrayConcrete::EMIT_LIGHT,
+			Block::LightGrayConcrete(_) => LightGrayConcrete::EMIT_LIGHT,
+			Block::CyanConcrete(_) => CyanConcrete::EMIT_LIGHT,
+			Block::PurpleConcrete(_) => PurpleConcrete::EMIT_LIGHT,
+			Block::BlueConcrete(_) => BlueConcrete::EMIT_LIGHT,
+			Block::BrownConcrete(_) => BrownConcrete::EMIT_LIGHT,
+			Block::GreenConcrete(_) => GreenConcrete::EMIT_LIGHT,
+			Block::RedConcrete(_) => RedConcrete::EMIT_LIGHT,
+			Block::BlackConcrete(_) => BlackConcrete::EMIT_LIGHT,
+			Block::WhiteConcretePowder(_) => WhiteConcretePowder::EMIT_LIGHT,
+			Block::OrangeConcretePowder(_) => OrangeConcretePowder::EMIT_LIGHT,
+			Block::MagentaConcretePowder(_) => MagentaConcretePowder::EMIT_LIGHT,
+			Block::LightBlueConcretePowder(_) => LightBlueConcretePowder::EMIT_LIGHT,
+			Block::YellowConcretePowder(_) => YellowConcretePowder::EMIT_LIGHT,
+			Block::LimeConcretePowder(_) => LimeConcretePowder::EMIT_LIGHT,
+			Block::PinkConcretePowder(_) => PinkConcretePowder::EMIT_LIGHT,
+			Block::GrayConcretePowder(_) => GrayConcretePowder::EMIT_LIGHT,
+			Block::LightGrayConcretePowder(_) => LightGrayConcretePowder::EMIT_LIGHT,
+			Block::CyanConcretePowder(_) => CyanConcretePowder::EMIT_LIGHT,
+			Block::PurpleConcretePowder(_) => PurpleConcretePowder::EMIT_LIGHT,
+			Block::BlueConcretePowder(_) => BlueConcretePowder::EMIT_LIGHT,
+			Block::BrownConcretePowder(_) => BrownConcretePowder::EMIT_LIGHT,
+			Block::GreenConcretePowder(_) => GreenConcretePowder::EMIT_LIGHT,
+			Block::RedConcretePowder(_) => RedConcretePowder::EMIT_LIGHT,
+			Block::BlackConcretePowder(_) => BlackConcretePowder::EMIT_LIGHT,
+			Block::Kelp(_) => Kelp::EMIT_LIGHT,
+			Block::KelpPlant(_) => KelpPlant::EMIT_LIGHT,
+			Block::DriedKelpBlock(_) => DriedKelpBlock::EMIT_LIGHT,
+			Block::TurtleEgg(_) => TurtleEgg::EMIT_LIGHT,
+			Block::DeadTubeCoralBlock(_) => DeadTubeCoralBlock::EMIT_LIGHT,
+			Block::DeadBrainCoralBlock(_) => DeadBrainCoralBlock::EMIT_LIGHT,
+			Block::DeadBubbleCoralBlock(_) => DeadBubbleCoralBlock::EMIT_LIGHT,
+			Block::DeadFireCoralBlock(_) => DeadFireCoralBlock::EMIT_LIGHT,
+			Block::DeadHornCoralBlock(_) => DeadHornCoralBlock::EMIT_LIGHT,
+			Block::TubeCoralBlock(_) => TubeCoralBlock::EMIT_LIGHT,
+			Block::BrainCoralBlock(_) => BrainCoralBlock::EMIT_LIGHT,
+			Block::BubbleCoralBlock(_) => BubbleCoralBlock::EMIT_LIGHT,
+			Block::FireCoralBlock(_) => FireCoralBlock::EMIT_LIGHT,
+			Block::HornCoralBlock(_) => HornCoralBlock::EMIT_LIGHT,
+			Block::DeadTubeCoral(_) => DeadTubeCoral::EMIT_LIGHT,
+			Block::DeadBrainCoral(_) => DeadBrainCoral::EMIT_LIGHT,
+			Block::DeadBubbleCoral(_) => DeadBubbleCoral::EMIT_LIGHT,
+			Block::DeadFireCoral(_) => DeadFireCoral::EMIT_LIGHT,
+			Block::DeadHornCoral(_) => DeadHornCoral::EMIT_LIGHT,
+			Block::TubeCoral(_) => TubeCoral::EMIT_LIGHT,
+			Block::BrainCoral(_) => BrainCoral::EMIT_LIGHT,
+			Block::BubbleCoral(_) => BubbleCoral::EMIT_LIGHT,
+			Block::FireCoral(_) => FireCoral::EMIT_LIGHT,
+			Block::HornCoral(_) => HornCoral::EMIT_LIGHT,
+			Block::DeadTubeCoralFan(_) => DeadTubeCoralFan::EMIT_LIGHT,
+			Block::DeadBrainCoralFan(_) => DeadBrainCoralFan::EMIT_LIGHT,
+			Block::DeadBubbleCoralFan(_) => DeadBubbleCoralFan::EMIT_LIGHT,
+			Block::DeadFireCoralFan(_) => DeadFireCoralFan::EMIT_LIGHT,
+			Block::DeadHornCoralFan(_) => DeadHornCoralFan::EMIT_LIGHT,
+			Block::TubeCoralFan(_) => TubeCoralFan::EMIT_LIGHT,
+			Block::BrainCoralFan(_) => BrainCoralFan::EMIT_LIGHT,
+			Block::BubbleCoralFan(_) => BubbleCoralFan::EMIT_LIGHT,
+			Block::FireCoralFan(_) => FireCoralFan::EMIT_LIGHT,
+			Block::HornCoralFan(_) => HornCoralFan::EMIT_LIGHT,
+			Block::DeadTubeCoralWallFan(_) => DeadTubeCoralWallFan::EMIT_LIGHT,
+			Block::DeadBrainCoralWallFan(_) => DeadBrainCoralWallFan::EMIT_LIGHT,
+			Block::DeadBubbleCoralWallFan(_) => DeadBubbleCoralWallFan::EMIT_LIGHT,
+			Block::DeadFireCoralWallFan(_) => DeadFireCoralWallFan::EMIT_LIGHT,
+			Block::DeadHornCoralWallFan(_) => DeadHornCoralWallFan::EMIT_LIGHT,
+			Block::TubeCoralWallFan(_) => TubeCoralWallFan::EMIT_LIGHT,
+			Block::BrainCoralWallFan(_) => BrainCoralWallFan::EMIT_LIGHT,
+			Block::BubbleCoralWallFan(_) => BubbleCoralWallFan::EMIT_LIGHT,
+			Block::FireCoralWallFan(_) => FireCoralWallFan::EMIT_LIGHT,
+			Block::HornCoralWallFan(_) => HornCoralWallFan::EMIT_LIGHT,
+			Block::SeaPickle(_) => SeaPickle::EMIT_LIGHT,
+			Block::BlueIce(_) => BlueIce::EMIT_LIGHT,
+			Block::Conduit(_) => Conduit::EMIT_LIGHT,
+			Block::BambooSapling(_) => BambooSapling::EMIT_LIGHT,
+			Block::Bamboo(_) => Bamboo::EMIT_LIGHT,
+			Block::PottedBamboo(_) => PottedBamboo::EMIT_LIGHT,
+			Block::VoidAir(_) => VoidAir::EMIT_LIGHT,
+			Block::CaveAir(_) => CaveAir::EMIT_LIGHT,
+			Block::BubbleColumn(_) => BubbleColumn::EMIT_LIGHT,
+			Block::PolishedGraniteStairs(_) => PolishedGraniteStairs::EMIT_LIGHT,
+			Block::SmoothRedSandstoneStairs(_) => SmoothRedSandstoneStairs::EMIT_LIGHT,
+			Block::MossyStoneBrickStairs(_) => MossyStoneBrickStairs::EMIT_LIGHT,
+			Block::PolishedDioriteStairs(_) => PolishedDioriteStairs::EMIT_LIGHT,
+			Block::MossyCobblestoneStairs(_) => MossyCobblestoneStairs::EMIT_LIGHT,
+			Block::EndStoneBrickStairs(_) => EndStoneBrickStairs::EMIT_LIGHT,
+			Block::StoneStairs(_) => StoneStairs::EMIT_LIGHT,
+			Block::SmoothSandstoneStairs(_) => SmoothSandstoneStairs::EMIT_LIGHT,
+			Block::SmoothQuartzStairs(_) => SmoothQuartzStairs::EMIT_LIGHT,
+			Block::GraniteStairs(_) => GraniteStairs::EMIT_LIGHT,
+			Block::AndesiteStairs(_) => AndesiteStairs::EMIT_LIGHT,
+			Block::RedNetherBrickStairs(_) => RedNetherBrickStairs::EMIT_LIGHT,
+			Block::PolishedAndesiteStairs(_) => PolishedAndesiteStairs::EMIT_LIGHT,
+			Block::DioriteStairs(_) => DioriteStairs::EMIT_LIGHT,
+			Block::PolishedGraniteSlab(_) => PolishedGraniteSlab::EMIT_LIGHT,
+			Block::SmoothRedSandstoneSlab(_) => SmoothRedSandstoneSlab::EMIT_LIGHT,
+			Block::MossyStoneBrickSlab(_) => MossyStoneBrickSlab::EMIT_LIGHT,
+			Block::PolishedDioriteSlab(_) => PolishedDioriteSlab::EMIT_LIGHT,
+			Block::MossyCobblestoneSlab(_) => MossyCobblestoneSlab::EMIT_LIGHT,
+			Block::EndStoneBrickSlab(_) => EndStoneBrickSlab::EMIT_LIGHT,
+			Block::SmoothSandstoneSlab(_) => SmoothSandstoneSlab::EMIT_LIGHT,
+			Block::SmoothQuartzSlab(_) => SmoothQuartzSlab::EMIT_LIGHT,
+			Block::GraniteSlab(_) => GraniteSlab::EMIT_LIGHT,
+			Block::AndesiteSlab(_) => AndesiteSlab::EMIT_LIGHT,
+			Block::RedNetherBrickSlab(_) => RedNetherBrickSlab::EMIT_LIGHT,
+			Block::PolishedAndesiteSlab(_) => PolishedAndesiteSlab::EMIT_LIGHT,
+			Block::DioriteSlab(_) => DioriteSlab::EMIT_LIGHT,
+			Block::BrickWall(_) => BrickWall::EMIT_LIGHT,
+			Block::PrismarineWall(_) => PrismarineWall::EMIT_LIGHT,
+			Block::RedSandstoneWall(_) => RedSandstoneWall::EMIT_LIGHT,
+			Block::MossyStoneBrickWall(_) => MossyStoneBrickWall::EMIT_LIGHT,
+			Block::GraniteWall(_) => GraniteWall::EMIT_LIGHT,
+			Block::StoneBrickWall(_) => StoneBrickWall::EMIT_LIGHT,
+			Block::MudBrickWall(_) => MudBrickWall::EMIT_LIGHT,
+			Block::NetherBrickWall(_) => NetherBrickWall::EMIT_LIGHT,
+			Block::AndesiteWall(_) => AndesiteWall::EMIT_LIGHT,
+			Block::RedNetherBrickWall(_) => RedNetherBrickWall::EMIT_LIGHT,
+			Block::SandstoneWall(_) => SandstoneWall::EMIT_LIGHT,
+			Block::EndStoneBrickWall(_) => EndStoneBrickWall::EMIT_LIGHT,
+			Block::DioriteWall(_) => DioriteWall::EMIT_LIGHT,
+			Block::Scaffolding(_) => Scaffolding::EMIT_LIGHT,
+			Block::Loom(_) => Loom::EMIT_LIGHT,
+			Block::Barrel(_) => Barrel::EMIT_LIGHT,
+			Block::Smoker(_) => Smoker::EMIT_LIGHT,
+			Block::BlastFurnace(_) => BlastFurnace::EMIT_LIGHT,
+			Block::CartographyTable(_) => CartographyTable::EMIT_LIGHT,
+			Block::FletchingTable(_) => FletchingTable::EMIT_LIGHT,
+			Block::Grindstone(_) => Grindstone::EMIT_LIGHT,
+			Block::Lectern(_) => Lectern::EMIT_LIGHT,
+			Block::SmithingTable(_) => SmithingTable::EMIT_LIGHT,
+			Block::Stonecutter(_) => Stonecutter::EMIT_LIGHT,
+			Block::Bell(_) => Bell::EMIT_LIGHT,
+			Block::Lantern(_) => Lantern::EMIT_LIGHT,
+			Block::SoulLantern(_) => SoulLantern::EMIT_LIGHT,
+			Block::Campfire(_) => Campfire::EMIT_LIGHT,
+			Block::SoulCampfire(_) => SoulCampfire::EMIT_LIGHT,
+			Block::SweetBerryBush(_) => SweetBerryBush::EMIT_LIGHT,
+			Block::WarpedStem(_) => WarpedStem::EMIT_LIGHT,
+			Block::StrippedWarpedStem(_) => StrippedWarpedStem::EMIT_LIGHT,
+			Block::WarpedHyphae(_) => WarpedHyphae::EMIT_LIGHT,
+			Block::StrippedWarpedHyphae(_) => StrippedWarpedHyphae::EMIT_LIGHT,
+			Block::WarpedNylium(_) => WarpedNylium::EMIT_LIGHT,
+			Block::WarpedFungus(_) => WarpedFungus::EMIT_LIGHT,
+			Block::WarpedWartBlock(_) => WarpedWartBlock::EMIT_LIGHT,
+			Block::WarpedRoots(_) => WarpedRoots::EMIT_LIGHT,
+			Block::NetherSprouts(_) => NetherSprouts::EMIT_LIGHT,
+			Block::CrimsonStem(_) => CrimsonStem::EMIT_LIGHT,
+			Block::StrippedCrimsonStem(_) => StrippedCrimsonStem::EMIT_LIGHT,
+			Block::CrimsonHyphae(_) => CrimsonHyphae::EMIT_LIGHT,
+			Block::StrippedCrimsonHyphae(_) => StrippedCrimsonHyphae::EMIT_LIGHT,
+			Block::CrimsonNylium(_) => CrimsonNylium::EMIT_LIGHT,
+			Block::CrimsonFungus(_) => CrimsonFungus::EMIT_LIGHT,
+			Block::Shroomlight(_) => Shroomlight::EMIT_LIGHT,
+			Block::WeepingVines(_) => WeepingVines::EMIT_LIGHT,
+			Block::WeepingVinesPlant(_) => WeepingVinesPlant::EMIT_LIGHT,
+			Block::TwistingVines(_) => TwistingVines::EMIT_LIGHT,
+			Block::TwistingVinesPlant(_) => TwistingVinesPlant::EMIT_LIGHT,
+			Block::CrimsonRoots(_) => CrimsonRoots::EMIT_LIGHT,
+			Block::CrimsonPlanks(_) => CrimsonPlanks::EMIT_LIGHT,
+			Block::WarpedPlanks(_) => WarpedPlanks::EMIT_LIGHT,
+			Block::CrimsonSlab(_) => CrimsonSlab::EMIT_LIGHT,
+			Block::WarpedSlab(_) => WarpedSlab::EMIT_LIGHT,
+			Block::CrimsonPressurePlate(_) => CrimsonPressurePlate::EMIT_LIGHT,
+			Block::WarpedPressurePlate(_) => WarpedPressurePlate::EMIT_LIGHT,
+			Block::CrimsonFence(_) => CrimsonFence::EMIT_LIGHT,
+			Block::WarpedFence(_) => WarpedFence::EMIT_LIGHT,
+			Block::CrimsonTrapdoor(_) => CrimsonTrapdoor::EMIT_LIGHT,
+			Block::WarpedTrapdoor(_) => WarpedTrapdoor::EMIT_LIGHT,
+			Block::CrimsonFenceGate(_) => CrimsonFenceGate::EMIT_LIGHT,
+			Block::WarpedFenceGate(_) => WarpedFenceGate::EMIT_LIGHT,
+			Block::CrimsonStairs(_) => CrimsonStairs::EMIT_LIGHT,
+			Block::WarpedStairs(_) => WarpedStairs::EMIT_LIGHT,
+			Block::CrimsonButton(_) => CrimsonButton::EMIT_LIGHT,
+			Block::WarpedButton(_) => WarpedButton::EMIT_LIGHT,
+			Block::CrimsonDoor(_) => CrimsonDoor::EMIT_LIGHT,
+			Block::WarpedDoor(_) => WarpedDoor::EMIT_LIGHT,
+			Block::CrimsonSign(_) => CrimsonSign::EMIT_LIGHT,
+			Block::WarpedSign(_) => WarpedSign::EMIT_LIGHT,
+			Block::CrimsonWallSign(_) => CrimsonWallSign::EMIT_LIGHT,
+			Block::WarpedWallSign(_) => WarpedWallSign::EMIT_LIGHT,
+			Block::StructureBlock(_) => StructureBlock::EMIT_LIGHT,
+			Block::Jigsaw(_) => Jigsaw::EMIT_LIGHT,
+			Block::Composter(_) => Composter::EMIT_LIGHT,
+			Block::Target(_) => Target::EMIT_LIGHT,
+			Block::BeeNest(_) => BeeNest::EMIT_LIGHT,
+			Block::Beehive(_) => Beehive::EMIT_LIGHT,
+			Block::HoneyBlock(_) => HoneyBlock::EMIT_LIGHT,
+			Block::HoneycombBlock(_) => HoneycombBlock::EMIT_LIGHT,
+			Block::NetheriteBlock(_) => NetheriteBlock::EMIT_LIGHT,
+			Block::AncientDebris(_) => AncientDebris::EMIT_LIGHT,
+			Block::CryingObsidian(_) => CryingObsidian::EMIT_LIGHT,
+			Block::RespawnAnchor(_) => RespawnAnchor::EMIT_LIGHT,
+			Block::PottedCrimsonFungus(_) => PottedCrimsonFungus::EMIT_LIGHT,
+			Block::PottedWarpedFungus(_) => PottedWarpedFungus::EMIT_LIGHT,
+			Block::PottedCrimsonRoots(_) => PottedCrimsonRoots::EMIT_LIGHT,
+			Block::PottedWarpedRoots(_) => PottedWarpedRoots::EMIT_LIGHT,
+			Block::Lodestone(_) => Lodestone::EMIT_LIGHT,
+			Block::Blackstone(_) => Blackstone::EMIT_LIGHT,
+			Block::BlackstoneStairs(_) => BlackstoneStairs::EMIT_LIGHT,
+			Block::BlackstoneWall(_) => BlackstoneWall::EMIT_LIGHT,
+			Block::BlackstoneSlab(_) => BlackstoneSlab::EMIT_LIGHT,
+			Block::PolishedBlackstone(_) => PolishedBlackstone::EMIT_LIGHT,
+			Block::PolishedBlackstoneBricks(_) => PolishedBlackstoneBricks::EMIT_LIGHT,
+			Block::CrackedPolishedBlackstoneBricks(_) => CrackedPolishedBlackstoneBricks::EMIT_LIGHT,
+			Block::ChiseledPolishedBlackstone(_) => ChiseledPolishedBlackstone::EMIT_LIGHT,
+			Block::PolishedBlackstoneBrickSlab(_) => PolishedBlackstoneBrickSlab::EMIT_LIGHT,
+			Block::PolishedBlackstoneBrickStairs(_) => PolishedBlackstoneBrickStairs::EMIT_LIGHT,
+			Block::PolishedBlackstoneBrickWall(_) => PolishedBlackstoneBrickWall::EMIT_LIGHT,
+			Block::GildedBlackstone(_) => GildedBlackstone::EMIT_LIGHT,
+			Block::PolishedBlackstoneStairs(_) => PolishedBlackstoneStairs::EMIT_LIGHT,
+			Block::PolishedBlackstoneSlab(_) => PolishedBlackstoneSlab::EMIT_LIGHT,
+			Block::PolishedBlackstonePressurePlate(_) => PolishedBlackstonePressurePlate::EMIT_LIGHT,
+			Block::PolishedBlackstoneButton(_) => PolishedBlackstoneButton::EMIT_LIGHT,
+			Block::PolishedBlackstoneWall(_) => PolishedBlackstoneWall::EMIT_LIGHT,
+			Block::ChiseledNetherBricks(_) => ChiseledNetherBricks::EMIT_LIGHT,
+			Block::CrackedNetherBricks(_) => CrackedNetherBricks::EMIT_LIGHT,
+			Block::QuartzBricks(_) => QuartzBricks::EMIT_LIGHT,
+			Block::Candle(_) => Candle::EMIT_LIGHT,
+			Block::WhiteCandle(_) => WhiteCandle::EMIT_LIGHT,
+			Block::OrangeCandle(_) => OrangeCandle::EMIT_LIGHT,
+			Block::MagentaCandle(_) => MagentaCandle::EMIT_LIGHT,
+			Block::LightBlueCandle(_) => LightBlueCandle::EMIT_LIGHT,
+			Block::YellowCandle(_) => YellowCandle::EMIT_LIGHT,
+			Block::LimeCandle(_) => LimeCandle::EMIT_LIGHT,
+			Block::PinkCandle(_) => PinkCandle::EMIT_LIGHT,
+			Block::GrayCandle(_) => GrayCandle::EMIT_LIGHT,
+			Block::LightGrayCandle(_) => LightGrayCandle::EMIT_LIGHT,
+			Block::CyanCandle(_) => CyanCandle::EMIT_LIGHT,
+			Block::PurpleCandle(_) => PurpleCandle::EMIT_LIGHT,
+			Block::BlueCandle(_) => BlueCandle::EMIT_LIGHT,
+			Block::BrownCandle(_) => BrownCandle::EMIT_LIGHT,
+			Block::GreenCandle(_) => GreenCandle::EMIT_LIGHT,
+			Block::RedCandle(_) => RedCandle::EMIT_LIGHT,
+			Block::BlackCandle(_) => BlackCandle::EMIT_LIGHT,
+			Block::CandleCake(_) => CandleCake::EMIT_LIGHT,
+			Block::WhiteCandleCake(_) => WhiteCandleCake::EMIT_LIGHT,
+			Block::OrangeCandleCake(_) => OrangeCandleCake::EMIT_LIGHT,
+			Block::MagentaCandleCake(_) => MagentaCandleCake::EMIT_LIGHT,
+			Block::LightBlueCandleCake(_) => LightBlueCandleCake::EMIT_LIGHT,
+			Block::YellowCandleCake(_) => YellowCandleCake::EMIT_LIGHT,
+			Block::LimeCandleCake(_) => LimeCandleCake::EMIT_LIGHT,
+			Block::PinkCandleCake(_) => PinkCandleCake::EMIT_LIGHT,
+			Block::GrayCandleCake(_) => GrayCandleCake::EMIT_LIGHT,
+			Block::LightGrayCandleCake(_) => LightGrayCandleCake::EMIT_LIGHT,
+			Block::CyanCandleCake(_) => CyanCandleCake::EMIT_LIGHT,
+			Block::PurpleCandleCake(_) => PurpleCandleCake::EMIT_LIGHT,
+			Block::BlueCandleCake(_) => BlueCandleCake::EMIT_LIGHT,
+			Block::BrownCandleCake(_) => BrownCandleCake::EMIT_LIGHT,
+			Block::GreenCandleCake(_) => GreenCandleCake::EMIT_LIGHT,
+			Block::RedCandleCake(_) => RedCandleCake::EMIT_LIGHT,
+			Block::BlackCandleCake(_) => BlackCandleCake::EMIT_LIGHT,
+			Block::AmethystBlock(_) => AmethystBlock::EMIT_LIGHT,
+			Block::BuddingAmethyst(_) => BuddingAmethyst::EMIT_LIGHT,
+			Block::AmethystCluster(_) => AmethystCluster::EMIT_LIGHT,
+			Block::LargeAmethystBud(_) => LargeAmethystBud::EMIT_LIGHT,
+			Block::MediumAmethystBud(_) => MediumAmethystBud::EMIT_LIGHT,
+			Block::SmallAmethystBud(_) => SmallAmethystBud::EMIT_LIGHT,
+			Block::Tuff(_) => Tuff::EMIT_LIGHT,
+			Block::Calcite(_) => Calcite::EMIT_LIGHT,
+			Block::TintedGlass(_) => TintedGlass::EMIT_LIGHT,
+			Block::PowderSnow(_) => PowderSnow::EMIT_LIGHT,
+			Block::SculkSensor(_) => SculkSensor::EMIT_LIGHT,
+			Block::Sculk(_) => Sculk::EMIT_LIGHT,
+			Block::SculkVein(_) => SculkVein::EMIT_LIGHT,
+			Block::SculkCatalyst(_) => SculkCatalyst::EMIT_LIGHT,
+			Block::SculkShrieker(_) => SculkShrieker::EMIT_LIGHT,
+			Block::OxidizedCopper(_) => OxidizedCopper::EMIT_LIGHT,
+			Block::WeatheredCopper(_) => WeatheredCopper::EMIT_LIGHT,
+			Block::ExposedCopper(_) => ExposedCopper::EMIT_LIGHT,
+			Block::CopperBlock(_) => CopperBlock::EMIT_LIGHT,
+			Block::CopperOre(_) => CopperOre::EMIT_LIGHT,
+			Block::DeepslateCopperOre(_) => DeepslateCopperOre::EMIT_LIGHT,
+			Block::OxidizedCutCopper(_) => OxidizedCutCopper::EMIT_LIGHT,
+			Block::WeatheredCutCopper(_) => WeatheredCutCopper::EMIT_LIGHT,
+			Block::ExposedCutCopper(_) => ExposedCutCopper::EMIT_LIGHT,
+			Block::CutCopper(_) => CutCopper::EMIT_LIGHT,
+			Block::OxidizedCutCopperStairs(_) => OxidizedCutCopperStairs::EMIT_LIGHT,
+			Block::WeatheredCutCopperStairs(_) => WeatheredCutCopperStairs::EMIT_LIGHT,
+			Block::ExposedCutCopperStairs(_) => ExposedCutCopperStairs::EMIT_LIGHT,
+			Block::CutCopperStairs(_) => CutCopperStairs::EMIT_LIGHT,
+			Block::OxidizedCutCopperSlab(_) => OxidizedCutCopperSlab::EMIT_LIGHT,
+			Block::WeatheredCutCopperSlab(_) => WeatheredCutCopperSlab::EMIT_LIGHT,
+			Block::ExposedCutCopperSlab(_) => ExposedCutCopperSlab::EMIT_LIGHT,
+			Block::CutCopperSlab(_) => CutCopperSlab::EMIT_LIGHT,
+			Block::WaxedCopperBlock(_) => WaxedCopperBlock::EMIT_LIGHT,
+			Block::WaxedWeatheredCopper(_) => WaxedWeatheredCopper::EMIT_LIGHT,
+			Block::WaxedExposedCopper(_) => WaxedExposedCopper::EMIT_LIGHT,
+			Block::WaxedOxidizedCopper(_) => WaxedOxidizedCopper::EMIT_LIGHT,
+			Block::WaxedOxidizedCutCopper(_) => WaxedOxidizedCutCopper::EMIT_LIGHT,
+			Block::WaxedWeatheredCutCopper(_) => WaxedWeatheredCutCopper::EMIT_LIGHT,
+			Block::WaxedExposedCutCopper(_) => WaxedExposedCutCopper::EMIT_LIGHT,
+			Block::WaxedCutCopper(_) => WaxedCutCopper::EMIT_LIGHT,
+			Block::WaxedOxidizedCutCopperStairs(_) => WaxedOxidizedCutCopperStairs::EMIT_LIGHT,
+			Block::WaxedWeatheredCutCopperStairs(_) => WaxedWeatheredCutCopperStairs::EMIT_LIGHT,
+			Block::WaxedExposedCutCopperStairs(_) => WaxedExposedCutCopperStairs::EMIT_LIGHT,
+			Block::WaxedCutCopperStairs(_) => WaxedCutCopperStairs::EMIT_LIGHT,
+			Block::WaxedOxidizedCutCopperSlab(_) => WaxedOxidizedCutCopperSlab::EMIT_LIGHT,
+			Block::WaxedWeatheredCutCopperSlab(_) => WaxedWeatheredCutCopperSlab::EMIT_LIGHT,
+			Block::WaxedExposedCutCopperSlab(_) => WaxedExposedCutCopperSlab::EMIT_LIGHT,
+			Block::WaxedCutCopperSlab(_) => WaxedCutCopperSlab::EMIT_LIGHT,
+			Block::LightningRod(_) => LightningRod::EMIT_LIGHT,
+			Block::PointedDripstone(_) => PointedDripstone::EMIT_LIGHT,
+			Block::DripstoneBlock(_) => DripstoneBlock::EMIT_LIGHT,
+			Block::CaveVines(_) => CaveVines::EMIT_LIGHT,
+			Block::CaveVinesPlant(_) => CaveVinesPlant::EMIT_LIGHT,
+			Block::SporeBlossom(_) => SporeBlossom::EMIT_LIGHT,
+			Block::Azalea(_) => Azalea::EMIT_LIGHT,
+			Block::FloweringAzalea(_) => FloweringAzalea::EMIT_LIGHT,
+			Block::MossCarpet(_) => MossCarpet::EMIT_LIGHT,
+			Block::MossBlock(_) => MossBlock::EMIT_LIGHT,
+			Block::BigDripleaf(_) => BigDripleaf::EMIT_LIGHT,
+			Block::BigDripleafStem(_) => BigDripleafStem::EMIT_LIGHT,
+			Block::SmallDripleaf(_) => SmallDripleaf::EMIT_LIGHT,
+			Block::HangingRoots(_) => HangingRoots::EMIT_LIGHT,
+			Block::RootedDirt(_) => RootedDirt::EMIT_LIGHT,
+			Block::Mud(_) => Mud::EMIT_LIGHT,
+			Block::Deepslate(_) => Deepslate::EMIT_LIGHT,
+			Block::CobbledDeepslate(_) => CobbledDeepslate::EMIT_LIGHT,
+			Block::CobbledDeepslateStairs(_) => CobbledDeepslateStairs::EMIT_LIGHT,
+			Block::CobbledDeepslateSlab(_) => CobbledDeepslateSlab::EMIT_LIGHT,
+			Block::CobbledDeepslateWall(_) => CobbledDeepslateWall::EMIT_LIGHT,
+			Block::PolishedDeepslate(_) => PolishedDeepslate::EMIT_LIGHT,
+			Block::PolishedDeepslateStairs(_) => PolishedDeepslateStairs::EMIT_LIGHT,
+			Block::PolishedDeepslateSlab(_) => PolishedDeepslateSlab::EMIT_LIGHT,
+			Block::PolishedDeepslateWall(_) => PolishedDeepslateWall::EMIT_LIGHT,
+			Block::DeepslateTiles(_) => DeepslateTiles::EMIT_LIGHT,
+			Block::DeepslateTileStairs(_) => DeepslateTileStairs::EMIT_LIGHT,
+			Block::DeepslateTileSlab(_) => DeepslateTileSlab::EMIT_LIGHT,
+			Block::DeepslateTileWall(_) => DeepslateTileWall::EMIT_LIGHT,
+			Block::DeepslateBricks(_) => DeepslateBricks::EMIT_LIGHT,
+			Block::DeepslateBrickStairs(_) => DeepslateBrickStairs::EMIT_LIGHT,
+			Block::DeepslateBrickSlab(_) => DeepslateBrickSlab::EMIT_LIGHT,
+			Block::DeepslateBrickWall(_) => DeepslateBrickWall::EMIT_LIGHT,
+			Block::ChiseledDeepslate(_) => ChiseledDeepslate::EMIT_LIGHT,
+			Block::CrackedDeepslateBricks(_) => CrackedDeepslateBricks::EMIT_LIGHT,
+			Block::CrackedDeepslateTiles(_) => CrackedDeepslateTiles::EMIT_LIGHT,
+			Block::InfestedDeepslate(_) => InfestedDeepslate::EMIT_LIGHT,
+			Block::SmoothBasalt(_) => SmoothBasalt::EMIT_LIGHT,
+			Block::RawIronBlock(_) => RawIronBlock::EMIT_LIGHT,
+			Block::RawCopperBlock(_) => RawCopperBlock::EMIT_LIGHT,
+			Block::RawGoldBlock(_) => RawGoldBlock::EMIT_LIGHT,
+			Block::PottedAzaleaBush(_) => PottedAzaleaBush::EMIT_LIGHT,
+			Block::PottedFloweringAzaleaBush(_) => PottedFloweringAzaleaBush::EMIT_LIGHT,
+			Block::OchreFroglight(_) => OchreFroglight::EMIT_LIGHT,
+			Block::VerdantFroglight(_) => VerdantFroglight::EMIT_LIGHT,
+			Block::PearlescentFroglight(_) => PearlescentFroglight::EMIT_LIGHT,
+			Block::Frogspawn(_) => Frogspawn::EMIT_LIGHT,
+			Block::ReinforcedDeepslate(_) => ReinforcedDeepslate::EMIT_LIGHT,
+		}
+	}
+	pub fn get_filter_light(&self) -> u8 {
+		match self {
+			Block::Air(_) => Air::FILTER_LIGHT,
+			Block::Stone(_) => Stone::FILTER_LIGHT,
+			Block::Granite(_) => Granite::FILTER_LIGHT,
+			Block::PolishedGranite(_) => PolishedGranite::FILTER_LIGHT,
+			Block::Diorite(_) => Diorite::FILTER_LIGHT,
+			Block::PolishedDiorite(_) => PolishedDiorite::FILTER_LIGHT,
+			Block::Andesite(_) => Andesite::FILTER_LIGHT,
+			Block::PolishedAndesite(_) => PolishedAndesite::FILTER_LIGHT,
+			Block::GrassBlock(_) => GrassBlock::FILTER_LIGHT,
+			Block::Dirt(_) => Dirt::FILTER_LIGHT,
+			Block::CoarseDirt(_) => CoarseDirt::FILTER_LIGHT,
+			Block::Podzol(_) => Podzol::FILTER_LIGHT,
+			Block::Cobblestone(_) => Cobblestone::FILTER_LIGHT,
+			Block::OakPlanks(_) => OakPlanks::FILTER_LIGHT,
+			Block::SprucePlanks(_) => SprucePlanks::FILTER_LIGHT,
+			Block::BirchPlanks(_) => BirchPlanks::FILTER_LIGHT,
+			Block::JunglePlanks(_) => JunglePlanks::FILTER_LIGHT,
+			Block::AcaciaPlanks(_) => AcaciaPlanks::FILTER_LIGHT,
+			Block::DarkOakPlanks(_) => DarkOakPlanks::FILTER_LIGHT,
+			Block::MangrovePlanks(_) => MangrovePlanks::FILTER_LIGHT,
+			Block::OakSapling(_) => OakSapling::FILTER_LIGHT,
+			Block::SpruceSapling(_) => SpruceSapling::FILTER_LIGHT,
+			Block::BirchSapling(_) => BirchSapling::FILTER_LIGHT,
+			Block::JungleSapling(_) => JungleSapling::FILTER_LIGHT,
+			Block::AcaciaSapling(_) => AcaciaSapling::FILTER_LIGHT,
+			Block::DarkOakSapling(_) => DarkOakSapling::FILTER_LIGHT,
+			Block::MangrovePropagule(_) => MangrovePropagule::FILTER_LIGHT,
+			Block::Bedrock(_) => Bedrock::FILTER_LIGHT,
+			Block::Water(_) => Water::FILTER_LIGHT,
+			Block::Lava(_) => Lava::FILTER_LIGHT,
+			Block::Sand(_) => Sand::FILTER_LIGHT,
+			Block::RedSand(_) => RedSand::FILTER_LIGHT,
+			Block::Gravel(_) => Gravel::FILTER_LIGHT,
+			Block::GoldOre(_) => GoldOre::FILTER_LIGHT,
+			Block::DeepslateGoldOre(_) => DeepslateGoldOre::FILTER_LIGHT,
+			Block::IronOre(_) => IronOre::FILTER_LIGHT,
+			Block::DeepslateIronOre(_) => DeepslateIronOre::FILTER_LIGHT,
+			Block::CoalOre(_) => CoalOre::FILTER_LIGHT,
+			Block::DeepslateCoalOre(_) => DeepslateCoalOre::FILTER_LIGHT,
+			Block::NetherGoldOre(_) => NetherGoldOre::FILTER_LIGHT,
+			Block::OakLog(_) => OakLog::FILTER_LIGHT,
+			Block::SpruceLog(_) => SpruceLog::FILTER_LIGHT,
+			Block::BirchLog(_) => BirchLog::FILTER_LIGHT,
+			Block::JungleLog(_) => JungleLog::FILTER_LIGHT,
+			Block::AcaciaLog(_) => AcaciaLog::FILTER_LIGHT,
+			Block::DarkOakLog(_) => DarkOakLog::FILTER_LIGHT,
+			Block::MangroveLog(_) => MangroveLog::FILTER_LIGHT,
+			Block::MangroveRoots(_) => MangroveRoots::FILTER_LIGHT,
+			Block::MuddyMangroveRoots(_) => MuddyMangroveRoots::FILTER_LIGHT,
+			Block::StrippedSpruceLog(_) => StrippedSpruceLog::FILTER_LIGHT,
+			Block::StrippedBirchLog(_) => StrippedBirchLog::FILTER_LIGHT,
+			Block::StrippedJungleLog(_) => StrippedJungleLog::FILTER_LIGHT,
+			Block::StrippedAcaciaLog(_) => StrippedAcaciaLog::FILTER_LIGHT,
+			Block::StrippedDarkOakLog(_) => StrippedDarkOakLog::FILTER_LIGHT,
+			Block::StrippedOakLog(_) => StrippedOakLog::FILTER_LIGHT,
+			Block::StrippedMangroveLog(_) => StrippedMangroveLog::FILTER_LIGHT,
+			Block::OakWood(_) => OakWood::FILTER_LIGHT,
+			Block::SpruceWood(_) => SpruceWood::FILTER_LIGHT,
+			Block::BirchWood(_) => BirchWood::FILTER_LIGHT,
+			Block::JungleWood(_) => JungleWood::FILTER_LIGHT,
+			Block::AcaciaWood(_) => AcaciaWood::FILTER_LIGHT,
+			Block::DarkOakWood(_) => DarkOakWood::FILTER_LIGHT,
+			Block::MangroveWood(_) => MangroveWood::FILTER_LIGHT,
+			Block::StrippedOakWood(_) => StrippedOakWood::FILTER_LIGHT,
+			Block::StrippedSpruceWood(_) => StrippedSpruceWood::FILTER_LIGHT,
+			Block::StrippedBirchWood(_) => StrippedBirchWood::FILTER_LIGHT,
+			Block::StrippedJungleWood(_) => StrippedJungleWood::FILTER_LIGHT,
+			Block::StrippedAcaciaWood(_) => StrippedAcaciaWood::FILTER_LIGHT,
+			Block::StrippedDarkOakWood(_) => StrippedDarkOakWood::FILTER_LIGHT,
+			Block::StrippedMangroveWood(_) => StrippedMangroveWood::FILTER_LIGHT,
+			Block::OakLeaves(_) => OakLeaves::FILTER_LIGHT,
+			Block::SpruceLeaves(_) => SpruceLeaves::FILTER_LIGHT,
+			Block::BirchLeaves(_) => BirchLeaves::FILTER_LIGHT,
+			Block::JungleLeaves(_) => JungleLeaves::FILTER_LIGHT,
+			Block::AcaciaLeaves(_) => AcaciaLeaves::FILTER_LIGHT,
+			Block::DarkOakLeaves(_) => DarkOakLeaves::FILTER_LIGHT,
+			Block::MangroveLeaves(_) => MangroveLeaves::FILTER_LIGHT,
+			Block::AzaleaLeaves(_) => AzaleaLeaves::FILTER_LIGHT,
+			Block::FloweringAzaleaLeaves(_) => FloweringAzaleaLeaves::FILTER_LIGHT,
+			Block::Sponge(_) => Sponge::FILTER_LIGHT,
+			Block::WetSponge(_) => WetSponge::FILTER_LIGHT,
+			Block::Glass(_) => Glass::FILTER_LIGHT,
+			Block::LapisOre(_) => LapisOre::FILTER_LIGHT,
+			Block::DeepslateLapisOre(_) => DeepslateLapisOre::FILTER_LIGHT,
+			Block::LapisBlock(_) => LapisBlock::FILTER_LIGHT,
+			Block::Dispenser(_) => Dispenser::FILTER_LIGHT,
+			Block::Sandstone(_) => Sandstone::FILTER_LIGHT,
+			Block::ChiseledSandstone(_) => ChiseledSandstone::FILTER_LIGHT,
+			Block::CutSandstone(_) => CutSandstone::FILTER_LIGHT,
+			Block::NoteBlock(_) => NoteBlock::FILTER_LIGHT,
+			Block::WhiteBed(_) => WhiteBed::FILTER_LIGHT,
+			Block::OrangeBed(_) => OrangeBed::FILTER_LIGHT,
+			Block::MagentaBed(_) => MagentaBed::FILTER_LIGHT,
+			Block::LightBlueBed(_) => LightBlueBed::FILTER_LIGHT,
+			Block::YellowBed(_) => YellowBed::FILTER_LIGHT,
+			Block::LimeBed(_) => LimeBed::FILTER_LIGHT,
+			Block::PinkBed(_) => PinkBed::FILTER_LIGHT,
+			Block::GrayBed(_) => GrayBed::FILTER_LIGHT,
+			Block::LightGrayBed(_) => LightGrayBed::FILTER_LIGHT,
+			Block::CyanBed(_) => CyanBed::FILTER_LIGHT,
+			Block::PurpleBed(_) => PurpleBed::FILTER_LIGHT,
+			Block::BlueBed(_) => BlueBed::FILTER_LIGHT,
+			Block::BrownBed(_) => BrownBed::FILTER_LIGHT,
+			Block::GreenBed(_) => GreenBed::FILTER_LIGHT,
+			Block::RedBed(_) => RedBed::FILTER_LIGHT,
+			Block::BlackBed(_) => BlackBed::FILTER_LIGHT,
+			Block::PoweredRail(_) => PoweredRail::FILTER_LIGHT,
+			Block::DetectorRail(_) => DetectorRail::FILTER_LIGHT,
+			Block::StickyPiston(_) => StickyPiston::FILTER_LIGHT,
+			Block::Cobweb(_) => Cobweb::FILTER_LIGHT,
+			Block::Grass(_) => Grass::FILTER_LIGHT,
+			Block::Fern(_) => Fern::FILTER_LIGHT,
+			Block::DeadBush(_) => DeadBush::FILTER_LIGHT,
+			Block::Seagrass(_) => Seagrass::FILTER_LIGHT,
+			Block::TallSeagrass(_) => TallSeagrass::FILTER_LIGHT,
+			Block::Piston(_) => Piston::FILTER_LIGHT,
+			Block::PistonHead(_) => PistonHead::FILTER_LIGHT,
+			Block::WhiteWool(_) => WhiteWool::FILTER_LIGHT,
+			Block::OrangeWool(_) => OrangeWool::FILTER_LIGHT,
+			Block::MagentaWool(_) => MagentaWool::FILTER_LIGHT,
+			Block::LightBlueWool(_) => LightBlueWool::FILTER_LIGHT,
+			Block::YellowWool(_) => YellowWool::FILTER_LIGHT,
+			Block::LimeWool(_) => LimeWool::FILTER_LIGHT,
+			Block::PinkWool(_) => PinkWool::FILTER_LIGHT,
+			Block::GrayWool(_) => GrayWool::FILTER_LIGHT,
+			Block::LightGrayWool(_) => LightGrayWool::FILTER_LIGHT,
+			Block::CyanWool(_) => CyanWool::FILTER_LIGHT,
+			Block::PurpleWool(_) => PurpleWool::FILTER_LIGHT,
+			Block::BlueWool(_) => BlueWool::FILTER_LIGHT,
+			Block::BrownWool(_) => BrownWool::FILTER_LIGHT,
+			Block::GreenWool(_) => GreenWool::FILTER_LIGHT,
+			Block::RedWool(_) => RedWool::FILTER_LIGHT,
+			Block::BlackWool(_) => BlackWool::FILTER_LIGHT,
+			Block::MovingPiston(_) => MovingPiston::FILTER_LIGHT,
+			Block::Dandelion(_) => Dandelion::FILTER_LIGHT,
+			Block::Poppy(_) => Poppy::FILTER_LIGHT,
+			Block::BlueOrchid(_) => BlueOrchid::FILTER_LIGHT,
+			Block::Allium(_) => Allium::FILTER_LIGHT,
+			Block::AzureBluet(_) => AzureBluet::FILTER_LIGHT,
+			Block::RedTulip(_) => RedTulip::FILTER_LIGHT,
+			Block::OrangeTulip(_) => OrangeTulip::FILTER_LIGHT,
+			Block::WhiteTulip(_) => WhiteTulip::FILTER_LIGHT,
+			Block::PinkTulip(_) => PinkTulip::FILTER_LIGHT,
+			Block::OxeyeDaisy(_) => OxeyeDaisy::FILTER_LIGHT,
+			Block::Cornflower(_) => Cornflower::FILTER_LIGHT,
+			Block::WitherRose(_) => WitherRose::FILTER_LIGHT,
+			Block::LilyOfTheValley(_) => LilyOfTheValley::FILTER_LIGHT,
+			Block::BrownMushroom(_) => BrownMushroom::FILTER_LIGHT,
+			Block::RedMushroom(_) => RedMushroom::FILTER_LIGHT,
+			Block::GoldBlock(_) => GoldBlock::FILTER_LIGHT,
+			Block::IronBlock(_) => IronBlock::FILTER_LIGHT,
+			Block::Bricks(_) => Bricks::FILTER_LIGHT,
+			Block::Tnt(_) => Tnt::FILTER_LIGHT,
+			Block::Bookshelf(_) => Bookshelf::FILTER_LIGHT,
+			Block::MossyCobblestone(_) => MossyCobblestone::FILTER_LIGHT,
+			Block::Obsidian(_) => Obsidian::FILTER_LIGHT,
+			Block::Torch(_) => Torch::FILTER_LIGHT,
+			Block::WallTorch(_) => WallTorch::FILTER_LIGHT,
+			Block::Fire(_) => Fire::FILTER_LIGHT,
+			Block::SoulFire(_) => SoulFire::FILTER_LIGHT,
+			Block::Spawner(_) => Spawner::FILTER_LIGHT,
+			Block::OakStairs(_) => OakStairs::FILTER_LIGHT,
+			Block::Chest(_) => Chest::FILTER_LIGHT,
+			Block::RedstoneWire(_) => RedstoneWire::FILTER_LIGHT,
+			Block::DiamondOre(_) => DiamondOre::FILTER_LIGHT,
+			Block::DeepslateDiamondOre(_) => DeepslateDiamondOre::FILTER_LIGHT,
+			Block::DiamondBlock(_) => DiamondBlock::FILTER_LIGHT,
+			Block::CraftingTable(_) => CraftingTable::FILTER_LIGHT,
+			Block::Wheat(_) => Wheat::FILTER_LIGHT,
+			Block::Farmland(_) => Farmland::FILTER_LIGHT,
+			Block::Furnace(_) => Furnace::FILTER_LIGHT,
+			Block::OakSign(_) => OakSign::FILTER_LIGHT,
+			Block::SpruceSign(_) => SpruceSign::FILTER_LIGHT,
+			Block::BirchSign(_) => BirchSign::FILTER_LIGHT,
+			Block::AcaciaSign(_) => AcaciaSign::FILTER_LIGHT,
+			Block::JungleSign(_) => JungleSign::FILTER_LIGHT,
+			Block::DarkOakSign(_) => DarkOakSign::FILTER_LIGHT,
+			Block::MangroveSign(_) => MangroveSign::FILTER_LIGHT,
+			Block::OakDoor(_) => OakDoor::FILTER_LIGHT,
+			Block::Ladder(_) => Ladder::FILTER_LIGHT,
+			Block::Rail(_) => Rail::FILTER_LIGHT,
+			Block::CobblestoneStairs(_) => CobblestoneStairs::FILTER_LIGHT,
+			Block::OakWallSign(_) => OakWallSign::FILTER_LIGHT,
+			Block::SpruceWallSign(_) => SpruceWallSign::FILTER_LIGHT,
+			Block::BirchWallSign(_) => BirchWallSign::FILTER_LIGHT,
+			Block::AcaciaWallSign(_) => AcaciaWallSign::FILTER_LIGHT,
+			Block::JungleWallSign(_) => JungleWallSign::FILTER_LIGHT,
+			Block::DarkOakWallSign(_) => DarkOakWallSign::FILTER_LIGHT,
+			Block::MangroveWallSign(_) => MangroveWallSign::FILTER_LIGHT,
+			Block::Lever(_) => Lever::FILTER_LIGHT,
+			Block::StonePressurePlate(_) => StonePressurePlate::FILTER_LIGHT,
+			Block::IronDoor(_) => IronDoor::FILTER_LIGHT,
+			Block::OakPressurePlate(_) => OakPressurePlate::FILTER_LIGHT,
+			Block::SprucePressurePlate(_) => SprucePressurePlate::FILTER_LIGHT,
+			Block::BirchPressurePlate(_) => BirchPressurePlate::FILTER_LIGHT,
+			Block::JunglePressurePlate(_) => JunglePressurePlate::FILTER_LIGHT,
+			Block::AcaciaPressurePlate(_) => AcaciaPressurePlate::FILTER_LIGHT,
+			Block::DarkOakPressurePlate(_) => DarkOakPressurePlate::FILTER_LIGHT,
+			Block::MangrovePressurePlate(_) => MangrovePressurePlate::FILTER_LIGHT,
+			Block::RedstoneOre(_) => RedstoneOre::FILTER_LIGHT,
+			Block::DeepslateRedstoneOre(_) => DeepslateRedstoneOre::FILTER_LIGHT,
+			Block::RedstoneTorch(_) => RedstoneTorch::FILTER_LIGHT,
+			Block::RedstoneWallTorch(_) => RedstoneWallTorch::FILTER_LIGHT,
+			Block::StoneButton(_) => StoneButton::FILTER_LIGHT,
+			Block::Snow(_) => Snow::FILTER_LIGHT,
+			Block::Ice(_) => Ice::FILTER_LIGHT,
+			Block::SnowBlock(_) => SnowBlock::FILTER_LIGHT,
+			Block::Cactus(_) => Cactus::FILTER_LIGHT,
+			Block::Clay(_) => Clay::FILTER_LIGHT,
+			Block::SugarCane(_) => SugarCane::FILTER_LIGHT,
+			Block::Jukebox(_) => Jukebox::FILTER_LIGHT,
+			Block::OakFence(_) => OakFence::FILTER_LIGHT,
+			Block::Pumpkin(_) => Pumpkin::FILTER_LIGHT,
+			Block::Netherrack(_) => Netherrack::FILTER_LIGHT,
+			Block::SoulSand(_) => SoulSand::FILTER_LIGHT,
+			Block::SoulSoil(_) => SoulSoil::FILTER_LIGHT,
+			Block::Basalt(_) => Basalt::FILTER_LIGHT,
+			Block::PolishedBasalt(_) => PolishedBasalt::FILTER_LIGHT,
+			Block::SoulTorch(_) => SoulTorch::FILTER_LIGHT,
+			Block::SoulWallTorch(_) => SoulWallTorch::FILTER_LIGHT,
+			Block::Glowstone(_) => Glowstone::FILTER_LIGHT,
+			Block::NetherPortal(_) => NetherPortal::FILTER_LIGHT,
+			Block::CarvedPumpkin(_) => CarvedPumpkin::FILTER_LIGHT,
+			Block::JackOLantern(_) => JackOLantern::FILTER_LIGHT,
+			Block::Cake(_) => Cake::FILTER_LIGHT,
+			Block::Repeater(_) => Repeater::FILTER_LIGHT,
+			Block::WhiteStainedGlass(_) => WhiteStainedGlass::FILTER_LIGHT,
+			Block::OrangeStainedGlass(_) => OrangeStainedGlass::FILTER_LIGHT,
+			Block::MagentaStainedGlass(_) => MagentaStainedGlass::FILTER_LIGHT,
+			Block::LightBlueStainedGlass(_) => LightBlueStainedGlass::FILTER_LIGHT,
+			Block::YellowStainedGlass(_) => YellowStainedGlass::FILTER_LIGHT,
+			Block::LimeStainedGlass(_) => LimeStainedGlass::FILTER_LIGHT,
+			Block::PinkStainedGlass(_) => PinkStainedGlass::FILTER_LIGHT,
+			Block::GrayStainedGlass(_) => GrayStainedGlass::FILTER_LIGHT,
+			Block::LightGrayStainedGlass(_) => LightGrayStainedGlass::FILTER_LIGHT,
+			Block::CyanStainedGlass(_) => CyanStainedGlass::FILTER_LIGHT,
+			Block::PurpleStainedGlass(_) => PurpleStainedGlass::FILTER_LIGHT,
+			Block::BlueStainedGlass(_) => BlueStainedGlass::FILTER_LIGHT,
+			Block::BrownStainedGlass(_) => BrownStainedGlass::FILTER_LIGHT,
+			Block::GreenStainedGlass(_) => GreenStainedGlass::FILTER_LIGHT,
+			Block::RedStainedGlass(_) => RedStainedGlass::FILTER_LIGHT,
+			Block::BlackStainedGlass(_) => BlackStainedGlass::FILTER_LIGHT,
+			Block::OakTrapdoor(_) => OakTrapdoor::FILTER_LIGHT,
+			Block::SpruceTrapdoor(_) => SpruceTrapdoor::FILTER_LIGHT,
+			Block::BirchTrapdoor(_) => BirchTrapdoor::FILTER_LIGHT,
+			Block::JungleTrapdoor(_) => JungleTrapdoor::FILTER_LIGHT,
+			Block::AcaciaTrapdoor(_) => AcaciaTrapdoor::FILTER_LIGHT,
+			Block::DarkOakTrapdoor(_) => DarkOakTrapdoor::FILTER_LIGHT,
+			Block::MangroveTrapdoor(_) => MangroveTrapdoor::FILTER_LIGHT,
+			Block::StoneBricks(_) => StoneBricks::FILTER_LIGHT,
+			Block::MossyStoneBricks(_) => MossyStoneBricks::FILTER_LIGHT,
+			Block::CrackedStoneBricks(_) => CrackedStoneBricks::FILTER_LIGHT,
+			Block::ChiseledStoneBricks(_) => ChiseledStoneBricks::FILTER_LIGHT,
+			Block::PackedMud(_) => PackedMud::FILTER_LIGHT,
+			Block::MudBricks(_) => MudBricks::FILTER_LIGHT,
+			Block::InfestedStone(_) => InfestedStone::FILTER_LIGHT,
+			Block::InfestedCobblestone(_) => InfestedCobblestone::FILTER_LIGHT,
+			Block::InfestedStoneBricks(_) => InfestedStoneBricks::FILTER_LIGHT,
+			Block::InfestedMossyStoneBricks(_) => InfestedMossyStoneBricks::FILTER_LIGHT,
+			Block::InfestedCrackedStoneBricks(_) => InfestedCrackedStoneBricks::FILTER_LIGHT,
+			Block::InfestedChiseledStoneBricks(_) => InfestedChiseledStoneBricks::FILTER_LIGHT,
+			Block::BrownMushroomBlock(_) => BrownMushroomBlock::FILTER_LIGHT,
+			Block::RedMushroomBlock(_) => RedMushroomBlock::FILTER_LIGHT,
+			Block::MushroomStem(_) => MushroomStem::FILTER_LIGHT,
+			Block::IronBars(_) => IronBars::FILTER_LIGHT,
+			Block::Chain(_) => Chain::FILTER_LIGHT,
+			Block::GlassPane(_) => GlassPane::FILTER_LIGHT,
+			Block::Melon(_) => Melon::FILTER_LIGHT,
+			Block::AttachedPumpkinStem(_) => AttachedPumpkinStem::FILTER_LIGHT,
+			Block::AttachedMelonStem(_) => AttachedMelonStem::FILTER_LIGHT,
+			Block::PumpkinStem(_) => PumpkinStem::FILTER_LIGHT,
+			Block::MelonStem(_) => MelonStem::FILTER_LIGHT,
+			Block::Vine(_) => Vine::FILTER_LIGHT,
+			Block::GlowLichen(_) => GlowLichen::FILTER_LIGHT,
+			Block::OakFenceGate(_) => OakFenceGate::FILTER_LIGHT,
+			Block::BrickStairs(_) => BrickStairs::FILTER_LIGHT,
+			Block::StoneBrickStairs(_) => StoneBrickStairs::FILTER_LIGHT,
+			Block::MudBrickStairs(_) => MudBrickStairs::FILTER_LIGHT,
+			Block::Mycelium(_) => Mycelium::FILTER_LIGHT,
+			Block::LilyPad(_) => LilyPad::FILTER_LIGHT,
+			Block::NetherBricks(_) => NetherBricks::FILTER_LIGHT,
+			Block::NetherBrickFence(_) => NetherBrickFence::FILTER_LIGHT,
+			Block::NetherBrickStairs(_) => NetherBrickStairs::FILTER_LIGHT,
+			Block::NetherWart(_) => NetherWart::FILTER_LIGHT,
+			Block::EnchantingTable(_) => EnchantingTable::FILTER_LIGHT,
+			Block::BrewingStand(_) => BrewingStand::FILTER_LIGHT,
+			Block::Cauldron(_) => Cauldron::FILTER_LIGHT,
+			Block::WaterCauldron(_) => WaterCauldron::FILTER_LIGHT,
+			Block::LavaCauldron(_) => LavaCauldron::FILTER_LIGHT,
+			Block::PowderSnowCauldron(_) => PowderSnowCauldron::FILTER_LIGHT,
+			Block::EndPortal(_) => EndPortal::FILTER_LIGHT,
+			Block::EndPortalFrame(_) => EndPortalFrame::FILTER_LIGHT,
+			Block::EndStone(_) => EndStone::FILTER_LIGHT,
+			Block::DragonEgg(_) => DragonEgg::FILTER_LIGHT,
+			Block::RedstoneLamp(_) => RedstoneLamp::FILTER_LIGHT,
+			Block::Cocoa(_) => Cocoa::FILTER_LIGHT,
+			Block::SandstoneStairs(_) => SandstoneStairs::FILTER_LIGHT,
+			Block::EmeraldOre(_) => EmeraldOre::FILTER_LIGHT,
+			Block::DeepslateEmeraldOre(_) => DeepslateEmeraldOre::FILTER_LIGHT,
+			Block::EnderChest(_) => EnderChest::FILTER_LIGHT,
+			Block::TripwireHook(_) => TripwireHook::FILTER_LIGHT,
+			Block::Tripwire(_) => Tripwire::FILTER_LIGHT,
+			Block::EmeraldBlock(_) => EmeraldBlock::FILTER_LIGHT,
+			Block::SpruceStairs(_) => SpruceStairs::FILTER_LIGHT,
+			Block::BirchStairs(_) => BirchStairs::FILTER_LIGHT,
+			Block::JungleStairs(_) => JungleStairs::FILTER_LIGHT,
+			Block::CommandBlock(_) => CommandBlock::FILTER_LIGHT,
+			Block::Beacon(_) => Beacon::FILTER_LIGHT,
+			Block::CobblestoneWall(_) => CobblestoneWall::FILTER_LIGHT,
+			Block::MossyCobblestoneWall(_) => MossyCobblestoneWall::FILTER_LIGHT,
+			Block::FlowerPot(_) => FlowerPot::FILTER_LIGHT,
+			Block::PottedOakSapling(_) => PottedOakSapling::FILTER_LIGHT,
+			Block::PottedSpruceSapling(_) => PottedSpruceSapling::FILTER_LIGHT,
+			Block::PottedBirchSapling(_) => PottedBirchSapling::FILTER_LIGHT,
+			Block::PottedJungleSapling(_) => PottedJungleSapling::FILTER_LIGHT,
+			Block::PottedAcaciaSapling(_) => PottedAcaciaSapling::FILTER_LIGHT,
+			Block::PottedDarkOakSapling(_) => PottedDarkOakSapling::FILTER_LIGHT,
+			Block::PottedMangrovePropagule(_) => PottedMangrovePropagule::FILTER_LIGHT,
+			Block::PottedFern(_) => PottedFern::FILTER_LIGHT,
+			Block::PottedDandelion(_) => PottedDandelion::FILTER_LIGHT,
+			Block::PottedPoppy(_) => PottedPoppy::FILTER_LIGHT,
+			Block::PottedBlueOrchid(_) => PottedBlueOrchid::FILTER_LIGHT,
+			Block::PottedAllium(_) => PottedAllium::FILTER_LIGHT,
+			Block::PottedAzureBluet(_) => PottedAzureBluet::FILTER_LIGHT,
+			Block::PottedRedTulip(_) => PottedRedTulip::FILTER_LIGHT,
+			Block::PottedOrangeTulip(_) => PottedOrangeTulip::FILTER_LIGHT,
+			Block::PottedWhiteTulip(_) => PottedWhiteTulip::FILTER_LIGHT,
+			Block::PottedPinkTulip(_) => PottedPinkTulip::FILTER_LIGHT,
+			Block::PottedOxeyeDaisy(_) => PottedOxeyeDaisy::FILTER_LIGHT,
+			Block::PottedCornflower(_) => PottedCornflower::FILTER_LIGHT,
+			Block::PottedLilyOfTheValley(_) => PottedLilyOfTheValley::FILTER_LIGHT,
+			Block::PottedWitherRose(_) => PottedWitherRose::FILTER_LIGHT,
+			Block::PottedRedMushroom(_) => PottedRedMushroom::FILTER_LIGHT,
+			Block::PottedBrownMushroom(_) => PottedBrownMushroom::FILTER_LIGHT,
+			Block::PottedDeadBush(_) => PottedDeadBush::FILTER_LIGHT,
+			Block::PottedCactus(_) => PottedCactus::FILTER_LIGHT,
+			Block::Carrots(_) => Carrots::FILTER_LIGHT,
+			Block::Potatoes(_) => Potatoes::FILTER_LIGHT,
+			Block::OakButton(_) => OakButton::FILTER_LIGHT,
+			Block::SpruceButton(_) => SpruceButton::FILTER_LIGHT,
+			Block::BirchButton(_) => BirchButton::FILTER_LIGHT,
+			Block::JungleButton(_) => JungleButton::FILTER_LIGHT,
+			Block::AcaciaButton(_) => AcaciaButton::FILTER_LIGHT,
+			Block::DarkOakButton(_) => DarkOakButton::FILTER_LIGHT,
+			Block::MangroveButton(_) => MangroveButton::FILTER_LIGHT,
+			Block::SkeletonSkull(_) => SkeletonSkull::FILTER_LIGHT,
+			Block::SkeletonWallSkull(_) => SkeletonWallSkull::FILTER_LIGHT,
+			Block::WitherSkeletonSkull(_) => WitherSkeletonSkull::FILTER_LIGHT,
+			Block::WitherSkeletonWallSkull(_) => WitherSkeletonWallSkull::FILTER_LIGHT,
+			Block::ZombieHead(_) => ZombieHead::FILTER_LIGHT,
+			Block::ZombieWallHead(_) => ZombieWallHead::FILTER_LIGHT,
+			Block::PlayerHead(_) => PlayerHead::FILTER_LIGHT,
+			Block::PlayerWallHead(_) => PlayerWallHead::FILTER_LIGHT,
+			Block::CreeperHead(_) => CreeperHead::FILTER_LIGHT,
+			Block::CreeperWallHead(_) => CreeperWallHead::FILTER_LIGHT,
+			Block::DragonHead(_) => DragonHead::FILTER_LIGHT,
+			Block::DragonWallHead(_) => DragonWallHead::FILTER_LIGHT,
+			Block::Anvil(_) => Anvil::FILTER_LIGHT,
+			Block::ChippedAnvil(_) => ChippedAnvil::FILTER_LIGHT,
+			Block::DamagedAnvil(_) => DamagedAnvil::FILTER_LIGHT,
+			Block::TrappedChest(_) => TrappedChest::FILTER_LIGHT,
+			Block::LightWeightedPressurePlate(_) => LightWeightedPressurePlate::FILTER_LIGHT,
+			Block::HeavyWeightedPressurePlate(_) => HeavyWeightedPressurePlate::FILTER_LIGHT,
+			Block::Comparator(_) => Comparator::FILTER_LIGHT,
+			Block::DaylightDetector(_) => DaylightDetector::FILTER_LIGHT,
+			Block::RedstoneBlock(_) => RedstoneBlock::FILTER_LIGHT,
+			Block::NetherQuartzOre(_) => NetherQuartzOre::FILTER_LIGHT,
+			Block::Hopper(_) => Hopper::FILTER_LIGHT,
+			Block::QuartzBlock(_) => QuartzBlock::FILTER_LIGHT,
+			Block::ChiseledQuartzBlock(_) => ChiseledQuartzBlock::FILTER_LIGHT,
+			Block::QuartzPillar(_) => QuartzPillar::FILTER_LIGHT,
+			Block::QuartzStairs(_) => QuartzStairs::FILTER_LIGHT,
+			Block::ActivatorRail(_) => ActivatorRail::FILTER_LIGHT,
+			Block::Dropper(_) => Dropper::FILTER_LIGHT,
+			Block::WhiteTerracotta(_) => WhiteTerracotta::FILTER_LIGHT,
+			Block::OrangeTerracotta(_) => OrangeTerracotta::FILTER_LIGHT,
+			Block::MagentaTerracotta(_) => MagentaTerracotta::FILTER_LIGHT,
+			Block::LightBlueTerracotta(_) => LightBlueTerracotta::FILTER_LIGHT,
+			Block::YellowTerracotta(_) => YellowTerracotta::FILTER_LIGHT,
+			Block::LimeTerracotta(_) => LimeTerracotta::FILTER_LIGHT,
+			Block::PinkTerracotta(_) => PinkTerracotta::FILTER_LIGHT,
+			Block::GrayTerracotta(_) => GrayTerracotta::FILTER_LIGHT,
+			Block::LightGrayTerracotta(_) => LightGrayTerracotta::FILTER_LIGHT,
+			Block::CyanTerracotta(_) => CyanTerracotta::FILTER_LIGHT,
+			Block::PurpleTerracotta(_) => PurpleTerracotta::FILTER_LIGHT,
+			Block::BlueTerracotta(_) => BlueTerracotta::FILTER_LIGHT,
+			Block::BrownTerracotta(_) => BrownTerracotta::FILTER_LIGHT,
+			Block::GreenTerracotta(_) => GreenTerracotta::FILTER_LIGHT,
+			Block::RedTerracotta(_) => RedTerracotta::FILTER_LIGHT,
+			Block::BlackTerracotta(_) => BlackTerracotta::FILTER_LIGHT,
+			Block::WhiteStainedGlassPane(_) => WhiteStainedGlassPane::FILTER_LIGHT,
+			Block::OrangeStainedGlassPane(_) => OrangeStainedGlassPane::FILTER_LIGHT,
+			Block::MagentaStainedGlassPane(_) => MagentaStainedGlassPane::FILTER_LIGHT,
+			Block::LightBlueStainedGlassPane(_) => LightBlueStainedGlassPane::FILTER_LIGHT,
+			Block::YellowStainedGlassPane(_) => YellowStainedGlassPane::FILTER_LIGHT,
+			Block::LimeStainedGlassPane(_) => LimeStainedGlassPane::FILTER_LIGHT,
+			Block::PinkStainedGlassPane(_) => PinkStainedGlassPane::FILTER_LIGHT,
+			Block::GrayStainedGlassPane(_) => GrayStainedGlassPane::FILTER_LIGHT,
+			Block::LightGrayStainedGlassPane(_) => LightGrayStainedGlassPane::FILTER_LIGHT,
+			Block::CyanStainedGlassPane(_) => CyanStainedGlassPane::FILTER_LIGHT,
+			Block::PurpleStainedGlassPane(_) => PurpleStainedGlassPane::FILTER_LIGHT,
+			Block::BlueStainedGlassPane(_) => BlueStainedGlassPane::FILTER_LIGHT,
+			Block::BrownStainedGlassPane(_) => BrownStainedGlassPane::FILTER_LIGHT,
+			Block::GreenStainedGlassPane(_) => GreenStainedGlassPane::FILTER_LIGHT,
+			Block::RedStainedGlassPane(_) => RedStainedGlassPane::FILTER_LIGHT,
+			Block::BlackStainedGlassPane(_) => BlackStainedGlassPane::FILTER_LIGHT,
+			Block::AcaciaStairs(_) => AcaciaStairs::FILTER_LIGHT,
+			Block::DarkOakStairs(_) => DarkOakStairs::FILTER_LIGHT,
+			Block::MangroveStairs(_) => MangroveStairs::FILTER_LIGHT,
+			Block::SlimeBlock(_) => SlimeBlock::FILTER_LIGHT,
+			Block::Barrier(_) => Barrier::FILTER_LIGHT,
+			Block::Light(_) => Light::FILTER_LIGHT,
+			Block::IronTrapdoor(_) => IronTrapdoor::FILTER_LIGHT,
+			Block::Prismarine(_) => Prismarine::FILTER_LIGHT,
+			Block::PrismarineBricks(_) => PrismarineBricks::FILTER_LIGHT,
+			Block::DarkPrismarine(_) => DarkPrismarine::FILTER_LIGHT,
+			Block::PrismarineStairs(_) => PrismarineStairs::FILTER_LIGHT,
+			Block::PrismarineBrickStairs(_) => PrismarineBrickStairs::FILTER_LIGHT,
+			Block::DarkPrismarineStairs(_) => DarkPrismarineStairs::FILTER_LIGHT,
+			Block::PrismarineSlab(_) => PrismarineSlab::FILTER_LIGHT,
+			Block::PrismarineBrickSlab(_) => PrismarineBrickSlab::FILTER_LIGHT,
+			Block::DarkPrismarineSlab(_) => DarkPrismarineSlab::FILTER_LIGHT,
+			Block::SeaLantern(_) => SeaLantern::FILTER_LIGHT,
+			Block::HayBlock(_) => HayBlock::FILTER_LIGHT,
+			Block::WhiteCarpet(_) => WhiteCarpet::FILTER_LIGHT,
+			Block::OrangeCarpet(_) => OrangeCarpet::FILTER_LIGHT,
+			Block::MagentaCarpet(_) => MagentaCarpet::FILTER_LIGHT,
+			Block::LightBlueCarpet(_) => LightBlueCarpet::FILTER_LIGHT,
+			Block::YellowCarpet(_) => YellowCarpet::FILTER_LIGHT,
+			Block::LimeCarpet(_) => LimeCarpet::FILTER_LIGHT,
+			Block::PinkCarpet(_) => PinkCarpet::FILTER_LIGHT,
+			Block::GrayCarpet(_) => GrayCarpet::FILTER_LIGHT,
+			Block::LightGrayCarpet(_) => LightGrayCarpet::FILTER_LIGHT,
+			Block::CyanCarpet(_) => CyanCarpet::FILTER_LIGHT,
+			Block::PurpleCarpet(_) => PurpleCarpet::FILTER_LIGHT,
+			Block::BlueCarpet(_) => BlueCarpet::FILTER_LIGHT,
+			Block::BrownCarpet(_) => BrownCarpet::FILTER_LIGHT,
+			Block::GreenCarpet(_) => GreenCarpet::FILTER_LIGHT,
+			Block::RedCarpet(_) => RedCarpet::FILTER_LIGHT,
+			Block::BlackCarpet(_) => BlackCarpet::FILTER_LIGHT,
+			Block::Terracotta(_) => Terracotta::FILTER_LIGHT,
+			Block::CoalBlock(_) => CoalBlock::FILTER_LIGHT,
+			Block::PackedIce(_) => PackedIce::FILTER_LIGHT,
+			Block::Sunflower(_) => Sunflower::FILTER_LIGHT,
+			Block::Lilac(_) => Lilac::FILTER_LIGHT,
+			Block::RoseBush(_) => RoseBush::FILTER_LIGHT,
+			Block::Peony(_) => Peony::FILTER_LIGHT,
+			Block::TallGrass(_) => TallGrass::FILTER_LIGHT,
+			Block::LargeFern(_) => LargeFern::FILTER_LIGHT,
+			Block::WhiteBanner(_) => WhiteBanner::FILTER_LIGHT,
+			Block::OrangeBanner(_) => OrangeBanner::FILTER_LIGHT,
+			Block::MagentaBanner(_) => MagentaBanner::FILTER_LIGHT,
+			Block::LightBlueBanner(_) => LightBlueBanner::FILTER_LIGHT,
+			Block::YellowBanner(_) => YellowBanner::FILTER_LIGHT,
+			Block::LimeBanner(_) => LimeBanner::FILTER_LIGHT,
+			Block::PinkBanner(_) => PinkBanner::FILTER_LIGHT,
+			Block::GrayBanner(_) => GrayBanner::FILTER_LIGHT,
+			Block::LightGrayBanner(_) => LightGrayBanner::FILTER_LIGHT,
+			Block::CyanBanner(_) => CyanBanner::FILTER_LIGHT,
+			Block::PurpleBanner(_) => PurpleBanner::FILTER_LIGHT,
+			Block::BlueBanner(_) => BlueBanner::FILTER_LIGHT,
+			Block::BrownBanner(_) => BrownBanner::FILTER_LIGHT,
+			Block::GreenBanner(_) => GreenBanner::FILTER_LIGHT,
+			Block::RedBanner(_) => RedBanner::FILTER_LIGHT,
+			Block::BlackBanner(_) => BlackBanner::FILTER_LIGHT,
+			Block::WhiteWallBanner(_) => WhiteWallBanner::FILTER_LIGHT,
+			Block::OrangeWallBanner(_) => OrangeWallBanner::FILTER_LIGHT,
+			Block::MagentaWallBanner(_) => MagentaWallBanner::FILTER_LIGHT,
+			Block::LightBlueWallBanner(_) => LightBlueWallBanner::FILTER_LIGHT,
+			Block::YellowWallBanner(_) => YellowWallBanner::FILTER_LIGHT,
+			Block::LimeWallBanner(_) => LimeWallBanner::FILTER_LIGHT,
+			Block::PinkWallBanner(_) => PinkWallBanner::FILTER_LIGHT,
+			Block::GrayWallBanner(_) => GrayWallBanner::FILTER_LIGHT,
+			Block::LightGrayWallBanner(_) => LightGrayWallBanner::FILTER_LIGHT,
+			Block::CyanWallBanner(_) => CyanWallBanner::FILTER_LIGHT,
+			Block::PurpleWallBanner(_) => PurpleWallBanner::FILTER_LIGHT,
+			Block::BlueWallBanner(_) => BlueWallBanner::FILTER_LIGHT,
+			Block::BrownWallBanner(_) => BrownWallBanner::FILTER_LIGHT,
+			Block::GreenWallBanner(_) => GreenWallBanner::FILTER_LIGHT,
+			Block::RedWallBanner(_) => RedWallBanner::FILTER_LIGHT,
+			Block::BlackWallBanner(_) => BlackWallBanner::FILTER_LIGHT,
+			Block::RedSandstone(_) => RedSandstone::FILTER_LIGHT,
+			Block::ChiseledRedSandstone(_) => ChiseledRedSandstone::FILTER_LIGHT,
+			Block::CutRedSandstone(_) => CutRedSandstone::FILTER_LIGHT,
+			Block::RedSandstoneStairs(_) => RedSandstoneStairs::FILTER_LIGHT,
+			Block::OakSlab(_) => OakSlab::FILTER_LIGHT,
+			Block::SpruceSlab(_) => SpruceSlab::FILTER_LIGHT,
+			Block::BirchSlab(_) => BirchSlab::FILTER_LIGHT,
+			Block::JungleSlab(_) => JungleSlab::FILTER_LIGHT,
+			Block::AcaciaSlab(_) => AcaciaSlab::FILTER_LIGHT,
+			Block::DarkOakSlab(_) => DarkOakSlab::FILTER_LIGHT,
+			Block::MangroveSlab(_) => MangroveSlab::FILTER_LIGHT,
+			Block::StoneSlab(_) => StoneSlab::FILTER_LIGHT,
+			Block::SmoothStoneSlab(_) => SmoothStoneSlab::FILTER_LIGHT,
+			Block::SandstoneSlab(_) => SandstoneSlab::FILTER_LIGHT,
+			Block::CutSandstoneSlab(_) => CutSandstoneSlab::FILTER_LIGHT,
+			Block::PetrifiedOakSlab(_) => PetrifiedOakSlab::FILTER_LIGHT,
+			Block::CobblestoneSlab(_) => CobblestoneSlab::FILTER_LIGHT,
+			Block::BrickSlab(_) => BrickSlab::FILTER_LIGHT,
+			Block::StoneBrickSlab(_) => StoneBrickSlab::FILTER_LIGHT,
+			Block::MudBrickSlab(_) => MudBrickSlab::FILTER_LIGHT,
+			Block::NetherBrickSlab(_) => NetherBrickSlab::FILTER_LIGHT,
+			Block::QuartzSlab(_) => QuartzSlab::FILTER_LIGHT,
+			Block::RedSandstoneSlab(_) => RedSandstoneSlab::FILTER_LIGHT,
+			Block::CutRedSandstoneSlab(_) => CutRedSandstoneSlab::FILTER_LIGHT,
+			Block::PurpurSlab(_) => PurpurSlab::FILTER_LIGHT,
+			Block::SmoothStone(_) => SmoothStone::FILTER_LIGHT,
+			Block::SmoothSandstone(_) => SmoothSandstone::FILTER_LIGHT,
+			Block::SmoothQuartz(_) => SmoothQuartz::FILTER_LIGHT,
+			Block::SmoothRedSandstone(_) => SmoothRedSandstone::FILTER_LIGHT,
+			Block::SpruceFenceGate(_) => SpruceFenceGate::FILTER_LIGHT,
+			Block::BirchFenceGate(_) => BirchFenceGate::FILTER_LIGHT,
+			Block::JungleFenceGate(_) => JungleFenceGate::FILTER_LIGHT,
+			Block::AcaciaFenceGate(_) => AcaciaFenceGate::FILTER_LIGHT,
+			Block::DarkOakFenceGate(_) => DarkOakFenceGate::FILTER_LIGHT,
+			Block::MangroveFenceGate(_) => MangroveFenceGate::FILTER_LIGHT,
+			Block::SpruceFence(_) => SpruceFence::FILTER_LIGHT,
+			Block::BirchFence(_) => BirchFence::FILTER_LIGHT,
+			Block::JungleFence(_) => JungleFence::FILTER_LIGHT,
+			Block::AcaciaFence(_) => AcaciaFence::FILTER_LIGHT,
+			Block::DarkOakFence(_) => DarkOakFence::FILTER_LIGHT,
+			Block::MangroveFence(_) => MangroveFence::FILTER_LIGHT,
+			Block::SpruceDoor(_) => SpruceDoor::FILTER_LIGHT,
+			Block::BirchDoor(_) => BirchDoor::FILTER_LIGHT,
+			Block::JungleDoor(_) => JungleDoor::FILTER_LIGHT,
+			Block::AcaciaDoor(_) => AcaciaDoor::FILTER_LIGHT,
+			Block::DarkOakDoor(_) => DarkOakDoor::FILTER_LIGHT,
+			Block::MangroveDoor(_) => MangroveDoor::FILTER_LIGHT,
+			Block::EndRod(_) => EndRod::FILTER_LIGHT,
+			Block::ChorusPlant(_) => ChorusPlant::FILTER_LIGHT,
+			Block::ChorusFlower(_) => ChorusFlower::FILTER_LIGHT,
+			Block::PurpurBlock(_) => PurpurBlock::FILTER_LIGHT,
+			Block::PurpurPillar(_) => PurpurPillar::FILTER_LIGHT,
+			Block::PurpurStairs(_) => PurpurStairs::FILTER_LIGHT,
+			Block::EndStoneBricks(_) => EndStoneBricks::FILTER_LIGHT,
+			Block::Beetroots(_) => Beetroots::FILTER_LIGHT,
+			Block::DirtPath(_) => DirtPath::FILTER_LIGHT,
+			Block::EndGateway(_) => EndGateway::FILTER_LIGHT,
+			Block::RepeatingCommandBlock(_) => RepeatingCommandBlock::FILTER_LIGHT,
+			Block::ChainCommandBlock(_) => ChainCommandBlock::FILTER_LIGHT,
+			Block::FrostedIce(_) => FrostedIce::FILTER_LIGHT,
+			Block::MagmaBlock(_) => MagmaBlock::FILTER_LIGHT,
+			Block::NetherWartBlock(_) => NetherWartBlock::FILTER_LIGHT,
+			Block::RedNetherBricks(_) => RedNetherBricks::FILTER_LIGHT,
+			Block::BoneBlock(_) => BoneBlock::FILTER_LIGHT,
+			Block::StructureVoid(_) => StructureVoid::FILTER_LIGHT,
+			Block::Observer(_) => Observer::FILTER_LIGHT,
+			Block::ShulkerBox(_) => ShulkerBox::FILTER_LIGHT,
+			Block::WhiteShulkerBox(_) => WhiteShulkerBox::FILTER_LIGHT,
+			Block::OrangeShulkerBox(_) => OrangeShulkerBox::FILTER_LIGHT,
+			Block::MagentaShulkerBox(_) => MagentaShulkerBox::FILTER_LIGHT,
+			Block::LightBlueShulkerBox(_) => LightBlueShulkerBox::FILTER_LIGHT,
+			Block::YellowShulkerBox(_) => YellowShulkerBox::FILTER_LIGHT,
+			Block::LimeShulkerBox(_) => LimeShulkerBox::FILTER_LIGHT,
+			Block::PinkShulkerBox(_) => PinkShulkerBox::FILTER_LIGHT,
+			Block::GrayShulkerBox(_) => GrayShulkerBox::FILTER_LIGHT,
+			Block::LightGrayShulkerBox(_) => LightGrayShulkerBox::FILTER_LIGHT,
+			Block::CyanShulkerBox(_) => CyanShulkerBox::FILTER_LIGHT,
+			Block::PurpleShulkerBox(_) => PurpleShulkerBox::FILTER_LIGHT,
+			Block::BlueShulkerBox(_) => BlueShulkerBox::FILTER_LIGHT,
+			Block::BrownShulkerBox(_) => BrownShulkerBox::FILTER_LIGHT,
+			Block::GreenShulkerBox(_) => GreenShulkerBox::FILTER_LIGHT,
+			Block::RedShulkerBox(_) => RedShulkerBox::FILTER_LIGHT,
+			Block::BlackShulkerBox(_) => BlackShulkerBox::FILTER_LIGHT,
+			Block::WhiteGlazedTerracotta(_) => WhiteGlazedTerracotta::FILTER_LIGHT,
+			Block::OrangeGlazedTerracotta(_) => OrangeGlazedTerracotta::FILTER_LIGHT,
+			Block::MagentaGlazedTerracotta(_) => MagentaGlazedTerracotta::FILTER_LIGHT,
+			Block::LightBlueGlazedTerracotta(_) => LightBlueGlazedTerracotta::FILTER_LIGHT,
+			Block::YellowGlazedTerracotta(_) => YellowGlazedTerracotta::FILTER_LIGHT,
+			Block::LimeGlazedTerracotta(_) => LimeGlazedTerracotta::FILTER_LIGHT,
+			Block::PinkGlazedTerracotta(_) => PinkGlazedTerracotta::FILTER_LIGHT,
+			Block::GrayGlazedTerracotta(_) => GrayGlazedTerracotta::FILTER_LIGHT,
+			Block::LightGrayGlazedTerracotta(_) => LightGrayGlazedTerracotta::FILTER_LIGHT,
+			Block::CyanGlazedTerracotta(_) => CyanGlazedTerracotta::FILTER_LIGHT,
+			Block::PurpleGlazedTerracotta(_) => PurpleGlazedTerracotta::FILTER_LIGHT,
+			Block::BlueGlazedTerracotta(_) => BlueGlazedTerracotta::FILTER_LIGHT,
+			Block::BrownGlazedTerracotta(_) => BrownGlazedTerracotta::FILTER_LIGHT,
+			Block::GreenGlazedTerracotta(_) => GreenGlazedTerracotta::FILTER_LIGHT,
+			Block::RedGlazedTerracotta(_) => RedGlazedTerracotta::FILTER_LIGHT,
+			Block::BlackGlazedTerracotta(_) => BlackGlazedTerracotta::FILTER_LIGHT,
+			Block::WhiteConcrete(_) => WhiteConcrete::FILTER_LIGHT,
+			Block::OrangeConcrete(_) => OrangeConcrete::FILTER_LIGHT,
+			Block::MagentaConcrete(_) => MagentaConcrete::FILTER_LIGHT,
+			Block::LightBlueConcrete(_) => LightBlueConcrete::FILTER_LIGHT,
+			Block::YellowConcrete(_) => YellowConcrete::FILTER_LIGHT,
+			Block::LimeConcrete(_) => LimeConcrete::FILTER_LIGHT,
+			Block::PinkConcrete(_) => PinkConcrete::FILTER_LIGHT,
+			Block::GrayConcrete(_) => GrayConcrete::FILTER_LIGHT,
+			Block::LightGrayConcrete(_) => LightGrayConcrete::FILTER_LIGHT,
+			Block::CyanConcrete(_) => CyanConcrete::FILTER_LIGHT,
+			Block::PurpleConcrete(_) => PurpleConcrete::FILTER_LIGHT,
+			Block::BlueConcrete(_) => BlueConcrete::FILTER_LIGHT,
+			Block::BrownConcrete(_) => BrownConcrete::FILTER_LIGHT,
+			Block::GreenConcrete(_) => GreenConcrete::FILTER_LIGHT,
+			Block::RedConcrete(_) => RedConcrete::FILTER_LIGHT,
+			Block::BlackConcrete(_) => BlackConcrete::FILTER_LIGHT,
+			Block::WhiteConcretePowder(_) => WhiteConcretePowder::FILTER_LIGHT,
+			Block::OrangeConcretePowder(_) => OrangeConcretePowder::FILTER_LIGHT,
+			Block::MagentaConcretePowder(_) => MagentaConcretePowder::FILTER_LIGHT,
+			Block::LightBlueConcretePowder(_) => LightBlueConcretePowder::FILTER_LIGHT,
+			Block::YellowConcretePowder(_) => YellowConcretePowder::FILTER_LIGHT,
+			Block::LimeConcretePowder(_) => LimeConcretePowder::FILTER_LIGHT,
+			Block::PinkConcretePowder(_) => PinkConcretePowder::FILTER_LIGHT,
+			Block::GrayConcretePowder(_) => GrayConcretePowder::FILTER_LIGHT,
+			Block::LightGrayConcretePowder(_) => LightGrayConcretePowder::FILTER_LIGHT,
+			Block::CyanConcretePowder(_) => CyanConcretePowder::FILTER_LIGHT,
+			Block::PurpleConcretePowder(_) => PurpleConcretePowder::FILTER_LIGHT,
+			Block::BlueConcretePowder(_) => BlueConcretePowder::FILTER_LIGHT,
+			Block::BrownConcretePowder(_) => BrownConcretePowder::FILTER_LIGHT,
+			Block::GreenConcretePowder(_) => GreenConcretePowder::FILTER_LIGHT,
+			Block::RedConcretePowder(_) => RedConcretePowder::FILTER_LIGHT,
+			Block::BlackConcretePowder(_) => BlackConcretePowder::FILTER_LIGHT,
+			Block::Kelp(_) => Kelp::FILTER_LIGHT,
+			Block::KelpPlant(_) => KelpPlant::FILTER_LIGHT,
+			Block::DriedKelpBlock(_) => DriedKelpBlock::FILTER_LIGHT,
+			Block::TurtleEgg(_) => TurtleEgg::FILTER_LIGHT,
+			Block::DeadTubeCoralBlock(_) => DeadTubeCoralBlock::FILTER_LIGHT,
+			Block::DeadBrainCoralBlock(_) => DeadBrainCoralBlock::FILTER_LIGHT,
+			Block::DeadBubbleCoralBlock(_) => DeadBubbleCoralBlock::FILTER_LIGHT,
+			Block::DeadFireCoralBlock(_) => DeadFireCoralBlock::FILTER_LIGHT,
+			Block::DeadHornCoralBlock(_) => DeadHornCoralBlock::FILTER_LIGHT,
+			Block::TubeCoralBlock(_) => TubeCoralBlock::FILTER_LIGHT,
+			Block::BrainCoralBlock(_) => BrainCoralBlock::FILTER_LIGHT,
+			Block::BubbleCoralBlock(_) => BubbleCoralBlock::FILTER_LIGHT,
+			Block::FireCoralBlock(_) => FireCoralBlock::FILTER_LIGHT,
+			Block::HornCoralBlock(_) => HornCoralBlock::FILTER_LIGHT,
+			Block::DeadTubeCoral(_) => DeadTubeCoral::FILTER_LIGHT,
+			Block::DeadBrainCoral(_) => DeadBrainCoral::FILTER_LIGHT,
+			Block::DeadBubbleCoral(_) => DeadBubbleCoral::FILTER_LIGHT,
+			Block::DeadFireCoral(_) => DeadFireCoral::FILTER_LIGHT,
+			Block::DeadHornCoral(_) => DeadHornCoral::FILTER_LIGHT,
+			Block::TubeCoral(_) => TubeCoral::FILTER_LIGHT,
+			Block::BrainCoral(_) => BrainCoral::FILTER_LIGHT,
+			Block::BubbleCoral(_) => BubbleCoral::FILTER_LIGHT,
+			Block::FireCoral(_) => FireCoral::FILTER_LIGHT,
+			Block::HornCoral(_) => HornCoral::FILTER_LIGHT,
+			Block::DeadTubeCoralFan(_) => DeadTubeCoralFan::FILTER_LIGHT,
+			Block::DeadBrainCoralFan(_) => DeadBrainCoralFan::FILTER_LIGHT,
+			Block::DeadBubbleCoralFan(_) => DeadBubbleCoralFan::FILTER_LIGHT,
+			Block::DeadFireCoralFan(_) => DeadFireCoralFan::FILTER_LIGHT,
+			Block::DeadHornCoralFan(_) => DeadHornCoralFan::FILTER_LIGHT,
+			Block::TubeCoralFan(_) => TubeCoralFan::FILTER_LIGHT,
+			Block::BrainCoralFan(_) => BrainCoralFan::FILTER_LIGHT,
+			Block::BubbleCoralFan(_) => BubbleCoralFan::FILTER_LIGHT,
+			Block::FireCoralFan(_) => FireCoralFan::FILTER_LIGHT,
+			Block::HornCoralFan(_) => HornCoralFan::FILTER_LIGHT,
+			Block::DeadTubeCoralWallFan(_) => DeadTubeCoralWallFan::FILTER_LIGHT,
+			Block::DeadBrainCoralWallFan(_) => DeadBrainCoralWallFan::FILTER_LIGHT,
+			Block::DeadBubbleCoralWallFan(_) => DeadBubbleCoralWallFan::FILTER_LIGHT,
+			Block::DeadFireCoralWallFan(_) => DeadFireCoralWallFan::FILTER_LIGHT,
+			Block::DeadHornCoralWallFan(_) => DeadHornCoralWallFan::FILTER_LIGHT,
+			Block::TubeCoralWallFan(_) => TubeCoralWallFan::FILTER_LIGHT,
+			Block::BrainCoralWallFan(_) => BrainCoralWallFan::FILTER_LIGHT,
+			Block::BubbleCoralWallFan(_) => BubbleCoralWallFan::FILTER_LIGHT,
+			Block::FireCoralWallFan(_) => FireCoralWallFan::FILTER_LIGHT,
+			Block::HornCoralWallFan(_) => HornCoralWallFan::FILTER_LIGHT,
+			Block::SeaPickle(_) => SeaPickle::FILTER_LIGHT,
+			Block::BlueIce(_) => BlueIce::FILTER_LIGHT,
+			Block::Conduit(_) => Conduit::FILTER_LIGHT,
+			Block::BambooSapling(_) => BambooSapling::FILTER_LIGHT,
+			Block::Bamboo(_) => Bamboo::FILTER_LIGHT,
+			Block::PottedBamboo(_) => PottedBamboo::FILTER_LIGHT,
+			Block::VoidAir(_) => VoidAir::FILTER_LIGHT,
+			Block::CaveAir(_) => CaveAir::FILTER_LIGHT,
+			Block::BubbleColumn(_) => BubbleColumn::FILTER_LIGHT,
+			Block::PolishedGraniteStairs(_) => PolishedGraniteStairs::FILTER_LIGHT,
+			Block::SmoothRedSandstoneStairs(_) => SmoothRedSandstoneStairs::FILTER_LIGHT,
+			Block::MossyStoneBrickStairs(_) => MossyStoneBrickStairs::FILTER_LIGHT,
+			Block::PolishedDioriteStairs(_) => PolishedDioriteStairs::FILTER_LIGHT,
+			Block::MossyCobblestoneStairs(_) => MossyCobblestoneStairs::FILTER_LIGHT,
+			Block::EndStoneBrickStairs(_) => EndStoneBrickStairs::FILTER_LIGHT,
+			Block::StoneStairs(_) => StoneStairs::FILTER_LIGHT,
+			Block::SmoothSandstoneStairs(_) => SmoothSandstoneStairs::FILTER_LIGHT,
+			Block::SmoothQuartzStairs(_) => SmoothQuartzStairs::FILTER_LIGHT,
+			Block::GraniteStairs(_) => GraniteStairs::FILTER_LIGHT,
+			Block::AndesiteStairs(_) => AndesiteStairs::FILTER_LIGHT,
+			Block::RedNetherBrickStairs(_) => RedNetherBrickStairs::FILTER_LIGHT,
+			Block::PolishedAndesiteStairs(_) => PolishedAndesiteStairs::FILTER_LIGHT,
+			Block::DioriteStairs(_) => DioriteStairs::FILTER_LIGHT,
+			Block::PolishedGraniteSlab(_) => PolishedGraniteSlab::FILTER_LIGHT,
+			Block::SmoothRedSandstoneSlab(_) => SmoothRedSandstoneSlab::FILTER_LIGHT,
+			Block::MossyStoneBrickSlab(_) => MossyStoneBrickSlab::FILTER_LIGHT,
+			Block::PolishedDioriteSlab(_) => PolishedDioriteSlab::FILTER_LIGHT,
+			Block::MossyCobblestoneSlab(_) => MossyCobblestoneSlab::FILTER_LIGHT,
+			Block::EndStoneBrickSlab(_) => EndStoneBrickSlab::FILTER_LIGHT,
+			Block::SmoothSandstoneSlab(_) => SmoothSandstoneSlab::FILTER_LIGHT,
+			Block::SmoothQuartzSlab(_) => SmoothQuartzSlab::FILTER_LIGHT,
+			Block::GraniteSlab(_) => GraniteSlab::FILTER_LIGHT,
+			Block::AndesiteSlab(_) => AndesiteSlab::FILTER_LIGHT,
+			Block::RedNetherBrickSlab(_) => RedNetherBrickSlab::FILTER_LIGHT,
+			Block::PolishedAndesiteSlab(_) => PolishedAndesiteSlab::FILTER_LIGHT,
+			Block::DioriteSlab(_) => DioriteSlab::FILTER_LIGHT,
+			Block::BrickWall(_) => BrickWall::FILTER_LIGHT,
+			Block::PrismarineWall(_) => PrismarineWall::FILTER_LIGHT,
+			Block::RedSandstoneWall(_) => RedSandstoneWall::FILTER_LIGHT,
+			Block::MossyStoneBrickWall(_) => MossyStoneBrickWall::FILTER_LIGHT,
+			Block::GraniteWall(_) => GraniteWall::FILTER_LIGHT,
+			Block::StoneBrickWall(_) => StoneBrickWall::FILTER_LIGHT,
+			Block::MudBrickWall(_) => MudBrickWall::FILTER_LIGHT,
+			Block::NetherBrickWall(_) => NetherBrickWall::FILTER_LIGHT,
+			Block::AndesiteWall(_) => AndesiteWall::FILTER_LIGHT,
+			Block::RedNetherBrickWall(_) => RedNetherBrickWall::FILTER_LIGHT,
+			Block::SandstoneWall(_) => SandstoneWall::FILTER_LIGHT,
+			Block::EndStoneBrickWall(_) => EndStoneBrickWall::FILTER_LIGHT,
+			Block::DioriteWall(_) => DioriteWall::FILTER_LIGHT,
+			Block::Scaffolding(_) => Scaffolding::FILTER_LIGHT,
+			Block::Loom(_) => Loom::FILTER_LIGHT,
+			Block::Barrel(_) => Barrel::FILTER_LIGHT,
+			Block::Smoker(_) => Smoker::FILTER_LIGHT,
+			Block::BlastFurnace(_) => BlastFurnace::FILTER_LIGHT,
+			Block::CartographyTable(_) => CartographyTable::FILTER_LIGHT,
+			Block::FletchingTable(_) => FletchingTable::FILTER_LIGHT,
+			Block::Grindstone(_) => Grindstone::FILTER_LIGHT,
+			Block::Lectern(_) => Lectern::FILTER_LIGHT,
+			Block::SmithingTable(_) => SmithingTable::FILTER_LIGHT,
+			Block::Stonecutter(_) => Stonecutter::FILTER_LIGHT,
+			Block::Bell(_) => Bell::FILTER_LIGHT,
+			Block::Lantern(_) => Lantern::FILTER_LIGHT,
+			Block::SoulLantern(_) => SoulLantern::FILTER_LIGHT,
+			Block::Campfire(_) => Campfire::FILTER_LIGHT,
+			Block::SoulCampfire(_) => SoulCampfire::FILTER_LIGHT,
+			Block::SweetBerryBush(_) => SweetBerryBush::FILTER_LIGHT,
+			Block::WarpedStem(_) => WarpedStem::FILTER_LIGHT,
+			Block::StrippedWarpedStem(_) => StrippedWarpedStem::FILTER_LIGHT,
+			Block::WarpedHyphae(_) => WarpedHyphae::FILTER_LIGHT,
+			Block::StrippedWarpedHyphae(_) => StrippedWarpedHyphae::FILTER_LIGHT,
+			Block::WarpedNylium(_) => WarpedNylium::FILTER_LIGHT,
+			Block::WarpedFungus(_) => WarpedFungus::FILTER_LIGHT,
+			Block::WarpedWartBlock(_) => WarpedWartBlock::FILTER_LIGHT,
+			Block::WarpedRoots(_) => WarpedRoots::FILTER_LIGHT,
+			Block::NetherSprouts(_) => NetherSprouts::FILTER_LIGHT,
+			Block::CrimsonStem(_) => CrimsonStem::FILTER_LIGHT,
+			Block::StrippedCrimsonStem(_) => StrippedCrimsonStem::FILTER_LIGHT,
+			Block::CrimsonHyphae(_) => CrimsonHyphae::FILTER_LIGHT,
+			Block::StrippedCrimsonHyphae(_) => StrippedCrimsonHyphae::FILTER_LIGHT,
+			Block::CrimsonNylium(_) => CrimsonNylium::FILTER_LIGHT,
+			Block::CrimsonFungus(_) => CrimsonFungus::FILTER_LIGHT,
+			Block::Shroomlight(_) => Shroomlight::FILTER_LIGHT,
+			Block::WeepingVines(_) => WeepingVines::FILTER_LIGHT,
+			Block::WeepingVinesPlant(_) => WeepingVinesPlant::FILTER_LIGHT,
+			Block::TwistingVines(_) => TwistingVines::FILTER_LIGHT,
+			Block::TwistingVinesPlant(_) => TwistingVinesPlant::FILTER_LIGHT,
+			Block::CrimsonRoots(_) => CrimsonRoots::FILTER_LIGHT,
+			Block::CrimsonPlanks(_) => CrimsonPlanks::FILTER_LIGHT,
+			Block::WarpedPlanks(_) => WarpedPlanks::FILTER_LIGHT,
+			Block::CrimsonSlab(_) => CrimsonSlab::FILTER_LIGHT,
+			Block::WarpedSlab(_) => WarpedSlab::FILTER_LIGHT,
+			Block::CrimsonPressurePlate(_) => CrimsonPressurePlate::FILTER_LIGHT,
+			Block::WarpedPressurePlate(_) => WarpedPressurePlate::FILTER_LIGHT,
+			Block::CrimsonFence(_) => CrimsonFence::FILTER_LIGHT,
+			Block::WarpedFence(_) => WarpedFence::FILTER_LIGHT,
+			Block::CrimsonTrapdoor(_) => CrimsonTrapdoor::FILTER_LIGHT,
+			Block::WarpedTrapdoor(_) => WarpedTrapdoor::FILTER_LIGHT,
+			Block::CrimsonFenceGate(_) => CrimsonFenceGate::FILTER_LIGHT,
+			Block::WarpedFenceGate(_) => WarpedFenceGate::FILTER_LIGHT,
+			Block::CrimsonStairs(_) => CrimsonStairs::FILTER_LIGHT,
+			Block::WarpedStairs(_) => WarpedStairs::FILTER_LIGHT,
+			Block::CrimsonButton(_) => CrimsonButton::FILTER_LIGHT,
+			Block::WarpedButton(_) => WarpedButton::FILTER_LIGHT,
+			Block::CrimsonDoor(_) => CrimsonDoor::FILTER_LIGHT,
+			Block::WarpedDoor(_) => WarpedDoor::FILTER_LIGHT,
+			Block::CrimsonSign(_) => CrimsonSign::FILTER_LIGHT,
+			Block::WarpedSign(_) => WarpedSign::FILTER_LIGHT,
+			Block::CrimsonWallSign(_) => CrimsonWallSign::FILTER_LIGHT,
+			Block::WarpedWallSign(_) => WarpedWallSign::FILTER_LIGHT,
+			Block::StructureBlock(_) => StructureBlock::FILTER_LIGHT,
+			Block::Jigsaw(_) => Jigsaw::FILTER_LIGHT,
+			Block::Composter(_) => Composter::FILTER_LIGHT,
+			Block::Target(_) => Target::FILTER_LIGHT,
+			Block::BeeNest(_) => BeeNest::FILTER_LIGHT,
+			Block::Beehive(_) => Beehive::FILTER_LIGHT,
+			Block::HoneyBlock(_) => HoneyBlock::FILTER_LIGHT,
+			Block::HoneycombBlock(_) => HoneycombBlock::FILTER_LIGHT,
+			Block::NetheriteBlock(_) => NetheriteBlock::FILTER_LIGHT,
+			Block::AncientDebris(_) => AncientDebris::FILTER_LIGHT,
+			Block::CryingObsidian(_) => CryingObsidian::FILTER_LIGHT,
+			Block::RespawnAnchor(_) => RespawnAnchor::FILTER_LIGHT,
+			Block::PottedCrimsonFungus(_) => PottedCrimsonFungus::FILTER_LIGHT,
+			Block::PottedWarpedFungus(_) => PottedWarpedFungus::FILTER_LIGHT,
+			Block::PottedCrimsonRoots(_) => PottedCrimsonRoots::FILTER_LIGHT,
+			Block::PottedWarpedRoots(_) => PottedWarpedRoots::FILTER_LIGHT,
+			Block::Lodestone(_) => Lodestone::FILTER_LIGHT,
+			Block::Blackstone(_) => Blackstone::FILTER_LIGHT,
+			Block::BlackstoneStairs(_) => BlackstoneStairs::FILTER_LIGHT,
+			Block::BlackstoneWall(_) => BlackstoneWall::FILTER_LIGHT,
+			Block::BlackstoneSlab(_) => BlackstoneSlab::FILTER_LIGHT,
+			Block::PolishedBlackstone(_) => PolishedBlackstone::FILTER_LIGHT,
+			Block::PolishedBlackstoneBricks(_) => PolishedBlackstoneBricks::FILTER_LIGHT,
+			Block::CrackedPolishedBlackstoneBricks(_) => CrackedPolishedBlackstoneBricks::FILTER_LIGHT,
+			Block::ChiseledPolishedBlackstone(_) => ChiseledPolishedBlackstone::FILTER_LIGHT,
+			Block::PolishedBlackstoneBrickSlab(_) => PolishedBlackstoneBrickSlab::FILTER_LIGHT,
+			Block::PolishedBlackstoneBrickStairs(_) => PolishedBlackstoneBrickStairs::FILTER_LIGHT,
+			Block::PolishedBlackstoneBrickWall(_) => PolishedBlackstoneBrickWall::FILTER_LIGHT,
+			Block::GildedBlackstone(_) => GildedBlackstone::FILTER_LIGHT,
+			Block::PolishedBlackstoneStairs(_) => PolishedBlackstoneStairs::FILTER_LIGHT,
+			Block::PolishedBlackstoneSlab(_) => PolishedBlackstoneSlab::FILTER_LIGHT,
+			Block::PolishedBlackstonePressurePlate(_) => PolishedBlackstonePressurePlate::FILTER_LIGHT,
+			Block::PolishedBlackstoneButton(_) => PolishedBlackstoneButton::FILTER_LIGHT,
+			Block::PolishedBlackstoneWall(_) => PolishedBlackstoneWall::FILTER_LIGHT,
+			Block::ChiseledNetherBricks(_) => ChiseledNetherBricks::FILTER_LIGHT,
+			Block::CrackedNetherBricks(_) => CrackedNetherBricks::FILTER_LIGHT,
+			Block::QuartzBricks(_) => QuartzBricks::FILTER_LIGHT,
+			Block::Candle(_) => Candle::FILTER_LIGHT,
+			Block::WhiteCandle(_) => WhiteCandle::FILTER_LIGHT,
+			Block::OrangeCandle(_) => OrangeCandle::FILTER_LIGHT,
+			Block::MagentaCandle(_) => MagentaCandle::FILTER_LIGHT,
+			Block::LightBlueCandle(_) => LightBlueCandle::FILTER_LIGHT,
+			Block::YellowCandle(_) => YellowCandle::FILTER_LIGHT,
+			Block::LimeCandle(_) => LimeCandle::FILTER_LIGHT,
+			Block::PinkCandle(_) => PinkCandle::FILTER_LIGHT,
+			Block::GrayCandle(_) => GrayCandle::FILTER_LIGHT,
+			Block::LightGrayCandle(_) => LightGrayCandle::FILTER_LIGHT,
+			Block::CyanCandle(_) => CyanCandle::FILTER_LIGHT,
+			Block::PurpleCandle(_) => PurpleCandle::FILTER_LIGHT,
+			Block::BlueCandle(_) => BlueCandle::FILTER_LIGHT,
+			Block::BrownCandle(_) => BrownCandle::FILTER_LIGHT,
+			Block::GreenCandle(_) => GreenCandle::FILTER_LIGHT,
+			Block::RedCandle(_) => RedCandle::FILTER_LIGHT,
+			Block::BlackCandle(_) => BlackCandle::FILTER_LIGHT,
+			Block::CandleCake(_) => CandleCake::FILTER_LIGHT,
+			Block::WhiteCandleCake(_) => WhiteCandleCake::FILTER_LIGHT,
+			Block::OrangeCandleCake(_) => OrangeCandleCake::FILTER_LIGHT,
+			Block::MagentaCandleCake(_) => MagentaCandleCake::FILTER_LIGHT,
+			Block::LightBlueCandleCake(_) => LightBlueCandleCake::FILTER_LIGHT,
+			Block::YellowCandleCake(_) => YellowCandleCake::FILTER_LIGHT,
+			Block::LimeCandleCake(_) => LimeCandleCake::FILTER_LIGHT,
+			Block::PinkCandleCake(_) => PinkCandleCake::FILTER_LIGHT,
+			Block::GrayCandleCake(_) => GrayCandleCake::FILTER_LIGHT,
+			Block::LightGrayCandleCake(_) => LightGrayCandleCake::FILTER_LIGHT,
+			Block::CyanCandleCake(_) => CyanCandleCake::FILTER_LIGHT,
+			Block::PurpleCandleCake(_) => PurpleCandleCake::FILTER_LIGHT,
+			Block::BlueCandleCake(_) => BlueCandleCake::FILTER_LIGHT,
+			Block::BrownCandleCake(_) => BrownCandleCake::FILTER_LIGHT,
+			Block::GreenCandleCake(_) => GreenCandleCake::FILTER_LIGHT,
+			Block::RedCandleCake(_) => RedCandleCake::FILTER_LIGHT,
+			Block::BlackCandleCake(_) => BlackCandleCake::FILTER_LIGHT,
+			Block::AmethystBlock(_) => AmethystBlock::FILTER_LIGHT,
+			Block::BuddingAmethyst(_) => BuddingAmethyst::FILTER_LIGHT,
+			Block::AmethystCluster(_) => AmethystCluster::FILTER_LIGHT,
+			Block::LargeAmethystBud(_) => LargeAmethystBud::FILTER_LIGHT,
+			Block::MediumAmethystBud(_) => MediumAmethystBud::FILTER_LIGHT,
+			Block::SmallAmethystBud(_) => SmallAmethystBud::FILTER_LIGHT,
+			Block::Tuff(_) => Tuff::FILTER_LIGHT,
+			Block::Calcite(_) => Calcite::FILTER_LIGHT,
+			Block::TintedGlass(_) => TintedGlass::FILTER_LIGHT,
+			Block::PowderSnow(_) => PowderSnow::FILTER_LIGHT,
+			Block::SculkSensor(_) => SculkSensor::FILTER_LIGHT,
+			Block::Sculk(_) => Sculk::FILTER_LIGHT,
+			Block::SculkVein(_) => SculkVein::FILTER_LIGHT,
+			Block::SculkCatalyst(_) => SculkCatalyst::FILTER_LIGHT,
+			Block::SculkShrieker(_) => SculkShrieker::FILTER_LIGHT,
+			Block::OxidizedCopper(_) => OxidizedCopper::FILTER_LIGHT,
+			Block::WeatheredCopper(_) => WeatheredCopper::FILTER_LIGHT,
+			Block::ExposedCopper(_) => ExposedCopper::FILTER_LIGHT,
+			Block::CopperBlock(_) => CopperBlock::FILTER_LIGHT,
+			Block::CopperOre(_) => CopperOre::FILTER_LIGHT,
+			Block::DeepslateCopperOre(_) => DeepslateCopperOre::FILTER_LIGHT,
+			Block::OxidizedCutCopper(_) => OxidizedCutCopper::FILTER_LIGHT,
+			Block::WeatheredCutCopper(_) => WeatheredCutCopper::FILTER_LIGHT,
+			Block::ExposedCutCopper(_) => ExposedCutCopper::FILTER_LIGHT,
+			Block::CutCopper(_) => CutCopper::FILTER_LIGHT,
+			Block::OxidizedCutCopperStairs(_) => OxidizedCutCopperStairs::FILTER_LIGHT,
+			Block::WeatheredCutCopperStairs(_) => WeatheredCutCopperStairs::FILTER_LIGHT,
+			Block::ExposedCutCopperStairs(_) => ExposedCutCopperStairs::FILTER_LIGHT,
+			Block::CutCopperStairs(_) => CutCopperStairs::FILTER_LIGHT,
+			Block::OxidizedCutCopperSlab(_) => OxidizedCutCopperSlab::FILTER_LIGHT,
+			Block::WeatheredCutCopperSlab(_) => WeatheredCutCopperSlab::FILTER_LIGHT,
+			Block::ExposedCutCopperSlab(_) => ExposedCutCopperSlab::FILTER_LIGHT,
+			Block::CutCopperSlab(_) => CutCopperSlab::FILTER_LIGHT,
+			Block::WaxedCopperBlock(_) => WaxedCopperBlock::FILTER_LIGHT,
+			Block::WaxedWeatheredCopper(_) => WaxedWeatheredCopper::FILTER_LIGHT,
+			Block::WaxedExposedCopper(_) => WaxedExposedCopper::FILTER_LIGHT,
+			Block::WaxedOxidizedCopper(_) => WaxedOxidizedCopper::FILTER_LIGHT,
+			Block::WaxedOxidizedCutCopper(_) => WaxedOxidizedCutCopper::FILTER_LIGHT,
+			Block::WaxedWeatheredCutCopper(_) => WaxedWeatheredCutCopper::FILTER_LIGHT,
+			Block::WaxedExposedCutCopper(_) => WaxedExposedCutCopper::FILTER_LIGHT,
+			Block::WaxedCutCopper(_) => WaxedCutCopper::FILTER_LIGHT,
+			Block::WaxedOxidizedCutCopperStairs(_) => WaxedOxidizedCutCopperStairs::FILTER_LIGHT,
+			Block::WaxedWeatheredCutCopperStairs(_) => WaxedWeatheredCutCopperStairs::FILTER_LIGHT,
+			Block::WaxedExposedCutCopperStairs(_) => WaxedExposedCutCopperStairs::FILTER_LIGHT,
+			Block::WaxedCutCopperStairs(_) => WaxedCutCopperStairs::FILTER_LIGHT,
+			Block::WaxedOxidizedCutCopperSlab(_) => WaxedOxidizedCutCopperSlab::FILTER_LIGHT,
+			Block::WaxedWeatheredCutCopperSlab(_) => WaxedWeatheredCutCopperSlab::FILTER_LIGHT,
+			Block::WaxedExposedCutCopperSlab(_) => WaxedExposedCutCopperSlab::FILTER_LIGHT,
+			Block::WaxedCutCopperSlab(_) => WaxedCutCopperSlab::FILTER_LIGHT,
+			Block::LightningRod(_) => LightningRod::FILTER_LIGHT,
+			Block::PointedDripstone(_) => PointedDripstone::FILTER_LIGHT,
+			Block::DripstoneBlock(_) => DripstoneBlock::FILTER_LIGHT,
+			Block::CaveVines(_) => CaveVines::FILTER_LIGHT,
+			Block::CaveVinesPlant(_) => CaveVinesPlant::FILTER_LIGHT,
+			Block::SporeBlossom(_) => SporeBlossom::FILTER_LIGHT,
+			Block::Azalea(_) => Azalea::FILTER_LIGHT,
+			Block::FloweringAzalea(_) => FloweringAzalea::FILTER_LIGHT,
+			Block::MossCarpet(_) => MossCarpet::FILTER_LIGHT,
+			Block::MossBlock(_) => MossBlock::FILTER_LIGHT,
+			Block::BigDripleaf(_) => BigDripleaf::FILTER_LIGHT,
+			Block::BigDripleafStem(_) => BigDripleafStem::FILTER_LIGHT,
+			Block::SmallDripleaf(_) => SmallDripleaf::FILTER_LIGHT,
+			Block::HangingRoots(_) => HangingRoots::FILTER_LIGHT,
+			Block::RootedDirt(_) => RootedDirt::FILTER_LIGHT,
+			Block::Mud(_) => Mud::FILTER_LIGHT,
+			Block::Deepslate(_) => Deepslate::FILTER_LIGHT,
+			Block::CobbledDeepslate(_) => CobbledDeepslate::FILTER_LIGHT,
+			Block::CobbledDeepslateStairs(_) => CobbledDeepslateStairs::FILTER_LIGHT,
+			Block::CobbledDeepslateSlab(_) => CobbledDeepslateSlab::FILTER_LIGHT,
+			Block::CobbledDeepslateWall(_) => CobbledDeepslateWall::FILTER_LIGHT,
+			Block::PolishedDeepslate(_) => PolishedDeepslate::FILTER_LIGHT,
+			Block::PolishedDeepslateStairs(_) => PolishedDeepslateStairs::FILTER_LIGHT,
+			Block::PolishedDeepslateSlab(_) => PolishedDeepslateSlab::FILTER_LIGHT,
+			Block::PolishedDeepslateWall(_) => PolishedDeepslateWall::FILTER_LIGHT,
+			Block::DeepslateTiles(_) => DeepslateTiles::FILTER_LIGHT,
+			Block::DeepslateTileStairs(_) => DeepslateTileStairs::FILTER_LIGHT,
+			Block::DeepslateTileSlab(_) => DeepslateTileSlab::FILTER_LIGHT,
+			Block::DeepslateTileWall(_) => DeepslateTileWall::FILTER_LIGHT,
+			Block::DeepslateBricks(_) => DeepslateBricks::FILTER_LIGHT,
+			Block::DeepslateBrickStairs(_) => DeepslateBrickStairs::FILTER_LIGHT,
+			Block::DeepslateBrickSlab(_) => DeepslateBrickSlab::FILTER_LIGHT,
+			Block::DeepslateBrickWall(_) => DeepslateBrickWall::FILTER_LIGHT,
+			Block::ChiseledDeepslate(_) => ChiseledDeepslate::FILTER_LIGHT,
+			Block::CrackedDeepslateBricks(_) => CrackedDeepslateBricks::FILTER_LIGHT,
+			Block::CrackedDeepslateTiles(_) => CrackedDeepslateTiles::FILTER_LIGHT,
+			Block::InfestedDeepslate(_) => InfestedDeepslate::FILTER_LIGHT,
+			Block::SmoothBasalt(_) => SmoothBasalt::FILTER_LIGHT,
+			Block::RawIronBlock(_) => RawIronBlock::FILTER_LIGHT,
+			Block::RawCopperBlock(_) => RawCopperBlock::FILTER_LIGHT,
+			Block::RawGoldBlock(_) => RawGoldBlock::FILTER_LIGHT,
+			Block::PottedAzaleaBush(_) => PottedAzaleaBush::FILTER_LIGHT,
+			Block::PottedFloweringAzaleaBush(_) => PottedFloweringAzaleaBush::FILTER_LIGHT,
+			Block::OchreFroglight(_) => OchreFroglight::FILTER_LIGHT,
+			Block::VerdantFroglight(_) => VerdantFroglight::FILTER_LIGHT,
+			Block::PearlescentFroglight(_) => PearlescentFroglight::FILTER_LIGHT,
+			Block::Frogspawn(_) => Frogspawn::FILTER_LIGHT,
+			Block::ReinforcedDeepslate(_) => ReinforcedDeepslate::FILTER_LIGHT,
+		}
+	}
+}
+
 pub fn deserialize_content<'de, T: MapAccess<'de>>(
 	tag: &str,
 	map: Option<&HashMap<String, String>>,
@@ -954,7 +4708,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:andesite" => Block::Andesite(Andesite {}),
 		"minecraft:polished_andesite" => Block::PolishedAndesite(PolishedAndesite {}),
 		"minecraft:grass_block" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::GrassBlock(GrassBlock {
 				r#snowy: map.get("snowy").unwrap().parse().unwrap(),
 			})
@@ -962,7 +4717,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:dirt" => Block::Dirt(Dirt {}),
 		"minecraft:coarse_dirt" => Block::CoarseDirt(CoarseDirt {}),
 		"minecraft:podzol" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Podzol(Podzol {
 				r#snowy: map.get("snowy").unwrap().parse().unwrap(),
 			})
@@ -976,43 +4732,50 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:dark_oak_planks" => Block::DarkOakPlanks(DarkOakPlanks {}),
 		"minecraft:mangrove_planks" => Block::MangrovePlanks(MangrovePlanks {}),
 		"minecraft:oak_sapling" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OakSapling(OakSapling {
 				r#stage: map.get("stage").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:spruce_sapling" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SpruceSapling(SpruceSapling {
 				r#stage: map.get("stage").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:birch_sapling" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BirchSapling(BirchSapling {
 				r#stage: map.get("stage").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:jungle_sapling" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::JungleSapling(JungleSapling {
 				r#stage: map.get("stage").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:acacia_sapling" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::AcaciaSapling(AcaciaSapling {
 				r#stage: map.get("stage").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dark_oak_sapling" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DarkOakSapling(DarkOakSapling {
 				r#stage: map.get("stage").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:mangrove_propagule" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MangrovePropagule(MangrovePropagule {
 				r#age: map.get("age").unwrap().parse().unwrap(),
 				r#hanging: map.get("hanging").unwrap().parse().unwrap(),
@@ -1022,13 +4785,15 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		},
 		"minecraft:bedrock" => Block::Bedrock(Bedrock {}),
 		"minecraft:water" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Water(Water {
 				r#level: map.get("level").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:lava" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Lava(Lava {
 				r#level: map.get("level").unwrap().parse().unwrap(),
 			})
@@ -1044,187 +4809,218 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:deepslate_coal_ore" => Block::DeepslateCoalOre(DeepslateCoalOre {}),
 		"minecraft:nether_gold_ore" => Block::NetherGoldOre(NetherGoldOre {}),
 		"minecraft:oak_log" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OakLog(OakLog {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:spruce_log" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SpruceLog(SpruceLog {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:birch_log" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BirchLog(BirchLog {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:jungle_log" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::JungleLog(JungleLog {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:acacia_log" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::AcaciaLog(AcaciaLog {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dark_oak_log" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DarkOakLog(DarkOakLog {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:mangrove_log" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MangroveLog(MangroveLog {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:mangrove_roots" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MangroveRoots(MangroveRoots {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:muddy_mangrove_roots" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MuddyMangroveRoots(MuddyMangroveRoots {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:stripped_spruce_log" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StrippedSpruceLog(StrippedSpruceLog {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:stripped_birch_log" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StrippedBirchLog(StrippedBirchLog {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:stripped_jungle_log" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StrippedJungleLog(StrippedJungleLog {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:stripped_acacia_log" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StrippedAcaciaLog(StrippedAcaciaLog {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:stripped_dark_oak_log" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StrippedDarkOakLog(StrippedDarkOakLog {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:stripped_oak_log" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StrippedOakLog(StrippedOakLog {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:stripped_mangrove_log" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StrippedMangroveLog(StrippedMangroveLog {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:oak_wood" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OakWood(OakWood {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:spruce_wood" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SpruceWood(SpruceWood {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:birch_wood" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BirchWood(BirchWood {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:jungle_wood" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::JungleWood(JungleWood {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:acacia_wood" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::AcaciaWood(AcaciaWood {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dark_oak_wood" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DarkOakWood(DarkOakWood {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:mangrove_wood" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MangroveWood(MangroveWood {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:stripped_oak_wood" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StrippedOakWood(StrippedOakWood {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:stripped_spruce_wood" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StrippedSpruceWood(StrippedSpruceWood {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:stripped_birch_wood" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StrippedBirchWood(StrippedBirchWood {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:stripped_jungle_wood" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StrippedJungleWood(StrippedJungleWood {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:stripped_acacia_wood" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StrippedAcaciaWood(StrippedAcaciaWood {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:stripped_dark_oak_wood" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StrippedDarkOakWood(StrippedDarkOakWood {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:stripped_mangrove_wood" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StrippedMangroveWood(StrippedMangroveWood {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:oak_leaves" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OakLeaves(OakLeaves {
 				r#distance: map.get("distance").unwrap().parse().unwrap(),
 				r#persistent: map.get("persistent").unwrap().parse().unwrap(),
@@ -1232,7 +5028,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:spruce_leaves" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SpruceLeaves(SpruceLeaves {
 				r#distance: map.get("distance").unwrap().parse().unwrap(),
 				r#persistent: map.get("persistent").unwrap().parse().unwrap(),
@@ -1240,7 +5037,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:birch_leaves" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BirchLeaves(BirchLeaves {
 				r#distance: map.get("distance").unwrap().parse().unwrap(),
 				r#persistent: map.get("persistent").unwrap().parse().unwrap(),
@@ -1248,7 +5046,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:jungle_leaves" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::JungleLeaves(JungleLeaves {
 				r#distance: map.get("distance").unwrap().parse().unwrap(),
 				r#persistent: map.get("persistent").unwrap().parse().unwrap(),
@@ -1256,7 +5055,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:acacia_leaves" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::AcaciaLeaves(AcaciaLeaves {
 				r#distance: map.get("distance").unwrap().parse().unwrap(),
 				r#persistent: map.get("persistent").unwrap().parse().unwrap(),
@@ -1264,7 +5064,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:dark_oak_leaves" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DarkOakLeaves(DarkOakLeaves {
 				r#distance: map.get("distance").unwrap().parse().unwrap(),
 				r#persistent: map.get("persistent").unwrap().parse().unwrap(),
@@ -1272,7 +5073,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:mangrove_leaves" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MangroveLeaves(MangroveLeaves {
 				r#distance: map.get("distance").unwrap().parse().unwrap(),
 				r#persistent: map.get("persistent").unwrap().parse().unwrap(),
@@ -1280,7 +5082,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:azalea_leaves" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::AzaleaLeaves(AzaleaLeaves {
 				r#distance: map.get("distance").unwrap().parse().unwrap(),
 				r#persistent: map.get("persistent").unwrap().parse().unwrap(),
@@ -1288,7 +5091,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:flowering_azalea_leaves" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::FloweringAzaleaLeaves(FloweringAzaleaLeaves {
 				r#distance: map.get("distance").unwrap().parse().unwrap(),
 				r#persistent: map.get("persistent").unwrap().parse().unwrap(),
@@ -1302,7 +5106,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:deepslate_lapis_ore" => Block::DeepslateLapisOre(DeepslateLapisOre {}),
 		"minecraft:lapis_block" => Block::LapisBlock(LapisBlock {}),
 		"minecraft:dispenser" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Dispenser(Dispenser {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#triggered: map.get("triggered").unwrap().parse().unwrap(),
@@ -1312,7 +5117,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:chiseled_sandstone" => Block::ChiseledSandstone(ChiseledSandstone {}),
 		"minecraft:cut_sandstone" => Block::CutSandstone(CutSandstone {}),
 		"minecraft:note_block" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::NoteBlock(NoteBlock {
 				r#instrument: map.get("instrument").unwrap().parse().unwrap(),
 				r#note: map.get("note").unwrap().parse().unwrap(),
@@ -1320,7 +5126,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:white_bed" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WhiteBed(WhiteBed {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#occupied: map.get("occupied").unwrap().parse().unwrap(),
@@ -1328,7 +5135,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:orange_bed" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OrangeBed(OrangeBed {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#occupied: map.get("occupied").unwrap().parse().unwrap(),
@@ -1336,7 +5144,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:magenta_bed" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MagentaBed(MagentaBed {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#occupied: map.get("occupied").unwrap().parse().unwrap(),
@@ -1344,7 +5153,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:light_blue_bed" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LightBlueBed(LightBlueBed {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#occupied: map.get("occupied").unwrap().parse().unwrap(),
@@ -1352,7 +5162,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:yellow_bed" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::YellowBed(YellowBed {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#occupied: map.get("occupied").unwrap().parse().unwrap(),
@@ -1360,7 +5171,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:lime_bed" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LimeBed(LimeBed {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#occupied: map.get("occupied").unwrap().parse().unwrap(),
@@ -1368,7 +5180,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:pink_bed" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PinkBed(PinkBed {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#occupied: map.get("occupied").unwrap().parse().unwrap(),
@@ -1376,7 +5189,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:gray_bed" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::GrayBed(GrayBed {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#occupied: map.get("occupied").unwrap().parse().unwrap(),
@@ -1384,7 +5198,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:light_gray_bed" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LightGrayBed(LightGrayBed {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#occupied: map.get("occupied").unwrap().parse().unwrap(),
@@ -1392,7 +5207,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:cyan_bed" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CyanBed(CyanBed {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#occupied: map.get("occupied").unwrap().parse().unwrap(),
@@ -1400,7 +5216,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:purple_bed" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PurpleBed(PurpleBed {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#occupied: map.get("occupied").unwrap().parse().unwrap(),
@@ -1408,7 +5225,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:blue_bed" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BlueBed(BlueBed {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#occupied: map.get("occupied").unwrap().parse().unwrap(),
@@ -1416,7 +5234,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:brown_bed" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BrownBed(BrownBed {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#occupied: map.get("occupied").unwrap().parse().unwrap(),
@@ -1424,7 +5243,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:green_bed" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::GreenBed(GreenBed {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#occupied: map.get("occupied").unwrap().parse().unwrap(),
@@ -1432,7 +5252,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:red_bed" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RedBed(RedBed {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#occupied: map.get("occupied").unwrap().parse().unwrap(),
@@ -1440,7 +5261,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:black_bed" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BlackBed(BlackBed {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#occupied: map.get("occupied").unwrap().parse().unwrap(),
@@ -1448,7 +5270,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:powered_rail" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PoweredRail(PoweredRail {
 				r#powered: map.get("powered").unwrap().parse().unwrap(),
 				r#shape: map.get("shape").unwrap().parse().unwrap(),
@@ -1456,7 +5279,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:detector_rail" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DetectorRail(DetectorRail {
 				r#powered: map.get("powered").unwrap().parse().unwrap(),
 				r#shape: map.get("shape").unwrap().parse().unwrap(),
@@ -1464,7 +5288,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:sticky_piston" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StickyPiston(StickyPiston {
 				r#extended: map.get("extended").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
@@ -1476,20 +5301,23 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:dead_bush" => Block::DeadBush(DeadBush {}),
 		"minecraft:seagrass" => Block::Seagrass(Seagrass {}),
 		"minecraft:tall_seagrass" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::TallSeagrass(TallSeagrass {
 				r#half: map.get("half").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:piston" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Piston(Piston {
 				r#extended: map.get("extended").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:piston_head" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PistonHead(PistonHead {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#short: map.get("short").unwrap().parse().unwrap(),
@@ -1513,7 +5341,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:red_wool" => Block::RedWool(RedWool {}),
 		"minecraft:black_wool" => Block::BlackWool(BlackWool {}),
 		"minecraft:moving_piston" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MovingPiston(MovingPiston {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#type: map.get("type").unwrap().parse().unwrap(),
@@ -1538,7 +5367,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:iron_block" => Block::IronBlock(IronBlock {}),
 		"minecraft:bricks" => Block::Bricks(Bricks {}),
 		"minecraft:tnt" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Tnt(Tnt {
 				r#unstable: map.get("unstable").unwrap().parse().unwrap(),
 			})
@@ -1548,13 +5378,15 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:obsidian" => Block::Obsidian(Obsidian {}),
 		"minecraft:torch" => Block::Torch(Torch {}),
 		"minecraft:wall_torch" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WallTorch(WallTorch {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:fire" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Fire(Fire {
 				r#age: map.get("age").unwrap().parse().unwrap(),
 				r#east: map.get("east").unwrap().parse().unwrap(),
@@ -1567,7 +5399,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:soul_fire" => Block::SoulFire(SoulFire {}),
 		"minecraft:spawner" => Block::Spawner(Spawner {}),
 		"minecraft:oak_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OakStairs(OakStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -1576,7 +5409,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:chest" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Chest(Chest {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#type: map.get("type").unwrap().parse().unwrap(),
@@ -1584,7 +5418,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:redstone_wire" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RedstoneWire(RedstoneWire {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -1598,75 +5433,86 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:diamond_block" => Block::DiamondBlock(DiamondBlock {}),
 		"minecraft:crafting_table" => Block::CraftingTable(CraftingTable {}),
 		"minecraft:wheat" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Wheat(Wheat {
 				r#age: map.get("age").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:farmland" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Farmland(Farmland {
 				r#moisture: map.get("moisture").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:furnace" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Furnace(Furnace {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:oak_sign" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OakSign(OakSign {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:spruce_sign" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SpruceSign(SpruceSign {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:birch_sign" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BirchSign(BirchSign {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:acacia_sign" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::AcaciaSign(AcaciaSign {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:jungle_sign" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::JungleSign(JungleSign {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dark_oak_sign" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DarkOakSign(DarkOakSign {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:mangrove_sign" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MangroveSign(MangroveSign {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:oak_door" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OakDoor(OakDoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -1676,21 +5522,24 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:ladder" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Ladder(Ladder {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:rail" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Rail(Rail {
 				r#shape: map.get("shape").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:cobblestone_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CobblestoneStairs(CobblestoneStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -1699,56 +5548,64 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:oak_wall_sign" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OakWallSign(OakWallSign {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:spruce_wall_sign" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SpruceWallSign(SpruceWallSign {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:birch_wall_sign" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BirchWallSign(BirchWallSign {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:acacia_wall_sign" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::AcaciaWallSign(AcaciaWallSign {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:jungle_wall_sign" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::JungleWallSign(JungleWallSign {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dark_oak_wall_sign" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DarkOakWallSign(DarkOakWallSign {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:mangrove_wall_sign" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MangroveWallSign(MangroveWallSign {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:lever" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Lever(Lever {
 				r#face: map.get("face").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
@@ -1756,13 +5613,15 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:stone_pressure_plate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StonePressurePlate(StonePressurePlate {
 				r#powered: map.get("powered").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:iron_door" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::IronDoor(IronDoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -1772,74 +5631,86 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:oak_pressure_plate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OakPressurePlate(OakPressurePlate {
 				r#powered: map.get("powered").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:spruce_pressure_plate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SprucePressurePlate(SprucePressurePlate {
 				r#powered: map.get("powered").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:birch_pressure_plate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BirchPressurePlate(BirchPressurePlate {
 				r#powered: map.get("powered").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:jungle_pressure_plate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::JunglePressurePlate(JunglePressurePlate {
 				r#powered: map.get("powered").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:acacia_pressure_plate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::AcaciaPressurePlate(AcaciaPressurePlate {
 				r#powered: map.get("powered").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dark_oak_pressure_plate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DarkOakPressurePlate(DarkOakPressurePlate {
 				r#powered: map.get("powered").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:mangrove_pressure_plate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MangrovePressurePlate(MangrovePressurePlate {
 				r#powered: map.get("powered").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:redstone_ore" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RedstoneOre(RedstoneOre {
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:deepslate_redstone_ore" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DeepslateRedstoneOre(DeepslateRedstoneOre {
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:redstone_torch" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RedstoneTorch(RedstoneTorch {
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:redstone_wall_torch" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RedstoneWallTorch(RedstoneWallTorch {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:stone_button" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StoneButton(StoneButton {
 				r#face: map.get("face").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
@@ -1847,7 +5718,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:snow" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Snow(Snow {
 				r#layers: map.get("layers").unwrap().parse().unwrap(),
 			})
@@ -1855,26 +5727,30 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:ice" => Block::Ice(Ice {}),
 		"minecraft:snow_block" => Block::SnowBlock(SnowBlock {}),
 		"minecraft:cactus" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Cactus(Cactus {
 				r#age: map.get("age").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:clay" => Block::Clay(Clay {}),
 		"minecraft:sugar_cane" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SugarCane(SugarCane {
 				r#age: map.get("age").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:jukebox" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Jukebox(Jukebox {
 				r#has_record: map.get("has_record").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:oak_fence" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OakFence(OakFence {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -1888,51 +5764,59 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:soul_sand" => Block::SoulSand(SoulSand {}),
 		"minecraft:soul_soil" => Block::SoulSoil(SoulSoil {}),
 		"minecraft:basalt" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Basalt(Basalt {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:polished_basalt" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PolishedBasalt(PolishedBasalt {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:soul_torch" => Block::SoulTorch(SoulTorch {}),
 		"minecraft:soul_wall_torch" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SoulWallTorch(SoulWallTorch {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:glowstone" => Block::Glowstone(Glowstone {}),
 		"minecraft:nether_portal" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::NetherPortal(NetherPortal {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:carved_pumpkin" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CarvedPumpkin(CarvedPumpkin {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:jack_o_lantern" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::JackOLantern(JackOLantern {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:cake" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Cake(Cake {
 				r#bites: map.get("bites").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:repeater" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Repeater(Repeater {
 				r#delay: map.get("delay").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
@@ -1957,7 +5841,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:red_stained_glass" => Block::RedStainedGlass(RedStainedGlass {}),
 		"minecraft:black_stained_glass" => Block::BlackStainedGlass(BlackStainedGlass {}),
 		"minecraft:oak_trapdoor" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OakTrapdoor(OakTrapdoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -1967,7 +5852,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:spruce_trapdoor" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SpruceTrapdoor(SpruceTrapdoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -1977,7 +5863,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:birch_trapdoor" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BirchTrapdoor(BirchTrapdoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -1987,7 +5874,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:jungle_trapdoor" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::JungleTrapdoor(JungleTrapdoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -1997,7 +5885,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:acacia_trapdoor" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::AcaciaTrapdoor(AcaciaTrapdoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -2007,7 +5896,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:dark_oak_trapdoor" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DarkOakTrapdoor(DarkOakTrapdoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -2017,7 +5907,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:mangrove_trapdoor" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MangroveTrapdoor(MangroveTrapdoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -2039,7 +5930,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:infested_cracked_stone_bricks" => Block::InfestedCrackedStoneBricks(InfestedCrackedStoneBricks {}),
 		"minecraft:infested_chiseled_stone_bricks" => Block::InfestedChiseledStoneBricks(InfestedChiseledStoneBricks {}),
 		"minecraft:brown_mushroom_block" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BrownMushroomBlock(BrownMushroomBlock {
 				r#down: map.get("down").unwrap().parse().unwrap(),
 				r#east: map.get("east").unwrap().parse().unwrap(),
@@ -2050,7 +5942,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:red_mushroom_block" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RedMushroomBlock(RedMushroomBlock {
 				r#down: map.get("down").unwrap().parse().unwrap(),
 				r#east: map.get("east").unwrap().parse().unwrap(),
@@ -2061,7 +5954,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:mushroom_stem" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MushroomStem(MushroomStem {
 				r#down: map.get("down").unwrap().parse().unwrap(),
 				r#east: map.get("east").unwrap().parse().unwrap(),
@@ -2072,7 +5966,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:iron_bars" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::IronBars(IronBars {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -2082,14 +5977,16 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:chain" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Chain(Chain {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:glass_pane" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::GlassPane(GlassPane {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -2100,31 +5997,36 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		},
 		"minecraft:melon" => Block::Melon(Melon {}),
 		"minecraft:attached_pumpkin_stem" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::AttachedPumpkinStem(AttachedPumpkinStem {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:attached_melon_stem" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::AttachedMelonStem(AttachedMelonStem {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:pumpkin_stem" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PumpkinStem(PumpkinStem {
 				r#age: map.get("age").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:melon_stem" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MelonStem(MelonStem {
 				r#age: map.get("age").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:vine" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Vine(Vine {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -2134,7 +6036,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:glow_lichen" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::GlowLichen(GlowLichen {
 				r#down: map.get("down").unwrap().parse().unwrap(),
 				r#east: map.get("east").unwrap().parse().unwrap(),
@@ -2146,7 +6049,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:oak_fence_gate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OakFenceGate(OakFenceGate {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#in_wall: map.get("in_wall").unwrap().parse().unwrap(),
@@ -2155,7 +6059,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:brick_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BrickStairs(BrickStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -2164,7 +6069,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:stone_brick_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StoneBrickStairs(StoneBrickStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -2173,7 +6079,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:mud_brick_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MudBrickStairs(MudBrickStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -2182,7 +6089,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:mycelium" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Mycelium(Mycelium {
 				r#snowy: map.get("snowy").unwrap().parse().unwrap(),
 			})
@@ -2190,7 +6098,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:lily_pad" => Block::LilyPad(LilyPad {}),
 		"minecraft:nether_bricks" => Block::NetherBricks(NetherBricks {}),
 		"minecraft:nether_brick_fence" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::NetherBrickFence(NetherBrickFence {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -2200,7 +6109,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:nether_brick_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::NetherBrickStairs(NetherBrickStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -2209,14 +6119,16 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:nether_wart" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::NetherWart(NetherWart {
 				r#age: map.get("age").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:enchanting_table" => Block::EnchantingTable(EnchantingTable {}),
 		"minecraft:brewing_stand" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BrewingStand(BrewingStand {
 				r#has_bottle_0: map.get("has_bottle_0").unwrap().parse().unwrap(),
 				r#has_bottle_1: map.get("has_bottle_1").unwrap().parse().unwrap(),
@@ -2225,21 +6137,24 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		},
 		"minecraft:cauldron" => Block::Cauldron(Cauldron {}),
 		"minecraft:water_cauldron" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WaterCauldron(WaterCauldron {
 				r#level: map.get("level").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:lava_cauldron" => Block::LavaCauldron(LavaCauldron {}),
 		"minecraft:powder_snow_cauldron" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PowderSnowCauldron(PowderSnowCauldron {
 				r#level: map.get("level").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:end_portal" => Block::EndPortal(EndPortal {}),
 		"minecraft:end_portal_frame" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::EndPortalFrame(EndPortalFrame {
 				r#eye: map.get("eye").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
@@ -2248,20 +6163,23 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:end_stone" => Block::EndStone(EndStone {}),
 		"minecraft:dragon_egg" => Block::DragonEgg(DragonEgg {}),
 		"minecraft:redstone_lamp" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RedstoneLamp(RedstoneLamp {
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:cocoa" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Cocoa(Cocoa {
 				r#age: map.get("age").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:sandstone_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SandstoneStairs(SandstoneStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -2272,14 +6190,16 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:emerald_ore" => Block::EmeraldOre(EmeraldOre {}),
 		"minecraft:deepslate_emerald_ore" => Block::DeepslateEmeraldOre(DeepslateEmeraldOre {}),
 		"minecraft:ender_chest" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::EnderChest(EnderChest {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:tripwire_hook" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::TripwireHook(TripwireHook {
 				r#attached: map.get("attached").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
@@ -2287,7 +6207,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:tripwire" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Tripwire(Tripwire {
 				r#attached: map.get("attached").unwrap().parse().unwrap(),
 				r#disarmed: map.get("disarmed").unwrap().parse().unwrap(),
@@ -2300,7 +6221,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		},
 		"minecraft:emerald_block" => Block::EmeraldBlock(EmeraldBlock {}),
 		"minecraft:spruce_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SpruceStairs(SpruceStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -2309,7 +6231,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:birch_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BirchStairs(BirchStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -2318,7 +6241,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:jungle_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::JungleStairs(JungleStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -2327,7 +6251,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:command_block" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CommandBlock(CommandBlock {
 				r#conditional: map.get("conditional").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
@@ -2335,7 +6260,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		},
 		"minecraft:beacon" => Block::Beacon(Beacon {}),
 		"minecraft:cobblestone_wall" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CobblestoneWall(CobblestoneWall {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -2346,7 +6272,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:mossy_cobblestone_wall" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MossyCobblestoneWall(MossyCobblestoneWall {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -2383,19 +6310,22 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:potted_dead_bush" => Block::PottedDeadBush(PottedDeadBush {}),
 		"minecraft:potted_cactus" => Block::PottedCactus(PottedCactus {}),
 		"minecraft:carrots" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Carrots(Carrots {
 				r#age: map.get("age").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:potatoes" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Potatoes(Potatoes {
 				r#age: map.get("age").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:oak_button" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OakButton(OakButton {
 				r#face: map.get("face").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
@@ -2403,7 +6333,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:spruce_button" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SpruceButton(SpruceButton {
 				r#face: map.get("face").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
@@ -2411,7 +6342,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:birch_button" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BirchButton(BirchButton {
 				r#face: map.get("face").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
@@ -2419,7 +6351,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:jungle_button" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::JungleButton(JungleButton {
 				r#face: map.get("face").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
@@ -2427,7 +6360,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:acacia_button" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::AcaciaButton(AcaciaButton {
 				r#face: map.get("face").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
@@ -2435,7 +6369,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:dark_oak_button" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DarkOakButton(DarkOakButton {
 				r#face: map.get("face").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
@@ -2443,7 +6378,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:mangrove_button" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MangroveButton(MangroveButton {
 				r#face: map.get("face").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
@@ -2451,97 +6387,113 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:skeleton_skull" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SkeletonSkull(SkeletonSkull {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:skeleton_wall_skull" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SkeletonWallSkull(SkeletonWallSkull {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:wither_skeleton_skull" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WitherSkeletonSkull(WitherSkeletonSkull {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:wither_skeleton_wall_skull" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WitherSkeletonWallSkull(WitherSkeletonWallSkull {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:zombie_head" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::ZombieHead(ZombieHead {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:zombie_wall_head" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::ZombieWallHead(ZombieWallHead {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:player_head" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PlayerHead(PlayerHead {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:player_wall_head" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PlayerWallHead(PlayerWallHead {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:creeper_head" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CreeperHead(CreeperHead {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:creeper_wall_head" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CreeperWallHead(CreeperWallHead {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dragon_head" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DragonHead(DragonHead {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dragon_wall_head" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DragonWallHead(DragonWallHead {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:anvil" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Anvil(Anvil {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:chipped_anvil" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::ChippedAnvil(ChippedAnvil {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:damaged_anvil" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DamagedAnvil(DamagedAnvil {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:trapped_chest" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::TrappedChest(TrappedChest {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#type: map.get("type").unwrap().parse().unwrap(),
@@ -2549,19 +6501,22 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:light_weighted_pressure_plate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LightWeightedPressurePlate(LightWeightedPressurePlate {
 				r#power: map.get("power").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:heavy_weighted_pressure_plate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::HeavyWeightedPressurePlate(HeavyWeightedPressurePlate {
 				r#power: map.get("power").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:comparator" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Comparator(Comparator {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#mode: map.get("mode").unwrap().parse().unwrap(),
@@ -2569,7 +6524,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:daylight_detector" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DaylightDetector(DaylightDetector {
 				r#inverted: map.get("inverted").unwrap().parse().unwrap(),
 				r#power: map.get("power").unwrap().parse().unwrap(),
@@ -2578,7 +6534,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:redstone_block" => Block::RedstoneBlock(RedstoneBlock {}),
 		"minecraft:nether_quartz_ore" => Block::NetherQuartzOre(NetherQuartzOre {}),
 		"minecraft:hopper" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Hopper(Hopper {
 				r#enabled: map.get("enabled").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
@@ -2587,13 +6544,15 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:quartz_block" => Block::QuartzBlock(QuartzBlock {}),
 		"minecraft:chiseled_quartz_block" => Block::ChiseledQuartzBlock(ChiseledQuartzBlock {}),
 		"minecraft:quartz_pillar" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::QuartzPillar(QuartzPillar {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:quartz_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::QuartzStairs(QuartzStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -2602,7 +6561,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:activator_rail" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::ActivatorRail(ActivatorRail {
 				r#powered: map.get("powered").unwrap().parse().unwrap(),
 				r#shape: map.get("shape").unwrap().parse().unwrap(),
@@ -2610,7 +6570,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:dropper" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Dropper(Dropper {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#triggered: map.get("triggered").unwrap().parse().unwrap(),
@@ -2633,7 +6594,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:red_terracotta" => Block::RedTerracotta(RedTerracotta {}),
 		"minecraft:black_terracotta" => Block::BlackTerracotta(BlackTerracotta {}),
 		"minecraft:white_stained_glass_pane" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WhiteStainedGlassPane(WhiteStainedGlassPane {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -2643,7 +6605,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:orange_stained_glass_pane" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OrangeStainedGlassPane(OrangeStainedGlassPane {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -2653,7 +6616,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:magenta_stained_glass_pane" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MagentaStainedGlassPane(MagentaStainedGlassPane {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -2663,7 +6627,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:light_blue_stained_glass_pane" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LightBlueStainedGlassPane(LightBlueStainedGlassPane {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -2673,7 +6638,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:yellow_stained_glass_pane" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::YellowStainedGlassPane(YellowStainedGlassPane {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -2683,7 +6649,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:lime_stained_glass_pane" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LimeStainedGlassPane(LimeStainedGlassPane {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -2693,7 +6660,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:pink_stained_glass_pane" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PinkStainedGlassPane(PinkStainedGlassPane {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -2703,7 +6671,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:gray_stained_glass_pane" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::GrayStainedGlassPane(GrayStainedGlassPane {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -2713,7 +6682,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:light_gray_stained_glass_pane" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LightGrayStainedGlassPane(LightGrayStainedGlassPane {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -2723,7 +6693,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:cyan_stained_glass_pane" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CyanStainedGlassPane(CyanStainedGlassPane {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -2733,7 +6704,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:purple_stained_glass_pane" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PurpleStainedGlassPane(PurpleStainedGlassPane {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -2743,7 +6715,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:blue_stained_glass_pane" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BlueStainedGlassPane(BlueStainedGlassPane {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -2753,7 +6726,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:brown_stained_glass_pane" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BrownStainedGlassPane(BrownStainedGlassPane {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -2763,7 +6737,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:green_stained_glass_pane" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::GreenStainedGlassPane(GreenStainedGlassPane {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -2773,7 +6748,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:red_stained_glass_pane" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RedStainedGlassPane(RedStainedGlassPane {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -2783,7 +6759,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:black_stained_glass_pane" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BlackStainedGlassPane(BlackStainedGlassPane {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -2793,7 +6770,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:acacia_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::AcaciaStairs(AcaciaStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -2802,7 +6780,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:dark_oak_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DarkOakStairs(DarkOakStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -2811,7 +6790,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:mangrove_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MangroveStairs(MangroveStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -2822,14 +6802,16 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:slime_block" => Block::SlimeBlock(SlimeBlock {}),
 		"minecraft:barrier" => Block::Barrier(Barrier {}),
 		"minecraft:light" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Light(Light {
 				r#level: map.get("level").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:iron_trapdoor" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::IronTrapdoor(IronTrapdoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -2842,7 +6824,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:prismarine_bricks" => Block::PrismarineBricks(PrismarineBricks {}),
 		"minecraft:dark_prismarine" => Block::DarkPrismarine(DarkPrismarine {}),
 		"minecraft:prismarine_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PrismarineStairs(PrismarineStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -2851,7 +6834,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:prismarine_brick_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PrismarineBrickStairs(PrismarineBrickStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -2860,7 +6844,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:dark_prismarine_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DarkPrismarineStairs(DarkPrismarineStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -2869,21 +6854,24 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:prismarine_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PrismarineSlab(PrismarineSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:prismarine_brick_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PrismarineBrickSlab(PrismarineBrickSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dark_prismarine_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DarkPrismarineSlab(DarkPrismarineSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
@@ -2891,7 +6879,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		},
 		"minecraft:sea_lantern" => Block::SeaLantern(SeaLantern {}),
 		"minecraft:hay_block" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::HayBlock(HayBlock {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
@@ -2916,229 +6905,267 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:coal_block" => Block::CoalBlock(CoalBlock {}),
 		"minecraft:packed_ice" => Block::PackedIce(PackedIce {}),
 		"minecraft:sunflower" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Sunflower(Sunflower {
 				r#half: map.get("half").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:lilac" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Lilac(Lilac {
 				r#half: map.get("half").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:rose_bush" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RoseBush(RoseBush {
 				r#half: map.get("half").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:peony" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Peony(Peony {
 				r#half: map.get("half").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:tall_grass" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::TallGrass(TallGrass {
 				r#half: map.get("half").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:large_fern" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LargeFern(LargeFern {
 				r#half: map.get("half").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:white_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WhiteBanner(WhiteBanner {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:orange_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OrangeBanner(OrangeBanner {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:magenta_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MagentaBanner(MagentaBanner {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:light_blue_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LightBlueBanner(LightBlueBanner {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:yellow_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::YellowBanner(YellowBanner {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:lime_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LimeBanner(LimeBanner {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:pink_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PinkBanner(PinkBanner {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:gray_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::GrayBanner(GrayBanner {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:light_gray_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LightGrayBanner(LightGrayBanner {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:cyan_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CyanBanner(CyanBanner {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:purple_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PurpleBanner(PurpleBanner {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:blue_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BlueBanner(BlueBanner {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:brown_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BrownBanner(BrownBanner {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:green_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::GreenBanner(GreenBanner {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:red_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RedBanner(RedBanner {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:black_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BlackBanner(BlackBanner {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:white_wall_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WhiteWallBanner(WhiteWallBanner {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:orange_wall_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OrangeWallBanner(OrangeWallBanner {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:magenta_wall_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MagentaWallBanner(MagentaWallBanner {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:light_blue_wall_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LightBlueWallBanner(LightBlueWallBanner {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:yellow_wall_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::YellowWallBanner(YellowWallBanner {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:lime_wall_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LimeWallBanner(LimeWallBanner {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:pink_wall_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PinkWallBanner(PinkWallBanner {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:gray_wall_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::GrayWallBanner(GrayWallBanner {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:light_gray_wall_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LightGrayWallBanner(LightGrayWallBanner {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:cyan_wall_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CyanWallBanner(CyanWallBanner {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:purple_wall_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PurpleWallBanner(PurpleWallBanner {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:blue_wall_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BlueWallBanner(BlueWallBanner {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:brown_wall_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BrownWallBanner(BrownWallBanner {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:green_wall_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::GreenWallBanner(GreenWallBanner {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:red_wall_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RedWallBanner(RedWallBanner {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:black_wall_banner" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BlackWallBanner(BlackWallBanner {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
@@ -3147,7 +7174,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:chiseled_red_sandstone" => Block::ChiseledRedSandstone(ChiseledRedSandstone {}),
 		"minecraft:cut_red_sandstone" => Block::CutRedSandstone(CutRedSandstone {}),
 		"minecraft:red_sandstone_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RedSandstoneStairs(RedSandstoneStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -3156,147 +7184,168 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:oak_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OakSlab(OakSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:spruce_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SpruceSlab(SpruceSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:birch_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BirchSlab(BirchSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:jungle_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::JungleSlab(JungleSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:acacia_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::AcaciaSlab(AcaciaSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dark_oak_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DarkOakSlab(DarkOakSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:mangrove_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MangroveSlab(MangroveSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:stone_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StoneSlab(StoneSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:smooth_stone_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SmoothStoneSlab(SmoothStoneSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:sandstone_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SandstoneSlab(SandstoneSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:cut_sandstone_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CutSandstoneSlab(CutSandstoneSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:petrified_oak_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PetrifiedOakSlab(PetrifiedOakSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:cobblestone_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CobblestoneSlab(CobblestoneSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:brick_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BrickSlab(BrickSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:stone_brick_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StoneBrickSlab(StoneBrickSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:mud_brick_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MudBrickSlab(MudBrickSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:nether_brick_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::NetherBrickSlab(NetherBrickSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:quartz_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::QuartzSlab(QuartzSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:red_sandstone_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RedSandstoneSlab(RedSandstoneSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:cut_red_sandstone_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CutRedSandstoneSlab(CutRedSandstoneSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:purpur_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PurpurSlab(PurpurSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
@@ -3307,7 +7356,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:smooth_quartz" => Block::SmoothQuartz(SmoothQuartz {}),
 		"minecraft:smooth_red_sandstone" => Block::SmoothRedSandstone(SmoothRedSandstone {}),
 		"minecraft:spruce_fence_gate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SpruceFenceGate(SpruceFenceGate {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#in_wall: map.get("in_wall").unwrap().parse().unwrap(),
@@ -3316,7 +7366,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:birch_fence_gate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BirchFenceGate(BirchFenceGate {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#in_wall: map.get("in_wall").unwrap().parse().unwrap(),
@@ -3325,7 +7376,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:jungle_fence_gate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::JungleFenceGate(JungleFenceGate {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#in_wall: map.get("in_wall").unwrap().parse().unwrap(),
@@ -3334,7 +7386,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:acacia_fence_gate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::AcaciaFenceGate(AcaciaFenceGate {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#in_wall: map.get("in_wall").unwrap().parse().unwrap(),
@@ -3343,7 +7396,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:dark_oak_fence_gate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DarkOakFenceGate(DarkOakFenceGate {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#in_wall: map.get("in_wall").unwrap().parse().unwrap(),
@@ -3352,7 +7406,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:mangrove_fence_gate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MangroveFenceGate(MangroveFenceGate {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#in_wall: map.get("in_wall").unwrap().parse().unwrap(),
@@ -3361,7 +7416,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:spruce_fence" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SpruceFence(SpruceFence {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -3371,7 +7427,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:birch_fence" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BirchFence(BirchFence {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -3381,7 +7438,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:jungle_fence" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::JungleFence(JungleFence {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -3391,7 +7449,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:acacia_fence" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::AcaciaFence(AcaciaFence {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -3401,7 +7460,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:dark_oak_fence" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DarkOakFence(DarkOakFence {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -3411,7 +7471,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:mangrove_fence" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MangroveFence(MangroveFence {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -3421,7 +7482,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:spruce_door" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SpruceDoor(SpruceDoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -3431,7 +7493,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:birch_door" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BirchDoor(BirchDoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -3441,7 +7504,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:jungle_door" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::JungleDoor(JungleDoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -3451,7 +7515,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:acacia_door" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::AcaciaDoor(AcaciaDoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -3461,7 +7526,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:dark_oak_door" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DarkOakDoor(DarkOakDoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -3471,7 +7537,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:mangrove_door" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MangroveDoor(MangroveDoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -3481,13 +7548,15 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:end_rod" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::EndRod(EndRod {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:chorus_plant" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::ChorusPlant(ChorusPlant {
 				r#down: map.get("down").unwrap().parse().unwrap(),
 				r#east: map.get("east").unwrap().parse().unwrap(),
@@ -3498,20 +7567,23 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:chorus_flower" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::ChorusFlower(ChorusFlower {
 				r#age: map.get("age").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:purpur_block" => Block::PurpurBlock(PurpurBlock {}),
 		"minecraft:purpur_pillar" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PurpurPillar(PurpurPillar {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:purpur_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PurpurStairs(PurpurStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -3521,7 +7593,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		},
 		"minecraft:end_stone_bricks" => Block::EndStoneBricks(EndStoneBricks {}),
 		"minecraft:beetroots" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Beetroots(Beetroots {
 				r#age: map.get("age").unwrap().parse().unwrap(),
 			})
@@ -3529,21 +7602,24 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:dirt_path" => Block::DirtPath(DirtPath {}),
 		"minecraft:end_gateway" => Block::EndGateway(EndGateway {}),
 		"minecraft:repeating_command_block" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RepeatingCommandBlock(RepeatingCommandBlock {
 				r#conditional: map.get("conditional").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:chain_command_block" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::ChainCommandBlock(ChainCommandBlock {
 				r#conditional: map.get("conditional").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:frosted_ice" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::FrostedIce(FrostedIce {
 				r#age: map.get("age").unwrap().parse().unwrap(),
 			})
@@ -3552,213 +7628,248 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:nether_wart_block" => Block::NetherWartBlock(NetherWartBlock {}),
 		"minecraft:red_nether_bricks" => Block::RedNetherBricks(RedNetherBricks {}),
 		"minecraft:bone_block" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BoneBlock(BoneBlock {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:structure_void" => Block::StructureVoid(StructureVoid {}),
 		"minecraft:observer" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Observer(Observer {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#powered: map.get("powered").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:shulker_box" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::ShulkerBox(ShulkerBox {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:white_shulker_box" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WhiteShulkerBox(WhiteShulkerBox {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:orange_shulker_box" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OrangeShulkerBox(OrangeShulkerBox {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:magenta_shulker_box" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MagentaShulkerBox(MagentaShulkerBox {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:light_blue_shulker_box" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LightBlueShulkerBox(LightBlueShulkerBox {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:yellow_shulker_box" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::YellowShulkerBox(YellowShulkerBox {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:lime_shulker_box" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LimeShulkerBox(LimeShulkerBox {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:pink_shulker_box" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PinkShulkerBox(PinkShulkerBox {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:gray_shulker_box" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::GrayShulkerBox(GrayShulkerBox {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:light_gray_shulker_box" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LightGrayShulkerBox(LightGrayShulkerBox {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:cyan_shulker_box" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CyanShulkerBox(CyanShulkerBox {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:purple_shulker_box" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PurpleShulkerBox(PurpleShulkerBox {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:blue_shulker_box" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BlueShulkerBox(BlueShulkerBox {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:brown_shulker_box" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BrownShulkerBox(BrownShulkerBox {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:green_shulker_box" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::GreenShulkerBox(GreenShulkerBox {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:red_shulker_box" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RedShulkerBox(RedShulkerBox {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:black_shulker_box" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BlackShulkerBox(BlackShulkerBox {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:white_glazed_terracotta" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WhiteGlazedTerracotta(WhiteGlazedTerracotta {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:orange_glazed_terracotta" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OrangeGlazedTerracotta(OrangeGlazedTerracotta {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:magenta_glazed_terracotta" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MagentaGlazedTerracotta(MagentaGlazedTerracotta {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:light_blue_glazed_terracotta" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LightBlueGlazedTerracotta(LightBlueGlazedTerracotta {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:yellow_glazed_terracotta" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::YellowGlazedTerracotta(YellowGlazedTerracotta {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:lime_glazed_terracotta" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LimeGlazedTerracotta(LimeGlazedTerracotta {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:pink_glazed_terracotta" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PinkGlazedTerracotta(PinkGlazedTerracotta {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:gray_glazed_terracotta" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::GrayGlazedTerracotta(GrayGlazedTerracotta {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:light_gray_glazed_terracotta" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LightGrayGlazedTerracotta(LightGrayGlazedTerracotta {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:cyan_glazed_terracotta" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CyanGlazedTerracotta(CyanGlazedTerracotta {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:purple_glazed_terracotta" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PurpleGlazedTerracotta(PurpleGlazedTerracotta {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:blue_glazed_terracotta" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BlueGlazedTerracotta(BlueGlazedTerracotta {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:brown_glazed_terracotta" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BrownGlazedTerracotta(BrownGlazedTerracotta {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:green_glazed_terracotta" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::GreenGlazedTerracotta(GreenGlazedTerracotta {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:red_glazed_terracotta" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RedGlazedTerracotta(RedGlazedTerracotta {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:black_glazed_terracotta" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BlackGlazedTerracotta(BlackGlazedTerracotta {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
@@ -3796,7 +7907,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:red_concrete_powder" => Block::RedConcretePowder(RedConcretePowder {}),
 		"minecraft:black_concrete_powder" => Block::BlackConcretePowder(BlackConcretePowder {}),
 		"minecraft:kelp" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Kelp(Kelp {
 				r#age: map.get("age").unwrap().parse().unwrap(),
 			})
@@ -3804,7 +7916,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:kelp_plant" => Block::KelpPlant(KelpPlant {}),
 		"minecraft:dried_kelp_block" => Block::DriedKelpBlock(DriedKelpBlock {}),
 		"minecraft:turtle_egg" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::TurtleEgg(TurtleEgg {
 				r#eggs: map.get("eggs").unwrap().parse().unwrap(),
 				r#hatch: map.get("hatch").unwrap().parse().unwrap(),
@@ -3821,197 +7934,228 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:fire_coral_block" => Block::FireCoralBlock(FireCoralBlock {}),
 		"minecraft:horn_coral_block" => Block::HornCoralBlock(HornCoralBlock {}),
 		"minecraft:dead_tube_coral" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DeadTubeCoral(DeadTubeCoral {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dead_brain_coral" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DeadBrainCoral(DeadBrainCoral {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dead_bubble_coral" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DeadBubbleCoral(DeadBubbleCoral {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dead_fire_coral" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DeadFireCoral(DeadFireCoral {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dead_horn_coral" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DeadHornCoral(DeadHornCoral {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:tube_coral" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::TubeCoral(TubeCoral {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:brain_coral" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BrainCoral(BrainCoral {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:bubble_coral" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BubbleCoral(BubbleCoral {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:fire_coral" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::FireCoral(FireCoral {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:horn_coral" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::HornCoral(HornCoral {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dead_tube_coral_fan" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DeadTubeCoralFan(DeadTubeCoralFan {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dead_brain_coral_fan" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DeadBrainCoralFan(DeadBrainCoralFan {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dead_bubble_coral_fan" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DeadBubbleCoralFan(DeadBubbleCoralFan {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dead_fire_coral_fan" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DeadFireCoralFan(DeadFireCoralFan {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dead_horn_coral_fan" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DeadHornCoralFan(DeadHornCoralFan {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:tube_coral_fan" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::TubeCoralFan(TubeCoralFan {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:brain_coral_fan" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BrainCoralFan(BrainCoralFan {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:bubble_coral_fan" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BubbleCoralFan(BubbleCoralFan {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:fire_coral_fan" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::FireCoralFan(FireCoralFan {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:horn_coral_fan" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::HornCoralFan(HornCoralFan {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dead_tube_coral_wall_fan" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DeadTubeCoralWallFan(DeadTubeCoralWallFan {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dead_brain_coral_wall_fan" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DeadBrainCoralWallFan(DeadBrainCoralWallFan {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dead_bubble_coral_wall_fan" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DeadBubbleCoralWallFan(DeadBubbleCoralWallFan {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dead_fire_coral_wall_fan" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DeadFireCoralWallFan(DeadFireCoralWallFan {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:dead_horn_coral_wall_fan" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DeadHornCoralWallFan(DeadHornCoralWallFan {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:tube_coral_wall_fan" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::TubeCoralWallFan(TubeCoralWallFan {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:brain_coral_wall_fan" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BrainCoralWallFan(BrainCoralWallFan {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:bubble_coral_wall_fan" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BubbleCoralWallFan(BubbleCoralWallFan {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:fire_coral_wall_fan" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::FireCoralWallFan(FireCoralWallFan {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:horn_coral_wall_fan" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::HornCoralWallFan(HornCoralWallFan {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:sea_pickle" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SeaPickle(SeaPickle {
 				r#pickles: map.get("pickles").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
@@ -4019,14 +8163,16 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		},
 		"minecraft:blue_ice" => Block::BlueIce(BlueIce {}),
 		"minecraft:conduit" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Conduit(Conduit {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:bamboo_sapling" => Block::BambooSapling(BambooSapling {}),
 		"minecraft:bamboo" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Bamboo(Bamboo {
 				r#age: map.get("age").unwrap().parse().unwrap(),
 				r#leaves: map.get("leaves").unwrap().parse().unwrap(),
@@ -4037,13 +8183,15 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:void_air" => Block::VoidAir(VoidAir {}),
 		"minecraft:cave_air" => Block::CaveAir(CaveAir {}),
 		"minecraft:bubble_column" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BubbleColumn(BubbleColumn {
 				r#drag: map.get("drag").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:polished_granite_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PolishedGraniteStairs(PolishedGraniteStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4052,7 +8200,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:smooth_red_sandstone_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SmoothRedSandstoneStairs(SmoothRedSandstoneStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4061,7 +8210,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:mossy_stone_brick_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MossyStoneBrickStairs(MossyStoneBrickStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4070,7 +8220,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:polished_diorite_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PolishedDioriteStairs(PolishedDioriteStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4079,7 +8230,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:mossy_cobblestone_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MossyCobblestoneStairs(MossyCobblestoneStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4088,7 +8240,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:end_stone_brick_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::EndStoneBrickStairs(EndStoneBrickStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4097,7 +8250,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:stone_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StoneStairs(StoneStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4106,7 +8260,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:smooth_sandstone_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SmoothSandstoneStairs(SmoothSandstoneStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4115,7 +8270,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:smooth_quartz_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SmoothQuartzStairs(SmoothQuartzStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4124,7 +8280,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:granite_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::GraniteStairs(GraniteStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4133,7 +8290,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:andesite_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::AndesiteStairs(AndesiteStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4142,7 +8300,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:red_nether_brick_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RedNetherBrickStairs(RedNetherBrickStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4151,7 +8310,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:polished_andesite_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PolishedAndesiteStairs(PolishedAndesiteStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4160,7 +8320,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:diorite_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DioriteStairs(DioriteStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4169,98 +8330,112 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:polished_granite_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PolishedGraniteSlab(PolishedGraniteSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:smooth_red_sandstone_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SmoothRedSandstoneSlab(SmoothRedSandstoneSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:mossy_stone_brick_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MossyStoneBrickSlab(MossyStoneBrickSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:polished_diorite_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PolishedDioriteSlab(PolishedDioriteSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:mossy_cobblestone_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MossyCobblestoneSlab(MossyCobblestoneSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:end_stone_brick_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::EndStoneBrickSlab(EndStoneBrickSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:smooth_sandstone_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SmoothSandstoneSlab(SmoothSandstoneSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:smooth_quartz_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SmoothQuartzSlab(SmoothQuartzSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:granite_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::GraniteSlab(GraniteSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:andesite_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::AndesiteSlab(AndesiteSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:red_nether_brick_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RedNetherBrickSlab(RedNetherBrickSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:polished_andesite_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PolishedAndesiteSlab(PolishedAndesiteSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:diorite_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DioriteSlab(DioriteSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:brick_wall" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BrickWall(BrickWall {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -4271,7 +8446,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:prismarine_wall" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PrismarineWall(PrismarineWall {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -4282,7 +8458,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:red_sandstone_wall" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RedSandstoneWall(RedSandstoneWall {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -4293,7 +8470,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:mossy_stone_brick_wall" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MossyStoneBrickWall(MossyStoneBrickWall {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -4304,7 +8482,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:granite_wall" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::GraniteWall(GraniteWall {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -4315,7 +8494,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:stone_brick_wall" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StoneBrickWall(StoneBrickWall {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -4326,7 +8506,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:mud_brick_wall" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MudBrickWall(MudBrickWall {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -4337,7 +8518,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:nether_brick_wall" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::NetherBrickWall(NetherBrickWall {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -4348,7 +8530,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:andesite_wall" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::AndesiteWall(AndesiteWall {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -4359,7 +8542,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:red_nether_brick_wall" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RedNetherBrickWall(RedNetherBrickWall {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -4370,7 +8554,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:sandstone_wall" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SandstoneWall(SandstoneWall {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -4381,7 +8566,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:end_stone_brick_wall" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::EndStoneBrickWall(EndStoneBrickWall {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -4392,7 +8578,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:diorite_wall" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DioriteWall(DioriteWall {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -4403,7 +8590,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:scaffolding" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Scaffolding(Scaffolding {
 				r#bottom: map.get("bottom").unwrap().parse().unwrap(),
 				r#distance: map.get("distance").unwrap().parse().unwrap(),
@@ -4411,27 +8599,31 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:loom" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Loom(Loom {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:barrel" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Barrel(Barrel {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#open: map.get("open").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:smoker" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Smoker(Smoker {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:blast_furnace" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BlastFurnace(BlastFurnace {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
@@ -4440,14 +8632,16 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:cartography_table" => Block::CartographyTable(CartographyTable {}),
 		"minecraft:fletching_table" => Block::FletchingTable(FletchingTable {}),
 		"minecraft:grindstone" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Grindstone(Grindstone {
 				r#face: map.get("face").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:lectern" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Lectern(Lectern {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#has_book: map.get("has_book").unwrap().parse().unwrap(),
@@ -4456,13 +8650,15 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		},
 		"minecraft:smithing_table" => Block::SmithingTable(SmithingTable {}),
 		"minecraft:stonecutter" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Stonecutter(Stonecutter {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:bell" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Bell(Bell {
 				r#attachment: map.get("attachment").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
@@ -4470,21 +8666,24 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:lantern" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Lantern(Lantern {
 				r#hanging: map.get("hanging").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:soul_lantern" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SoulLantern(SoulLantern {
 				r#hanging: map.get("hanging").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:campfire" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Campfire(Campfire {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
@@ -4493,7 +8692,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:soul_campfire" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SoulCampfire(SoulCampfire {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
@@ -4502,31 +8702,36 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:sweet_berry_bush" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SweetBerryBush(SweetBerryBush {
 				r#age: map.get("age").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:warped_stem" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WarpedStem(WarpedStem {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:stripped_warped_stem" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StrippedWarpedStem(StrippedWarpedStem {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:warped_hyphae" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WarpedHyphae(WarpedHyphae {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:stripped_warped_hyphae" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StrippedWarpedHyphae(StrippedWarpedHyphae {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
@@ -4537,25 +8742,29 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:warped_roots" => Block::WarpedRoots(WarpedRoots {}),
 		"minecraft:nether_sprouts" => Block::NetherSprouts(NetherSprouts {}),
 		"minecraft:crimson_stem" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CrimsonStem(CrimsonStem {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:stripped_crimson_stem" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StrippedCrimsonStem(StrippedCrimsonStem {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:crimson_hyphae" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CrimsonHyphae(CrimsonHyphae {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:stripped_crimson_hyphae" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StrippedCrimsonHyphae(StrippedCrimsonHyphae {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
@@ -4564,14 +8773,16 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:crimson_fungus" => Block::CrimsonFungus(CrimsonFungus {}),
 		"minecraft:shroomlight" => Block::Shroomlight(Shroomlight {}),
 		"minecraft:weeping_vines" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WeepingVines(WeepingVines {
 				r#age: map.get("age").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:weeping_vines_plant" => Block::WeepingVinesPlant(WeepingVinesPlant {}),
 		"minecraft:twisting_vines" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::TwistingVines(TwistingVines {
 				r#age: map.get("age").unwrap().parse().unwrap(),
 			})
@@ -4581,33 +8792,38 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:crimson_planks" => Block::CrimsonPlanks(CrimsonPlanks {}),
 		"minecraft:warped_planks" => Block::WarpedPlanks(WarpedPlanks {}),
 		"minecraft:crimson_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CrimsonSlab(CrimsonSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:warped_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WarpedSlab(WarpedSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:crimson_pressure_plate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CrimsonPressurePlate(CrimsonPressurePlate {
 				r#powered: map.get("powered").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:warped_pressure_plate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WarpedPressurePlate(WarpedPressurePlate {
 				r#powered: map.get("powered").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:crimson_fence" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CrimsonFence(CrimsonFence {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -4617,7 +8833,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:warped_fence" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WarpedFence(WarpedFence {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -4627,7 +8844,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:crimson_trapdoor" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CrimsonTrapdoor(CrimsonTrapdoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4637,7 +8855,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:warped_trapdoor" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WarpedTrapdoor(WarpedTrapdoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4647,7 +8866,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:crimson_fence_gate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CrimsonFenceGate(CrimsonFenceGate {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#in_wall: map.get("in_wall").unwrap().parse().unwrap(),
@@ -4656,7 +8876,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:warped_fence_gate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WarpedFenceGate(WarpedFenceGate {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#in_wall: map.get("in_wall").unwrap().parse().unwrap(),
@@ -4665,7 +8886,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:crimson_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CrimsonStairs(CrimsonStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4674,7 +8896,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:warped_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WarpedStairs(WarpedStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4683,7 +8906,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:crimson_button" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CrimsonButton(CrimsonButton {
 				r#face: map.get("face").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
@@ -4691,7 +8915,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:warped_button" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WarpedButton(WarpedButton {
 				r#face: map.get("face").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
@@ -4699,7 +8924,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:crimson_door" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CrimsonDoor(CrimsonDoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4709,7 +8935,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:warped_door" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WarpedDoor(WarpedDoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4719,66 +8946,76 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:crimson_sign" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CrimsonSign(CrimsonSign {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:warped_sign" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WarpedSign(WarpedSign {
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:crimson_wall_sign" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CrimsonWallSign(CrimsonWallSign {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:warped_wall_sign" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WarpedWallSign(WarpedWallSign {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:structure_block" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::StructureBlock(StructureBlock {
 				r#mode: map.get("mode").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:jigsaw" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Jigsaw(Jigsaw {
 				r#orientation: map.get("orientation").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:composter" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Composter(Composter {
 				r#level: map.get("level").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:target" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Target(Target {
 				r#power: map.get("power").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:bee_nest" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BeeNest(BeeNest {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#honey_level: map.get("honey_level").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:beehive" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Beehive(Beehive {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#honey_level: map.get("honey_level").unwrap().parse().unwrap(),
@@ -4790,7 +9027,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:ancient_debris" => Block::AncientDebris(AncientDebris {}),
 		"minecraft:crying_obsidian" => Block::CryingObsidian(CryingObsidian {}),
 		"minecraft:respawn_anchor" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RespawnAnchor(RespawnAnchor {
 				r#charges: map.get("charges").unwrap().parse().unwrap(),
 			})
@@ -4802,7 +9040,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:lodestone" => Block::Lodestone(Lodestone {}),
 		"minecraft:blackstone" => Block::Blackstone(Blackstone {}),
 		"minecraft:blackstone_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BlackstoneStairs(BlackstoneStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4811,7 +9050,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:blackstone_wall" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BlackstoneWall(BlackstoneWall {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -4822,7 +9062,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:blackstone_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BlackstoneSlab(BlackstoneSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
@@ -4833,14 +9074,16 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:cracked_polished_blackstone_bricks" => Block::CrackedPolishedBlackstoneBricks(CrackedPolishedBlackstoneBricks {}),
 		"minecraft:chiseled_polished_blackstone" => Block::ChiseledPolishedBlackstone(ChiseledPolishedBlackstone {}),
 		"minecraft:polished_blackstone_brick_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PolishedBlackstoneBrickSlab(PolishedBlackstoneBrickSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:polished_blackstone_brick_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PolishedBlackstoneBrickStairs(PolishedBlackstoneBrickStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4849,7 +9092,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:polished_blackstone_brick_wall" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PolishedBlackstoneBrickWall(PolishedBlackstoneBrickWall {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -4861,7 +9105,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		},
 		"minecraft:gilded_blackstone" => Block::GildedBlackstone(GildedBlackstone {}),
 		"minecraft:polished_blackstone_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PolishedBlackstoneStairs(PolishedBlackstoneStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -4870,20 +9115,23 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:polished_blackstone_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PolishedBlackstoneSlab(PolishedBlackstoneSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:polished_blackstone_pressure_plate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PolishedBlackstonePressurePlate(PolishedBlackstonePressurePlate {
 				r#powered: map.get("powered").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:polished_blackstone_button" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PolishedBlackstoneButton(PolishedBlackstoneButton {
 				r#face: map.get("face").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
@@ -4891,7 +9139,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:polished_blackstone_wall" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PolishedBlackstoneWall(PolishedBlackstoneWall {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -4905,7 +9154,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:cracked_nether_bricks" => Block::CrackedNetherBricks(CrackedNetherBricks {}),
 		"minecraft:quartz_bricks" => Block::QuartzBricks(QuartzBricks {}),
 		"minecraft:candle" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Candle(Candle {
 				r#candles: map.get("candles").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
@@ -4913,7 +9163,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:white_candle" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WhiteCandle(WhiteCandle {
 				r#candles: map.get("candles").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
@@ -4921,7 +9172,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:orange_candle" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OrangeCandle(OrangeCandle {
 				r#candles: map.get("candles").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
@@ -4929,7 +9181,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:magenta_candle" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MagentaCandle(MagentaCandle {
 				r#candles: map.get("candles").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
@@ -4937,7 +9190,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:light_blue_candle" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LightBlueCandle(LightBlueCandle {
 				r#candles: map.get("candles").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
@@ -4945,7 +9199,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:yellow_candle" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::YellowCandle(YellowCandle {
 				r#candles: map.get("candles").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
@@ -4953,7 +9208,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:lime_candle" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LimeCandle(LimeCandle {
 				r#candles: map.get("candles").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
@@ -4961,7 +9217,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:pink_candle" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PinkCandle(PinkCandle {
 				r#candles: map.get("candles").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
@@ -4969,7 +9226,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:gray_candle" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::GrayCandle(GrayCandle {
 				r#candles: map.get("candles").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
@@ -4977,7 +9235,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:light_gray_candle" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LightGrayCandle(LightGrayCandle {
 				r#candles: map.get("candles").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
@@ -4985,7 +9244,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:cyan_candle" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CyanCandle(CyanCandle {
 				r#candles: map.get("candles").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
@@ -4993,7 +9253,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:purple_candle" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PurpleCandle(PurpleCandle {
 				r#candles: map.get("candles").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
@@ -5001,7 +9262,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:blue_candle" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BlueCandle(BlueCandle {
 				r#candles: map.get("candles").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
@@ -5009,7 +9271,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:brown_candle" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BrownCandle(BrownCandle {
 				r#candles: map.get("candles").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
@@ -5017,7 +9280,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:green_candle" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::GreenCandle(GreenCandle {
 				r#candles: map.get("candles").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
@@ -5025,7 +9289,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:red_candle" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RedCandle(RedCandle {
 				r#candles: map.get("candles").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
@@ -5033,7 +9298,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:black_candle" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BlackCandle(BlackCandle {
 				r#candles: map.get("candles").unwrap().parse().unwrap(),
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
@@ -5041,103 +9307,120 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:candle_cake" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CandleCake(CandleCake {
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:white_candle_cake" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WhiteCandleCake(WhiteCandleCake {
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:orange_candle_cake" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OrangeCandleCake(OrangeCandleCake {
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:magenta_candle_cake" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MagentaCandleCake(MagentaCandleCake {
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:light_blue_candle_cake" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LightBlueCandleCake(LightBlueCandleCake {
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:yellow_candle_cake" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::YellowCandleCake(YellowCandleCake {
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:lime_candle_cake" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LimeCandleCake(LimeCandleCake {
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:pink_candle_cake" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PinkCandleCake(PinkCandleCake {
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:gray_candle_cake" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::GrayCandleCake(GrayCandleCake {
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:light_gray_candle_cake" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LightGrayCandleCake(LightGrayCandleCake {
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:cyan_candle_cake" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CyanCandleCake(CyanCandleCake {
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:purple_candle_cake" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PurpleCandleCake(PurpleCandleCake {
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:blue_candle_cake" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BlueCandleCake(BlueCandleCake {
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:brown_candle_cake" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BrownCandleCake(BrownCandleCake {
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:green_candle_cake" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::GreenCandleCake(GreenCandleCake {
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:red_candle_cake" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::RedCandleCake(RedCandleCake {
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:black_candle_cake" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BlackCandleCake(BlackCandleCake {
 				r#lit: map.get("lit").unwrap().parse().unwrap(),
 			})
@@ -5145,28 +9428,32 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:amethyst_block" => Block::AmethystBlock(AmethystBlock {}),
 		"minecraft:budding_amethyst" => Block::BuddingAmethyst(BuddingAmethyst {}),
 		"minecraft:amethyst_cluster" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::AmethystCluster(AmethystCluster {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:large_amethyst_bud" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LargeAmethystBud(LargeAmethystBud {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:medium_amethyst_bud" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::MediumAmethystBud(MediumAmethystBud {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:small_amethyst_bud" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SmallAmethystBud(SmallAmethystBud {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
@@ -5177,7 +9464,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:tinted_glass" => Block::TintedGlass(TintedGlass {}),
 		"minecraft:powder_snow" => Block::PowderSnow(PowderSnow {}),
 		"minecraft:sculk_sensor" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SculkSensor(SculkSensor {
 				r#power: map.get("power").unwrap().parse().unwrap(),
 				r#sculk_sensor_phase: map.get("sculk_sensor_phase").unwrap().parse().unwrap(),
@@ -5186,7 +9474,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		},
 		"minecraft:sculk" => Block::Sculk(Sculk {}),
 		"minecraft:sculk_vein" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SculkVein(SculkVein {
 				r#down: map.get("down").unwrap().parse().unwrap(),
 				r#east: map.get("east").unwrap().parse().unwrap(),
@@ -5198,13 +9487,15 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:sculk_catalyst" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SculkCatalyst(SculkCatalyst {
 				r#bloom: map.get("bloom").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:sculk_shrieker" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SculkShrieker(SculkShrieker {
 				r#can_summon: map.get("can_summon").unwrap().parse().unwrap(),
 				r#shrieking: map.get("shrieking").unwrap().parse().unwrap(),
@@ -5222,7 +9513,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:exposed_cut_copper" => Block::ExposedCutCopper(ExposedCutCopper {}),
 		"minecraft:cut_copper" => Block::CutCopper(CutCopper {}),
 		"minecraft:oxidized_cut_copper_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OxidizedCutCopperStairs(OxidizedCutCopperStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -5231,7 +9523,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:weathered_cut_copper_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WeatheredCutCopperStairs(WeatheredCutCopperStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -5240,7 +9533,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:exposed_cut_copper_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::ExposedCutCopperStairs(ExposedCutCopperStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -5249,7 +9543,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:cut_copper_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CutCopperStairs(CutCopperStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -5258,28 +9553,32 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:oxidized_cut_copper_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OxidizedCutCopperSlab(OxidizedCutCopperSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:weathered_cut_copper_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WeatheredCutCopperSlab(WeatheredCutCopperSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:exposed_cut_copper_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::ExposedCutCopperSlab(ExposedCutCopperSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:cut_copper_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CutCopperSlab(CutCopperSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
@@ -5294,7 +9593,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:waxed_exposed_cut_copper" => Block::WaxedExposedCutCopper(WaxedExposedCutCopper {}),
 		"minecraft:waxed_cut_copper" => Block::WaxedCutCopper(WaxedCutCopper {}),
 		"minecraft:waxed_oxidized_cut_copper_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WaxedOxidizedCutCopperStairs(WaxedOxidizedCutCopperStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -5303,7 +9603,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:waxed_weathered_cut_copper_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WaxedWeatheredCutCopperStairs(WaxedWeatheredCutCopperStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -5312,7 +9613,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:waxed_exposed_cut_copper_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WaxedExposedCutCopperStairs(WaxedExposedCutCopperStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -5321,7 +9623,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:waxed_cut_copper_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WaxedCutCopperStairs(WaxedCutCopperStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -5330,35 +9633,40 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:waxed_oxidized_cut_copper_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WaxedOxidizedCutCopperSlab(WaxedOxidizedCutCopperSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:waxed_weathered_cut_copper_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WaxedWeatheredCutCopperSlab(WaxedWeatheredCutCopperSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:waxed_exposed_cut_copper_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WaxedExposedCutCopperSlab(WaxedExposedCutCopperSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:waxed_cut_copper_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::WaxedCutCopperSlab(WaxedCutCopperSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:lightning_rod" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::LightningRod(LightningRod {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#powered: map.get("powered").unwrap().parse().unwrap(),
@@ -5366,7 +9674,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:pointed_dripstone" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PointedDripstone(PointedDripstone {
 				r#thickness: map.get("thickness").unwrap().parse().unwrap(),
 				r#vertical_direction: map.get("vertical_direction").unwrap().parse().unwrap(),
@@ -5375,14 +9684,16 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		},
 		"minecraft:dripstone_block" => Block::DripstoneBlock(DripstoneBlock {}),
 		"minecraft:cave_vines" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CaveVines(CaveVines {
 				r#age: map.get("age").unwrap().parse().unwrap(),
 				r#berries: map.get("berries").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:cave_vines_plant" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CaveVinesPlant(CaveVinesPlant {
 				r#berries: map.get("berries").unwrap().parse().unwrap(),
 			})
@@ -5393,7 +9704,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:moss_carpet" => Block::MossCarpet(MossCarpet {}),
 		"minecraft:moss_block" => Block::MossBlock(MossBlock {}),
 		"minecraft:big_dripleaf" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BigDripleaf(BigDripleaf {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#tilt: map.get("tilt").unwrap().parse().unwrap(),
@@ -5401,14 +9713,16 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:big_dripleaf_stem" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::BigDripleafStem(BigDripleafStem {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:small_dripleaf" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::SmallDripleaf(SmallDripleaf {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -5416,7 +9730,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:hanging_roots" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::HangingRoots(HangingRoots {
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
@@ -5424,14 +9739,16 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:rooted_dirt" => Block::RootedDirt(RootedDirt {}),
 		"minecraft:mud" => Block::Mud(Mud {}),
 		"minecraft:deepslate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::Deepslate(Deepslate {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:cobbled_deepslate" => Block::CobbledDeepslate(CobbledDeepslate {}),
 		"minecraft:cobbled_deepslate_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CobbledDeepslateStairs(CobbledDeepslateStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -5440,14 +9757,16 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:cobbled_deepslate_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CobbledDeepslateSlab(CobbledDeepslateSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:cobbled_deepslate_wall" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::CobbledDeepslateWall(CobbledDeepslateWall {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -5459,7 +9778,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		},
 		"minecraft:polished_deepslate" => Block::PolishedDeepslate(PolishedDeepslate {}),
 		"minecraft:polished_deepslate_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PolishedDeepslateStairs(PolishedDeepslateStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -5468,14 +9788,16 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:polished_deepslate_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PolishedDeepslateSlab(PolishedDeepslateSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:polished_deepslate_wall" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PolishedDeepslateWall(PolishedDeepslateWall {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -5487,7 +9809,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		},
 		"minecraft:deepslate_tiles" => Block::DeepslateTiles(DeepslateTiles {}),
 		"minecraft:deepslate_tile_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DeepslateTileStairs(DeepslateTileStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -5496,14 +9819,16 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:deepslate_tile_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DeepslateTileSlab(DeepslateTileSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:deepslate_tile_wall" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DeepslateTileWall(DeepslateTileWall {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -5515,7 +9840,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		},
 		"minecraft:deepslate_bricks" => Block::DeepslateBricks(DeepslateBricks {}),
 		"minecraft:deepslate_brick_stairs" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DeepslateBrickStairs(DeepslateBrickStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
@@ -5524,14 +9850,16 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:deepslate_brick_slab" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DeepslateBrickSlab(DeepslateBrickSlab {
 				r#type: map.get("type").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:deepslate_brick_wall" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::DeepslateBrickWall(DeepslateBrickWall {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
@@ -5545,7 +9873,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:cracked_deepslate_bricks" => Block::CrackedDeepslateBricks(CrackedDeepslateBricks {}),
 		"minecraft:cracked_deepslate_tiles" => Block::CrackedDeepslateTiles(CrackedDeepslateTiles {}),
 		"minecraft:infested_deepslate" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::InfestedDeepslate(InfestedDeepslate {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
@@ -5557,19 +9886,22 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:potted_azalea_bush" => Block::PottedAzaleaBush(PottedAzaleaBush {}),
 		"minecraft:potted_flowering_azalea_bush" => Block::PottedFloweringAzaleaBush(PottedFloweringAzaleaBush {}),
 		"minecraft:ochre_froglight" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::OchreFroglight(OchreFroglight {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:verdant_froglight" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::VerdantFroglight(VerdantFroglight {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
 		"minecraft:pearlescent_froglight" => {
-			let map = crate::ref_or_error(map)?;
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
 			Block::PearlescentFroglight(PearlescentFroglight {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
@@ -5581,219 +9913,9 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 }
 
 pub mod property_enums {
-	use std::{collections::HashMap, str::FromStr};
+	use std::str::FromStr;
 	
-	#[derive(Debug)]
-	pub enum Mode1 {
-		save,
-		load,
-		corner,
-		data,
-	}
-	impl FromStr for Mode1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"save" => Ok(Mode1::save),
-				"load" => Ok(Mode1::load),
-				"corner" => Ok(Mode1::corner),
-				"data" => Ok(Mode1::data),
-				_ => Err(format!("Invalid Mode1 value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
-	pub enum South {
-		up,
-		side,
-		none,
-	}
-	impl FromStr for South {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"up" => Ok(South::up),
-				"side" => Ok(South::side),
-				"none" => Ok(South::none),
-				_ => Err(format!("Invalid South value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
-	pub enum Half {
-		upper,
-		lower,
-	}
-	impl FromStr for Half {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"upper" => Ok(Half::upper),
-				"lower" => Ok(Half::lower),
-				_ => Err(format!("Invalid Half value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
-	pub enum Half1 {
-		top,
-		bottom,
-	}
-	impl FromStr for Half1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"top" => Ok(Half1::top),
-				"bottom" => Ok(Half1::bottom),
-				_ => Err(format!("Invalid Half1 value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
-	pub enum Shape2 {
-		north_south,
-		east_west,
-		ascending_east,
-		ascending_west,
-		ascending_north,
-		ascending_south,
-		south_east,
-		south_west,
-		north_west,
-		north_east,
-	}
-	impl FromStr for Shape2 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"north_south" => Ok(Shape2::north_south),
-				"east_west" => Ok(Shape2::east_west),
-				"ascending_east" => Ok(Shape2::ascending_east),
-				"ascending_west" => Ok(Shape2::ascending_west),
-				"ascending_north" => Ok(Shape2::ascending_north),
-				"ascending_south" => Ok(Shape2::ascending_south),
-				"south_east" => Ok(Shape2::south_east),
-				"south_west" => Ok(Shape2::south_west),
-				"north_west" => Ok(Shape2::north_west),
-				"north_east" => Ok(Shape2::north_east),
-				_ => Err(format!("Invalid Shape2 value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
-	pub enum Face {
-		floor,
-		wall,
-		ceiling,
-	}
-	impl FromStr for Face {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"floor" => Ok(Face::floor),
-				"wall" => Ok(Face::wall),
-				"ceiling" => Ok(Face::ceiling),
-				_ => Err(format!("Invalid Face value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
-	pub enum South1 {
-		none,
-		low,
-		tall,
-	}
-	impl FromStr for South1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"none" => Ok(South1::none),
-				"low" => Ok(South1::low),
-				"tall" => Ok(South1::tall),
-				_ => Err(format!("Invalid South1 value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
-	pub enum West1 {
-		none,
-		low,
-		tall,
-	}
-	impl FromStr for West1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"none" => Ok(West1::none),
-				"low" => Ok(West1::low),
-				"tall" => Ok(West1::tall),
-				_ => Err(format!("Invalid West1 value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
-	pub enum Tilt {
-		none,
-		unstable,
-		partial,
-		full,
-	}
-	impl FromStr for Tilt {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"none" => Ok(Tilt::none),
-				"unstable" => Ok(Tilt::unstable),
-				"partial" => Ok(Tilt::partial),
-				"full" => Ok(Tilt::full),
-				_ => Err(format!("Invalid Tilt value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
-	pub enum Facing {
-		north,
-		east,
-		south,
-		west,
-		up,
-		down,
-	}
-	impl FromStr for Facing {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"north" => Ok(Facing::north),
-				"east" => Ok(Facing::east),
-				"south" => Ok(Facing::south),
-				"west" => Ok(Facing::west),
-				"up" => Ok(Facing::up),
-				"down" => Ok(Facing::down),
-				_ => Err(format!("Invalid Facing value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 	pub enum Facing1 {
 		north,
 		south,
@@ -5813,8 +9935,47 @@ pub mod property_enums {
 			}
 		}
 	}
+	impl crate::Values for Facing1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
 
-	#[derive(Debug)]
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::north,
+				Self::south,
+				Self::west,
+				Self::east,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Axis1 {
+		x,
+		z,
+	}
+	impl FromStr for Axis1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"x" => Ok(Axis1::x),
+				"z" => Ok(Axis1::z),
+				_ => Err(format!("Invalid Axis1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Axis1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::x,
+				Self::z,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 	pub enum East1 {
 		none,
 		low,
@@ -5832,239 +9993,19 @@ pub mod property_enums {
 			}
 		}
 	}
+	impl crate::Values for East1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
 
-	#[derive(Debug)]
-	pub enum North1 {
-		none,
-		low,
-		tall,
-	}
-	impl FromStr for North1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"none" => Ok(North1::none),
-				"low" => Ok(North1::low),
-				"tall" => Ok(North1::tall),
-				_ => Err(format!("Invalid North1 value: {}", s)),
-			}
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::none,
+				Self::low,
+				Self::tall,
+			].into_iter()
 		}
 	}
 
-	#[derive(Debug)]
-	pub enum Type1 {
-		single,
-		left,
-		right,
-	}
-	impl FromStr for Type1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"single" => Ok(Type1::single),
-				"left" => Ok(Type1::left),
-				"right" => Ok(Type1::right),
-				_ => Err(format!("Invalid Type1 value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
-	pub enum Type2 {
-		top,
-		bottom,
-		double,
-	}
-	impl FromStr for Type2 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"top" => Ok(Type2::top),
-				"bottom" => Ok(Type2::bottom),
-				"double" => Ok(Type2::double),
-				_ => Err(format!("Invalid Type2 value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
-	pub enum Part {
-		head,
-		foot,
-	}
-	impl FromStr for Part {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"head" => Ok(Part::head),
-				"foot" => Ok(Part::foot),
-				_ => Err(format!("Invalid Part value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
-	pub enum Axis {
-		x,
-		y,
-		z,
-	}
-	impl FromStr for Axis {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"x" => Ok(Axis::x),
-				"y" => Ok(Axis::y),
-				"z" => Ok(Axis::z),
-				_ => Err(format!("Invalid Axis value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
-	pub enum Orientation {
-		down_east,
-		down_north,
-		down_south,
-		down_west,
-		up_east,
-		up_north,
-		up_south,
-		up_west,
-		west_up,
-		east_up,
-		north_up,
-		south_up,
-	}
-	impl FromStr for Orientation {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"down_east" => Ok(Orientation::down_east),
-				"down_north" => Ok(Orientation::down_north),
-				"down_south" => Ok(Orientation::down_south),
-				"down_west" => Ok(Orientation::down_west),
-				"up_east" => Ok(Orientation::up_east),
-				"up_north" => Ok(Orientation::up_north),
-				"up_south" => Ok(Orientation::up_south),
-				"up_west" => Ok(Orientation::up_west),
-				"west_up" => Ok(Orientation::west_up),
-				"east_up" => Ok(Orientation::east_up),
-				"north_up" => Ok(Orientation::north_up),
-				"south_up" => Ok(Orientation::south_up),
-				_ => Err(format!("Invalid Orientation value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
-	pub enum Thickness {
-		tip_merge,
-		tip,
-		frustum,
-		middle,
-		base,
-	}
-	impl FromStr for Thickness {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"tip_merge" => Ok(Thickness::tip_merge),
-				"tip" => Ok(Thickness::tip),
-				"frustum" => Ok(Thickness::frustum),
-				"middle" => Ok(Thickness::middle),
-				"base" => Ok(Thickness::base),
-				_ => Err(format!("Invalid Thickness value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
-	pub enum West {
-		up,
-		side,
-		none,
-	}
-	impl FromStr for West {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"up" => Ok(West::up),
-				"side" => Ok(West::side),
-				"none" => Ok(West::none),
-				_ => Err(format!("Invalid West value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
-	pub enum Shape1 {
-		straight,
-		inner_left,
-		inner_right,
-		outer_left,
-		outer_right,
-	}
-	impl FromStr for Shape1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"straight" => Ok(Shape1::straight),
-				"inner_left" => Ok(Shape1::inner_left),
-				"inner_right" => Ok(Shape1::inner_right),
-				"outer_left" => Ok(Shape1::outer_left),
-				"outer_right" => Ok(Shape1::outer_right),
-				_ => Err(format!("Invalid Shape1 value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
-	pub enum Hinge {
-		left,
-		right,
-	}
-	impl FromStr for Hinge {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"left" => Ok(Hinge::left),
-				"right" => Ok(Hinge::right),
-				_ => Err(format!("Invalid Hinge value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
-	pub enum Leaves {
-		none,
-		small,
-		large,
-	}
-	impl FromStr for Leaves {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"none" => Ok(Leaves::none),
-				"small" => Ok(Leaves::small),
-				"large" => Ok(Leaves::large),
-				_ => Err(format!("Invalid Leaves value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 	pub enum Instrument {
 		harp,
 		basedrum,
@@ -6108,8 +10049,266 @@ pub mod property_enums {
 			}
 		}
 	}
+	impl crate::Values for Instrument {
+		type ValueIterator = std::vec::IntoIter<Self>;
 
-	#[derive(Debug)]
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::harp,
+				Self::basedrum,
+				Self::snare,
+				Self::hat,
+				Self::bass,
+				Self::flute,
+				Self::bell,
+				Self::guitar,
+				Self::chime,
+				Self::xylophone,
+				Self::iron_xylophone,
+				Self::cow_bell,
+				Self::didgeridoo,
+				Self::bit,
+				Self::banjo,
+				Self::pling,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum West1 {
+		none,
+		low,
+		tall,
+	}
+	impl FromStr for West1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"none" => Ok(West1::none),
+				"low" => Ok(West1::low),
+				"tall" => Ok(West1::tall),
+				_ => Err(format!("Invalid West1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for West1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::none,
+				Self::low,
+				Self::tall,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Attachment {
+		floor,
+		ceiling,
+		single_wall,
+		double_wall,
+	}
+	impl FromStr for Attachment {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"floor" => Ok(Attachment::floor),
+				"ceiling" => Ok(Attachment::ceiling),
+				"single_wall" => Ok(Attachment::single_wall),
+				"double_wall" => Ok(Attachment::double_wall),
+				_ => Err(format!("Invalid Attachment value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Attachment {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::floor,
+				Self::ceiling,
+				Self::single_wall,
+				Self::double_wall,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Shape2 {
+		north_south,
+		east_west,
+		ascending_east,
+		ascending_west,
+		ascending_north,
+		ascending_south,
+		south_east,
+		south_west,
+		north_west,
+		north_east,
+	}
+	impl FromStr for Shape2 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"north_south" => Ok(Shape2::north_south),
+				"east_west" => Ok(Shape2::east_west),
+				"ascending_east" => Ok(Shape2::ascending_east),
+				"ascending_west" => Ok(Shape2::ascending_west),
+				"ascending_north" => Ok(Shape2::ascending_north),
+				"ascending_south" => Ok(Shape2::ascending_south),
+				"south_east" => Ok(Shape2::south_east),
+				"south_west" => Ok(Shape2::south_west),
+				"north_west" => Ok(Shape2::north_west),
+				"north_east" => Ok(Shape2::north_east),
+				_ => Err(format!("Invalid Shape2 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Shape2 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::north_south,
+				Self::east_west,
+				Self::ascending_east,
+				Self::ascending_west,
+				Self::ascending_north,
+				Self::ascending_south,
+				Self::south_east,
+				Self::south_west,
+				Self::north_west,
+				Self::north_east,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Orientation {
+		down_east,
+		down_north,
+		down_south,
+		down_west,
+		up_east,
+		up_north,
+		up_south,
+		up_west,
+		west_up,
+		east_up,
+		north_up,
+		south_up,
+	}
+	impl FromStr for Orientation {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"down_east" => Ok(Orientation::down_east),
+				"down_north" => Ok(Orientation::down_north),
+				"down_south" => Ok(Orientation::down_south),
+				"down_west" => Ok(Orientation::down_west),
+				"up_east" => Ok(Orientation::up_east),
+				"up_north" => Ok(Orientation::up_north),
+				"up_south" => Ok(Orientation::up_south),
+				"up_west" => Ok(Orientation::up_west),
+				"west_up" => Ok(Orientation::west_up),
+				"east_up" => Ok(Orientation::east_up),
+				"north_up" => Ok(Orientation::north_up),
+				"south_up" => Ok(Orientation::south_up),
+				_ => Err(format!("Invalid Orientation value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Orientation {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::down_east,
+				Self::down_north,
+				Self::down_south,
+				Self::down_west,
+				Self::up_east,
+				Self::up_north,
+				Self::up_south,
+				Self::up_west,
+				Self::west_up,
+				Self::east_up,
+				Self::north_up,
+				Self::south_up,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Tilt {
+		none,
+		unstable,
+		partial,
+		full,
+	}
+	impl FromStr for Tilt {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"none" => Ok(Tilt::none),
+				"unstable" => Ok(Tilt::unstable),
+				"partial" => Ok(Tilt::partial),
+				"full" => Ok(Tilt::full),
+				_ => Err(format!("Invalid Tilt value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Tilt {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::none,
+				Self::unstable,
+				Self::partial,
+				Self::full,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum West {
+		up,
+		side,
+		none,
+	}
+	impl FromStr for West {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"up" => Ok(West::up),
+				"side" => Ok(West::side),
+				"none" => Ok(West::none),
+				_ => Err(format!("Invalid West value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for West {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::up,
+				Self::side,
+				Self::none,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 	pub enum Type {
 		normal,
 		sticky,
@@ -6125,8 +10324,264 @@ pub mod property_enums {
 			}
 		}
 	}
+	impl crate::Values for Type {
+		type ValueIterator = std::vec::IntoIter<Self>;
 
-	#[derive(Debug)]
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::normal,
+				Self::sticky,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Part {
+		head,
+		foot,
+	}
+	impl FromStr for Part {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"head" => Ok(Part::head),
+				"foot" => Ok(Part::foot),
+				_ => Err(format!("Invalid Part value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Part {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::head,
+				Self::foot,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Mode {
+		compare,
+		subtract,
+	}
+	impl FromStr for Mode {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"compare" => Ok(Mode::compare),
+				"subtract" => Ok(Mode::subtract),
+				_ => Err(format!("Invalid Mode value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Mode {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::compare,
+				Self::subtract,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum North1 {
+		none,
+		low,
+		tall,
+	}
+	impl FromStr for North1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"none" => Ok(North1::none),
+				"low" => Ok(North1::low),
+				"tall" => Ok(North1::tall),
+				_ => Err(format!("Invalid North1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for North1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::none,
+				Self::low,
+				Self::tall,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Face {
+		floor,
+		wall,
+		ceiling,
+	}
+	impl FromStr for Face {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"floor" => Ok(Face::floor),
+				"wall" => Ok(Face::wall),
+				"ceiling" => Ok(Face::ceiling),
+				_ => Err(format!("Invalid Face value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Face {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::floor,
+				Self::wall,
+				Self::ceiling,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Leaves {
+		none,
+		small,
+		large,
+	}
+	impl FromStr for Leaves {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"none" => Ok(Leaves::none),
+				"small" => Ok(Leaves::small),
+				"large" => Ok(Leaves::large),
+				_ => Err(format!("Invalid Leaves value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Leaves {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::none,
+				Self::small,
+				Self::large,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Facing {
+		north,
+		east,
+		south,
+		west,
+		up,
+		down,
+	}
+	impl FromStr for Facing {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"north" => Ok(Facing::north),
+				"east" => Ok(Facing::east),
+				"south" => Ok(Facing::south),
+				"west" => Ok(Facing::west),
+				"up" => Ok(Facing::up),
+				"down" => Ok(Facing::down),
+				_ => Err(format!("Invalid Facing value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Facing {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::north,
+				Self::east,
+				Self::south,
+				Self::west,
+				Self::up,
+				Self::down,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Half1 {
+		top,
+		bottom,
+	}
+	impl FromStr for Half1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"top" => Ok(Half1::top),
+				"bottom" => Ok(Half1::bottom),
+				_ => Err(format!("Invalid Half1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Half1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::top,
+				Self::bottom,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Facing2 {
+		down,
+		north,
+		south,
+		west,
+		east,
+	}
+	impl FromStr for Facing2 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"down" => Ok(Facing2::down),
+				"north" => Ok(Facing2::north),
+				"south" => Ok(Facing2::south),
+				"west" => Ok(Facing2::west),
+				"east" => Ok(Facing2::east),
+				_ => Err(format!("Invalid Facing2 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Facing2 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::down,
+				Self::north,
+				Self::south,
+				Self::west,
+				Self::east,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 	pub enum VerticalDirection {
 		up,
 		down,
@@ -6142,8 +10597,264 @@ pub mod property_enums {
 			}
 		}
 	}
+	impl crate::Values for VerticalDirection {
+		type ValueIterator = std::vec::IntoIter<Self>;
 
-	#[derive(Debug)]
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::up,
+				Self::down,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum South {
+		up,
+		side,
+		none,
+	}
+	impl FromStr for South {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"up" => Ok(South::up),
+				"side" => Ok(South::side),
+				"none" => Ok(South::none),
+				_ => Err(format!("Invalid South value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for South {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::up,
+				Self::side,
+				Self::none,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Shape1 {
+		straight,
+		inner_left,
+		inner_right,
+		outer_left,
+		outer_right,
+	}
+	impl FromStr for Shape1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"straight" => Ok(Shape1::straight),
+				"inner_left" => Ok(Shape1::inner_left),
+				"inner_right" => Ok(Shape1::inner_right),
+				"outer_left" => Ok(Shape1::outer_left),
+				"outer_right" => Ok(Shape1::outer_right),
+				_ => Err(format!("Invalid Shape1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Shape1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::straight,
+				Self::inner_left,
+				Self::inner_right,
+				Self::outer_left,
+				Self::outer_right,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Thickness {
+		tip_merge,
+		tip,
+		frustum,
+		middle,
+		base,
+	}
+	impl FromStr for Thickness {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"tip_merge" => Ok(Thickness::tip_merge),
+				"tip" => Ok(Thickness::tip),
+				"frustum" => Ok(Thickness::frustum),
+				"middle" => Ok(Thickness::middle),
+				"base" => Ok(Thickness::base),
+				_ => Err(format!("Invalid Thickness value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Thickness {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::tip_merge,
+				Self::tip,
+				Self::frustum,
+				Self::middle,
+				Self::base,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Half {
+		upper,
+		lower,
+	}
+	impl FromStr for Half {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"upper" => Ok(Half::upper),
+				"lower" => Ok(Half::lower),
+				_ => Err(format!("Invalid Half value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Half {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::upper,
+				Self::lower,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum East {
+		up,
+		side,
+		none,
+	}
+	impl FromStr for East {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"up" => Ok(East::up),
+				"side" => Ok(East::side),
+				"none" => Ok(East::none),
+				_ => Err(format!("Invalid East value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for East {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::up,
+				Self::side,
+				Self::none,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum North {
+		up,
+		side,
+		none,
+	}
+	impl FromStr for North {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"up" => Ok(North::up),
+				"side" => Ok(North::side),
+				"none" => Ok(North::none),
+				_ => Err(format!("Invalid North value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for North {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::up,
+				Self::side,
+				Self::none,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Hinge {
+		left,
+		right,
+	}
+	impl FromStr for Hinge {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"left" => Ok(Hinge::left),
+				"right" => Ok(Hinge::right),
+				_ => Err(format!("Invalid Hinge value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Hinge {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::left,
+				Self::right,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Type2 {
+		top,
+		bottom,
+		double,
+	}
+	impl FromStr for Type2 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"top" => Ok(Type2::top),
+				"bottom" => Ok(Type2::bottom),
+				"double" => Ok(Type2::double),
+				_ => Err(format!("Invalid Type2 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Type2 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::top,
+				Self::bottom,
+				Self::double,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 	pub enum Shape {
 		north_south,
 		east_west,
@@ -6167,27 +10878,115 @@ pub mod property_enums {
 			}
 		}
 	}
+	impl crate::Values for Shape {
+		type ValueIterator = std::vec::IntoIter<Self>;
 
-	#[derive(Debug)]
-	pub enum North {
-		up,
-		side,
-		none,
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::north_south,
+				Self::east_west,
+				Self::ascending_east,
+				Self::ascending_west,
+				Self::ascending_north,
+				Self::ascending_south,
+			].into_iter()
+		}
 	}
-	impl FromStr for North {
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum South1 {
+		none,
+		low,
+		tall,
+	}
+	impl FromStr for South1 {
 		type Err = String;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
 			match s {
-				"up" => Ok(North::up),
-				"side" => Ok(North::side),
-				"none" => Ok(North::none),
-				_ => Err(format!("Invalid North value: {}", s)),
+				"none" => Ok(South1::none),
+				"low" => Ok(South1::low),
+				"tall" => Ok(South1::tall),
+				_ => Err(format!("Invalid South1 value: {}", s)),
 			}
 		}
 	}
+	impl crate::Values for South1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
 
-	#[derive(Debug)]
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::none,
+				Self::low,
+				Self::tall,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Mode1 {
+		save,
+		load,
+		corner,
+		data,
+	}
+	impl FromStr for Mode1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"save" => Ok(Mode1::save),
+				"load" => Ok(Mode1::load),
+				"corner" => Ok(Mode1::corner),
+				"data" => Ok(Mode1::data),
+				_ => Err(format!("Invalid Mode1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Mode1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::save,
+				Self::load,
+				Self::corner,
+				Self::data,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Type1 {
+		single,
+		left,
+		right,
+	}
+	impl FromStr for Type1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"single" => Ok(Type1::single),
+				"left" => Ok(Type1::left),
+				"right" => Ok(Type1::right),
+				_ => Err(format!("Invalid Type1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Type1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::single,
+				Self::left,
+				Self::right,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 	pub enum SculkSensorPhase {
 		inactive,
 		active,
@@ -6205,106 +11004,49 @@ pub mod property_enums {
 			}
 		}
 	}
+	impl crate::Values for SculkSensorPhase {
+		type ValueIterator = std::vec::IntoIter<Self>;
 
-	#[derive(Debug)]
-	pub enum Axis1 {
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::inactive,
+				Self::active,
+				Self::cooldown,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Axis {
 		x,
+		y,
 		z,
 	}
-	impl FromStr for Axis1 {
+	impl FromStr for Axis {
 		type Err = String;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
 			match s {
-				"x" => Ok(Axis1::x),
-				"z" => Ok(Axis1::z),
-				_ => Err(format!("Invalid Axis1 value: {}", s)),
+				"x" => Ok(Axis::x),
+				"y" => Ok(Axis::y),
+				"z" => Ok(Axis::z),
+				_ => Err(format!("Invalid Axis value: {}", s)),
 			}
 		}
 	}
+	impl crate::Values for Axis {
+		type ValueIterator = std::vec::IntoIter<Self>;
 
-	#[derive(Debug)]
-	pub enum East {
-		up,
-		side,
-		none,
-	}
-	impl FromStr for East {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"up" => Ok(East::up),
-				"side" => Ok(East::side),
-				"none" => Ok(East::none),
-				_ => Err(format!("Invalid East value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
-	pub enum Mode {
-		compare,
-		subtract,
-	}
-	impl FromStr for Mode {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"compare" => Ok(Mode::compare),
-				"subtract" => Ok(Mode::subtract),
-				_ => Err(format!("Invalid Mode value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
-	pub enum Attachment {
-		floor,
-		ceiling,
-		single_wall,
-		double_wall,
-	}
-	impl FromStr for Attachment {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"floor" => Ok(Attachment::floor),
-				"ceiling" => Ok(Attachment::ceiling),
-				"single_wall" => Ok(Attachment::single_wall),
-				"double_wall" => Ok(Attachment::double_wall),
-				_ => Err(format!("Invalid Attachment value: {}", s)),
-			}
-		}
-	}
-
-	#[derive(Debug)]
-	pub enum Facing2 {
-		down,
-		north,
-		south,
-		west,
-		east,
-	}
-	impl FromStr for Facing2 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"down" => Ok(Facing2::down),
-				"north" => Ok(Facing2::north),
-				"south" => Ok(Facing2::south),
-				"west" => Ok(Facing2::west),
-				"east" => Ok(Facing2::east),
-				_ => Err(format!("Invalid Facing2 value: {}", s)),
-			}
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::x,
+				Self::y,
+				Self::z,
+			].into_iter()
 		}
 	}
 
 }
-
 pub mod blocks_props {
 
 	use crate::BlockProperties;
@@ -16574,860 +21316,702 @@ pub mod blocks_props {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Air;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Stone;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Granite;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedGranite;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Diorite;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedDiorite;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Andesite;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedAndesite;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GrassBlock {
 	pub r#snowy: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Dirt;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CoarseDirt;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Podzol {
 	pub r#snowy: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Cobblestone;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OakPlanks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SprucePlanks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BirchPlanks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct JunglePlanks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AcaciaPlanks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DarkOakPlanks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MangrovePlanks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OakSapling {
-	pub r#stage: ConstrainedInt<0, 1>,
+	pub r#stage: ConstrainedInt::<0, 1>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SpruceSapling {
-	pub r#stage: ConstrainedInt<0, 1>,
+	pub r#stage: ConstrainedInt::<0, 1>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BirchSapling {
-	pub r#stage: ConstrainedInt<0, 1>,
+	pub r#stage: ConstrainedInt::<0, 1>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct JungleSapling {
-	pub r#stage: ConstrainedInt<0, 1>,
+	pub r#stage: ConstrainedInt::<0, 1>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AcaciaSapling {
-	pub r#stage: ConstrainedInt<0, 1>,
+	pub r#stage: ConstrainedInt::<0, 1>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DarkOakSapling {
-	pub r#stage: ConstrainedInt<0, 1>,
+	pub r#stage: ConstrainedInt::<0, 1>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MangrovePropagule {
-	pub r#age: ConstrainedInt<0, 4>,
+	pub r#age: ConstrainedInt::<0, 4>,
 	pub r#hanging: bool,
-	pub r#stage: ConstrainedInt<0, 1>,
+	pub r#stage: ConstrainedInt::<0, 1>,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Bedrock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Water {
-	pub r#level: ConstrainedInt<0, 15>,
+	pub r#level: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Lava {
-	pub r#level: ConstrainedInt<0, 15>,
+	pub r#level: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Sand;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedSand;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Gravel;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GoldOre;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeepslateGoldOre;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct IronOre;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeepslateIronOre;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CoalOre;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeepslateCoalOre;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct NetherGoldOre;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OakLog {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SpruceLog {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BirchLog {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct JungleLog {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AcaciaLog {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DarkOakLog {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MangroveLog {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MangroveRoots {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MuddyMangroveRoots {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StrippedSpruceLog {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StrippedBirchLog {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StrippedJungleLog {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StrippedAcaciaLog {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StrippedDarkOakLog {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StrippedOakLog {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StrippedMangroveLog {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OakWood {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SpruceWood {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BirchWood {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct JungleWood {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AcaciaWood {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DarkOakWood {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MangroveWood {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StrippedOakWood {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StrippedSpruceWood {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StrippedBirchWood {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StrippedJungleWood {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StrippedAcaciaWood {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StrippedDarkOakWood {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StrippedMangroveWood {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OakLeaves {
-	pub r#distance: ConstrainedInt<1, 7>,
+	pub r#distance: ConstrainedInt::<1, 7>,
 	pub r#persistent: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SpruceLeaves {
-	pub r#distance: ConstrainedInt<1, 7>,
+	pub r#distance: ConstrainedInt::<1, 7>,
 	pub r#persistent: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BirchLeaves {
-	pub r#distance: ConstrainedInt<1, 7>,
+	pub r#distance: ConstrainedInt::<1, 7>,
 	pub r#persistent: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct JungleLeaves {
-	pub r#distance: ConstrainedInt<1, 7>,
+	pub r#distance: ConstrainedInt::<1, 7>,
 	pub r#persistent: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AcaciaLeaves {
-	pub r#distance: ConstrainedInt<1, 7>,
+	pub r#distance: ConstrainedInt::<1, 7>,
 	pub r#persistent: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DarkOakLeaves {
-	pub r#distance: ConstrainedInt<1, 7>,
+	pub r#distance: ConstrainedInt::<1, 7>,
 	pub r#persistent: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MangroveLeaves {
-	pub r#distance: ConstrainedInt<1, 7>,
+	pub r#distance: ConstrainedInt::<1, 7>,
 	pub r#persistent: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AzaleaLeaves {
-	pub r#distance: ConstrainedInt<1, 7>,
+	pub r#distance: ConstrainedInt::<1, 7>,
 	pub r#persistent: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct FloweringAzaleaLeaves {
-	pub r#distance: ConstrainedInt<1, 7>,
+	pub r#distance: ConstrainedInt::<1, 7>,
 	pub r#persistent: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Sponge;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WetSponge;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Glass;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LapisOre;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeepslateLapisOre;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LapisBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Dispenser {
 	pub r#facing: property_enums::Facing,
 	pub r#triggered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Sandstone;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct ChiseledSandstone;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CutSandstone;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct NoteBlock {
 	pub r#instrument: property_enums::Instrument,
-	pub r#note: ConstrainedInt<0, 24>,
+	pub r#note: ConstrainedInt::<0, 24>,
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WhiteBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OrangeBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MagentaBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightBlueBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct YellowBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LimeBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PinkBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GrayBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightGrayBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CyanBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PurpleBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlueBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrownBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GreenBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlackBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PoweredRail {
 	pub r#powered: bool,
 	pub r#shape: property_enums::Shape,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DetectorRail {
 	pub r#powered: bool,
 	pub r#shape: property_enums::Shape,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StickyPiston {
 	pub r#extended: bool,
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Cobweb;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Grass;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Fern;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeadBush;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Seagrass;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct TallSeagrass {
 	pub r#half: property_enums::Half,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Piston {
 	pub r#extended: bool,
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PistonHead {
 	pub r#facing: property_enums::Facing,
 	pub r#short: bool,
 	pub r#type: property_enums::Type,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WhiteWool;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OrangeWool;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MagentaWool;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightBlueWool;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct YellowWool;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LimeWool;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PinkWool;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GrayWool;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightGrayWool;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CyanWool;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PurpleWool;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlueWool;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrownWool;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GreenWool;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedWool;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlackWool;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MovingPiston {
 	pub r#facing: property_enums::Facing,
 	pub r#type: property_enums::Type,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Dandelion;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Poppy;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlueOrchid;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Allium;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AzureBluet;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedTulip;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OrangeTulip;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WhiteTulip;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PinkTulip;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OxeyeDaisy;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Cornflower;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WitherRose;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LilyOfTheValley;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrownMushroom;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedMushroom;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GoldBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct IronBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Bricks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Tnt {
 	pub r#unstable: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Bookshelf;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MossyCobblestone;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Obsidian;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Torch;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WallTorch {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Fire {
-	pub r#age: ConstrainedInt<0, 15>,
+	pub r#age: ConstrainedInt::<0, 15>,
 	pub r#east: bool,
 	pub r#north: bool,
 	pub r#south: bool,
@@ -17435,16 +22019,13 @@ pub struct Fire {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SoulFire;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Spawner;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OakStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -17452,110 +22033,93 @@ pub struct OakStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Chest {
 	pub r#facing: property_enums::Facing1,
 	pub r#type: property_enums::Type1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedstoneWire {
 	pub r#east: property_enums::East,
 	pub r#north: property_enums::North,
-	pub r#power: ConstrainedInt<0, 15>,
+	pub r#power: ConstrainedInt::<0, 15>,
 	pub r#south: property_enums::South,
 	pub r#west: property_enums::West,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DiamondOre;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeepslateDiamondOre;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DiamondBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CraftingTable;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Wheat {
-	pub r#age: ConstrainedInt<0, 7>,
+	pub r#age: ConstrainedInt::<0, 7>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Farmland {
-	pub r#moisture: ConstrainedInt<0, 7>,
+	pub r#moisture: ConstrainedInt::<0, 7>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Furnace {
 	pub r#facing: property_enums::Facing1,
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OakSign {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SpruceSign {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BirchSign {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AcaciaSign {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct JungleSign {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DarkOakSign {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MangroveSign {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OakDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
@@ -17564,22 +22128,19 @@ pub struct OakDoor {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Ladder {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Rail {
 	pub r#shape: property_enums::Shape2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CobblestoneStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -17587,71 +22148,61 @@ pub struct CobblestoneStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OakWallSign {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SpruceWallSign {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BirchWallSign {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AcaciaWallSign {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct JungleWallSign {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DarkOakWallSign {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MangroveWallSign {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Lever {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StonePressurePlate {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct IronDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
@@ -17660,119 +22211,99 @@ pub struct IronDoor {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OakPressurePlate {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SprucePressurePlate {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BirchPressurePlate {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct JunglePressurePlate {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AcaciaPressurePlate {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DarkOakPressurePlate {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MangrovePressurePlate {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedstoneOre {
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeepslateRedstoneOre {
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedstoneTorch {
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedstoneWallTorch {
 	pub r#facing: property_enums::Facing1,
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StoneButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Snow {
-	pub r#layers: ConstrainedInt<1, 8>,
+	pub r#layers: ConstrainedInt::<1, 8>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Ice;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SnowBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Cactus {
-	pub r#age: ConstrainedInt<0, 15>,
+	pub r#age: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Clay;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SugarCane {
-	pub r#age: ConstrainedInt<0, 15>,
+	pub r#age: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Jukebox {
 	pub r#has_record: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OakFence {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -17781,147 +22312,116 @@ pub struct OakFence {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Pumpkin;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Netherrack;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SoulSand;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SoulSoil;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Basalt {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedBasalt {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SoulTorch;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SoulWallTorch {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Glowstone;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct NetherPortal {
 	pub r#axis: property_enums::Axis1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CarvedPumpkin {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct JackOLantern {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Cake {
-	pub r#bites: ConstrainedInt<0, 6>,
+	pub r#bites: ConstrainedInt::<0, 6>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Repeater {
-	pub r#delay: ConstrainedInt<1, 4>,
+	pub r#delay: ConstrainedInt::<1, 4>,
 	pub r#facing: property_enums::Facing1,
 	pub r#locked: bool,
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WhiteStainedGlass;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OrangeStainedGlass;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MagentaStainedGlass;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightBlueStainedGlass;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct YellowStainedGlass;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LimeStainedGlass;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PinkStainedGlass;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GrayStainedGlass;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightGrayStainedGlass;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CyanStainedGlass;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PurpleStainedGlass;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlueStainedGlass;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrownStainedGlass;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GreenStainedGlass;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedStainedGlass;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlackStainedGlass;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OakTrapdoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -17930,8 +22430,7 @@ pub struct OakTrapdoor {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SpruceTrapdoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -17940,8 +22439,7 @@ pub struct SpruceTrapdoor {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BirchTrapdoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -17950,8 +22448,7 @@ pub struct BirchTrapdoor {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct JungleTrapdoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -17960,8 +22457,7 @@ pub struct JungleTrapdoor {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AcaciaTrapdoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -17970,8 +22466,7 @@ pub struct AcaciaTrapdoor {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DarkOakTrapdoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -17980,8 +22475,7 @@ pub struct DarkOakTrapdoor {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MangroveTrapdoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -17990,56 +22484,43 @@ pub struct MangroveTrapdoor {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StoneBricks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MossyStoneBricks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CrackedStoneBricks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct ChiseledStoneBricks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PackedMud;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MudBricks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct InfestedStone;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct InfestedCobblestone;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct InfestedStoneBricks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct InfestedMossyStoneBricks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct InfestedCrackedStoneBricks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct InfestedChiseledStoneBricks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrownMushroomBlock {
 	pub r#down: bool,
 	pub r#east: bool,
@@ -18049,8 +22530,7 @@ pub struct BrownMushroomBlock {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedMushroomBlock {
 	pub r#down: bool,
 	pub r#east: bool,
@@ -18060,8 +22540,7 @@ pub struct RedMushroomBlock {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MushroomStem {
 	pub r#down: bool,
 	pub r#east: bool,
@@ -18071,8 +22550,7 @@ pub struct MushroomStem {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct IronBars {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -18081,15 +22559,13 @@ pub struct IronBars {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Chain {
 	pub r#axis: property_enums::Axis,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -18098,36 +22574,30 @@ pub struct GlassPane {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Melon;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AttachedPumpkinStem {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AttachedMelonStem {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PumpkinStem {
-	pub r#age: ConstrainedInt<0, 7>,
+	pub r#age: ConstrainedInt::<0, 7>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MelonStem {
-	pub r#age: ConstrainedInt<0, 7>,
+	pub r#age: ConstrainedInt::<0, 7>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Vine {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -18136,8 +22606,7 @@ pub struct Vine {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GlowLichen {
 	pub r#down: bool,
 	pub r#east: bool,
@@ -18148,8 +22617,7 @@ pub struct GlowLichen {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OakFenceGate {
 	pub r#facing: property_enums::Facing1,
 	pub r#in_wall: bool,
@@ -18157,8 +22625,7 @@ pub struct OakFenceGate {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrickStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -18166,8 +22633,7 @@ pub struct BrickStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StoneBrickStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -18175,8 +22641,7 @@ pub struct StoneBrickStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MudBrickStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -18184,22 +22649,18 @@ pub struct MudBrickStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Mycelium {
 	pub r#snowy: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LilyPad;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct NetherBricks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct NetherBrickFence {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -18208,8 +22669,7 @@ pub struct NetherBrickFence {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct NetherBrickStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -18217,78 +22677,64 @@ pub struct NetherBrickStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct NetherWart {
-	pub r#age: ConstrainedInt<0, 3>,
+	pub r#age: ConstrainedInt::<0, 3>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct EnchantingTable;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrewingStand {
 	pub r#has_bottle_0: bool,
 	pub r#has_bottle_1: bool,
 	pub r#has_bottle_2: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Cauldron;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WaterCauldron {
-	pub r#level: ConstrainedInt<1, 3>,
+	pub r#level: ConstrainedInt::<1, 3>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LavaCauldron;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PowderSnowCauldron {
-	pub r#level: ConstrainedInt<1, 3>,
+	pub r#level: ConstrainedInt::<1, 3>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct EndPortal;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct EndPortalFrame {
 	pub r#eye: bool,
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct EndStone;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DragonEgg;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedstoneLamp {
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Cocoa {
-	pub r#age: ConstrainedInt<0, 2>,
+	pub r#age: ConstrainedInt::<0, 2>,
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SandstoneStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -18296,31 +22742,26 @@ pub struct SandstoneStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct EmeraldOre;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeepslateEmeraldOre;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct EnderChest {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct TripwireHook {
 	pub r#attached: bool,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Tripwire {
 	pub r#attached: bool,
 	pub r#disarmed: bool,
@@ -18331,12 +22772,10 @@ pub struct Tripwire {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct EmeraldBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SpruceStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -18344,8 +22783,7 @@ pub struct SpruceStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BirchStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -18353,8 +22791,7 @@ pub struct BirchStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct JungleStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -18362,19 +22799,16 @@ pub struct JungleStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CommandBlock {
 	pub r#conditional: bool,
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Beacon;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CobblestoneWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -18384,8 +22818,7 @@ pub struct CobblestoneWall {
 	pub r#west: property_enums::West1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MossyCobblestoneWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -18395,334 +22828,272 @@ pub struct MossyCobblestoneWall {
 	pub r#west: property_enums::West1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct FlowerPot;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedOakSapling;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedSpruceSapling;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedBirchSapling;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedJungleSapling;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedAcaciaSapling;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedDarkOakSapling;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedMangrovePropagule;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedFern;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedDandelion;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedPoppy;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedBlueOrchid;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedAllium;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedAzureBluet;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedRedTulip;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedOrangeTulip;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedWhiteTulip;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedPinkTulip;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedOxeyeDaisy;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedCornflower;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedLilyOfTheValley;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedWitherRose;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedRedMushroom;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedBrownMushroom;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedDeadBush;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedCactus;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Carrots {
-	pub r#age: ConstrainedInt<0, 7>,
+	pub r#age: ConstrainedInt::<0, 7>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Potatoes {
-	pub r#age: ConstrainedInt<0, 7>,
+	pub r#age: ConstrainedInt::<0, 7>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OakButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SpruceButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BirchButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct JungleButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AcaciaButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DarkOakButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MangroveButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SkeletonSkull {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SkeletonWallSkull {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WitherSkeletonSkull {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WitherSkeletonWallSkull {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct ZombieHead {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct ZombieWallHead {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PlayerHead {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PlayerWallHead {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CreeperHead {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CreeperWallHead {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DragonHead {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DragonWallHead {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Anvil {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct ChippedAnvil {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DamagedAnvil {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct TrappedChest {
 	pub r#facing: property_enums::Facing1,
 	pub r#type: property_enums::Type1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightWeightedPressurePlate {
-	pub r#power: ConstrainedInt<0, 15>,
+	pub r#power: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct HeavyWeightedPressurePlate {
-	pub r#power: ConstrainedInt<0, 15>,
+	pub r#power: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Comparator {
 	pub r#facing: property_enums::Facing1,
 	pub r#mode: property_enums::Mode,
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DaylightDetector {
 	pub r#inverted: bool,
-	pub r#power: ConstrainedInt<0, 15>,
+	pub r#power: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedstoneBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct NetherQuartzOre;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Hopper {
 	pub r#enabled: bool,
 	pub r#facing: property_enums::Facing2,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct QuartzBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct ChiseledQuartzBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct QuartzPillar {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct QuartzStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -18730,87 +23101,68 @@ pub struct QuartzStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct ActivatorRail {
 	pub r#powered: bool,
 	pub r#shape: property_enums::Shape,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Dropper {
 	pub r#facing: property_enums::Facing,
 	pub r#triggered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WhiteTerracotta;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OrangeTerracotta;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MagentaTerracotta;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightBlueTerracotta;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct YellowTerracotta;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LimeTerracotta;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PinkTerracotta;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GrayTerracotta;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightGrayTerracotta;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CyanTerracotta;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PurpleTerracotta;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlueTerracotta;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrownTerracotta;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GreenTerracotta;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedTerracotta;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlackTerracotta;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WhiteStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -18819,8 +23171,7 @@ pub struct WhiteStainedGlassPane {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OrangeStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -18829,8 +23180,7 @@ pub struct OrangeStainedGlassPane {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MagentaStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -18839,8 +23189,7 @@ pub struct MagentaStainedGlassPane {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightBlueStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -18849,8 +23198,7 @@ pub struct LightBlueStainedGlassPane {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct YellowStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -18859,8 +23207,7 @@ pub struct YellowStainedGlassPane {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LimeStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -18869,8 +23216,7 @@ pub struct LimeStainedGlassPane {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PinkStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -18879,8 +23225,7 @@ pub struct PinkStainedGlassPane {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GrayStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -18889,8 +23234,7 @@ pub struct GrayStainedGlassPane {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightGrayStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -18899,8 +23243,7 @@ pub struct LightGrayStainedGlassPane {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CyanStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -18909,8 +23252,7 @@ pub struct CyanStainedGlassPane {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PurpleStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -18919,8 +23261,7 @@ pub struct PurpleStainedGlassPane {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlueStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -18929,8 +23270,7 @@ pub struct BlueStainedGlassPane {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrownStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -18939,8 +23279,7 @@ pub struct BrownStainedGlassPane {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GreenStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -18949,8 +23288,7 @@ pub struct GreenStainedGlassPane {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -18959,8 +23297,7 @@ pub struct RedStainedGlassPane {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlackStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -18969,8 +23306,7 @@ pub struct BlackStainedGlassPane {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AcaciaStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -18978,8 +23314,7 @@ pub struct AcaciaStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DarkOakStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -18987,8 +23322,7 @@ pub struct DarkOakStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MangroveStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -18996,23 +23330,19 @@ pub struct MangroveStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SlimeBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Barrier;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Light {
-	pub r#level: ConstrainedInt<0, 15>,
+	pub r#level: ConstrainedInt::<0, 15>,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct IronTrapdoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -19021,20 +23351,16 @@ pub struct IronTrapdoor {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Prismarine;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PrismarineBricks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DarkPrismarine;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PrismarineStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -19042,8 +23368,7 @@ pub struct PrismarineStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PrismarineBrickStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -19051,8 +23376,7 @@ pub struct PrismarineBrickStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DarkPrismarineStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -19060,355 +23384,289 @@ pub struct DarkPrismarineStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PrismarineSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PrismarineBrickSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DarkPrismarineSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SeaLantern;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct HayBlock {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WhiteCarpet;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OrangeCarpet;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MagentaCarpet;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightBlueCarpet;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct YellowCarpet;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LimeCarpet;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PinkCarpet;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GrayCarpet;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightGrayCarpet;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CyanCarpet;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PurpleCarpet;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlueCarpet;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrownCarpet;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GreenCarpet;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedCarpet;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlackCarpet;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Terracotta;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CoalBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PackedIce;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Sunflower {
 	pub r#half: property_enums::Half,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Lilac {
 	pub r#half: property_enums::Half,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RoseBush {
 	pub r#half: property_enums::Half,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Peony {
 	pub r#half: property_enums::Half,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct TallGrass {
 	pub r#half: property_enums::Half,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LargeFern {
 	pub r#half: property_enums::Half,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WhiteBanner {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OrangeBanner {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MagentaBanner {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightBlueBanner {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct YellowBanner {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LimeBanner {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PinkBanner {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GrayBanner {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightGrayBanner {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CyanBanner {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PurpleBanner {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlueBanner {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrownBanner {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GreenBanner {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedBanner {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlackBanner {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WhiteWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OrangeWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MagentaWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightBlueWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct YellowWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LimeWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PinkWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GrayWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightGrayWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CyanWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PurpleWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlueWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrownWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GreenWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlackWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedSandstone;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct ChiseledRedSandstone;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CutRedSandstone;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedSandstoneStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -19416,171 +23674,145 @@ pub struct RedSandstoneStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OakSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SpruceSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BirchSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct JungleSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AcaciaSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DarkOakSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MangroveSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SmoothStoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SandstoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CutSandstoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PetrifiedOakSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CobblestoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrickSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StoneBrickSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MudBrickSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct NetherBrickSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct QuartzSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedSandstoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CutRedSandstoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PurpurSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SmoothStone;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SmoothSandstone;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SmoothQuartz;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SmoothRedSandstone;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SpruceFenceGate {
 	pub r#facing: property_enums::Facing1,
 	pub r#in_wall: bool,
@@ -19588,8 +23820,7 @@ pub struct SpruceFenceGate {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BirchFenceGate {
 	pub r#facing: property_enums::Facing1,
 	pub r#in_wall: bool,
@@ -19597,8 +23828,7 @@ pub struct BirchFenceGate {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct JungleFenceGate {
 	pub r#facing: property_enums::Facing1,
 	pub r#in_wall: bool,
@@ -19606,8 +23836,7 @@ pub struct JungleFenceGate {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AcaciaFenceGate {
 	pub r#facing: property_enums::Facing1,
 	pub r#in_wall: bool,
@@ -19615,8 +23844,7 @@ pub struct AcaciaFenceGate {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DarkOakFenceGate {
 	pub r#facing: property_enums::Facing1,
 	pub r#in_wall: bool,
@@ -19624,8 +23852,7 @@ pub struct DarkOakFenceGate {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MangroveFenceGate {
 	pub r#facing: property_enums::Facing1,
 	pub r#in_wall: bool,
@@ -19633,8 +23860,7 @@ pub struct MangroveFenceGate {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SpruceFence {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -19643,8 +23869,7 @@ pub struct SpruceFence {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BirchFence {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -19653,8 +23878,7 @@ pub struct BirchFence {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct JungleFence {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -19663,8 +23887,7 @@ pub struct JungleFence {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AcaciaFence {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -19673,8 +23896,7 @@ pub struct AcaciaFence {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DarkOakFence {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -19683,8 +23905,7 @@ pub struct DarkOakFence {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MangroveFence {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -19693,8 +23914,7 @@ pub struct MangroveFence {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SpruceDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
@@ -19703,8 +23923,7 @@ pub struct SpruceDoor {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BirchDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
@@ -19713,8 +23932,7 @@ pub struct BirchDoor {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct JungleDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
@@ -19723,8 +23941,7 @@ pub struct JungleDoor {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AcaciaDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
@@ -19733,8 +23950,7 @@ pub struct AcaciaDoor {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DarkOakDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
@@ -19743,8 +23959,7 @@ pub struct DarkOakDoor {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MangroveDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
@@ -19753,14 +23968,12 @@ pub struct MangroveDoor {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct EndRod {
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct ChorusPlant {
 	pub r#down: bool,
 	pub r#east: bool,
@@ -19770,24 +23983,20 @@ pub struct ChorusPlant {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct ChorusFlower {
-	pub r#age: ConstrainedInt<0, 5>,
+	pub r#age: ConstrainedInt::<0, 5>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PurpurBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PurpurPillar {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PurpurStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -19795,699 +24004,567 @@ pub struct PurpurStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct EndStoneBricks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Beetroots {
-	pub r#age: ConstrainedInt<0, 3>,
+	pub r#age: ConstrainedInt::<0, 3>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DirtPath;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct EndGateway;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RepeatingCommandBlock {
 	pub r#conditional: bool,
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct ChainCommandBlock {
 	pub r#conditional: bool,
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct FrostedIce {
-	pub r#age: ConstrainedInt<0, 3>,
+	pub r#age: ConstrainedInt::<0, 3>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MagmaBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct NetherWartBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedNetherBricks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BoneBlock {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StructureVoid;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Observer {
 	pub r#facing: property_enums::Facing,
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct ShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WhiteShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OrangeShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MagentaShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightBlueShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct YellowShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LimeShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PinkShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GrayShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightGrayShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CyanShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PurpleShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlueShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrownShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GreenShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlackShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WhiteGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OrangeGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MagentaGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightBlueGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct YellowGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LimeGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PinkGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GrayGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightGrayGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CyanGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PurpleGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlueGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrownGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GreenGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlackGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WhiteConcrete;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OrangeConcrete;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MagentaConcrete;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightBlueConcrete;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct YellowConcrete;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LimeConcrete;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PinkConcrete;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GrayConcrete;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightGrayConcrete;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CyanConcrete;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PurpleConcrete;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlueConcrete;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrownConcrete;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GreenConcrete;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedConcrete;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlackConcrete;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WhiteConcretePowder;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OrangeConcretePowder;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MagentaConcretePowder;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightBlueConcretePowder;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct YellowConcretePowder;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LimeConcretePowder;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PinkConcretePowder;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GrayConcretePowder;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightGrayConcretePowder;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CyanConcretePowder;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PurpleConcretePowder;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlueConcretePowder;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrownConcretePowder;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GreenConcretePowder;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedConcretePowder;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlackConcretePowder;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Kelp {
-	pub r#age: ConstrainedInt<0, 25>,
+	pub r#age: ConstrainedInt::<0, 25>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct KelpPlant;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DriedKelpBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct TurtleEgg {
-	pub r#eggs: ConstrainedInt<1, 4>,
-	pub r#hatch: ConstrainedInt<0, 2>,
+	pub r#eggs: ConstrainedInt::<1, 4>,
+	pub r#hatch: ConstrainedInt::<0, 2>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeadTubeCoralBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeadBrainCoralBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeadBubbleCoralBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeadFireCoralBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeadHornCoralBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct TubeCoralBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrainCoralBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BubbleCoralBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct FireCoralBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct HornCoralBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeadTubeCoral {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeadBrainCoral {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeadBubbleCoral {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeadFireCoral {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeadHornCoral {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct TubeCoral {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrainCoral {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BubbleCoral {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct FireCoral {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct HornCoral {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeadTubeCoralFan {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeadBrainCoralFan {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeadBubbleCoralFan {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeadFireCoralFan {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeadHornCoralFan {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct TubeCoralFan {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrainCoralFan {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BubbleCoralFan {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct FireCoralFan {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct HornCoralFan {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeadTubeCoralWallFan {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeadBrainCoralWallFan {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeadBubbleCoralWallFan {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeadFireCoralWallFan {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeadHornCoralWallFan {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct TubeCoralWallFan {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrainCoralWallFan {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BubbleCoralWallFan {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct FireCoralWallFan {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct HornCoralWallFan {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SeaPickle {
-	pub r#pickles: ConstrainedInt<1, 4>,
+	pub r#pickles: ConstrainedInt::<1, 4>,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlueIce;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Conduit {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BambooSapling;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Bamboo {
-	pub r#age: ConstrainedInt<0, 1>,
+	pub r#age: ConstrainedInt::<0, 1>,
 	pub r#leaves: property_enums::Leaves,
-	pub r#stage: ConstrainedInt<0, 1>,
+	pub r#stage: ConstrainedInt::<0, 1>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedBamboo;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct VoidAir;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CaveAir;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BubbleColumn {
 	pub r#drag: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedGraniteStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -20495,8 +24572,7 @@ pub struct PolishedGraniteStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SmoothRedSandstoneStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -20504,8 +24580,7 @@ pub struct SmoothRedSandstoneStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MossyStoneBrickStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -20513,8 +24588,7 @@ pub struct MossyStoneBrickStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedDioriteStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -20522,8 +24596,7 @@ pub struct PolishedDioriteStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MossyCobblestoneStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -20531,8 +24604,7 @@ pub struct MossyCobblestoneStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct EndStoneBrickStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -20540,8 +24612,7 @@ pub struct EndStoneBrickStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StoneStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -20549,8 +24620,7 @@ pub struct StoneStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SmoothSandstoneStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -20558,8 +24628,7 @@ pub struct SmoothSandstoneStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SmoothQuartzStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -20567,8 +24636,7 @@ pub struct SmoothQuartzStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GraniteStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -20576,8 +24644,7 @@ pub struct GraniteStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AndesiteStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -20585,8 +24652,7 @@ pub struct AndesiteStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedNetherBrickStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -20594,8 +24660,7 @@ pub struct RedNetherBrickStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedAndesiteStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -20603,8 +24668,7 @@ pub struct PolishedAndesiteStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DioriteStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -20612,99 +24676,85 @@ pub struct DioriteStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedGraniteSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SmoothRedSandstoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MossyStoneBrickSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedDioriteSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MossyCobblestoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct EndStoneBrickSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SmoothSandstoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SmoothQuartzSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GraniteSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AndesiteSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedNetherBrickSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedAndesiteSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DioriteSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrickWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -20714,8 +24764,7 @@ pub struct BrickWall {
 	pub r#west: property_enums::West1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PrismarineWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -20725,8 +24774,7 @@ pub struct PrismarineWall {
 	pub r#west: property_enums::West1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedSandstoneWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -20736,8 +24784,7 @@ pub struct RedSandstoneWall {
 	pub r#west: property_enums::West1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MossyStoneBrickWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -20747,8 +24794,7 @@ pub struct MossyStoneBrickWall {
 	pub r#west: property_enums::West1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GraniteWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -20758,8 +24804,7 @@ pub struct GraniteWall {
 	pub r#west: property_enums::West1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StoneBrickWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -20769,8 +24814,7 @@ pub struct StoneBrickWall {
 	pub r#west: property_enums::West1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MudBrickWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -20780,8 +24824,7 @@ pub struct MudBrickWall {
 	pub r#west: property_enums::West1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct NetherBrickWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -20791,8 +24834,7 @@ pub struct NetherBrickWall {
 	pub r#west: property_enums::West1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AndesiteWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -20802,8 +24844,7 @@ pub struct AndesiteWall {
 	pub r#west: property_enums::West1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedNetherBrickWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -20813,8 +24854,7 @@ pub struct RedNetherBrickWall {
 	pub r#west: property_enums::West1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SandstoneWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -20824,8 +24864,7 @@ pub struct SandstoneWall {
 	pub r#west: property_enums::West1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct EndStoneBrickWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -20835,8 +24874,7 @@ pub struct EndStoneBrickWall {
 	pub r#west: property_enums::West1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DioriteWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -20846,98 +24884,83 @@ pub struct DioriteWall {
 	pub r#west: property_enums::West1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Scaffolding {
 	pub r#bottom: bool,
-	pub r#distance: ConstrainedInt<0, 7>,
+	pub r#distance: ConstrainedInt::<0, 7>,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Loom {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Barrel {
 	pub r#facing: property_enums::Facing,
 	pub r#open: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Smoker {
 	pub r#facing: property_enums::Facing1,
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlastFurnace {
 	pub r#facing: property_enums::Facing1,
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CartographyTable;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct FletchingTable;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Grindstone {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Lectern {
 	pub r#facing: property_enums::Facing1,
 	pub r#has_book: bool,
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SmithingTable;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Stonecutter {
 	pub r#facing: property_enums::Facing1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Bell {
 	pub r#attachment: property_enums::Attachment,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Lantern {
 	pub r#hanging: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SoulLantern {
 	pub r#hanging: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Campfire {
 	pub r#facing: property_enums::Facing1,
 	pub r#lit: bool,
@@ -20945,8 +24968,7 @@ pub struct Campfire {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SoulCampfire {
 	pub r#facing: property_enums::Facing1,
 	pub r#lit: bool,
@@ -20954,152 +24976,123 @@ pub struct SoulCampfire {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SweetBerryBush {
-	pub r#age: ConstrainedInt<0, 3>,
+	pub r#age: ConstrainedInt::<0, 3>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WarpedStem {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StrippedWarpedStem {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WarpedHyphae {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StrippedWarpedHyphae {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WarpedNylium;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WarpedFungus;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WarpedWartBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WarpedRoots;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct NetherSprouts;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CrimsonStem {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StrippedCrimsonStem {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CrimsonHyphae {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StrippedCrimsonHyphae {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CrimsonNylium;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CrimsonFungus;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Shroomlight;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WeepingVines {
-	pub r#age: ConstrainedInt<0, 25>,
+	pub r#age: ConstrainedInt::<0, 25>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WeepingVinesPlant;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct TwistingVines {
-	pub r#age: ConstrainedInt<0, 25>,
+	pub r#age: ConstrainedInt::<0, 25>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct TwistingVinesPlant;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CrimsonRoots;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CrimsonPlanks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WarpedPlanks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CrimsonSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WarpedSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CrimsonPressurePlate {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WarpedPressurePlate {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CrimsonFence {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -21108,8 +25101,7 @@ pub struct CrimsonFence {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WarpedFence {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -21118,8 +25110,7 @@ pub struct WarpedFence {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CrimsonTrapdoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -21128,8 +25119,7 @@ pub struct CrimsonTrapdoor {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WarpedTrapdoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -21138,8 +25128,7 @@ pub struct WarpedTrapdoor {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CrimsonFenceGate {
 	pub r#facing: property_enums::Facing1,
 	pub r#in_wall: bool,
@@ -21147,8 +25136,7 @@ pub struct CrimsonFenceGate {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WarpedFenceGate {
 	pub r#facing: property_enums::Facing1,
 	pub r#in_wall: bool,
@@ -21156,8 +25144,7 @@ pub struct WarpedFenceGate {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CrimsonStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -21165,8 +25152,7 @@ pub struct CrimsonStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WarpedStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -21174,24 +25160,21 @@ pub struct WarpedStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CrimsonButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WarpedButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CrimsonDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
@@ -21200,8 +25183,7 @@ pub struct CrimsonDoor {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WarpedDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
@@ -21210,124 +25192,101 @@ pub struct WarpedDoor {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CrimsonSign {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WarpedSign {
-	pub r#rotation: ConstrainedInt<0, 15>,
+	pub r#rotation: ConstrainedInt::<0, 15>,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CrimsonWallSign {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WarpedWallSign {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct StructureBlock {
 	pub r#mode: property_enums::Mode1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Jigsaw {
 	pub r#orientation: property_enums::Orientation,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Composter {
-	pub r#level: ConstrainedInt<0, 8>,
+	pub r#level: ConstrainedInt::<0, 8>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Target {
-	pub r#power: ConstrainedInt<0, 15>,
+	pub r#power: ConstrainedInt::<0, 15>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BeeNest {
 	pub r#facing: property_enums::Facing1,
-	pub r#honey_level: ConstrainedInt<0, 5>,
+	pub r#honey_level: ConstrainedInt::<0, 5>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Beehive {
 	pub r#facing: property_enums::Facing1,
-	pub r#honey_level: ConstrainedInt<0, 5>,
+	pub r#honey_level: ConstrainedInt::<0, 5>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct HoneyBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct HoneycombBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct NetheriteBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AncientDebris;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CryingObsidian;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RespawnAnchor {
-	pub r#charges: ConstrainedInt<0, 4>,
+	pub r#charges: ConstrainedInt::<0, 4>,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedCrimsonFungus;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedWarpedFungus;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedCrimsonRoots;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedWarpedRoots;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Lodestone;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Blackstone;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlackstoneStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -21335,8 +25294,7 @@ pub struct BlackstoneStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlackstoneWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -21346,38 +25304,31 @@ pub struct BlackstoneWall {
 	pub r#west: property_enums::West1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlackstoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedBlackstone;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedBlackstoneBricks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CrackedPolishedBlackstoneBricks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct ChiseledPolishedBlackstone;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedBlackstoneBrickSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedBlackstoneBrickStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -21385,8 +25336,7 @@ pub struct PolishedBlackstoneBrickStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedBlackstoneBrickWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -21396,12 +25346,10 @@ pub struct PolishedBlackstoneBrickWall {
 	pub r#west: property_enums::West1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GildedBlackstone;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedBlackstoneStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -21409,29 +25357,25 @@ pub struct PolishedBlackstoneStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedBlackstoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedBlackstonePressurePlate {
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedBlackstoneButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedBlackstoneWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -21441,322 +25385,272 @@ pub struct PolishedBlackstoneWall {
 	pub r#west: property_enums::West1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct ChiseledNetherBricks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CrackedNetherBricks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct QuartzBricks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Candle {
-	pub r#candles: ConstrainedInt<1, 4>,
+	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WhiteCandle {
-	pub r#candles: ConstrainedInt<1, 4>,
+	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OrangeCandle {
-	pub r#candles: ConstrainedInt<1, 4>,
+	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MagentaCandle {
-	pub r#candles: ConstrainedInt<1, 4>,
+	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightBlueCandle {
-	pub r#candles: ConstrainedInt<1, 4>,
+	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct YellowCandle {
-	pub r#candles: ConstrainedInt<1, 4>,
+	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LimeCandle {
-	pub r#candles: ConstrainedInt<1, 4>,
+	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PinkCandle {
-	pub r#candles: ConstrainedInt<1, 4>,
+	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GrayCandle {
-	pub r#candles: ConstrainedInt<1, 4>,
+	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightGrayCandle {
-	pub r#candles: ConstrainedInt<1, 4>,
+	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CyanCandle {
-	pub r#candles: ConstrainedInt<1, 4>,
+	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PurpleCandle {
-	pub r#candles: ConstrainedInt<1, 4>,
+	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlueCandle {
-	pub r#candles: ConstrainedInt<1, 4>,
+	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrownCandle {
-	pub r#candles: ConstrainedInt<1, 4>,
+	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GreenCandle {
-	pub r#candles: ConstrainedInt<1, 4>,
+	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedCandle {
-	pub r#candles: ConstrainedInt<1, 4>,
+	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlackCandle {
-	pub r#candles: ConstrainedInt<1, 4>,
+	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CandleCake {
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WhiteCandleCake {
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OrangeCandleCake {
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MagentaCandleCake {
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightBlueCandleCake {
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct YellowCandleCake {
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LimeCandleCake {
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PinkCandleCake {
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GrayCandleCake {
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightGrayCandleCake {
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CyanCandleCake {
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PurpleCandleCake {
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlueCandleCake {
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BrownCandleCake {
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct GreenCandleCake {
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RedCandleCake {
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BlackCandleCake {
 	pub r#lit: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AmethystBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BuddingAmethyst;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct AmethystCluster {
 	pub r#facing: property_enums::Facing,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LargeAmethystBud {
 	pub r#facing: property_enums::Facing,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MediumAmethystBud {
 	pub r#facing: property_enums::Facing,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SmallAmethystBud {
 	pub r#facing: property_enums::Facing,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Tuff;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Calcite;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct TintedGlass;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PowderSnow;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SculkSensor {
-	pub r#power: ConstrainedInt<0, 15>,
+	pub r#power: ConstrainedInt::<0, 15>,
 	pub r#sculk_sensor_phase: property_enums::SculkSensorPhase,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Sculk;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SculkVein {
 	pub r#down: bool,
 	pub r#east: bool,
@@ -21767,62 +25661,49 @@ pub struct SculkVein {
 	pub r#west: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SculkCatalyst {
 	pub r#bloom: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SculkShrieker {
 	pub r#can_summon: bool,
 	pub r#shrieking: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OxidizedCopper;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WeatheredCopper;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct ExposedCopper;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CopperBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CopperOre;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeepslateCopperOre;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OxidizedCutCopper;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WeatheredCutCopper;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct ExposedCutCopper;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CutCopper;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OxidizedCutCopperStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -21830,8 +25711,7 @@ pub struct OxidizedCutCopperStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WeatheredCutCopperStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -21839,8 +25719,7 @@ pub struct WeatheredCutCopperStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct ExposedCutCopperStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -21848,8 +25727,7 @@ pub struct ExposedCutCopperStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CutCopperStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -21857,68 +25735,55 @@ pub struct CutCopperStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OxidizedCutCopperSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WeatheredCutCopperSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct ExposedCutCopperSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CutCopperSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WaxedCopperBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WaxedWeatheredCopper;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WaxedExposedCopper;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WaxedOxidizedCopper;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WaxedOxidizedCutCopper;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WaxedWeatheredCutCopper;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WaxedExposedCutCopper;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WaxedCutCopper;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WaxedOxidizedCutCopperStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -21926,8 +25791,7 @@ pub struct WaxedOxidizedCutCopperStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WaxedWeatheredCutCopperStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -21935,8 +25799,7 @@ pub struct WaxedWeatheredCutCopperStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WaxedExposedCutCopperStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -21944,8 +25807,7 @@ pub struct WaxedExposedCutCopperStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WaxedCutCopperStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -21953,136 +25815,113 @@ pub struct WaxedCutCopperStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WaxedOxidizedCutCopperSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WaxedWeatheredCutCopperSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WaxedExposedCutCopperSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct WaxedCutCopperSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct LightningRod {
 	pub r#facing: property_enums::Facing,
 	pub r#powered: bool,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PointedDripstone {
 	pub r#thickness: property_enums::Thickness,
 	pub r#vertical_direction: property_enums::VerticalDirection,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DripstoneBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CaveVines {
-	pub r#age: ConstrainedInt<0, 25>,
+	pub r#age: ConstrainedInt::<0, 25>,
 	pub r#berries: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CaveVinesPlant {
 	pub r#berries: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SporeBlossom;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Azalea;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct FloweringAzalea;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MossCarpet;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct MossBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BigDripleaf {
 	pub r#facing: property_enums::Facing1,
 	pub r#tilt: property_enums::Tilt,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct BigDripleafStem {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SmallDripleaf {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct HangingRoots {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RootedDirt;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Mud;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Deepslate {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CobbledDeepslate;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CobbledDeepslateStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -22090,15 +25929,13 @@ pub struct CobbledDeepslateStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CobbledDeepslateSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CobbledDeepslateWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -22108,12 +25945,10 @@ pub struct CobbledDeepslateWall {
 	pub r#west: property_enums::West1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedDeepslate;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedDeepslateStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -22121,15 +25956,13 @@ pub struct PolishedDeepslateStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedDeepslateSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PolishedDeepslateWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -22139,12 +25972,10 @@ pub struct PolishedDeepslateWall {
 	pub r#west: property_enums::West1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeepslateTiles;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeepslateTileStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -22152,15 +25983,13 @@ pub struct DeepslateTileStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeepslateTileSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeepslateTileWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -22170,12 +25999,10 @@ pub struct DeepslateTileWall {
 	pub r#west: property_enums::West1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeepslateBricks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeepslateBrickStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -22183,15 +26010,13 @@ pub struct DeepslateBrickStairs {
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeepslateBrickSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DeepslateBrickWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -22201,71 +26026,3766 @@ pub struct DeepslateBrickWall {
 	pub r#west: property_enums::West1,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct ChiseledDeepslate;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CrackedDeepslateBricks;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct CrackedDeepslateTiles;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct InfestedDeepslate {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct SmoothBasalt;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RawIronBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RawCopperBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RawGoldBlock;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedAzaleaBush;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PottedFloweringAzaleaBush;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct OchreFroglight {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct VerdantFroglight {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PearlescentFroglight {
 	pub r#axis: property_enums::Axis,
 }
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct Frogspawn;
 
-
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct ReinforcedDeepslate;
 
+
+pub fn create_global_palette() -> HashMap<Block, usize> {
+	let mut map = HashMap::new();
+	map.insert(Block::Air ( Air {} ), map.len());
+	map.insert(Block::Stone ( Stone {} ), map.len());
+	map.insert(Block::Granite ( Granite {} ), map.len());
+	map.insert(Block::PolishedGranite ( PolishedGranite {} ), map.len());
+	map.insert(Block::Diorite ( Diorite {} ), map.len());
+	map.insert(Block::PolishedDiorite ( PolishedDiorite {} ), map.len());
+	map.insert(Block::Andesite ( Andesite {} ), map.len());
+	map.insert(Block::PolishedAndesite ( PolishedAndesite {} ), map.len());
+	for r#snowy in bool::possible_values() {
+		map.insert(Block::GrassBlock ( GrassBlock {r#snowy: r#snowy.clone(), } ), map.len());
+	}
+	map.insert(Block::Dirt ( Dirt {} ), map.len());
+	map.insert(Block::CoarseDirt ( CoarseDirt {} ), map.len());
+	for r#snowy in bool::possible_values() {
+		map.insert(Block::Podzol ( Podzol {r#snowy: r#snowy.clone(), } ), map.len());
+	}
+	map.insert(Block::Cobblestone ( Cobblestone {} ), map.len());
+	map.insert(Block::OakPlanks ( OakPlanks {} ), map.len());
+	map.insert(Block::SprucePlanks ( SprucePlanks {} ), map.len());
+	map.insert(Block::BirchPlanks ( BirchPlanks {} ), map.len());
+	map.insert(Block::JunglePlanks ( JunglePlanks {} ), map.len());
+	map.insert(Block::AcaciaPlanks ( AcaciaPlanks {} ), map.len());
+	map.insert(Block::DarkOakPlanks ( DarkOakPlanks {} ), map.len());
+	map.insert(Block::MangrovePlanks ( MangrovePlanks {} ), map.len());
+	for r#stage in ConstrainedInt::<0, 1>::possible_values() {
+		map.insert(Block::OakSapling ( OakSapling {r#stage: r#stage.clone(), } ), map.len());
+	}
+	for r#stage in ConstrainedInt::<0, 1>::possible_values() {
+		map.insert(Block::SpruceSapling ( SpruceSapling {r#stage: r#stage.clone(), } ), map.len());
+	}
+	for r#stage in ConstrainedInt::<0, 1>::possible_values() {
+		map.insert(Block::BirchSapling ( BirchSapling {r#stage: r#stage.clone(), } ), map.len());
+	}
+	for r#stage in ConstrainedInt::<0, 1>::possible_values() {
+		map.insert(Block::JungleSapling ( JungleSapling {r#stage: r#stage.clone(), } ), map.len());
+	}
+	for r#stage in ConstrainedInt::<0, 1>::possible_values() {
+		map.insert(Block::AcaciaSapling ( AcaciaSapling {r#stage: r#stage.clone(), } ), map.len());
+	}
+	for r#stage in ConstrainedInt::<0, 1>::possible_values() {
+		map.insert(Block::DarkOakSapling ( DarkOakSapling {r#stage: r#stage.clone(), } ), map.len());
+	}
+	for r#age in ConstrainedInt::<0, 4>::possible_values() {
+		for r#hanging in bool::possible_values() {
+			for r#stage in ConstrainedInt::<0, 1>::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::MangrovePropagule ( MangrovePropagule {r#age: r#age.clone(), r#hanging: r#hanging.clone(), r#stage: r#stage.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	map.insert(Block::Bedrock ( Bedrock {} ), map.len());
+	for r#level in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::Water ( Water {r#level: r#level.clone(), } ), map.len());
+	}
+	for r#level in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::Lava ( Lava {r#level: r#level.clone(), } ), map.len());
+	}
+	map.insert(Block::Sand ( Sand {} ), map.len());
+	map.insert(Block::RedSand ( RedSand {} ), map.len());
+	map.insert(Block::Gravel ( Gravel {} ), map.len());
+	map.insert(Block::GoldOre ( GoldOre {} ), map.len());
+	map.insert(Block::DeepslateGoldOre ( DeepslateGoldOre {} ), map.len());
+	map.insert(Block::IronOre ( IronOre {} ), map.len());
+	map.insert(Block::DeepslateIronOre ( DeepslateIronOre {} ), map.len());
+	map.insert(Block::CoalOre ( CoalOre {} ), map.len());
+	map.insert(Block::DeepslateCoalOre ( DeepslateCoalOre {} ), map.len());
+	map.insert(Block::NetherGoldOre ( NetherGoldOre {} ), map.len());
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::OakLog ( OakLog {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::SpruceLog ( SpruceLog {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::BirchLog ( BirchLog {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::JungleLog ( JungleLog {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::AcaciaLog ( AcaciaLog {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::DarkOakLog ( DarkOakLog {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::MangroveLog ( MangroveLog {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::MangroveRoots ( MangroveRoots {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::MuddyMangroveRoots ( MuddyMangroveRoots {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::StrippedSpruceLog ( StrippedSpruceLog {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::StrippedBirchLog ( StrippedBirchLog {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::StrippedJungleLog ( StrippedJungleLog {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::StrippedAcaciaLog ( StrippedAcaciaLog {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::StrippedDarkOakLog ( StrippedDarkOakLog {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::StrippedOakLog ( StrippedOakLog {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::StrippedMangroveLog ( StrippedMangroveLog {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::OakWood ( OakWood {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::SpruceWood ( SpruceWood {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::BirchWood ( BirchWood {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::JungleWood ( JungleWood {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::AcaciaWood ( AcaciaWood {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::DarkOakWood ( DarkOakWood {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::MangroveWood ( MangroveWood {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::StrippedOakWood ( StrippedOakWood {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::StrippedSpruceWood ( StrippedSpruceWood {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::StrippedBirchWood ( StrippedBirchWood {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::StrippedJungleWood ( StrippedJungleWood {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::StrippedAcaciaWood ( StrippedAcaciaWood {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::StrippedDarkOakWood ( StrippedDarkOakWood {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::StrippedMangroveWood ( StrippedMangroveWood {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#distance in ConstrainedInt::<1, 7>::possible_values() {
+		for r#persistent in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::OakLeaves ( OakLeaves {r#distance: r#distance.clone(), r#persistent: r#persistent.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#distance in ConstrainedInt::<1, 7>::possible_values() {
+		for r#persistent in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::SpruceLeaves ( SpruceLeaves {r#distance: r#distance.clone(), r#persistent: r#persistent.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#distance in ConstrainedInt::<1, 7>::possible_values() {
+		for r#persistent in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::BirchLeaves ( BirchLeaves {r#distance: r#distance.clone(), r#persistent: r#persistent.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#distance in ConstrainedInt::<1, 7>::possible_values() {
+		for r#persistent in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::JungleLeaves ( JungleLeaves {r#distance: r#distance.clone(), r#persistent: r#persistent.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#distance in ConstrainedInt::<1, 7>::possible_values() {
+		for r#persistent in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::AcaciaLeaves ( AcaciaLeaves {r#distance: r#distance.clone(), r#persistent: r#persistent.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#distance in ConstrainedInt::<1, 7>::possible_values() {
+		for r#persistent in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::DarkOakLeaves ( DarkOakLeaves {r#distance: r#distance.clone(), r#persistent: r#persistent.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#distance in ConstrainedInt::<1, 7>::possible_values() {
+		for r#persistent in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::MangroveLeaves ( MangroveLeaves {r#distance: r#distance.clone(), r#persistent: r#persistent.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#distance in ConstrainedInt::<1, 7>::possible_values() {
+		for r#persistent in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::AzaleaLeaves ( AzaleaLeaves {r#distance: r#distance.clone(), r#persistent: r#persistent.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#distance in ConstrainedInt::<1, 7>::possible_values() {
+		for r#persistent in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::FloweringAzaleaLeaves ( FloweringAzaleaLeaves {r#distance: r#distance.clone(), r#persistent: r#persistent.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	map.insert(Block::Sponge ( Sponge {} ), map.len());
+	map.insert(Block::WetSponge ( WetSponge {} ), map.len());
+	map.insert(Block::Glass ( Glass {} ), map.len());
+	map.insert(Block::LapisOre ( LapisOre {} ), map.len());
+	map.insert(Block::DeepslateLapisOre ( DeepslateLapisOre {} ), map.len());
+	map.insert(Block::LapisBlock ( LapisBlock {} ), map.len());
+	for r#facing in property_enums::Facing::possible_values() {
+		for r#triggered in bool::possible_values() {
+			map.insert(Block::Dispenser ( Dispenser {r#facing: r#facing.clone(), r#triggered: r#triggered.clone(), } ), map.len());
+		}
+	}
+	map.insert(Block::Sandstone ( Sandstone {} ), map.len());
+	map.insert(Block::ChiseledSandstone ( ChiseledSandstone {} ), map.len());
+	map.insert(Block::CutSandstone ( CutSandstone {} ), map.len());
+	for r#instrument in property_enums::Instrument::possible_values() {
+		for r#note in ConstrainedInt::<0, 24>::possible_values() {
+			for r#powered in bool::possible_values() {
+				map.insert(Block::NoteBlock ( NoteBlock {r#instrument: r#instrument.clone(), r#note: r#note.clone(), r#powered: r#powered.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#occupied in bool::possible_values() {
+			for r#part in property_enums::Part::possible_values() {
+				map.insert(Block::WhiteBed ( WhiteBed {r#facing: r#facing.clone(), r#occupied: r#occupied.clone(), r#part: r#part.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#occupied in bool::possible_values() {
+			for r#part in property_enums::Part::possible_values() {
+				map.insert(Block::OrangeBed ( OrangeBed {r#facing: r#facing.clone(), r#occupied: r#occupied.clone(), r#part: r#part.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#occupied in bool::possible_values() {
+			for r#part in property_enums::Part::possible_values() {
+				map.insert(Block::MagentaBed ( MagentaBed {r#facing: r#facing.clone(), r#occupied: r#occupied.clone(), r#part: r#part.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#occupied in bool::possible_values() {
+			for r#part in property_enums::Part::possible_values() {
+				map.insert(Block::LightBlueBed ( LightBlueBed {r#facing: r#facing.clone(), r#occupied: r#occupied.clone(), r#part: r#part.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#occupied in bool::possible_values() {
+			for r#part in property_enums::Part::possible_values() {
+				map.insert(Block::YellowBed ( YellowBed {r#facing: r#facing.clone(), r#occupied: r#occupied.clone(), r#part: r#part.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#occupied in bool::possible_values() {
+			for r#part in property_enums::Part::possible_values() {
+				map.insert(Block::LimeBed ( LimeBed {r#facing: r#facing.clone(), r#occupied: r#occupied.clone(), r#part: r#part.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#occupied in bool::possible_values() {
+			for r#part in property_enums::Part::possible_values() {
+				map.insert(Block::PinkBed ( PinkBed {r#facing: r#facing.clone(), r#occupied: r#occupied.clone(), r#part: r#part.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#occupied in bool::possible_values() {
+			for r#part in property_enums::Part::possible_values() {
+				map.insert(Block::GrayBed ( GrayBed {r#facing: r#facing.clone(), r#occupied: r#occupied.clone(), r#part: r#part.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#occupied in bool::possible_values() {
+			for r#part in property_enums::Part::possible_values() {
+				map.insert(Block::LightGrayBed ( LightGrayBed {r#facing: r#facing.clone(), r#occupied: r#occupied.clone(), r#part: r#part.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#occupied in bool::possible_values() {
+			for r#part in property_enums::Part::possible_values() {
+				map.insert(Block::CyanBed ( CyanBed {r#facing: r#facing.clone(), r#occupied: r#occupied.clone(), r#part: r#part.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#occupied in bool::possible_values() {
+			for r#part in property_enums::Part::possible_values() {
+				map.insert(Block::PurpleBed ( PurpleBed {r#facing: r#facing.clone(), r#occupied: r#occupied.clone(), r#part: r#part.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#occupied in bool::possible_values() {
+			for r#part in property_enums::Part::possible_values() {
+				map.insert(Block::BlueBed ( BlueBed {r#facing: r#facing.clone(), r#occupied: r#occupied.clone(), r#part: r#part.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#occupied in bool::possible_values() {
+			for r#part in property_enums::Part::possible_values() {
+				map.insert(Block::BrownBed ( BrownBed {r#facing: r#facing.clone(), r#occupied: r#occupied.clone(), r#part: r#part.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#occupied in bool::possible_values() {
+			for r#part in property_enums::Part::possible_values() {
+				map.insert(Block::GreenBed ( GreenBed {r#facing: r#facing.clone(), r#occupied: r#occupied.clone(), r#part: r#part.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#occupied in bool::possible_values() {
+			for r#part in property_enums::Part::possible_values() {
+				map.insert(Block::RedBed ( RedBed {r#facing: r#facing.clone(), r#occupied: r#occupied.clone(), r#part: r#part.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#occupied in bool::possible_values() {
+			for r#part in property_enums::Part::possible_values() {
+				map.insert(Block::BlackBed ( BlackBed {r#facing: r#facing.clone(), r#occupied: r#occupied.clone(), r#part: r#part.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#powered in bool::possible_values() {
+		for r#shape in property_enums::Shape::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::PoweredRail ( PoweredRail {r#powered: r#powered.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#powered in bool::possible_values() {
+		for r#shape in property_enums::Shape::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::DetectorRail ( DetectorRail {r#powered: r#powered.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#extended in bool::possible_values() {
+		for r#facing in property_enums::Facing::possible_values() {
+			map.insert(Block::StickyPiston ( StickyPiston {r#extended: r#extended.clone(), r#facing: r#facing.clone(), } ), map.len());
+		}
+	}
+	map.insert(Block::Cobweb ( Cobweb {} ), map.len());
+	map.insert(Block::Grass ( Grass {} ), map.len());
+	map.insert(Block::Fern ( Fern {} ), map.len());
+	map.insert(Block::DeadBush ( DeadBush {} ), map.len());
+	map.insert(Block::Seagrass ( Seagrass {} ), map.len());
+	for r#half in property_enums::Half::possible_values() {
+		map.insert(Block::TallSeagrass ( TallSeagrass {r#half: r#half.clone(), } ), map.len());
+	}
+	for r#extended in bool::possible_values() {
+		for r#facing in property_enums::Facing::possible_values() {
+			map.insert(Block::Piston ( Piston {r#extended: r#extended.clone(), r#facing: r#facing.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		for r#short in bool::possible_values() {
+			for r#type in property_enums::Type::possible_values() {
+				map.insert(Block::PistonHead ( PistonHead {r#facing: r#facing.clone(), r#short: r#short.clone(), r#type: r#type.clone(), } ), map.len());
+			}
+		}
+	}
+	map.insert(Block::WhiteWool ( WhiteWool {} ), map.len());
+	map.insert(Block::OrangeWool ( OrangeWool {} ), map.len());
+	map.insert(Block::MagentaWool ( MagentaWool {} ), map.len());
+	map.insert(Block::LightBlueWool ( LightBlueWool {} ), map.len());
+	map.insert(Block::YellowWool ( YellowWool {} ), map.len());
+	map.insert(Block::LimeWool ( LimeWool {} ), map.len());
+	map.insert(Block::PinkWool ( PinkWool {} ), map.len());
+	map.insert(Block::GrayWool ( GrayWool {} ), map.len());
+	map.insert(Block::LightGrayWool ( LightGrayWool {} ), map.len());
+	map.insert(Block::CyanWool ( CyanWool {} ), map.len());
+	map.insert(Block::PurpleWool ( PurpleWool {} ), map.len());
+	map.insert(Block::BlueWool ( BlueWool {} ), map.len());
+	map.insert(Block::BrownWool ( BrownWool {} ), map.len());
+	map.insert(Block::GreenWool ( GreenWool {} ), map.len());
+	map.insert(Block::RedWool ( RedWool {} ), map.len());
+	map.insert(Block::BlackWool ( BlackWool {} ), map.len());
+	for r#facing in property_enums::Facing::possible_values() {
+		for r#type in property_enums::Type::possible_values() {
+			map.insert(Block::MovingPiston ( MovingPiston {r#facing: r#facing.clone(), r#type: r#type.clone(), } ), map.len());
+		}
+	}
+	map.insert(Block::Dandelion ( Dandelion {} ), map.len());
+	map.insert(Block::Poppy ( Poppy {} ), map.len());
+	map.insert(Block::BlueOrchid ( BlueOrchid {} ), map.len());
+	map.insert(Block::Allium ( Allium {} ), map.len());
+	map.insert(Block::AzureBluet ( AzureBluet {} ), map.len());
+	map.insert(Block::RedTulip ( RedTulip {} ), map.len());
+	map.insert(Block::OrangeTulip ( OrangeTulip {} ), map.len());
+	map.insert(Block::WhiteTulip ( WhiteTulip {} ), map.len());
+	map.insert(Block::PinkTulip ( PinkTulip {} ), map.len());
+	map.insert(Block::OxeyeDaisy ( OxeyeDaisy {} ), map.len());
+	map.insert(Block::Cornflower ( Cornflower {} ), map.len());
+	map.insert(Block::WitherRose ( WitherRose {} ), map.len());
+	map.insert(Block::LilyOfTheValley ( LilyOfTheValley {} ), map.len());
+	map.insert(Block::BrownMushroom ( BrownMushroom {} ), map.len());
+	map.insert(Block::RedMushroom ( RedMushroom {} ), map.len());
+	map.insert(Block::GoldBlock ( GoldBlock {} ), map.len());
+	map.insert(Block::IronBlock ( IronBlock {} ), map.len());
+	map.insert(Block::Bricks ( Bricks {} ), map.len());
+	for r#unstable in bool::possible_values() {
+		map.insert(Block::Tnt ( Tnt {r#unstable: r#unstable.clone(), } ), map.len());
+	}
+	map.insert(Block::Bookshelf ( Bookshelf {} ), map.len());
+	map.insert(Block::MossyCobblestone ( MossyCobblestone {} ), map.len());
+	map.insert(Block::Obsidian ( Obsidian {} ), map.len());
+	map.insert(Block::Torch ( Torch {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::WallTorch ( WallTorch {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#age in ConstrainedInt::<0, 15>::possible_values() {
+		for r#east in bool::possible_values() {
+			for r#north in bool::possible_values() {
+				for r#south in bool::possible_values() {
+					for r#up in bool::possible_values() {
+						for r#west in bool::possible_values() {
+							map.insert(Block::Fire ( Fire {r#age: r#age.clone(), r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	map.insert(Block::SoulFire ( SoulFire {} ), map.len());
+	map.insert(Block::Spawner ( Spawner {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::OakStairs ( OakStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#type in property_enums::Type1::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::Chest ( Chest {r#facing: r#facing.clone(), r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#east in property_enums::East::possible_values() {
+		for r#north in property_enums::North::possible_values() {
+			for r#power in ConstrainedInt::<0, 15>::possible_values() {
+				for r#south in property_enums::South::possible_values() {
+					for r#west in property_enums::West::possible_values() {
+						map.insert(Block::RedstoneWire ( RedstoneWire {r#east: r#east.clone(), r#north: r#north.clone(), r#power: r#power.clone(), r#south: r#south.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	map.insert(Block::DiamondOre ( DiamondOre {} ), map.len());
+	map.insert(Block::DeepslateDiamondOre ( DeepslateDiamondOre {} ), map.len());
+	map.insert(Block::DiamondBlock ( DiamondBlock {} ), map.len());
+	map.insert(Block::CraftingTable ( CraftingTable {} ), map.len());
+	for r#age in ConstrainedInt::<0, 7>::possible_values() {
+		map.insert(Block::Wheat ( Wheat {r#age: r#age.clone(), } ), map.len());
+	}
+	for r#moisture in ConstrainedInt::<0, 7>::possible_values() {
+		map.insert(Block::Farmland ( Farmland {r#moisture: r#moisture.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#lit in bool::possible_values() {
+			map.insert(Block::Furnace ( Furnace {r#facing: r#facing.clone(), r#lit: r#lit.clone(), } ), map.len());
+		}
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::OakSign ( OakSign {r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::SpruceSign ( SpruceSign {r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::BirchSign ( BirchSign {r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::AcaciaSign ( AcaciaSign {r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::JungleSign ( JungleSign {r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::DarkOakSign ( DarkOakSign {r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::MangroveSign ( MangroveSign {r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half::possible_values() {
+			for r#hinge in property_enums::Hinge::possible_values() {
+				for r#open in bool::possible_values() {
+					for r#powered in bool::possible_values() {
+						map.insert(Block::OakDoor ( OakDoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#hinge: r#hinge.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::Ladder ( Ladder {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#shape in property_enums::Shape2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::Rail ( Rail {r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::CobblestoneStairs ( CobblestoneStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::OakWallSign ( OakWallSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::SpruceWallSign ( SpruceWallSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::BirchWallSign ( BirchWallSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::AcaciaWallSign ( AcaciaWallSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::JungleWallSign ( JungleWallSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::DarkOakWallSign ( DarkOakWallSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::MangroveWallSign ( MangroveWallSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#face in property_enums::Face::possible_values() {
+		for r#facing in property_enums::Facing1::possible_values() {
+			for r#powered in bool::possible_values() {
+				map.insert(Block::Lever ( Lever {r#face: r#face.clone(), r#facing: r#facing.clone(), r#powered: r#powered.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#powered in bool::possible_values() {
+		map.insert(Block::StonePressurePlate ( StonePressurePlate {r#powered: r#powered.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half::possible_values() {
+			for r#hinge in property_enums::Hinge::possible_values() {
+				for r#open in bool::possible_values() {
+					for r#powered in bool::possible_values() {
+						map.insert(Block::IronDoor ( IronDoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#hinge: r#hinge.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#powered in bool::possible_values() {
+		map.insert(Block::OakPressurePlate ( OakPressurePlate {r#powered: r#powered.clone(), } ), map.len());
+	}
+	for r#powered in bool::possible_values() {
+		map.insert(Block::SprucePressurePlate ( SprucePressurePlate {r#powered: r#powered.clone(), } ), map.len());
+	}
+	for r#powered in bool::possible_values() {
+		map.insert(Block::BirchPressurePlate ( BirchPressurePlate {r#powered: r#powered.clone(), } ), map.len());
+	}
+	for r#powered in bool::possible_values() {
+		map.insert(Block::JunglePressurePlate ( JunglePressurePlate {r#powered: r#powered.clone(), } ), map.len());
+	}
+	for r#powered in bool::possible_values() {
+		map.insert(Block::AcaciaPressurePlate ( AcaciaPressurePlate {r#powered: r#powered.clone(), } ), map.len());
+	}
+	for r#powered in bool::possible_values() {
+		map.insert(Block::DarkOakPressurePlate ( DarkOakPressurePlate {r#powered: r#powered.clone(), } ), map.len());
+	}
+	for r#powered in bool::possible_values() {
+		map.insert(Block::MangrovePressurePlate ( MangrovePressurePlate {r#powered: r#powered.clone(), } ), map.len());
+	}
+	for r#lit in bool::possible_values() {
+		map.insert(Block::RedstoneOre ( RedstoneOre {r#lit: r#lit.clone(), } ), map.len());
+	}
+	for r#lit in bool::possible_values() {
+		map.insert(Block::DeepslateRedstoneOre ( DeepslateRedstoneOre {r#lit: r#lit.clone(), } ), map.len());
+	}
+	for r#lit in bool::possible_values() {
+		map.insert(Block::RedstoneTorch ( RedstoneTorch {r#lit: r#lit.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#lit in bool::possible_values() {
+			map.insert(Block::RedstoneWallTorch ( RedstoneWallTorch {r#facing: r#facing.clone(), r#lit: r#lit.clone(), } ), map.len());
+		}
+	}
+	for r#face in property_enums::Face::possible_values() {
+		for r#facing in property_enums::Facing1::possible_values() {
+			for r#powered in bool::possible_values() {
+				map.insert(Block::StoneButton ( StoneButton {r#face: r#face.clone(), r#facing: r#facing.clone(), r#powered: r#powered.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#layers in ConstrainedInt::<1, 8>::possible_values() {
+		map.insert(Block::Snow ( Snow {r#layers: r#layers.clone(), } ), map.len());
+	}
+	map.insert(Block::Ice ( Ice {} ), map.len());
+	map.insert(Block::SnowBlock ( SnowBlock {} ), map.len());
+	for r#age in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::Cactus ( Cactus {r#age: r#age.clone(), } ), map.len());
+	}
+	map.insert(Block::Clay ( Clay {} ), map.len());
+	for r#age in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::SugarCane ( SugarCane {r#age: r#age.clone(), } ), map.len());
+	}
+	for r#has_record in bool::possible_values() {
+		map.insert(Block::Jukebox ( Jukebox {r#has_record: r#has_record.clone(), } ), map.len());
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::OakFence ( OakFence {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	map.insert(Block::Pumpkin ( Pumpkin {} ), map.len());
+	map.insert(Block::Netherrack ( Netherrack {} ), map.len());
+	map.insert(Block::SoulSand ( SoulSand {} ), map.len());
+	map.insert(Block::SoulSoil ( SoulSoil {} ), map.len());
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::Basalt ( Basalt {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::PolishedBasalt ( PolishedBasalt {r#axis: r#axis.clone(), } ), map.len());
+	}
+	map.insert(Block::SoulTorch ( SoulTorch {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::SoulWallTorch ( SoulWallTorch {r#facing: r#facing.clone(), } ), map.len());
+	}
+	map.insert(Block::Glowstone ( Glowstone {} ), map.len());
+	for r#axis in property_enums::Axis1::possible_values() {
+		map.insert(Block::NetherPortal ( NetherPortal {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::CarvedPumpkin ( CarvedPumpkin {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::JackOLantern ( JackOLantern {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#bites in ConstrainedInt::<0, 6>::possible_values() {
+		map.insert(Block::Cake ( Cake {r#bites: r#bites.clone(), } ), map.len());
+	}
+	for r#delay in ConstrainedInt::<1, 4>::possible_values() {
+		for r#facing in property_enums::Facing1::possible_values() {
+			for r#locked in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					map.insert(Block::Repeater ( Repeater {r#delay: r#delay.clone(), r#facing: r#facing.clone(), r#locked: r#locked.clone(), r#powered: r#powered.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	map.insert(Block::WhiteStainedGlass ( WhiteStainedGlass {} ), map.len());
+	map.insert(Block::OrangeStainedGlass ( OrangeStainedGlass {} ), map.len());
+	map.insert(Block::MagentaStainedGlass ( MagentaStainedGlass {} ), map.len());
+	map.insert(Block::LightBlueStainedGlass ( LightBlueStainedGlass {} ), map.len());
+	map.insert(Block::YellowStainedGlass ( YellowStainedGlass {} ), map.len());
+	map.insert(Block::LimeStainedGlass ( LimeStainedGlass {} ), map.len());
+	map.insert(Block::PinkStainedGlass ( PinkStainedGlass {} ), map.len());
+	map.insert(Block::GrayStainedGlass ( GrayStainedGlass {} ), map.len());
+	map.insert(Block::LightGrayStainedGlass ( LightGrayStainedGlass {} ), map.len());
+	map.insert(Block::CyanStainedGlass ( CyanStainedGlass {} ), map.len());
+	map.insert(Block::PurpleStainedGlass ( PurpleStainedGlass {} ), map.len());
+	map.insert(Block::BlueStainedGlass ( BlueStainedGlass {} ), map.len());
+	map.insert(Block::BrownStainedGlass ( BrownStainedGlass {} ), map.len());
+	map.insert(Block::GreenStainedGlass ( GreenStainedGlass {} ), map.len());
+	map.insert(Block::RedStainedGlass ( RedStainedGlass {} ), map.len());
+	map.insert(Block::BlackStainedGlass ( BlackStainedGlass {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						map.insert(Block::OakTrapdoor ( OakTrapdoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						map.insert(Block::SpruceTrapdoor ( SpruceTrapdoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						map.insert(Block::BirchTrapdoor ( BirchTrapdoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						map.insert(Block::JungleTrapdoor ( JungleTrapdoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						map.insert(Block::AcaciaTrapdoor ( AcaciaTrapdoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						map.insert(Block::DarkOakTrapdoor ( DarkOakTrapdoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						map.insert(Block::MangroveTrapdoor ( MangroveTrapdoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	map.insert(Block::StoneBricks ( StoneBricks {} ), map.len());
+	map.insert(Block::MossyStoneBricks ( MossyStoneBricks {} ), map.len());
+	map.insert(Block::CrackedStoneBricks ( CrackedStoneBricks {} ), map.len());
+	map.insert(Block::ChiseledStoneBricks ( ChiseledStoneBricks {} ), map.len());
+	map.insert(Block::PackedMud ( PackedMud {} ), map.len());
+	map.insert(Block::MudBricks ( MudBricks {} ), map.len());
+	map.insert(Block::InfestedStone ( InfestedStone {} ), map.len());
+	map.insert(Block::InfestedCobblestone ( InfestedCobblestone {} ), map.len());
+	map.insert(Block::InfestedStoneBricks ( InfestedStoneBricks {} ), map.len());
+	map.insert(Block::InfestedMossyStoneBricks ( InfestedMossyStoneBricks {} ), map.len());
+	map.insert(Block::InfestedCrackedStoneBricks ( InfestedCrackedStoneBricks {} ), map.len());
+	map.insert(Block::InfestedChiseledStoneBricks ( InfestedChiseledStoneBricks {} ), map.len());
+	for r#down in bool::possible_values() {
+		for r#east in bool::possible_values() {
+			for r#north in bool::possible_values() {
+				for r#south in bool::possible_values() {
+					for r#up in bool::possible_values() {
+						for r#west in bool::possible_values() {
+							map.insert(Block::BrownMushroomBlock ( BrownMushroomBlock {r#down: r#down.clone(), r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	for r#down in bool::possible_values() {
+		for r#east in bool::possible_values() {
+			for r#north in bool::possible_values() {
+				for r#south in bool::possible_values() {
+					for r#up in bool::possible_values() {
+						for r#west in bool::possible_values() {
+							map.insert(Block::RedMushroomBlock ( RedMushroomBlock {r#down: r#down.clone(), r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	for r#down in bool::possible_values() {
+		for r#east in bool::possible_values() {
+			for r#north in bool::possible_values() {
+				for r#south in bool::possible_values() {
+					for r#up in bool::possible_values() {
+						for r#west in bool::possible_values() {
+							map.insert(Block::MushroomStem ( MushroomStem {r#down: r#down.clone(), r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::IronBars ( IronBars {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::Chain ( Chain {r#axis: r#axis.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::GlassPane ( GlassPane {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	map.insert(Block::Melon ( Melon {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::AttachedPumpkinStem ( AttachedPumpkinStem {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::AttachedMelonStem ( AttachedMelonStem {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#age in ConstrainedInt::<0, 7>::possible_values() {
+		map.insert(Block::PumpkinStem ( PumpkinStem {r#age: r#age.clone(), } ), map.len());
+	}
+	for r#age in ConstrainedInt::<0, 7>::possible_values() {
+		map.insert(Block::MelonStem ( MelonStem {r#age: r#age.clone(), } ), map.len());
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::Vine ( Vine {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#down in bool::possible_values() {
+		for r#east in bool::possible_values() {
+			for r#north in bool::possible_values() {
+				for r#south in bool::possible_values() {
+					for r#up in bool::possible_values() {
+						for r#waterlogged in bool::possible_values() {
+							for r#west in bool::possible_values() {
+								map.insert(Block::GlowLichen ( GlowLichen {r#down: r#down.clone(), r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#in_wall in bool::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					map.insert(Block::OakFenceGate ( OakFenceGate {r#facing: r#facing.clone(), r#in_wall: r#in_wall.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::BrickStairs ( BrickStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::StoneBrickStairs ( StoneBrickStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::MudBrickStairs ( MudBrickStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#snowy in bool::possible_values() {
+		map.insert(Block::Mycelium ( Mycelium {r#snowy: r#snowy.clone(), } ), map.len());
+	}
+	map.insert(Block::LilyPad ( LilyPad {} ), map.len());
+	map.insert(Block::NetherBricks ( NetherBricks {} ), map.len());
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::NetherBrickFence ( NetherBrickFence {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::NetherBrickStairs ( NetherBrickStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#age in ConstrainedInt::<0, 3>::possible_values() {
+		map.insert(Block::NetherWart ( NetherWart {r#age: r#age.clone(), } ), map.len());
+	}
+	map.insert(Block::EnchantingTable ( EnchantingTable {} ), map.len());
+	for r#has_bottle_0 in bool::possible_values() {
+		for r#has_bottle_1 in bool::possible_values() {
+			for r#has_bottle_2 in bool::possible_values() {
+				map.insert(Block::BrewingStand ( BrewingStand {r#has_bottle_0: r#has_bottle_0.clone(), r#has_bottle_1: r#has_bottle_1.clone(), r#has_bottle_2: r#has_bottle_2.clone(), } ), map.len());
+			}
+		}
+	}
+	map.insert(Block::Cauldron ( Cauldron {} ), map.len());
+	for r#level in ConstrainedInt::<1, 3>::possible_values() {
+		map.insert(Block::WaterCauldron ( WaterCauldron {r#level: r#level.clone(), } ), map.len());
+	}
+	map.insert(Block::LavaCauldron ( LavaCauldron {} ), map.len());
+	for r#level in ConstrainedInt::<1, 3>::possible_values() {
+		map.insert(Block::PowderSnowCauldron ( PowderSnowCauldron {r#level: r#level.clone(), } ), map.len());
+	}
+	map.insert(Block::EndPortal ( EndPortal {} ), map.len());
+	for r#eye in bool::possible_values() {
+		for r#facing in property_enums::Facing1::possible_values() {
+			map.insert(Block::EndPortalFrame ( EndPortalFrame {r#eye: r#eye.clone(), r#facing: r#facing.clone(), } ), map.len());
+		}
+	}
+	map.insert(Block::EndStone ( EndStone {} ), map.len());
+	map.insert(Block::DragonEgg ( DragonEgg {} ), map.len());
+	for r#lit in bool::possible_values() {
+		map.insert(Block::RedstoneLamp ( RedstoneLamp {r#lit: r#lit.clone(), } ), map.len());
+	}
+	for r#age in ConstrainedInt::<0, 2>::possible_values() {
+		for r#facing in property_enums::Facing1::possible_values() {
+			map.insert(Block::Cocoa ( Cocoa {r#age: r#age.clone(), r#facing: r#facing.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::SandstoneStairs ( SandstoneStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	map.insert(Block::EmeraldOre ( EmeraldOre {} ), map.len());
+	map.insert(Block::DeepslateEmeraldOre ( DeepslateEmeraldOre {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::EnderChest ( EnderChest {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#attached in bool::possible_values() {
+		for r#facing in property_enums::Facing1::possible_values() {
+			for r#powered in bool::possible_values() {
+				map.insert(Block::TripwireHook ( TripwireHook {r#attached: r#attached.clone(), r#facing: r#facing.clone(), r#powered: r#powered.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#attached in bool::possible_values() {
+		for r#disarmed in bool::possible_values() {
+			for r#east in bool::possible_values() {
+				for r#north in bool::possible_values() {
+					for r#powered in bool::possible_values() {
+						for r#south in bool::possible_values() {
+							for r#west in bool::possible_values() {
+								map.insert(Block::Tripwire ( Tripwire {r#attached: r#attached.clone(), r#disarmed: r#disarmed.clone(), r#east: r#east.clone(), r#north: r#north.clone(), r#powered: r#powered.clone(), r#south: r#south.clone(), r#west: r#west.clone(), } ), map.len());
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	map.insert(Block::EmeraldBlock ( EmeraldBlock {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::SpruceStairs ( SpruceStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::BirchStairs ( BirchStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::JungleStairs ( JungleStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#conditional in bool::possible_values() {
+		for r#facing in property_enums::Facing::possible_values() {
+			map.insert(Block::CommandBlock ( CommandBlock {r#conditional: r#conditional.clone(), r#facing: r#facing.clone(), } ), map.len());
+		}
+	}
+	map.insert(Block::Beacon ( Beacon {} ), map.len());
+	for r#east in property_enums::East1::possible_values() {
+		for r#north in property_enums::North1::possible_values() {
+			for r#south in property_enums::South1::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						for r#west in property_enums::West1::possible_values() {
+							map.insert(Block::CobblestoneWall ( CobblestoneWall {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	for r#east in property_enums::East1::possible_values() {
+		for r#north in property_enums::North1::possible_values() {
+			for r#south in property_enums::South1::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						for r#west in property_enums::West1::possible_values() {
+							map.insert(Block::MossyCobblestoneWall ( MossyCobblestoneWall {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	map.insert(Block::FlowerPot ( FlowerPot {} ), map.len());
+	map.insert(Block::PottedOakSapling ( PottedOakSapling {} ), map.len());
+	map.insert(Block::PottedSpruceSapling ( PottedSpruceSapling {} ), map.len());
+	map.insert(Block::PottedBirchSapling ( PottedBirchSapling {} ), map.len());
+	map.insert(Block::PottedJungleSapling ( PottedJungleSapling {} ), map.len());
+	map.insert(Block::PottedAcaciaSapling ( PottedAcaciaSapling {} ), map.len());
+	map.insert(Block::PottedDarkOakSapling ( PottedDarkOakSapling {} ), map.len());
+	map.insert(Block::PottedMangrovePropagule ( PottedMangrovePropagule {} ), map.len());
+	map.insert(Block::PottedFern ( PottedFern {} ), map.len());
+	map.insert(Block::PottedDandelion ( PottedDandelion {} ), map.len());
+	map.insert(Block::PottedPoppy ( PottedPoppy {} ), map.len());
+	map.insert(Block::PottedBlueOrchid ( PottedBlueOrchid {} ), map.len());
+	map.insert(Block::PottedAllium ( PottedAllium {} ), map.len());
+	map.insert(Block::PottedAzureBluet ( PottedAzureBluet {} ), map.len());
+	map.insert(Block::PottedRedTulip ( PottedRedTulip {} ), map.len());
+	map.insert(Block::PottedOrangeTulip ( PottedOrangeTulip {} ), map.len());
+	map.insert(Block::PottedWhiteTulip ( PottedWhiteTulip {} ), map.len());
+	map.insert(Block::PottedPinkTulip ( PottedPinkTulip {} ), map.len());
+	map.insert(Block::PottedOxeyeDaisy ( PottedOxeyeDaisy {} ), map.len());
+	map.insert(Block::PottedCornflower ( PottedCornflower {} ), map.len());
+	map.insert(Block::PottedLilyOfTheValley ( PottedLilyOfTheValley {} ), map.len());
+	map.insert(Block::PottedWitherRose ( PottedWitherRose {} ), map.len());
+	map.insert(Block::PottedRedMushroom ( PottedRedMushroom {} ), map.len());
+	map.insert(Block::PottedBrownMushroom ( PottedBrownMushroom {} ), map.len());
+	map.insert(Block::PottedDeadBush ( PottedDeadBush {} ), map.len());
+	map.insert(Block::PottedCactus ( PottedCactus {} ), map.len());
+	for r#age in ConstrainedInt::<0, 7>::possible_values() {
+		map.insert(Block::Carrots ( Carrots {r#age: r#age.clone(), } ), map.len());
+	}
+	for r#age in ConstrainedInt::<0, 7>::possible_values() {
+		map.insert(Block::Potatoes ( Potatoes {r#age: r#age.clone(), } ), map.len());
+	}
+	for r#face in property_enums::Face::possible_values() {
+		for r#facing in property_enums::Facing1::possible_values() {
+			for r#powered in bool::possible_values() {
+				map.insert(Block::OakButton ( OakButton {r#face: r#face.clone(), r#facing: r#facing.clone(), r#powered: r#powered.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#face in property_enums::Face::possible_values() {
+		for r#facing in property_enums::Facing1::possible_values() {
+			for r#powered in bool::possible_values() {
+				map.insert(Block::SpruceButton ( SpruceButton {r#face: r#face.clone(), r#facing: r#facing.clone(), r#powered: r#powered.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#face in property_enums::Face::possible_values() {
+		for r#facing in property_enums::Facing1::possible_values() {
+			for r#powered in bool::possible_values() {
+				map.insert(Block::BirchButton ( BirchButton {r#face: r#face.clone(), r#facing: r#facing.clone(), r#powered: r#powered.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#face in property_enums::Face::possible_values() {
+		for r#facing in property_enums::Facing1::possible_values() {
+			for r#powered in bool::possible_values() {
+				map.insert(Block::JungleButton ( JungleButton {r#face: r#face.clone(), r#facing: r#facing.clone(), r#powered: r#powered.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#face in property_enums::Face::possible_values() {
+		for r#facing in property_enums::Facing1::possible_values() {
+			for r#powered in bool::possible_values() {
+				map.insert(Block::AcaciaButton ( AcaciaButton {r#face: r#face.clone(), r#facing: r#facing.clone(), r#powered: r#powered.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#face in property_enums::Face::possible_values() {
+		for r#facing in property_enums::Facing1::possible_values() {
+			for r#powered in bool::possible_values() {
+				map.insert(Block::DarkOakButton ( DarkOakButton {r#face: r#face.clone(), r#facing: r#facing.clone(), r#powered: r#powered.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#face in property_enums::Face::possible_values() {
+		for r#facing in property_enums::Facing1::possible_values() {
+			for r#powered in bool::possible_values() {
+				map.insert(Block::MangroveButton ( MangroveButton {r#face: r#face.clone(), r#facing: r#facing.clone(), r#powered: r#powered.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::SkeletonSkull ( SkeletonSkull {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::SkeletonWallSkull ( SkeletonWallSkull {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::WitherSkeletonSkull ( WitherSkeletonSkull {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::WitherSkeletonWallSkull ( WitherSkeletonWallSkull {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::ZombieHead ( ZombieHead {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::ZombieWallHead ( ZombieWallHead {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::PlayerHead ( PlayerHead {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::PlayerWallHead ( PlayerWallHead {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::CreeperHead ( CreeperHead {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::CreeperWallHead ( CreeperWallHead {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::DragonHead ( DragonHead {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::DragonWallHead ( DragonWallHead {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::Anvil ( Anvil {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::ChippedAnvil ( ChippedAnvil {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::DamagedAnvil ( DamagedAnvil {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#type in property_enums::Type1::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::TrappedChest ( TrappedChest {r#facing: r#facing.clone(), r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#power in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::LightWeightedPressurePlate ( LightWeightedPressurePlate {r#power: r#power.clone(), } ), map.len());
+	}
+	for r#power in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::HeavyWeightedPressurePlate ( HeavyWeightedPressurePlate {r#power: r#power.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#mode in property_enums::Mode::possible_values() {
+			for r#powered in bool::possible_values() {
+				map.insert(Block::Comparator ( Comparator {r#facing: r#facing.clone(), r#mode: r#mode.clone(), r#powered: r#powered.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#inverted in bool::possible_values() {
+		for r#power in ConstrainedInt::<0, 15>::possible_values() {
+			map.insert(Block::DaylightDetector ( DaylightDetector {r#inverted: r#inverted.clone(), r#power: r#power.clone(), } ), map.len());
+		}
+	}
+	map.insert(Block::RedstoneBlock ( RedstoneBlock {} ), map.len());
+	map.insert(Block::NetherQuartzOre ( NetherQuartzOre {} ), map.len());
+	for r#enabled in bool::possible_values() {
+		for r#facing in property_enums::Facing2::possible_values() {
+			map.insert(Block::Hopper ( Hopper {r#enabled: r#enabled.clone(), r#facing: r#facing.clone(), } ), map.len());
+		}
+	}
+	map.insert(Block::QuartzBlock ( QuartzBlock {} ), map.len());
+	map.insert(Block::ChiseledQuartzBlock ( ChiseledQuartzBlock {} ), map.len());
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::QuartzPillar ( QuartzPillar {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::QuartzStairs ( QuartzStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#powered in bool::possible_values() {
+		for r#shape in property_enums::Shape::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::ActivatorRail ( ActivatorRail {r#powered: r#powered.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		for r#triggered in bool::possible_values() {
+			map.insert(Block::Dropper ( Dropper {r#facing: r#facing.clone(), r#triggered: r#triggered.clone(), } ), map.len());
+		}
+	}
+	map.insert(Block::WhiteTerracotta ( WhiteTerracotta {} ), map.len());
+	map.insert(Block::OrangeTerracotta ( OrangeTerracotta {} ), map.len());
+	map.insert(Block::MagentaTerracotta ( MagentaTerracotta {} ), map.len());
+	map.insert(Block::LightBlueTerracotta ( LightBlueTerracotta {} ), map.len());
+	map.insert(Block::YellowTerracotta ( YellowTerracotta {} ), map.len());
+	map.insert(Block::LimeTerracotta ( LimeTerracotta {} ), map.len());
+	map.insert(Block::PinkTerracotta ( PinkTerracotta {} ), map.len());
+	map.insert(Block::GrayTerracotta ( GrayTerracotta {} ), map.len());
+	map.insert(Block::LightGrayTerracotta ( LightGrayTerracotta {} ), map.len());
+	map.insert(Block::CyanTerracotta ( CyanTerracotta {} ), map.len());
+	map.insert(Block::PurpleTerracotta ( PurpleTerracotta {} ), map.len());
+	map.insert(Block::BlueTerracotta ( BlueTerracotta {} ), map.len());
+	map.insert(Block::BrownTerracotta ( BrownTerracotta {} ), map.len());
+	map.insert(Block::GreenTerracotta ( GreenTerracotta {} ), map.len());
+	map.insert(Block::RedTerracotta ( RedTerracotta {} ), map.len());
+	map.insert(Block::BlackTerracotta ( BlackTerracotta {} ), map.len());
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::WhiteStainedGlassPane ( WhiteStainedGlassPane {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::OrangeStainedGlassPane ( OrangeStainedGlassPane {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::MagentaStainedGlassPane ( MagentaStainedGlassPane {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::LightBlueStainedGlassPane ( LightBlueStainedGlassPane {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::YellowStainedGlassPane ( YellowStainedGlassPane {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::LimeStainedGlassPane ( LimeStainedGlassPane {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::PinkStainedGlassPane ( PinkStainedGlassPane {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::GrayStainedGlassPane ( GrayStainedGlassPane {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::LightGrayStainedGlassPane ( LightGrayStainedGlassPane {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::CyanStainedGlassPane ( CyanStainedGlassPane {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::PurpleStainedGlassPane ( PurpleStainedGlassPane {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::BlueStainedGlassPane ( BlueStainedGlassPane {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::BrownStainedGlassPane ( BrownStainedGlassPane {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::GreenStainedGlassPane ( GreenStainedGlassPane {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::RedStainedGlassPane ( RedStainedGlassPane {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::BlackStainedGlassPane ( BlackStainedGlassPane {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::AcaciaStairs ( AcaciaStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::DarkOakStairs ( DarkOakStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::MangroveStairs ( MangroveStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	map.insert(Block::SlimeBlock ( SlimeBlock {} ), map.len());
+	map.insert(Block::Barrier ( Barrier {} ), map.len());
+	for r#level in ConstrainedInt::<0, 15>::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::Light ( Light {r#level: r#level.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						map.insert(Block::IronTrapdoor ( IronTrapdoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	map.insert(Block::Prismarine ( Prismarine {} ), map.len());
+	map.insert(Block::PrismarineBricks ( PrismarineBricks {} ), map.len());
+	map.insert(Block::DarkPrismarine ( DarkPrismarine {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::PrismarineStairs ( PrismarineStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::PrismarineBrickStairs ( PrismarineBrickStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::DarkPrismarineStairs ( DarkPrismarineStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::PrismarineSlab ( PrismarineSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::PrismarineBrickSlab ( PrismarineBrickSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::DarkPrismarineSlab ( DarkPrismarineSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	map.insert(Block::SeaLantern ( SeaLantern {} ), map.len());
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::HayBlock ( HayBlock {r#axis: r#axis.clone(), } ), map.len());
+	}
+	map.insert(Block::WhiteCarpet ( WhiteCarpet {} ), map.len());
+	map.insert(Block::OrangeCarpet ( OrangeCarpet {} ), map.len());
+	map.insert(Block::MagentaCarpet ( MagentaCarpet {} ), map.len());
+	map.insert(Block::LightBlueCarpet ( LightBlueCarpet {} ), map.len());
+	map.insert(Block::YellowCarpet ( YellowCarpet {} ), map.len());
+	map.insert(Block::LimeCarpet ( LimeCarpet {} ), map.len());
+	map.insert(Block::PinkCarpet ( PinkCarpet {} ), map.len());
+	map.insert(Block::GrayCarpet ( GrayCarpet {} ), map.len());
+	map.insert(Block::LightGrayCarpet ( LightGrayCarpet {} ), map.len());
+	map.insert(Block::CyanCarpet ( CyanCarpet {} ), map.len());
+	map.insert(Block::PurpleCarpet ( PurpleCarpet {} ), map.len());
+	map.insert(Block::BlueCarpet ( BlueCarpet {} ), map.len());
+	map.insert(Block::BrownCarpet ( BrownCarpet {} ), map.len());
+	map.insert(Block::GreenCarpet ( GreenCarpet {} ), map.len());
+	map.insert(Block::RedCarpet ( RedCarpet {} ), map.len());
+	map.insert(Block::BlackCarpet ( BlackCarpet {} ), map.len());
+	map.insert(Block::Terracotta ( Terracotta {} ), map.len());
+	map.insert(Block::CoalBlock ( CoalBlock {} ), map.len());
+	map.insert(Block::PackedIce ( PackedIce {} ), map.len());
+	for r#half in property_enums::Half::possible_values() {
+		map.insert(Block::Sunflower ( Sunflower {r#half: r#half.clone(), } ), map.len());
+	}
+	for r#half in property_enums::Half::possible_values() {
+		map.insert(Block::Lilac ( Lilac {r#half: r#half.clone(), } ), map.len());
+	}
+	for r#half in property_enums::Half::possible_values() {
+		map.insert(Block::RoseBush ( RoseBush {r#half: r#half.clone(), } ), map.len());
+	}
+	for r#half in property_enums::Half::possible_values() {
+		map.insert(Block::Peony ( Peony {r#half: r#half.clone(), } ), map.len());
+	}
+	for r#half in property_enums::Half::possible_values() {
+		map.insert(Block::TallGrass ( TallGrass {r#half: r#half.clone(), } ), map.len());
+	}
+	for r#half in property_enums::Half::possible_values() {
+		map.insert(Block::LargeFern ( LargeFern {r#half: r#half.clone(), } ), map.len());
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::WhiteBanner ( WhiteBanner {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::OrangeBanner ( OrangeBanner {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::MagentaBanner ( MagentaBanner {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::LightBlueBanner ( LightBlueBanner {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::YellowBanner ( YellowBanner {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::LimeBanner ( LimeBanner {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::PinkBanner ( PinkBanner {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::GrayBanner ( GrayBanner {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::LightGrayBanner ( LightGrayBanner {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::CyanBanner ( CyanBanner {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::PurpleBanner ( PurpleBanner {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::BlueBanner ( BlueBanner {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::BrownBanner ( BrownBanner {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::GreenBanner ( GreenBanner {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::RedBanner ( RedBanner {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::BlackBanner ( BlackBanner {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::WhiteWallBanner ( WhiteWallBanner {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::OrangeWallBanner ( OrangeWallBanner {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::MagentaWallBanner ( MagentaWallBanner {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::LightBlueWallBanner ( LightBlueWallBanner {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::YellowWallBanner ( YellowWallBanner {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::LimeWallBanner ( LimeWallBanner {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::PinkWallBanner ( PinkWallBanner {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::GrayWallBanner ( GrayWallBanner {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::LightGrayWallBanner ( LightGrayWallBanner {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::CyanWallBanner ( CyanWallBanner {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::PurpleWallBanner ( PurpleWallBanner {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::BlueWallBanner ( BlueWallBanner {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::BrownWallBanner ( BrownWallBanner {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::GreenWallBanner ( GreenWallBanner {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::RedWallBanner ( RedWallBanner {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::BlackWallBanner ( BlackWallBanner {r#facing: r#facing.clone(), } ), map.len());
+	}
+	map.insert(Block::RedSandstone ( RedSandstone {} ), map.len());
+	map.insert(Block::ChiseledRedSandstone ( ChiseledRedSandstone {} ), map.len());
+	map.insert(Block::CutRedSandstone ( CutRedSandstone {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::RedSandstoneStairs ( RedSandstoneStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::OakSlab ( OakSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::SpruceSlab ( SpruceSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::BirchSlab ( BirchSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::JungleSlab ( JungleSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::AcaciaSlab ( AcaciaSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::DarkOakSlab ( DarkOakSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::MangroveSlab ( MangroveSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::StoneSlab ( StoneSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::SmoothStoneSlab ( SmoothStoneSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::SandstoneSlab ( SandstoneSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::CutSandstoneSlab ( CutSandstoneSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::PetrifiedOakSlab ( PetrifiedOakSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::CobblestoneSlab ( CobblestoneSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::BrickSlab ( BrickSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::StoneBrickSlab ( StoneBrickSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::MudBrickSlab ( MudBrickSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::NetherBrickSlab ( NetherBrickSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::QuartzSlab ( QuartzSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::RedSandstoneSlab ( RedSandstoneSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::CutRedSandstoneSlab ( CutRedSandstoneSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::PurpurSlab ( PurpurSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	map.insert(Block::SmoothStone ( SmoothStone {} ), map.len());
+	map.insert(Block::SmoothSandstone ( SmoothSandstone {} ), map.len());
+	map.insert(Block::SmoothQuartz ( SmoothQuartz {} ), map.len());
+	map.insert(Block::SmoothRedSandstone ( SmoothRedSandstone {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#in_wall in bool::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					map.insert(Block::SpruceFenceGate ( SpruceFenceGate {r#facing: r#facing.clone(), r#in_wall: r#in_wall.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#in_wall in bool::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					map.insert(Block::BirchFenceGate ( BirchFenceGate {r#facing: r#facing.clone(), r#in_wall: r#in_wall.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#in_wall in bool::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					map.insert(Block::JungleFenceGate ( JungleFenceGate {r#facing: r#facing.clone(), r#in_wall: r#in_wall.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#in_wall in bool::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					map.insert(Block::AcaciaFenceGate ( AcaciaFenceGate {r#facing: r#facing.clone(), r#in_wall: r#in_wall.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#in_wall in bool::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					map.insert(Block::DarkOakFenceGate ( DarkOakFenceGate {r#facing: r#facing.clone(), r#in_wall: r#in_wall.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#in_wall in bool::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					map.insert(Block::MangroveFenceGate ( MangroveFenceGate {r#facing: r#facing.clone(), r#in_wall: r#in_wall.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::SpruceFence ( SpruceFence {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::BirchFence ( BirchFence {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::JungleFence ( JungleFence {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::AcaciaFence ( AcaciaFence {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::DarkOakFence ( DarkOakFence {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::MangroveFence ( MangroveFence {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half::possible_values() {
+			for r#hinge in property_enums::Hinge::possible_values() {
+				for r#open in bool::possible_values() {
+					for r#powered in bool::possible_values() {
+						map.insert(Block::SpruceDoor ( SpruceDoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#hinge: r#hinge.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half::possible_values() {
+			for r#hinge in property_enums::Hinge::possible_values() {
+				for r#open in bool::possible_values() {
+					for r#powered in bool::possible_values() {
+						map.insert(Block::BirchDoor ( BirchDoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#hinge: r#hinge.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half::possible_values() {
+			for r#hinge in property_enums::Hinge::possible_values() {
+				for r#open in bool::possible_values() {
+					for r#powered in bool::possible_values() {
+						map.insert(Block::JungleDoor ( JungleDoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#hinge: r#hinge.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half::possible_values() {
+			for r#hinge in property_enums::Hinge::possible_values() {
+				for r#open in bool::possible_values() {
+					for r#powered in bool::possible_values() {
+						map.insert(Block::AcaciaDoor ( AcaciaDoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#hinge: r#hinge.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half::possible_values() {
+			for r#hinge in property_enums::Hinge::possible_values() {
+				for r#open in bool::possible_values() {
+					for r#powered in bool::possible_values() {
+						map.insert(Block::DarkOakDoor ( DarkOakDoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#hinge: r#hinge.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half::possible_values() {
+			for r#hinge in property_enums::Hinge::possible_values() {
+				for r#open in bool::possible_values() {
+					for r#powered in bool::possible_values() {
+						map.insert(Block::MangroveDoor ( MangroveDoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#hinge: r#hinge.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		map.insert(Block::EndRod ( EndRod {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#down in bool::possible_values() {
+		for r#east in bool::possible_values() {
+			for r#north in bool::possible_values() {
+				for r#south in bool::possible_values() {
+					for r#up in bool::possible_values() {
+						for r#west in bool::possible_values() {
+							map.insert(Block::ChorusPlant ( ChorusPlant {r#down: r#down.clone(), r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	for r#age in ConstrainedInt::<0, 5>::possible_values() {
+		map.insert(Block::ChorusFlower ( ChorusFlower {r#age: r#age.clone(), } ), map.len());
+	}
+	map.insert(Block::PurpurBlock ( PurpurBlock {} ), map.len());
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::PurpurPillar ( PurpurPillar {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::PurpurStairs ( PurpurStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	map.insert(Block::EndStoneBricks ( EndStoneBricks {} ), map.len());
+	for r#age in ConstrainedInt::<0, 3>::possible_values() {
+		map.insert(Block::Beetroots ( Beetroots {r#age: r#age.clone(), } ), map.len());
+	}
+	map.insert(Block::DirtPath ( DirtPath {} ), map.len());
+	map.insert(Block::EndGateway ( EndGateway {} ), map.len());
+	for r#conditional in bool::possible_values() {
+		for r#facing in property_enums::Facing::possible_values() {
+			map.insert(Block::RepeatingCommandBlock ( RepeatingCommandBlock {r#conditional: r#conditional.clone(), r#facing: r#facing.clone(), } ), map.len());
+		}
+	}
+	for r#conditional in bool::possible_values() {
+		for r#facing in property_enums::Facing::possible_values() {
+			map.insert(Block::ChainCommandBlock ( ChainCommandBlock {r#conditional: r#conditional.clone(), r#facing: r#facing.clone(), } ), map.len());
+		}
+	}
+	for r#age in ConstrainedInt::<0, 3>::possible_values() {
+		map.insert(Block::FrostedIce ( FrostedIce {r#age: r#age.clone(), } ), map.len());
+	}
+	map.insert(Block::MagmaBlock ( MagmaBlock {} ), map.len());
+	map.insert(Block::NetherWartBlock ( NetherWartBlock {} ), map.len());
+	map.insert(Block::RedNetherBricks ( RedNetherBricks {} ), map.len());
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::BoneBlock ( BoneBlock {r#axis: r#axis.clone(), } ), map.len());
+	}
+	map.insert(Block::StructureVoid ( StructureVoid {} ), map.len());
+	for r#facing in property_enums::Facing::possible_values() {
+		for r#powered in bool::possible_values() {
+			map.insert(Block::Observer ( Observer {r#facing: r#facing.clone(), r#powered: r#powered.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		map.insert(Block::ShulkerBox ( ShulkerBox {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		map.insert(Block::WhiteShulkerBox ( WhiteShulkerBox {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		map.insert(Block::OrangeShulkerBox ( OrangeShulkerBox {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		map.insert(Block::MagentaShulkerBox ( MagentaShulkerBox {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		map.insert(Block::LightBlueShulkerBox ( LightBlueShulkerBox {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		map.insert(Block::YellowShulkerBox ( YellowShulkerBox {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		map.insert(Block::LimeShulkerBox ( LimeShulkerBox {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		map.insert(Block::PinkShulkerBox ( PinkShulkerBox {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		map.insert(Block::GrayShulkerBox ( GrayShulkerBox {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		map.insert(Block::LightGrayShulkerBox ( LightGrayShulkerBox {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		map.insert(Block::CyanShulkerBox ( CyanShulkerBox {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		map.insert(Block::PurpleShulkerBox ( PurpleShulkerBox {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		map.insert(Block::BlueShulkerBox ( BlueShulkerBox {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		map.insert(Block::BrownShulkerBox ( BrownShulkerBox {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		map.insert(Block::GreenShulkerBox ( GreenShulkerBox {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		map.insert(Block::RedShulkerBox ( RedShulkerBox {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		map.insert(Block::BlackShulkerBox ( BlackShulkerBox {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::WhiteGlazedTerracotta ( WhiteGlazedTerracotta {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::OrangeGlazedTerracotta ( OrangeGlazedTerracotta {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::MagentaGlazedTerracotta ( MagentaGlazedTerracotta {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::LightBlueGlazedTerracotta ( LightBlueGlazedTerracotta {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::YellowGlazedTerracotta ( YellowGlazedTerracotta {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::LimeGlazedTerracotta ( LimeGlazedTerracotta {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::PinkGlazedTerracotta ( PinkGlazedTerracotta {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::GrayGlazedTerracotta ( GrayGlazedTerracotta {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::LightGrayGlazedTerracotta ( LightGrayGlazedTerracotta {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::CyanGlazedTerracotta ( CyanGlazedTerracotta {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::PurpleGlazedTerracotta ( PurpleGlazedTerracotta {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::BlueGlazedTerracotta ( BlueGlazedTerracotta {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::BrownGlazedTerracotta ( BrownGlazedTerracotta {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::GreenGlazedTerracotta ( GreenGlazedTerracotta {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::RedGlazedTerracotta ( RedGlazedTerracotta {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::BlackGlazedTerracotta ( BlackGlazedTerracotta {r#facing: r#facing.clone(), } ), map.len());
+	}
+	map.insert(Block::WhiteConcrete ( WhiteConcrete {} ), map.len());
+	map.insert(Block::OrangeConcrete ( OrangeConcrete {} ), map.len());
+	map.insert(Block::MagentaConcrete ( MagentaConcrete {} ), map.len());
+	map.insert(Block::LightBlueConcrete ( LightBlueConcrete {} ), map.len());
+	map.insert(Block::YellowConcrete ( YellowConcrete {} ), map.len());
+	map.insert(Block::LimeConcrete ( LimeConcrete {} ), map.len());
+	map.insert(Block::PinkConcrete ( PinkConcrete {} ), map.len());
+	map.insert(Block::GrayConcrete ( GrayConcrete {} ), map.len());
+	map.insert(Block::LightGrayConcrete ( LightGrayConcrete {} ), map.len());
+	map.insert(Block::CyanConcrete ( CyanConcrete {} ), map.len());
+	map.insert(Block::PurpleConcrete ( PurpleConcrete {} ), map.len());
+	map.insert(Block::BlueConcrete ( BlueConcrete {} ), map.len());
+	map.insert(Block::BrownConcrete ( BrownConcrete {} ), map.len());
+	map.insert(Block::GreenConcrete ( GreenConcrete {} ), map.len());
+	map.insert(Block::RedConcrete ( RedConcrete {} ), map.len());
+	map.insert(Block::BlackConcrete ( BlackConcrete {} ), map.len());
+	map.insert(Block::WhiteConcretePowder ( WhiteConcretePowder {} ), map.len());
+	map.insert(Block::OrangeConcretePowder ( OrangeConcretePowder {} ), map.len());
+	map.insert(Block::MagentaConcretePowder ( MagentaConcretePowder {} ), map.len());
+	map.insert(Block::LightBlueConcretePowder ( LightBlueConcretePowder {} ), map.len());
+	map.insert(Block::YellowConcretePowder ( YellowConcretePowder {} ), map.len());
+	map.insert(Block::LimeConcretePowder ( LimeConcretePowder {} ), map.len());
+	map.insert(Block::PinkConcretePowder ( PinkConcretePowder {} ), map.len());
+	map.insert(Block::GrayConcretePowder ( GrayConcretePowder {} ), map.len());
+	map.insert(Block::LightGrayConcretePowder ( LightGrayConcretePowder {} ), map.len());
+	map.insert(Block::CyanConcretePowder ( CyanConcretePowder {} ), map.len());
+	map.insert(Block::PurpleConcretePowder ( PurpleConcretePowder {} ), map.len());
+	map.insert(Block::BlueConcretePowder ( BlueConcretePowder {} ), map.len());
+	map.insert(Block::BrownConcretePowder ( BrownConcretePowder {} ), map.len());
+	map.insert(Block::GreenConcretePowder ( GreenConcretePowder {} ), map.len());
+	map.insert(Block::RedConcretePowder ( RedConcretePowder {} ), map.len());
+	map.insert(Block::BlackConcretePowder ( BlackConcretePowder {} ), map.len());
+	for r#age in ConstrainedInt::<0, 25>::possible_values() {
+		map.insert(Block::Kelp ( Kelp {r#age: r#age.clone(), } ), map.len());
+	}
+	map.insert(Block::KelpPlant ( KelpPlant {} ), map.len());
+	map.insert(Block::DriedKelpBlock ( DriedKelpBlock {} ), map.len());
+	for r#eggs in ConstrainedInt::<1, 4>::possible_values() {
+		for r#hatch in ConstrainedInt::<0, 2>::possible_values() {
+			map.insert(Block::TurtleEgg ( TurtleEgg {r#eggs: r#eggs.clone(), r#hatch: r#hatch.clone(), } ), map.len());
+		}
+	}
+	map.insert(Block::DeadTubeCoralBlock ( DeadTubeCoralBlock {} ), map.len());
+	map.insert(Block::DeadBrainCoralBlock ( DeadBrainCoralBlock {} ), map.len());
+	map.insert(Block::DeadBubbleCoralBlock ( DeadBubbleCoralBlock {} ), map.len());
+	map.insert(Block::DeadFireCoralBlock ( DeadFireCoralBlock {} ), map.len());
+	map.insert(Block::DeadHornCoralBlock ( DeadHornCoralBlock {} ), map.len());
+	map.insert(Block::TubeCoralBlock ( TubeCoralBlock {} ), map.len());
+	map.insert(Block::BrainCoralBlock ( BrainCoralBlock {} ), map.len());
+	map.insert(Block::BubbleCoralBlock ( BubbleCoralBlock {} ), map.len());
+	map.insert(Block::FireCoralBlock ( FireCoralBlock {} ), map.len());
+	map.insert(Block::HornCoralBlock ( HornCoralBlock {} ), map.len());
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::DeadTubeCoral ( DeadTubeCoral {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::DeadBrainCoral ( DeadBrainCoral {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::DeadBubbleCoral ( DeadBubbleCoral {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::DeadFireCoral ( DeadFireCoral {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::DeadHornCoral ( DeadHornCoral {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::TubeCoral ( TubeCoral {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::BrainCoral ( BrainCoral {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::BubbleCoral ( BubbleCoral {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::FireCoral ( FireCoral {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::HornCoral ( HornCoral {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::DeadTubeCoralFan ( DeadTubeCoralFan {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::DeadBrainCoralFan ( DeadBrainCoralFan {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::DeadBubbleCoralFan ( DeadBubbleCoralFan {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::DeadFireCoralFan ( DeadFireCoralFan {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::DeadHornCoralFan ( DeadHornCoralFan {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::TubeCoralFan ( TubeCoralFan {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::BrainCoralFan ( BrainCoralFan {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::BubbleCoralFan ( BubbleCoralFan {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::FireCoralFan ( FireCoralFan {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::HornCoralFan ( HornCoralFan {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::DeadTubeCoralWallFan ( DeadTubeCoralWallFan {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::DeadBrainCoralWallFan ( DeadBrainCoralWallFan {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::DeadBubbleCoralWallFan ( DeadBubbleCoralWallFan {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::DeadFireCoralWallFan ( DeadFireCoralWallFan {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::DeadHornCoralWallFan ( DeadHornCoralWallFan {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::TubeCoralWallFan ( TubeCoralWallFan {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::BrainCoralWallFan ( BrainCoralWallFan {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::BubbleCoralWallFan ( BubbleCoralWallFan {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::FireCoralWallFan ( FireCoralWallFan {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::HornCoralWallFan ( HornCoralWallFan {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#pickles in ConstrainedInt::<1, 4>::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::SeaPickle ( SeaPickle {r#pickles: r#pickles.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	map.insert(Block::BlueIce ( BlueIce {} ), map.len());
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::Conduit ( Conduit {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	map.insert(Block::BambooSapling ( BambooSapling {} ), map.len());
+	for r#age in ConstrainedInt::<0, 1>::possible_values() {
+		for r#leaves in property_enums::Leaves::possible_values() {
+			for r#stage in ConstrainedInt::<0, 1>::possible_values() {
+				map.insert(Block::Bamboo ( Bamboo {r#age: r#age.clone(), r#leaves: r#leaves.clone(), r#stage: r#stage.clone(), } ), map.len());
+			}
+		}
+	}
+	map.insert(Block::PottedBamboo ( PottedBamboo {} ), map.len());
+	map.insert(Block::VoidAir ( VoidAir {} ), map.len());
+	map.insert(Block::CaveAir ( CaveAir {} ), map.len());
+	for r#drag in bool::possible_values() {
+		map.insert(Block::BubbleColumn ( BubbleColumn {r#drag: r#drag.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::PolishedGraniteStairs ( PolishedGraniteStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::SmoothRedSandstoneStairs ( SmoothRedSandstoneStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::MossyStoneBrickStairs ( MossyStoneBrickStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::PolishedDioriteStairs ( PolishedDioriteStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::MossyCobblestoneStairs ( MossyCobblestoneStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::EndStoneBrickStairs ( EndStoneBrickStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::StoneStairs ( StoneStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::SmoothSandstoneStairs ( SmoothSandstoneStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::SmoothQuartzStairs ( SmoothQuartzStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::GraniteStairs ( GraniteStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::AndesiteStairs ( AndesiteStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::RedNetherBrickStairs ( RedNetherBrickStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::PolishedAndesiteStairs ( PolishedAndesiteStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::DioriteStairs ( DioriteStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::PolishedGraniteSlab ( PolishedGraniteSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::SmoothRedSandstoneSlab ( SmoothRedSandstoneSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::MossyStoneBrickSlab ( MossyStoneBrickSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::PolishedDioriteSlab ( PolishedDioriteSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::MossyCobblestoneSlab ( MossyCobblestoneSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::EndStoneBrickSlab ( EndStoneBrickSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::SmoothSandstoneSlab ( SmoothSandstoneSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::SmoothQuartzSlab ( SmoothQuartzSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::GraniteSlab ( GraniteSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::AndesiteSlab ( AndesiteSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::RedNetherBrickSlab ( RedNetherBrickSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::PolishedAndesiteSlab ( PolishedAndesiteSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::DioriteSlab ( DioriteSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#east in property_enums::East1::possible_values() {
+		for r#north in property_enums::North1::possible_values() {
+			for r#south in property_enums::South1::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						for r#west in property_enums::West1::possible_values() {
+							map.insert(Block::BrickWall ( BrickWall {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	for r#east in property_enums::East1::possible_values() {
+		for r#north in property_enums::North1::possible_values() {
+			for r#south in property_enums::South1::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						for r#west in property_enums::West1::possible_values() {
+							map.insert(Block::PrismarineWall ( PrismarineWall {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	for r#east in property_enums::East1::possible_values() {
+		for r#north in property_enums::North1::possible_values() {
+			for r#south in property_enums::South1::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						for r#west in property_enums::West1::possible_values() {
+							map.insert(Block::RedSandstoneWall ( RedSandstoneWall {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	for r#east in property_enums::East1::possible_values() {
+		for r#north in property_enums::North1::possible_values() {
+			for r#south in property_enums::South1::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						for r#west in property_enums::West1::possible_values() {
+							map.insert(Block::MossyStoneBrickWall ( MossyStoneBrickWall {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	for r#east in property_enums::East1::possible_values() {
+		for r#north in property_enums::North1::possible_values() {
+			for r#south in property_enums::South1::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						for r#west in property_enums::West1::possible_values() {
+							map.insert(Block::GraniteWall ( GraniteWall {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	for r#east in property_enums::East1::possible_values() {
+		for r#north in property_enums::North1::possible_values() {
+			for r#south in property_enums::South1::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						for r#west in property_enums::West1::possible_values() {
+							map.insert(Block::StoneBrickWall ( StoneBrickWall {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	for r#east in property_enums::East1::possible_values() {
+		for r#north in property_enums::North1::possible_values() {
+			for r#south in property_enums::South1::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						for r#west in property_enums::West1::possible_values() {
+							map.insert(Block::MudBrickWall ( MudBrickWall {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	for r#east in property_enums::East1::possible_values() {
+		for r#north in property_enums::North1::possible_values() {
+			for r#south in property_enums::South1::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						for r#west in property_enums::West1::possible_values() {
+							map.insert(Block::NetherBrickWall ( NetherBrickWall {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	for r#east in property_enums::East1::possible_values() {
+		for r#north in property_enums::North1::possible_values() {
+			for r#south in property_enums::South1::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						for r#west in property_enums::West1::possible_values() {
+							map.insert(Block::AndesiteWall ( AndesiteWall {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	for r#east in property_enums::East1::possible_values() {
+		for r#north in property_enums::North1::possible_values() {
+			for r#south in property_enums::South1::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						for r#west in property_enums::West1::possible_values() {
+							map.insert(Block::RedNetherBrickWall ( RedNetherBrickWall {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	for r#east in property_enums::East1::possible_values() {
+		for r#north in property_enums::North1::possible_values() {
+			for r#south in property_enums::South1::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						for r#west in property_enums::West1::possible_values() {
+							map.insert(Block::SandstoneWall ( SandstoneWall {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	for r#east in property_enums::East1::possible_values() {
+		for r#north in property_enums::North1::possible_values() {
+			for r#south in property_enums::South1::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						for r#west in property_enums::West1::possible_values() {
+							map.insert(Block::EndStoneBrickWall ( EndStoneBrickWall {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	for r#east in property_enums::East1::possible_values() {
+		for r#north in property_enums::North1::possible_values() {
+			for r#south in property_enums::South1::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						for r#west in property_enums::West1::possible_values() {
+							map.insert(Block::DioriteWall ( DioriteWall {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	for r#bottom in bool::possible_values() {
+		for r#distance in ConstrainedInt::<0, 7>::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::Scaffolding ( Scaffolding {r#bottom: r#bottom.clone(), r#distance: r#distance.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::Loom ( Loom {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		for r#open in bool::possible_values() {
+			map.insert(Block::Barrel ( Barrel {r#facing: r#facing.clone(), r#open: r#open.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#lit in bool::possible_values() {
+			map.insert(Block::Smoker ( Smoker {r#facing: r#facing.clone(), r#lit: r#lit.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#lit in bool::possible_values() {
+			map.insert(Block::BlastFurnace ( BlastFurnace {r#facing: r#facing.clone(), r#lit: r#lit.clone(), } ), map.len());
+		}
+	}
+	map.insert(Block::CartographyTable ( CartographyTable {} ), map.len());
+	map.insert(Block::FletchingTable ( FletchingTable {} ), map.len());
+	for r#face in property_enums::Face::possible_values() {
+		for r#facing in property_enums::Facing1::possible_values() {
+			map.insert(Block::Grindstone ( Grindstone {r#face: r#face.clone(), r#facing: r#facing.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#has_book in bool::possible_values() {
+			for r#powered in bool::possible_values() {
+				map.insert(Block::Lectern ( Lectern {r#facing: r#facing.clone(), r#has_book: r#has_book.clone(), r#powered: r#powered.clone(), } ), map.len());
+			}
+		}
+	}
+	map.insert(Block::SmithingTable ( SmithingTable {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::Stonecutter ( Stonecutter {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#attachment in property_enums::Attachment::possible_values() {
+		for r#facing in property_enums::Facing1::possible_values() {
+			for r#powered in bool::possible_values() {
+				map.insert(Block::Bell ( Bell {r#attachment: r#attachment.clone(), r#facing: r#facing.clone(), r#powered: r#powered.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#hanging in bool::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::Lantern ( Lantern {r#hanging: r#hanging.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#hanging in bool::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::SoulLantern ( SoulLantern {r#hanging: r#hanging.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#lit in bool::possible_values() {
+			for r#signal_fire in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::Campfire ( Campfire {r#facing: r#facing.clone(), r#lit: r#lit.clone(), r#signal_fire: r#signal_fire.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#lit in bool::possible_values() {
+			for r#signal_fire in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::SoulCampfire ( SoulCampfire {r#facing: r#facing.clone(), r#lit: r#lit.clone(), r#signal_fire: r#signal_fire.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#age in ConstrainedInt::<0, 3>::possible_values() {
+		map.insert(Block::SweetBerryBush ( SweetBerryBush {r#age: r#age.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::WarpedStem ( WarpedStem {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::StrippedWarpedStem ( StrippedWarpedStem {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::WarpedHyphae ( WarpedHyphae {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::StrippedWarpedHyphae ( StrippedWarpedHyphae {r#axis: r#axis.clone(), } ), map.len());
+	}
+	map.insert(Block::WarpedNylium ( WarpedNylium {} ), map.len());
+	map.insert(Block::WarpedFungus ( WarpedFungus {} ), map.len());
+	map.insert(Block::WarpedWartBlock ( WarpedWartBlock {} ), map.len());
+	map.insert(Block::WarpedRoots ( WarpedRoots {} ), map.len());
+	map.insert(Block::NetherSprouts ( NetherSprouts {} ), map.len());
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::CrimsonStem ( CrimsonStem {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::StrippedCrimsonStem ( StrippedCrimsonStem {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::CrimsonHyphae ( CrimsonHyphae {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::StrippedCrimsonHyphae ( StrippedCrimsonHyphae {r#axis: r#axis.clone(), } ), map.len());
+	}
+	map.insert(Block::CrimsonNylium ( CrimsonNylium {} ), map.len());
+	map.insert(Block::CrimsonFungus ( CrimsonFungus {} ), map.len());
+	map.insert(Block::Shroomlight ( Shroomlight {} ), map.len());
+	for r#age in ConstrainedInt::<0, 25>::possible_values() {
+		map.insert(Block::WeepingVines ( WeepingVines {r#age: r#age.clone(), } ), map.len());
+	}
+	map.insert(Block::WeepingVinesPlant ( WeepingVinesPlant {} ), map.len());
+	for r#age in ConstrainedInt::<0, 25>::possible_values() {
+		map.insert(Block::TwistingVines ( TwistingVines {r#age: r#age.clone(), } ), map.len());
+	}
+	map.insert(Block::TwistingVinesPlant ( TwistingVinesPlant {} ), map.len());
+	map.insert(Block::CrimsonRoots ( CrimsonRoots {} ), map.len());
+	map.insert(Block::CrimsonPlanks ( CrimsonPlanks {} ), map.len());
+	map.insert(Block::WarpedPlanks ( WarpedPlanks {} ), map.len());
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::CrimsonSlab ( CrimsonSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::WarpedSlab ( WarpedSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#powered in bool::possible_values() {
+		map.insert(Block::CrimsonPressurePlate ( CrimsonPressurePlate {r#powered: r#powered.clone(), } ), map.len());
+	}
+	for r#powered in bool::possible_values() {
+		map.insert(Block::WarpedPressurePlate ( WarpedPressurePlate {r#powered: r#powered.clone(), } ), map.len());
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::CrimsonFence ( CrimsonFence {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::WarpedFence ( WarpedFence {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						map.insert(Block::CrimsonTrapdoor ( CrimsonTrapdoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						map.insert(Block::WarpedTrapdoor ( WarpedTrapdoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#in_wall in bool::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					map.insert(Block::CrimsonFenceGate ( CrimsonFenceGate {r#facing: r#facing.clone(), r#in_wall: r#in_wall.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#in_wall in bool::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					map.insert(Block::WarpedFenceGate ( WarpedFenceGate {r#facing: r#facing.clone(), r#in_wall: r#in_wall.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::CrimsonStairs ( CrimsonStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::WarpedStairs ( WarpedStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#face in property_enums::Face::possible_values() {
+		for r#facing in property_enums::Facing1::possible_values() {
+			for r#powered in bool::possible_values() {
+				map.insert(Block::CrimsonButton ( CrimsonButton {r#face: r#face.clone(), r#facing: r#facing.clone(), r#powered: r#powered.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#face in property_enums::Face::possible_values() {
+		for r#facing in property_enums::Facing1::possible_values() {
+			for r#powered in bool::possible_values() {
+				map.insert(Block::WarpedButton ( WarpedButton {r#face: r#face.clone(), r#facing: r#facing.clone(), r#powered: r#powered.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half::possible_values() {
+			for r#hinge in property_enums::Hinge::possible_values() {
+				for r#open in bool::possible_values() {
+					for r#powered in bool::possible_values() {
+						map.insert(Block::CrimsonDoor ( CrimsonDoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#hinge: r#hinge.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half::possible_values() {
+			for r#hinge in property_enums::Hinge::possible_values() {
+				for r#open in bool::possible_values() {
+					for r#powered in bool::possible_values() {
+						map.insert(Block::WarpedDoor ( WarpedDoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#hinge: r#hinge.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::CrimsonSign ( CrimsonSign {r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::WarpedSign ( WarpedSign {r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::CrimsonWallSign ( CrimsonWallSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::WarpedWallSign ( WarpedWallSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#mode in property_enums::Mode1::possible_values() {
+		map.insert(Block::StructureBlock ( StructureBlock {r#mode: r#mode.clone(), } ), map.len());
+	}
+	for r#orientation in property_enums::Orientation::possible_values() {
+		map.insert(Block::Jigsaw ( Jigsaw {r#orientation: r#orientation.clone(), } ), map.len());
+	}
+	for r#level in ConstrainedInt::<0, 8>::possible_values() {
+		map.insert(Block::Composter ( Composter {r#level: r#level.clone(), } ), map.len());
+	}
+	for r#power in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::Target ( Target {r#power: r#power.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#honey_level in ConstrainedInt::<0, 5>::possible_values() {
+			map.insert(Block::BeeNest ( BeeNest {r#facing: r#facing.clone(), r#honey_level: r#honey_level.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#honey_level in ConstrainedInt::<0, 5>::possible_values() {
+			map.insert(Block::Beehive ( Beehive {r#facing: r#facing.clone(), r#honey_level: r#honey_level.clone(), } ), map.len());
+		}
+	}
+	map.insert(Block::HoneyBlock ( HoneyBlock {} ), map.len());
+	map.insert(Block::HoneycombBlock ( HoneycombBlock {} ), map.len());
+	map.insert(Block::NetheriteBlock ( NetheriteBlock {} ), map.len());
+	map.insert(Block::AncientDebris ( AncientDebris {} ), map.len());
+	map.insert(Block::CryingObsidian ( CryingObsidian {} ), map.len());
+	for r#charges in ConstrainedInt::<0, 4>::possible_values() {
+		map.insert(Block::RespawnAnchor ( RespawnAnchor {r#charges: r#charges.clone(), } ), map.len());
+	}
+	map.insert(Block::PottedCrimsonFungus ( PottedCrimsonFungus {} ), map.len());
+	map.insert(Block::PottedWarpedFungus ( PottedWarpedFungus {} ), map.len());
+	map.insert(Block::PottedCrimsonRoots ( PottedCrimsonRoots {} ), map.len());
+	map.insert(Block::PottedWarpedRoots ( PottedWarpedRoots {} ), map.len());
+	map.insert(Block::Lodestone ( Lodestone {} ), map.len());
+	map.insert(Block::Blackstone ( Blackstone {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::BlackstoneStairs ( BlackstoneStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#east in property_enums::East1::possible_values() {
+		for r#north in property_enums::North1::possible_values() {
+			for r#south in property_enums::South1::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						for r#west in property_enums::West1::possible_values() {
+							map.insert(Block::BlackstoneWall ( BlackstoneWall {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::BlackstoneSlab ( BlackstoneSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	map.insert(Block::PolishedBlackstone ( PolishedBlackstone {} ), map.len());
+	map.insert(Block::PolishedBlackstoneBricks ( PolishedBlackstoneBricks {} ), map.len());
+	map.insert(Block::CrackedPolishedBlackstoneBricks ( CrackedPolishedBlackstoneBricks {} ), map.len());
+	map.insert(Block::ChiseledPolishedBlackstone ( ChiseledPolishedBlackstone {} ), map.len());
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::PolishedBlackstoneBrickSlab ( PolishedBlackstoneBrickSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::PolishedBlackstoneBrickStairs ( PolishedBlackstoneBrickStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#east in property_enums::East1::possible_values() {
+		for r#north in property_enums::North1::possible_values() {
+			for r#south in property_enums::South1::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						for r#west in property_enums::West1::possible_values() {
+							map.insert(Block::PolishedBlackstoneBrickWall ( PolishedBlackstoneBrickWall {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	map.insert(Block::GildedBlackstone ( GildedBlackstone {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::PolishedBlackstoneStairs ( PolishedBlackstoneStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::PolishedBlackstoneSlab ( PolishedBlackstoneSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#powered in bool::possible_values() {
+		map.insert(Block::PolishedBlackstonePressurePlate ( PolishedBlackstonePressurePlate {r#powered: r#powered.clone(), } ), map.len());
+	}
+	for r#face in property_enums::Face::possible_values() {
+		for r#facing in property_enums::Facing1::possible_values() {
+			for r#powered in bool::possible_values() {
+				map.insert(Block::PolishedBlackstoneButton ( PolishedBlackstoneButton {r#face: r#face.clone(), r#facing: r#facing.clone(), r#powered: r#powered.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#east in property_enums::East1::possible_values() {
+		for r#north in property_enums::North1::possible_values() {
+			for r#south in property_enums::South1::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						for r#west in property_enums::West1::possible_values() {
+							map.insert(Block::PolishedBlackstoneWall ( PolishedBlackstoneWall {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	map.insert(Block::ChiseledNetherBricks ( ChiseledNetherBricks {} ), map.len());
+	map.insert(Block::CrackedNetherBricks ( CrackedNetherBricks {} ), map.len());
+	map.insert(Block::QuartzBricks ( QuartzBricks {} ), map.len());
+	for r#candles in ConstrainedInt::<1, 4>::possible_values() {
+		for r#lit in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::Candle ( Candle {r#candles: r#candles.clone(), r#lit: r#lit.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#candles in ConstrainedInt::<1, 4>::possible_values() {
+		for r#lit in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::WhiteCandle ( WhiteCandle {r#candles: r#candles.clone(), r#lit: r#lit.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#candles in ConstrainedInt::<1, 4>::possible_values() {
+		for r#lit in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::OrangeCandle ( OrangeCandle {r#candles: r#candles.clone(), r#lit: r#lit.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#candles in ConstrainedInt::<1, 4>::possible_values() {
+		for r#lit in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::MagentaCandle ( MagentaCandle {r#candles: r#candles.clone(), r#lit: r#lit.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#candles in ConstrainedInt::<1, 4>::possible_values() {
+		for r#lit in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::LightBlueCandle ( LightBlueCandle {r#candles: r#candles.clone(), r#lit: r#lit.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#candles in ConstrainedInt::<1, 4>::possible_values() {
+		for r#lit in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::YellowCandle ( YellowCandle {r#candles: r#candles.clone(), r#lit: r#lit.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#candles in ConstrainedInt::<1, 4>::possible_values() {
+		for r#lit in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::LimeCandle ( LimeCandle {r#candles: r#candles.clone(), r#lit: r#lit.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#candles in ConstrainedInt::<1, 4>::possible_values() {
+		for r#lit in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::PinkCandle ( PinkCandle {r#candles: r#candles.clone(), r#lit: r#lit.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#candles in ConstrainedInt::<1, 4>::possible_values() {
+		for r#lit in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::GrayCandle ( GrayCandle {r#candles: r#candles.clone(), r#lit: r#lit.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#candles in ConstrainedInt::<1, 4>::possible_values() {
+		for r#lit in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::LightGrayCandle ( LightGrayCandle {r#candles: r#candles.clone(), r#lit: r#lit.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#candles in ConstrainedInt::<1, 4>::possible_values() {
+		for r#lit in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::CyanCandle ( CyanCandle {r#candles: r#candles.clone(), r#lit: r#lit.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#candles in ConstrainedInt::<1, 4>::possible_values() {
+		for r#lit in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::PurpleCandle ( PurpleCandle {r#candles: r#candles.clone(), r#lit: r#lit.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#candles in ConstrainedInt::<1, 4>::possible_values() {
+		for r#lit in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::BlueCandle ( BlueCandle {r#candles: r#candles.clone(), r#lit: r#lit.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#candles in ConstrainedInt::<1, 4>::possible_values() {
+		for r#lit in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::BrownCandle ( BrownCandle {r#candles: r#candles.clone(), r#lit: r#lit.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#candles in ConstrainedInt::<1, 4>::possible_values() {
+		for r#lit in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::GreenCandle ( GreenCandle {r#candles: r#candles.clone(), r#lit: r#lit.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#candles in ConstrainedInt::<1, 4>::possible_values() {
+		for r#lit in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::RedCandle ( RedCandle {r#candles: r#candles.clone(), r#lit: r#lit.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#candles in ConstrainedInt::<1, 4>::possible_values() {
+		for r#lit in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::BlackCandle ( BlackCandle {r#candles: r#candles.clone(), r#lit: r#lit.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#lit in bool::possible_values() {
+		map.insert(Block::CandleCake ( CandleCake {r#lit: r#lit.clone(), } ), map.len());
+	}
+	for r#lit in bool::possible_values() {
+		map.insert(Block::WhiteCandleCake ( WhiteCandleCake {r#lit: r#lit.clone(), } ), map.len());
+	}
+	for r#lit in bool::possible_values() {
+		map.insert(Block::OrangeCandleCake ( OrangeCandleCake {r#lit: r#lit.clone(), } ), map.len());
+	}
+	for r#lit in bool::possible_values() {
+		map.insert(Block::MagentaCandleCake ( MagentaCandleCake {r#lit: r#lit.clone(), } ), map.len());
+	}
+	for r#lit in bool::possible_values() {
+		map.insert(Block::LightBlueCandleCake ( LightBlueCandleCake {r#lit: r#lit.clone(), } ), map.len());
+	}
+	for r#lit in bool::possible_values() {
+		map.insert(Block::YellowCandleCake ( YellowCandleCake {r#lit: r#lit.clone(), } ), map.len());
+	}
+	for r#lit in bool::possible_values() {
+		map.insert(Block::LimeCandleCake ( LimeCandleCake {r#lit: r#lit.clone(), } ), map.len());
+	}
+	for r#lit in bool::possible_values() {
+		map.insert(Block::PinkCandleCake ( PinkCandleCake {r#lit: r#lit.clone(), } ), map.len());
+	}
+	for r#lit in bool::possible_values() {
+		map.insert(Block::GrayCandleCake ( GrayCandleCake {r#lit: r#lit.clone(), } ), map.len());
+	}
+	for r#lit in bool::possible_values() {
+		map.insert(Block::LightGrayCandleCake ( LightGrayCandleCake {r#lit: r#lit.clone(), } ), map.len());
+	}
+	for r#lit in bool::possible_values() {
+		map.insert(Block::CyanCandleCake ( CyanCandleCake {r#lit: r#lit.clone(), } ), map.len());
+	}
+	for r#lit in bool::possible_values() {
+		map.insert(Block::PurpleCandleCake ( PurpleCandleCake {r#lit: r#lit.clone(), } ), map.len());
+	}
+	for r#lit in bool::possible_values() {
+		map.insert(Block::BlueCandleCake ( BlueCandleCake {r#lit: r#lit.clone(), } ), map.len());
+	}
+	for r#lit in bool::possible_values() {
+		map.insert(Block::BrownCandleCake ( BrownCandleCake {r#lit: r#lit.clone(), } ), map.len());
+	}
+	for r#lit in bool::possible_values() {
+		map.insert(Block::GreenCandleCake ( GreenCandleCake {r#lit: r#lit.clone(), } ), map.len());
+	}
+	for r#lit in bool::possible_values() {
+		map.insert(Block::RedCandleCake ( RedCandleCake {r#lit: r#lit.clone(), } ), map.len());
+	}
+	for r#lit in bool::possible_values() {
+		map.insert(Block::BlackCandleCake ( BlackCandleCake {r#lit: r#lit.clone(), } ), map.len());
+	}
+	map.insert(Block::AmethystBlock ( AmethystBlock {} ), map.len());
+	map.insert(Block::BuddingAmethyst ( BuddingAmethyst {} ), map.len());
+	for r#facing in property_enums::Facing::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::AmethystCluster ( AmethystCluster {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::LargeAmethystBud ( LargeAmethystBud {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::MediumAmethystBud ( MediumAmethystBud {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::SmallAmethystBud ( SmallAmethystBud {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	map.insert(Block::Tuff ( Tuff {} ), map.len());
+	map.insert(Block::Calcite ( Calcite {} ), map.len());
+	map.insert(Block::TintedGlass ( TintedGlass {} ), map.len());
+	map.insert(Block::PowderSnow ( PowderSnow {} ), map.len());
+	for r#power in ConstrainedInt::<0, 15>::possible_values() {
+		for r#sculk_sensor_phase in property_enums::SculkSensorPhase::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::SculkSensor ( SculkSensor {r#power: r#power.clone(), r#sculk_sensor_phase: r#sculk_sensor_phase.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	map.insert(Block::Sculk ( Sculk {} ), map.len());
+	for r#down in bool::possible_values() {
+		for r#east in bool::possible_values() {
+			for r#north in bool::possible_values() {
+				for r#south in bool::possible_values() {
+					for r#up in bool::possible_values() {
+						for r#waterlogged in bool::possible_values() {
+							for r#west in bool::possible_values() {
+								map.insert(Block::SculkVein ( SculkVein {r#down: r#down.clone(), r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	for r#bloom in bool::possible_values() {
+		map.insert(Block::SculkCatalyst ( SculkCatalyst {r#bloom: r#bloom.clone(), } ), map.len());
+	}
+	for r#can_summon in bool::possible_values() {
+		for r#shrieking in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::SculkShrieker ( SculkShrieker {r#can_summon: r#can_summon.clone(), r#shrieking: r#shrieking.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	map.insert(Block::OxidizedCopper ( OxidizedCopper {} ), map.len());
+	map.insert(Block::WeatheredCopper ( WeatheredCopper {} ), map.len());
+	map.insert(Block::ExposedCopper ( ExposedCopper {} ), map.len());
+	map.insert(Block::CopperBlock ( CopperBlock {} ), map.len());
+	map.insert(Block::CopperOre ( CopperOre {} ), map.len());
+	map.insert(Block::DeepslateCopperOre ( DeepslateCopperOre {} ), map.len());
+	map.insert(Block::OxidizedCutCopper ( OxidizedCutCopper {} ), map.len());
+	map.insert(Block::WeatheredCutCopper ( WeatheredCutCopper {} ), map.len());
+	map.insert(Block::ExposedCutCopper ( ExposedCutCopper {} ), map.len());
+	map.insert(Block::CutCopper ( CutCopper {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::OxidizedCutCopperStairs ( OxidizedCutCopperStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::WeatheredCutCopperStairs ( WeatheredCutCopperStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::ExposedCutCopperStairs ( ExposedCutCopperStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::CutCopperStairs ( CutCopperStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::OxidizedCutCopperSlab ( OxidizedCutCopperSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::WeatheredCutCopperSlab ( WeatheredCutCopperSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::ExposedCutCopperSlab ( ExposedCutCopperSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::CutCopperSlab ( CutCopperSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	map.insert(Block::WaxedCopperBlock ( WaxedCopperBlock {} ), map.len());
+	map.insert(Block::WaxedWeatheredCopper ( WaxedWeatheredCopper {} ), map.len());
+	map.insert(Block::WaxedExposedCopper ( WaxedExposedCopper {} ), map.len());
+	map.insert(Block::WaxedOxidizedCopper ( WaxedOxidizedCopper {} ), map.len());
+	map.insert(Block::WaxedOxidizedCutCopper ( WaxedOxidizedCutCopper {} ), map.len());
+	map.insert(Block::WaxedWeatheredCutCopper ( WaxedWeatheredCutCopper {} ), map.len());
+	map.insert(Block::WaxedExposedCutCopper ( WaxedExposedCutCopper {} ), map.len());
+	map.insert(Block::WaxedCutCopper ( WaxedCutCopper {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::WaxedOxidizedCutCopperStairs ( WaxedOxidizedCutCopperStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::WaxedWeatheredCutCopperStairs ( WaxedWeatheredCutCopperStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::WaxedExposedCutCopperStairs ( WaxedExposedCutCopperStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::WaxedCutCopperStairs ( WaxedCutCopperStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::WaxedOxidizedCutCopperSlab ( WaxedOxidizedCutCopperSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::WaxedWeatheredCutCopperSlab ( WaxedWeatheredCutCopperSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::WaxedExposedCutCopperSlab ( WaxedExposedCutCopperSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::WaxedCutCopperSlab ( WaxedCutCopperSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing::possible_values() {
+		for r#powered in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::LightningRod ( LightningRod {r#facing: r#facing.clone(), r#powered: r#powered.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#thickness in property_enums::Thickness::possible_values() {
+		for r#vertical_direction in property_enums::VerticalDirection::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::PointedDripstone ( PointedDripstone {r#thickness: r#thickness.clone(), r#vertical_direction: r#vertical_direction.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	map.insert(Block::DripstoneBlock ( DripstoneBlock {} ), map.len());
+	for r#age in ConstrainedInt::<0, 25>::possible_values() {
+		for r#berries in bool::possible_values() {
+			map.insert(Block::CaveVines ( CaveVines {r#age: r#age.clone(), r#berries: r#berries.clone(), } ), map.len());
+		}
+	}
+	for r#berries in bool::possible_values() {
+		map.insert(Block::CaveVinesPlant ( CaveVinesPlant {r#berries: r#berries.clone(), } ), map.len());
+	}
+	map.insert(Block::SporeBlossom ( SporeBlossom {} ), map.len());
+	map.insert(Block::Azalea ( Azalea {} ), map.len());
+	map.insert(Block::FloweringAzalea ( FloweringAzalea {} ), map.len());
+	map.insert(Block::MossCarpet ( MossCarpet {} ), map.len());
+	map.insert(Block::MossBlock ( MossBlock {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#tilt in property_enums::Tilt::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::BigDripleaf ( BigDripleaf {r#facing: r#facing.clone(), r#tilt: r#tilt.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::BigDripleafStem ( BigDripleafStem {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::SmallDripleaf ( SmallDripleaf {r#facing: r#facing.clone(), r#half: r#half.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#waterlogged in bool::possible_values() {
+		map.insert(Block::HangingRoots ( HangingRoots {r#waterlogged: r#waterlogged.clone(), } ), map.len());
+	}
+	map.insert(Block::RootedDirt ( RootedDirt {} ), map.len());
+	map.insert(Block::Mud ( Mud {} ), map.len());
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::Deepslate ( Deepslate {r#axis: r#axis.clone(), } ), map.len());
+	}
+	map.insert(Block::CobbledDeepslate ( CobbledDeepslate {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::CobbledDeepslateStairs ( CobbledDeepslateStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::CobbledDeepslateSlab ( CobbledDeepslateSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#east in property_enums::East1::possible_values() {
+		for r#north in property_enums::North1::possible_values() {
+			for r#south in property_enums::South1::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						for r#west in property_enums::West1::possible_values() {
+							map.insert(Block::CobbledDeepslateWall ( CobbledDeepslateWall {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	map.insert(Block::PolishedDeepslate ( PolishedDeepslate {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::PolishedDeepslateStairs ( PolishedDeepslateStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::PolishedDeepslateSlab ( PolishedDeepslateSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#east in property_enums::East1::possible_values() {
+		for r#north in property_enums::North1::possible_values() {
+			for r#south in property_enums::South1::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						for r#west in property_enums::West1::possible_values() {
+							map.insert(Block::PolishedDeepslateWall ( PolishedDeepslateWall {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	map.insert(Block::DeepslateTiles ( DeepslateTiles {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::DeepslateTileStairs ( DeepslateTileStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::DeepslateTileSlab ( DeepslateTileSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#east in property_enums::East1::possible_values() {
+		for r#north in property_enums::North1::possible_values() {
+			for r#south in property_enums::South1::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						for r#west in property_enums::West1::possible_values() {
+							map.insert(Block::DeepslateTileWall ( DeepslateTileWall {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	map.insert(Block::DeepslateBricks ( DeepslateBricks {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::DeepslateBrickStairs ( DeepslateBrickStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::DeepslateBrickSlab ( DeepslateBrickSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#east in property_enums::East1::possible_values() {
+		for r#north in property_enums::North1::possible_values() {
+			for r#south in property_enums::South1::possible_values() {
+				for r#up in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						for r#west in property_enums::West1::possible_values() {
+							map.insert(Block::DeepslateBrickWall ( DeepslateBrickWall {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#up: r#up.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+						}
+					}
+				}
+			}
+		}
+	}
+	map.insert(Block::ChiseledDeepslate ( ChiseledDeepslate {} ), map.len());
+	map.insert(Block::CrackedDeepslateBricks ( CrackedDeepslateBricks {} ), map.len());
+	map.insert(Block::CrackedDeepslateTiles ( CrackedDeepslateTiles {} ), map.len());
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::InfestedDeepslate ( InfestedDeepslate {r#axis: r#axis.clone(), } ), map.len());
+	}
+	map.insert(Block::SmoothBasalt ( SmoothBasalt {} ), map.len());
+	map.insert(Block::RawIronBlock ( RawIronBlock {} ), map.len());
+	map.insert(Block::RawCopperBlock ( RawCopperBlock {} ), map.len());
+	map.insert(Block::RawGoldBlock ( RawGoldBlock {} ), map.len());
+	map.insert(Block::PottedAzaleaBush ( PottedAzaleaBush {} ), map.len());
+	map.insert(Block::PottedFloweringAzaleaBush ( PottedFloweringAzaleaBush {} ), map.len());
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::OchreFroglight ( OchreFroglight {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::VerdantFroglight ( VerdantFroglight {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::PearlescentFroglight ( PearlescentFroglight {r#axis: r#axis.clone(), } ), map.len());
+	}
+	map.insert(Block::Frogspawn ( Frogspawn {} ), map.len());
+	map.insert(Block::ReinforcedDeepslate ( ReinforcedDeepslate {} ), map.len());
+	map
+}

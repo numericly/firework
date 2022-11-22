@@ -1,6 +1,5 @@
 use convert_case::{Case, Casing};
 use serde::Deserialize;
-use std::os::macos::raw::stat;
 use std::str::FromStr;
 use std::{
     collections::HashMap,
@@ -8,6 +7,7 @@ use std::{
     hash::{Hash, Hasher},
 };
 
+#[allow(dead_code)]
 #[derive(Deserialize, Debug)]
 struct Block {
     id: i32,
@@ -77,19 +77,59 @@ pub fn build_blocks() {
 
     block_rs += "// This code was generated using data provided by PrismarineJS/minecraft-data\n\n";
     block_rs += "use crate::ConstrainedInt;\n";
-    block_rs += "use serde::de::{MapAccess, self};\n";
-    block_rs += "use std::{collections::HashMap, str::FromStr};\n\n";
+    block_rs += "use crate::Values;\n";
+    block_rs += "use crate::BlockProperties;\n";
+    block_rs += "use serde::de::MapAccess;\n";
+    block_rs += "use std::collections::HashMap;\n\n";
 
     let mut enums = HashMap::new();
     let mut properties = HashMap::new();
 
-    block_rs += "#[derive(Debug)]\n";
+    block_rs += "#[derive(Debug, Hash, PartialEq, Eq)]\n";
     block_rs += "pub enum Block {";
     for block in &blocks {
         let name = block.name.to_case(Case::Pascal);
         block_rs += &format!("\n\t{}({}),", name, name);
     }
-    block_rs += "\n}\n";
+
+    // Map Block Enum to Block Properties
+    {
+        block_rs += "\n}\n\n";
+        block_rs += "impl Block {\n";
+        block_rs += "\tpub fn get_display_name(&self) -> &'static str {\n";
+        block_rs += "\t\tmatch self {\n";
+        for block in &blocks {
+            let name = block.name.to_case(Case::Pascal);
+            block_rs += &format!("\t\t\tBlock::{}(_) => {}::DISPLAY_NAME,\n", name, name);
+        }
+        block_rs += "\t\t}\n";
+        block_rs += "\t}\n";
+        block_rs += "\tpub fn get_transparency(&self) -> bool {\n";
+        block_rs += "\t\tmatch self {\n";
+        for block in &blocks {
+            let name = block.name.to_case(Case::Pascal);
+            block_rs += &format!("\t\t\tBlock::{}(_) => {}::TRANSPARENT,\n", name, name);
+        }
+        block_rs += "\t\t}\n";
+        block_rs += "\t}\n";
+        block_rs += "\tpub fn get_emit_light(&self) -> u8 {\n";
+        block_rs += "\t\tmatch self {\n";
+        for block in &blocks {
+            let name = block.name.to_case(Case::Pascal);
+            block_rs += &format!("\t\t\tBlock::{}(_) => {}::EMIT_LIGHT,\n", name, name);
+        }
+        block_rs += "\t\t}\n";
+        block_rs += "\t}\n";
+        block_rs += "\tpub fn get_filter_light(&self) -> u8 {\n";
+        block_rs += "\t\tmatch self {\n";
+        for block in &blocks {
+            let name = block.name.to_case(Case::Pascal);
+            block_rs += &format!("\t\t\tBlock::{}(_) => {}::FILTER_LIGHT,\n", name, name);
+        }
+        block_rs += "\t\t}\n";
+        block_rs += "\t}\n";
+        block_rs += "}\n\n";
+    }
 
     for block in &blocks {
         for state in &block.states {
@@ -108,7 +148,7 @@ pub fn build_blocks() {
                     properties.insert(
                         state,
                         format!(
-                            "ConstrainedInt<{}, {}>",
+                            "ConstrainedInt::<{}, {}>",
                             numbers.iter().min().unwrap(),
                             numbers.iter().max().unwrap()
                         ),
@@ -152,12 +192,17 @@ pub fn build_blocks() {
             block_rs += &format!("Block::{}({} {{}})", name, name);
         } else {
             block_rs += "{\n\t\t\t";
-            block_rs += "let map = crate::ref_or_error(map)?;\n";
-            // block_rs += "let map = map.as_ref().ok_or_else(|| de::Error::custom(\"expected properties\"))?;\n";
+            block_rs +=
+                "if map.is_none() { return Err(\"Missing block state\".to_owned()); }\n\t\t\t";
+            block_rs += "let map = map.unwrap();\n";
             let name = block.name.to_case(Case::Pascal);
             block_rs += &format!("\t\t\tBlock::{}({} {{\n", name, name);
             for state in &block.states {
                 block_rs += &format!("\t\t\t\tr#{}: ", state.name);
+                // block_rs += &format!(
+                //     "crate::get_prop(map, \"{}\")?.parse().map_err(|_| \"unable to parse\".to_string())?,\n",
+                //     state.name
+                // );
                 block_rs += &format!("map.get(\"{}\").unwrap().parse().unwrap(),\n", state.name);
             }
             block_rs += "\t\t\t})\n";
@@ -170,10 +215,10 @@ pub fn build_blocks() {
     block_rs += "}\n";
 
     block_rs += "\npub mod property_enums {\n\t";
-    block_rs += "use std::{collections::HashMap, str::FromStr};\n\t";
+    block_rs += "use std::str::FromStr;\n\t";
     for (name, values) in enums {
         if debug {
-            block_rs += "\n\t#[derive(Debug)]";
+            block_rs += "\n\t#[derive(Debug, Hash, PartialEq, Eq, Clone)]";
         }
         block_rs += &format!("\n\tpub enum {} {{", name);
         for value in &values {
@@ -195,8 +240,21 @@ pub fn build_blocks() {
         block_rs += "\n\t\t\t}\n";
         block_rs += "\t\t}\n";
         block_rs += "\t}\n";
+
+        block_rs += &format!("\timpl crate::Values for {} {{", name);
+        block_rs += "\n\t\ttype ValueIterator = std::vec::IntoIter<Self>;\n";
+
+        block_rs += "\n\t\tfn possible_values() -> Self::ValueIterator {\n";
+
+        block_rs += "\t\t\tvec![\n";
+        for value in &values {
+            block_rs += &format!("\t\t\t\tSelf::{},\n", value);
+        }
+        block_rs += "\t\t\t].into_iter()\n";
+        block_rs += "\t\t}\n";
+        block_rs += "\t}\n";
     }
-    block_rs += "\n}\n\n";
+    block_rs += "\n}\n";
 
     block_rs += "pub mod blocks_props {\n\n\t";
     block_rs += "use crate::BlockProperties;\n\t";
@@ -223,10 +281,10 @@ pub fn build_blocks() {
 
     for block in &blocks {
         if debug {
-            block_rs += "\n#[derive(Debug)]\n";
+            block_rs += "\n#[derive(Debug, Hash, PartialEq, Eq)]\n";
         }
         if block.states.is_empty() {
-            block_rs += &format!("pub struct {};\n\n", block.name.to_case(Case::Pascal));
+            block_rs += &format!("pub struct {};\n", block.name.to_case(Case::Pascal));
         } else {
             block_rs += &format!("pub struct {} {{\n", block.name.to_case(Case::Pascal));
             for state in &block.states {
@@ -236,9 +294,54 @@ pub fn build_blocks() {
                     properties.get(state).unwrap()
                 );
             }
-            block_rs += "}\n\n";
+            block_rs += "}\n";
         }
     }
+
+    block_rs += "\n\n";
+    block_rs += "pub fn create_global_palette() -> HashMap<Block, usize> {\n";
+    block_rs += "\tlet mut map = HashMap::new();\n";
+    for block in &blocks {
+        let mut nested = 1;
+        for state in &block.states {
+            for _ in 0..nested {
+                block_rs += "\t";
+            }
+
+            let enum_name = properties.get(state).unwrap();
+
+            block_rs += &format!(
+                "for r#{} in {}::possible_values() {{\n",
+                state.name, enum_name
+            );
+
+            nested += 1;
+        }
+
+        for _ in 0..nested {
+            block_rs += "\t";
+        }
+        block_rs += &format!(
+            "map.insert(Block::{} ( {} {{",
+            block.name.to_case(Case::Pascal),
+            block.name.to_case(Case::Pascal)
+        );
+
+        for state in &block.states {
+            block_rs += &format!("r#{}: r#{}.clone(), ", state.name, state.name);
+        }
+
+        block_rs += "} ), map.len());\n";
+
+        for i in (1..nested).rev() {
+            for _ in 0..i {
+                block_rs += "\t";
+            }
+            block_rs += "}\n";
+        }
+    }
+    block_rs += "\tmap\n";
+    block_rs += "}\n";
 
     fs::write("./src/blocks.rs", block_rs).unwrap();
 }

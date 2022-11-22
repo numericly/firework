@@ -1,5 +1,5 @@
 [package]
-name = "minecraft-data"
+name = "minecraft_data"
 version = "0.1.0"
 edition = "2021"
 build = "src/build/build.rs"
@@ -9,6 +9,7 @@ build = "src/build/build.rs"
 [dependencies]
 convert_case = "0.6.0"
 hematite-nbt = "0.5.2"
+lazy_static = "1.4.0"
 serde = { version = "1.0.147", features = ["derive"] }
 serde_json = "1.0.87"
 

@@ -858,16 +858,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2a60c7ce501c71e03a9c9c0d35b861413ae925bd979cc7a4e30d060069aaac8d"
 
 [[package]]
-name = "minecraft-data"
-version = "0.1.0"
-dependencies = [
- "convert_case",
- "hematite-nbt",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "minecraft-server-rs"
 version = "0.1.0"
 dependencies = [
@@ -882,6 +872,7 @@ dependencies = [
  "data",
  "futures",
  "hematite-nbt",
+ "minecraft_data",
  "miniz_oxide 0.6.2",
  "modular-bitfield",
  "num-bigint",
@@ -900,6 +891,17 @@ dependencies = [
  "tokio-scoped",
  "tokio-util",
  "world",
+]
+
+[[package]]
+name = "minecraft_data"
+version = "0.1.0"
+dependencies = [
+ "convert_case",
+ "hematite-nbt",
+ "lazy_static",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -2084,7 +2086,6 @@ dependencies = [
  "dashmap",
  "data",
  "hematite-nbt",
- "minecraft-data",
  "protocol",
  "quartz_nbt",
  "serde",

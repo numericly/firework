@@ -32,7 +32,7 @@ pub struct World {
 #[derive(Debug)]
 pub struct Region {
     chunk_timestamps: [u32; 1024],
-    sections: Mutex<[RegionChunk; 1024]>,
+    pub sections: Mutex<[RegionChunk; 1024]>,
 }
 
 #[derive(Debug)]

@@ -1,5 +1,5 @@
 use crate::blocks::deserialize_content;
-use blocks::{Block, GrassBlock};
+use blocks::Block;
 use serde::{
     de::{self, IgnoredAny, MapAccess, Visitor},
     Deserialize, Deserializer,
@@ -8,9 +8,7 @@ use serde::{
         TagOrContentField,
     },
 };
-use std::{collections::HashMap, str::FromStr};
-
-use crate::blocks::Stone;
+use std::{array, str::FromStr, vec};
 
 #[derive(Deserialize, Debug, Hash, PartialEq, Eq, Clone)]
 #[repr(transparent)]
@@ -38,6 +36,36 @@ impl<const MIN: u32, const MAX: u32> FromStr for ConstrainedInt<MIN, MAX> {
     }
 }
 
+pub trait Palette {
+    fn get(&self) -> i32;
+}
+
+trait Values {
+    type ValueIterator: Iterator;
+    fn possible_values() -> Self::ValueIterator
+    where
+        Self: Sized;
+}
+
+impl<const MIN: u32, const MAX: u32> Values for ConstrainedInt<MIN, MAX> {
+    type ValueIterator = vec::IntoIter<ConstrainedInt<MIN, MAX>>;
+    fn possible_values() -> Self::ValueIterator {
+        let values: Vec<ConstrainedInt<MIN, MAX>> = (MIN..=MAX)
+            .into_iter()
+            .map(|v| ConstrainedInt::<MIN, MAX>(v))
+            .collect();
+        values.into_iter()
+    }
+}
+
+impl Values for bool {
+    type ValueIterator = array::IntoIter<bool, 2>;
+    fn possible_values() -> Self::ValueIterator {
+        const VALUES: [bool; 2] = [true, false];
+        return VALUES.into_iter();
+    }
+}
+
 pub trait BlockProperties {
     const DISPLAY_NAME: &'static str;
     const HARDNESS: f32;
@@ -48,36 +76,6 @@ pub trait BlockProperties {
     const EMIT_LIGHT: u8;
     const FILTER_LIGHT: u8;
 }
-
-#[derive(Debug)]
-pub enum Blocks {
-    Stone(Stone),
-    GrassBlock(GrassBlock),
-}
-
-// fn deserialize_content<'de, T: MapAccess<'de>>(
-//     tag: &str,
-//     map: Option<HashMap<String, String>>,
-// ) -> Result<Blocks, T::Error> {
-//     match tag {
-//         "minecraft:stone" => Ok(Blocks::Stone(Stone {})),
-//         "minecraft:grass_block" => {
-//             let Some(map) = map else {
-//                 return Err(de::Error::custom("Missing properties for \"grass_block\""))
-//             };
-//             Ok(Blocks::GrassBlock(GrassBlock {
-//                 snowy: if let Some(snowy) = map.get("snowy") {
-//                     snowy.parse().map_err(de::Error::custom)?
-//                 } else {
-//                     return Err(de::Error::custom(
-//                         "missing property \"snowy\" in \"grass_block\"",
-//                     ));
-//                 },
-//             }))
-//         }
-//         _ => Err(de::Error::custom(format!("unknown block: {}", tag))),
-//     }
-// }
 
 impl<'de> Deserialize<'de> for Block {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -98,16 +96,13 @@ impl<'de> Deserialize<'de> for Block {
                     map: &mut T,
                 ) -> Result<Option<TagOrContentField>, T::Error> {
                     let mut tag_or_content: Option<TagOrContentField> = None;
-                    while let Some(key) = MapAccess::next_key_seed(
-                        map,
-                        TagContentOtherFieldVisitor {
-                            tag: "Name",
-                            content: "Properties",
-                        },
-                    )? {
+                    while let Some(key) = map.next_key_seed(TagContentOtherFieldVisitor {
+                        tag: "Name",
+                        content: "Properties",
+                    })? {
                         match key {
                             TagContentOtherField::Other => {
-                                MapAccess::next_value::<IgnoredAny>(map)?;
+                                map.next_value::<IgnoredAny>()?;
                                 continue;
                             }
                             TagContentOtherField::Tag => {
@@ -125,12 +120,17 @@ impl<'de> Deserialize<'de> for Block {
 
                 match read_key(&mut map)? {
                     Some(TagOrContentField::Tag) => {
-                        let tag = MapAccess::next_value::<&str>(&mut map)?;
+                        let tag = map.next_value::<String>()?;
                         match read_key(&mut map)? {
                             Some(TagOrContentField::Content) => {
-                                let map = map.next_value()?;
-                                deserialize_content::<T>(&tag, Some(&map))
-                                    .map_err(|e| de::Error::custom(e))
+                                let data_map: std::collections::HashMap<String, String> =
+                                    map.next_value()?;
+                                let content = deserialize_content::<T>(&tag, Some(&data_map))
+                                    .map_err(|e| de::Error::custom(e));
+                                let None = read_key(&mut map)? else {
+                                    return Err(de::Error::custom("did not expect more key-pairs for block"))
+                                };
+                                content
                             }
                             Some(TagOrContentField::Tag) => Err(de::Error::custom("duplicate tag")),
                             None => deserialize_content::<T>(&tag, None)
@@ -138,16 +138,21 @@ impl<'de> Deserialize<'de> for Block {
                         }
                     }
                     Some(TagOrContentField::Content) => {
-                        let content = MapAccess::next_value::<Content>(&mut map)?;
+                        let content = map.next_value::<Content>()?;
 
                         match read_key(&mut map)? {
                             Some(TagOrContentField::Tag) => {
                                 let deserializer = ContentDeserializer::<T::Error>::new(content);
-                                let tag = MapAccess::next_value::<&str>(&mut map)?;
-                                let map = Deserialize::deserialize(deserializer)?;
+                                let tag = map.next_value::<String>()?;
+                                let data_map = Deserialize::deserialize(deserializer)?;
 
-                                deserialize_content::<T>(tag, Some(&map))
-                                    .map_err(|e| de::Error::custom(e))
+                                let content =
+                                    deserialize_content::<T>(tag.as_str(), Some(&data_map))
+                                        .map_err(|e| de::Error::custom(e));
+                                let None = read_key(&mut map)? else {
+                                        return Err(de::Error::custom("did not expect more key-pairs for block"))
+                                    };
+                                content
                             }
                             Some(TagOrContentField::Content) => {
                                 Err(de::Error::duplicate_field("Properties"))
@@ -155,26 +160,14 @@ impl<'de> Deserialize<'de> for Block {
                             None => Err(de::Error::missing_field("Name")),
                         }
                     }
-                    None => Err(<T::Error as de::Error>::missing_field("t")),
+                    None => {
+                        println!("air");
+                        Ok(Block::Air(blocks::Air {}))
+                    }
                 }
             }
         }
-
-        let start = std::time::Instant::now();
-        let data = deserializer.deserialize_map(BlockVisitor)?;
-        println!("deserialization took {:?}", start.elapsed());
-
-        Ok(data)
-    }
-}
-
-pub fn ref_or_error<'a>(
-    map: Option<&'a HashMap<String, String>>,
-) -> Result<&'a HashMap<String, String>, String> {
-    if let Some(map) = map {
-        Ok(map)
-    } else {
-        Err("Missing properties".to_string())
+        Ok(deserializer.deserialize_map(BlockVisitor)?)
     }
 }
 
