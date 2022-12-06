@@ -1,5 +1,9 @@
-use crate::blocks::deserialize_content;
+use crate::{
+    biomes::{create_biome_map, Biome},
+    blocks::{create_global_palette, deserialize_content},
+};
 use blocks::Block;
+use lazy_static::lazy_static;
 use serde::{
     de::{self, IgnoredAny, MapAccess, Visitor},
     Deserialize, Deserializer,
@@ -8,6 +12,7 @@ use serde::{
         TagOrContentField,
     },
 };
+use std::collections::HashMap;
 use std::{array, str::FromStr, vec};
 
 #[derive(Deserialize, Debug, Hash, PartialEq, Eq, Clone)]
@@ -38,6 +43,30 @@ impl<const MIN: u32, const MAX: u32> FromStr for ConstrainedInt<MIN, MAX> {
 
 pub trait Palette {
     fn get(&self) -> i32;
+}
+
+lazy_static! {
+    static ref BLOCK_PALETTE: HashMap<Block, usize> = create_global_palette();
+}
+
+impl Palette for Block {
+    fn get(&self) -> i32 {
+        *BLOCK_PALETTE
+            .get(self)
+            .expect("Block not found in global palette") as i32
+    }
+}
+
+lazy_static! {
+    static ref BIOME_PALETTE: HashMap<Biome, usize> = create_biome_map();
+}
+
+impl Palette for Biome {
+    fn get(&self) -> i32 {
+        *BIOME_PALETTE
+            .get(self)
+            .expect("Biome not found in global palette") as i32
+    }
 }
 
 trait Values {
@@ -171,5 +200,34 @@ impl<'de> Deserialize<'de> for Block {
     }
 }
 
+impl<'de> Deserialize<'de> for Biome {
+    fn deserialize<__D>(__deserializer: __D) -> serde::__private::Result<Self, __D::Error>
+    where
+        __D: serde::Deserializer<'de>,
+    {
+        struct __Visitor;
+
+        impl<'de> serde::de::Visitor<'de> for __Visitor {
+            type Value = Biome;
+            fn expecting(
+                &self,
+                f: &mut serde::__private::Formatter,
+            ) -> serde::__private::fmt::Result {
+                f.write_str("biome string")
+            }
+            fn visit_str<Err>(self, __value: &str) -> serde::__private::Result<Self::Value, Err>
+            where
+                Err: serde::de::Error,
+            {
+                biomes::visit_str(__value)
+            }
+        }
+
+        __deserializer.deserialize_str(__Visitor)
+    }
+}
+
+pub mod biomes;
 #[allow(non_camel_case_types, dead_code)]
 pub mod blocks;
+pub mod tags;

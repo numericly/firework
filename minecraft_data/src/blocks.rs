@@ -6,7 +6,7 @@ use crate::BlockProperties;
 use serde::de::MapAccess;
 use std::collections::HashMap;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub enum Block {
 	Air(Air),
 	Stone(Stone),
@@ -9916,91 +9916,58 @@ pub mod property_enums {
 	use std::str::FromStr;
 	
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Facing1 {
-		north,
-		south,
-		west,
-		east,
+	pub enum Orientation {
+		down_east,
+		down_north,
+		down_south,
+		down_west,
+		up_east,
+		up_north,
+		up_south,
+		up_west,
+		west_up,
+		east_up,
+		north_up,
+		south_up,
 	}
-	impl FromStr for Facing1 {
+	impl FromStr for Orientation {
 		type Err = String;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
 			match s {
-				"north" => Ok(Facing1::north),
-				"south" => Ok(Facing1::south),
-				"west" => Ok(Facing1::west),
-				"east" => Ok(Facing1::east),
-				_ => Err(format!("Invalid Facing1 value: {}", s)),
+				"down_east" => Ok(Orientation::down_east),
+				"down_north" => Ok(Orientation::down_north),
+				"down_south" => Ok(Orientation::down_south),
+				"down_west" => Ok(Orientation::down_west),
+				"up_east" => Ok(Orientation::up_east),
+				"up_north" => Ok(Orientation::up_north),
+				"up_south" => Ok(Orientation::up_south),
+				"up_west" => Ok(Orientation::up_west),
+				"west_up" => Ok(Orientation::west_up),
+				"east_up" => Ok(Orientation::east_up),
+				"north_up" => Ok(Orientation::north_up),
+				"south_up" => Ok(Orientation::south_up),
+				_ => Err(format!("Invalid Orientation value: {}", s)),
 			}
 		}
 	}
-	impl crate::Values for Facing1 {
+	impl crate::Values for Orientation {
 		type ValueIterator = std::vec::IntoIter<Self>;
 
 		fn possible_values() -> Self::ValueIterator {
 			vec![
-				Self::north,
-				Self::south,
-				Self::west,
-				Self::east,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Axis1 {
-		x,
-		z,
-	}
-	impl FromStr for Axis1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"x" => Ok(Axis1::x),
-				"z" => Ok(Axis1::z),
-				_ => Err(format!("Invalid Axis1 value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Axis1 {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::x,
-				Self::z,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum East1 {
-		none,
-		low,
-		tall,
-	}
-	impl FromStr for East1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"none" => Ok(East1::none),
-				"low" => Ok(East1::low),
-				"tall" => Ok(East1::tall),
-				_ => Err(format!("Invalid East1 value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for East1 {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::none,
-				Self::low,
-				Self::tall,
+				Self::down_east,
+				Self::down_north,
+				Self::down_south,
+				Self::down_west,
+				Self::up_east,
+				Self::up_north,
+				Self::up_south,
+				Self::up_west,
+				Self::west_up,
+				Self::east_up,
+				Self::north_up,
+				Self::south_up,
 			].into_iter()
 		}
 	}
@@ -10075,64 +10042,61 @@ pub mod property_enums {
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum West1 {
+	pub enum South {
+		up,
+		side,
 		none,
-		low,
-		tall,
 	}
-	impl FromStr for West1 {
+	impl FromStr for South {
 		type Err = String;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
 			match s {
-				"none" => Ok(West1::none),
-				"low" => Ok(West1::low),
-				"tall" => Ok(West1::tall),
-				_ => Err(format!("Invalid West1 value: {}", s)),
+				"up" => Ok(South::up),
+				"side" => Ok(South::side),
+				"none" => Ok(South::none),
+				_ => Err(format!("Invalid South value: {}", s)),
 			}
 		}
 	}
-	impl crate::Values for West1 {
+	impl crate::Values for South {
 		type ValueIterator = std::vec::IntoIter<Self>;
 
 		fn possible_values() -> Self::ValueIterator {
 			vec![
+				Self::up,
+				Self::side,
 				Self::none,
-				Self::low,
-				Self::tall,
 			].into_iter()
 		}
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Attachment {
-		floor,
-		ceiling,
-		single_wall,
-		double_wall,
+	pub enum West {
+		up,
+		side,
+		none,
 	}
-	impl FromStr for Attachment {
+	impl FromStr for West {
 		type Err = String;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
 			match s {
-				"floor" => Ok(Attachment::floor),
-				"ceiling" => Ok(Attachment::ceiling),
-				"single_wall" => Ok(Attachment::single_wall),
-				"double_wall" => Ok(Attachment::double_wall),
-				_ => Err(format!("Invalid Attachment value: {}", s)),
+				"up" => Ok(West::up),
+				"side" => Ok(West::side),
+				"none" => Ok(West::none),
+				_ => Err(format!("Invalid West value: {}", s)),
 			}
 		}
 	}
-	impl crate::Values for Attachment {
+	impl crate::Values for West {
 		type ValueIterator = std::vec::IntoIter<Self>;
 
 		fn possible_values() -> Self::ValueIterator {
 			vec![
-				Self::floor,
-				Self::ceiling,
-				Self::single_wall,
-				Self::double_wall,
+				Self::up,
+				Self::side,
+				Self::none,
 			].into_iter()
 		}
 	}
@@ -10189,58 +10153,37 @@ pub mod property_enums {
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Orientation {
-		down_east,
-		down_north,
-		down_south,
-		down_west,
-		up_east,
-		up_north,
-		up_south,
-		up_west,
-		west_up,
-		east_up,
-		north_up,
-		south_up,
+	pub enum Facing2 {
+		down,
+		north,
+		south,
+		west,
+		east,
 	}
-	impl FromStr for Orientation {
+	impl FromStr for Facing2 {
 		type Err = String;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
 			match s {
-				"down_east" => Ok(Orientation::down_east),
-				"down_north" => Ok(Orientation::down_north),
-				"down_south" => Ok(Orientation::down_south),
-				"down_west" => Ok(Orientation::down_west),
-				"up_east" => Ok(Orientation::up_east),
-				"up_north" => Ok(Orientation::up_north),
-				"up_south" => Ok(Orientation::up_south),
-				"up_west" => Ok(Orientation::up_west),
-				"west_up" => Ok(Orientation::west_up),
-				"east_up" => Ok(Orientation::east_up),
-				"north_up" => Ok(Orientation::north_up),
-				"south_up" => Ok(Orientation::south_up),
-				_ => Err(format!("Invalid Orientation value: {}", s)),
+				"down" => Ok(Facing2::down),
+				"north" => Ok(Facing2::north),
+				"south" => Ok(Facing2::south),
+				"west" => Ok(Facing2::west),
+				"east" => Ok(Facing2::east),
+				_ => Err(format!("Invalid Facing2 value: {}", s)),
 			}
 		}
 	}
-	impl crate::Values for Orientation {
+	impl crate::Values for Facing2 {
 		type ValueIterator = std::vec::IntoIter<Self>;
 
 		fn possible_values() -> Self::ValueIterator {
 			vec![
-				Self::down_east,
-				Self::down_north,
-				Self::down_south,
-				Self::down_west,
-				Self::up_east,
-				Self::up_north,
-				Self::up_south,
-				Self::up_west,
-				Self::west_up,
-				Self::east_up,
-				Self::north_up,
-				Self::south_up,
+				Self::down,
+				Self::north,
+				Self::south,
+				Self::west,
+				Self::east,
 			].into_iter()
 		}
 	}
@@ -10279,495 +10222,6 @@ pub mod property_enums {
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum West {
-		up,
-		side,
-		none,
-	}
-	impl FromStr for West {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"up" => Ok(West::up),
-				"side" => Ok(West::side),
-				"none" => Ok(West::none),
-				_ => Err(format!("Invalid West value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for West {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::up,
-				Self::side,
-				Self::none,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Type {
-		normal,
-		sticky,
-	}
-	impl FromStr for Type {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"normal" => Ok(Type::normal),
-				"sticky" => Ok(Type::sticky),
-				_ => Err(format!("Invalid Type value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Type {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::normal,
-				Self::sticky,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Part {
-		head,
-		foot,
-	}
-	impl FromStr for Part {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"head" => Ok(Part::head),
-				"foot" => Ok(Part::foot),
-				_ => Err(format!("Invalid Part value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Part {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::head,
-				Self::foot,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Mode {
-		compare,
-		subtract,
-	}
-	impl FromStr for Mode {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"compare" => Ok(Mode::compare),
-				"subtract" => Ok(Mode::subtract),
-				_ => Err(format!("Invalid Mode value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Mode {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::compare,
-				Self::subtract,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum North1 {
-		none,
-		low,
-		tall,
-	}
-	impl FromStr for North1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"none" => Ok(North1::none),
-				"low" => Ok(North1::low),
-				"tall" => Ok(North1::tall),
-				_ => Err(format!("Invalid North1 value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for North1 {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::none,
-				Self::low,
-				Self::tall,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Face {
-		floor,
-		wall,
-		ceiling,
-	}
-	impl FromStr for Face {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"floor" => Ok(Face::floor),
-				"wall" => Ok(Face::wall),
-				"ceiling" => Ok(Face::ceiling),
-				_ => Err(format!("Invalid Face value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Face {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::floor,
-				Self::wall,
-				Self::ceiling,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Leaves {
-		none,
-		small,
-		large,
-	}
-	impl FromStr for Leaves {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"none" => Ok(Leaves::none),
-				"small" => Ok(Leaves::small),
-				"large" => Ok(Leaves::large),
-				_ => Err(format!("Invalid Leaves value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Leaves {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::none,
-				Self::small,
-				Self::large,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Facing {
-		north,
-		east,
-		south,
-		west,
-		up,
-		down,
-	}
-	impl FromStr for Facing {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"north" => Ok(Facing::north),
-				"east" => Ok(Facing::east),
-				"south" => Ok(Facing::south),
-				"west" => Ok(Facing::west),
-				"up" => Ok(Facing::up),
-				"down" => Ok(Facing::down),
-				_ => Err(format!("Invalid Facing value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Facing {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::north,
-				Self::east,
-				Self::south,
-				Self::west,
-				Self::up,
-				Self::down,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Half1 {
-		top,
-		bottom,
-	}
-	impl FromStr for Half1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"top" => Ok(Half1::top),
-				"bottom" => Ok(Half1::bottom),
-				_ => Err(format!("Invalid Half1 value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Half1 {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::top,
-				Self::bottom,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Facing2 {
-		down,
-		north,
-		south,
-		west,
-		east,
-	}
-	impl FromStr for Facing2 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"down" => Ok(Facing2::down),
-				"north" => Ok(Facing2::north),
-				"south" => Ok(Facing2::south),
-				"west" => Ok(Facing2::west),
-				"east" => Ok(Facing2::east),
-				_ => Err(format!("Invalid Facing2 value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Facing2 {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::down,
-				Self::north,
-				Self::south,
-				Self::west,
-				Self::east,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum VerticalDirection {
-		up,
-		down,
-	}
-	impl FromStr for VerticalDirection {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"up" => Ok(VerticalDirection::up),
-				"down" => Ok(VerticalDirection::down),
-				_ => Err(format!("Invalid VerticalDirection value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for VerticalDirection {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::up,
-				Self::down,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum South {
-		up,
-		side,
-		none,
-	}
-	impl FromStr for South {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"up" => Ok(South::up),
-				"side" => Ok(South::side),
-				"none" => Ok(South::none),
-				_ => Err(format!("Invalid South value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for South {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::up,
-				Self::side,
-				Self::none,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Shape1 {
-		straight,
-		inner_left,
-		inner_right,
-		outer_left,
-		outer_right,
-	}
-	impl FromStr for Shape1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"straight" => Ok(Shape1::straight),
-				"inner_left" => Ok(Shape1::inner_left),
-				"inner_right" => Ok(Shape1::inner_right),
-				"outer_left" => Ok(Shape1::outer_left),
-				"outer_right" => Ok(Shape1::outer_right),
-				_ => Err(format!("Invalid Shape1 value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Shape1 {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::straight,
-				Self::inner_left,
-				Self::inner_right,
-				Self::outer_left,
-				Self::outer_right,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Thickness {
-		tip_merge,
-		tip,
-		frustum,
-		middle,
-		base,
-	}
-	impl FromStr for Thickness {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"tip_merge" => Ok(Thickness::tip_merge),
-				"tip" => Ok(Thickness::tip),
-				"frustum" => Ok(Thickness::frustum),
-				"middle" => Ok(Thickness::middle),
-				"base" => Ok(Thickness::base),
-				_ => Err(format!("Invalid Thickness value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Thickness {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::tip_merge,
-				Self::tip,
-				Self::frustum,
-				Self::middle,
-				Self::base,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Half {
-		upper,
-		lower,
-	}
-	impl FromStr for Half {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"upper" => Ok(Half::upper),
-				"lower" => Ok(Half::lower),
-				_ => Err(format!("Invalid Half value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Half {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::upper,
-				Self::lower,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum East {
-		up,
-		side,
-		none,
-	}
-	impl FromStr for East {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"up" => Ok(East::up),
-				"side" => Ok(East::side),
-				"none" => Ok(East::none),
-				_ => Err(format!("Invalid East value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for East {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::up,
-				Self::side,
-				Self::none,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 	pub enum North {
 		up,
 		side,
@@ -10798,28 +10252,64 @@ pub mod property_enums {
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Hinge {
-		left,
-		right,
+	pub enum Attachment {
+		floor,
+		ceiling,
+		single_wall,
+		double_wall,
 	}
-	impl FromStr for Hinge {
+	impl FromStr for Attachment {
 		type Err = String;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
 			match s {
-				"left" => Ok(Hinge::left),
-				"right" => Ok(Hinge::right),
-				_ => Err(format!("Invalid Hinge value: {}", s)),
+				"floor" => Ok(Attachment::floor),
+				"ceiling" => Ok(Attachment::ceiling),
+				"single_wall" => Ok(Attachment::single_wall),
+				"double_wall" => Ok(Attachment::double_wall),
+				_ => Err(format!("Invalid Attachment value: {}", s)),
 			}
 		}
 	}
-	impl crate::Values for Hinge {
+	impl crate::Values for Attachment {
 		type ValueIterator = std::vec::IntoIter<Self>;
 
 		fn possible_values() -> Self::ValueIterator {
 			vec![
-				Self::left,
-				Self::right,
+				Self::floor,
+				Self::ceiling,
+				Self::single_wall,
+				Self::double_wall,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Axis {
+		x,
+		y,
+		z,
+	}
+	impl FromStr for Axis {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"x" => Ok(Axis::x),
+				"y" => Ok(Axis::y),
+				"z" => Ok(Axis::z),
+				_ => Err(format!("Invalid Axis value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Axis {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::x,
+				Self::y,
+				Self::z,
 			].into_iter()
 		}
 	}
@@ -10850,6 +10340,39 @@ pub mod property_enums {
 				Self::top,
 				Self::bottom,
 				Self::double,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Facing1 {
+		north,
+		south,
+		west,
+		east,
+	}
+	impl FromStr for Facing1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"north" => Ok(Facing1::north),
+				"south" => Ok(Facing1::south),
+				"west" => Ok(Facing1::west),
+				"east" => Ok(Facing1::east),
+				_ => Err(format!("Invalid Facing1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Facing1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::north,
+				Self::south,
+				Self::west,
+				Self::east,
 			].into_iter()
 		}
 	}
@@ -10924,34 +10447,94 @@ pub mod property_enums {
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Mode1 {
-		save,
-		load,
-		corner,
-		data,
+	pub enum Leaves {
+		none,
+		small,
+		large,
 	}
-	impl FromStr for Mode1 {
+	impl FromStr for Leaves {
 		type Err = String;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
 			match s {
-				"save" => Ok(Mode1::save),
-				"load" => Ok(Mode1::load),
-				"corner" => Ok(Mode1::corner),
-				"data" => Ok(Mode1::data),
-				_ => Err(format!("Invalid Mode1 value: {}", s)),
+				"none" => Ok(Leaves::none),
+				"small" => Ok(Leaves::small),
+				"large" => Ok(Leaves::large),
+				_ => Err(format!("Invalid Leaves value: {}", s)),
 			}
 		}
 	}
-	impl crate::Values for Mode1 {
+	impl crate::Values for Leaves {
 		type ValueIterator = std::vec::IntoIter<Self>;
 
 		fn possible_values() -> Self::ValueIterator {
 			vec![
-				Self::save,
-				Self::load,
-				Self::corner,
-				Self::data,
+				Self::none,
+				Self::small,
+				Self::large,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Shape1 {
+		straight,
+		inner_left,
+		inner_right,
+		outer_left,
+		outer_right,
+	}
+	impl FromStr for Shape1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"straight" => Ok(Shape1::straight),
+				"inner_left" => Ok(Shape1::inner_left),
+				"inner_right" => Ok(Shape1::inner_right),
+				"outer_left" => Ok(Shape1::outer_left),
+				"outer_right" => Ok(Shape1::outer_right),
+				_ => Err(format!("Invalid Shape1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Shape1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::straight,
+				Self::inner_left,
+				Self::inner_right,
+				Self::outer_left,
+				Self::outer_right,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Type {
+		normal,
+		sticky,
+	}
+	impl FromStr for Type {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"normal" => Ok(Type::normal),
+				"sticky" => Ok(Type::sticky),
+				_ => Err(format!("Invalid Type value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Type {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::normal,
+				Self::sticky,
 			].into_iter()
 		}
 	}
@@ -10987,6 +10570,87 @@ pub mod property_enums {
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Half {
+		upper,
+		lower,
+	}
+	impl FromStr for Half {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"upper" => Ok(Half::upper),
+				"lower" => Ok(Half::lower),
+				_ => Err(format!("Invalid Half value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Half {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::upper,
+				Self::lower,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Axis1 {
+		x,
+		z,
+	}
+	impl FromStr for Axis1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"x" => Ok(Axis1::x),
+				"z" => Ok(Axis1::z),
+				_ => Err(format!("Invalid Axis1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Axis1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::x,
+				Self::z,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Part {
+		head,
+		foot,
+	}
+	impl FromStr for Part {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"head" => Ok(Part::head),
+				"foot" => Ok(Part::foot),
+				_ => Err(format!("Invalid Part value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Part {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::head,
+				Self::foot,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 	pub enum SculkSensorPhase {
 		inactive,
 		active,
@@ -11017,31 +10681,367 @@ pub mod property_enums {
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Axis {
-		x,
-		y,
-		z,
+	pub enum Thickness {
+		tip_merge,
+		tip,
+		frustum,
+		middle,
+		base,
 	}
-	impl FromStr for Axis {
+	impl FromStr for Thickness {
 		type Err = String;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
 			match s {
-				"x" => Ok(Axis::x),
-				"y" => Ok(Axis::y),
-				"z" => Ok(Axis::z),
-				_ => Err(format!("Invalid Axis value: {}", s)),
+				"tip_merge" => Ok(Thickness::tip_merge),
+				"tip" => Ok(Thickness::tip),
+				"frustum" => Ok(Thickness::frustum),
+				"middle" => Ok(Thickness::middle),
+				"base" => Ok(Thickness::base),
+				_ => Err(format!("Invalid Thickness value: {}", s)),
 			}
 		}
 	}
-	impl crate::Values for Axis {
+	impl crate::Values for Thickness {
 		type ValueIterator = std::vec::IntoIter<Self>;
 
 		fn possible_values() -> Self::ValueIterator {
 			vec![
-				Self::x,
-				Self::y,
-				Self::z,
+				Self::tip_merge,
+				Self::tip,
+				Self::frustum,
+				Self::middle,
+				Self::base,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum VerticalDirection {
+		up,
+		down,
+	}
+	impl FromStr for VerticalDirection {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"up" => Ok(VerticalDirection::up),
+				"down" => Ok(VerticalDirection::down),
+				_ => Err(format!("Invalid VerticalDirection value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for VerticalDirection {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::up,
+				Self::down,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Mode1 {
+		save,
+		load,
+		corner,
+		data,
+	}
+	impl FromStr for Mode1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"save" => Ok(Mode1::save),
+				"load" => Ok(Mode1::load),
+				"corner" => Ok(Mode1::corner),
+				"data" => Ok(Mode1::data),
+				_ => Err(format!("Invalid Mode1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Mode1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::save,
+				Self::load,
+				Self::corner,
+				Self::data,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum West1 {
+		none,
+		low,
+		tall,
+	}
+	impl FromStr for West1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"none" => Ok(West1::none),
+				"low" => Ok(West1::low),
+				"tall" => Ok(West1::tall),
+				_ => Err(format!("Invalid West1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for West1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::none,
+				Self::low,
+				Self::tall,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Facing {
+		north,
+		east,
+		south,
+		west,
+		up,
+		down,
+	}
+	impl FromStr for Facing {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"north" => Ok(Facing::north),
+				"east" => Ok(Facing::east),
+				"south" => Ok(Facing::south),
+				"west" => Ok(Facing::west),
+				"up" => Ok(Facing::up),
+				"down" => Ok(Facing::down),
+				_ => Err(format!("Invalid Facing value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Facing {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::north,
+				Self::east,
+				Self::south,
+				Self::west,
+				Self::up,
+				Self::down,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Half1 {
+		top,
+		bottom,
+	}
+	impl FromStr for Half1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"top" => Ok(Half1::top),
+				"bottom" => Ok(Half1::bottom),
+				_ => Err(format!("Invalid Half1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Half1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::top,
+				Self::bottom,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Hinge {
+		left,
+		right,
+	}
+	impl FromStr for Hinge {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"left" => Ok(Hinge::left),
+				"right" => Ok(Hinge::right),
+				_ => Err(format!("Invalid Hinge value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Hinge {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::left,
+				Self::right,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum North1 {
+		none,
+		low,
+		tall,
+	}
+	impl FromStr for North1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"none" => Ok(North1::none),
+				"low" => Ok(North1::low),
+				"tall" => Ok(North1::tall),
+				_ => Err(format!("Invalid North1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for North1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::none,
+				Self::low,
+				Self::tall,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum East {
+		up,
+		side,
+		none,
+	}
+	impl FromStr for East {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"up" => Ok(East::up),
+				"side" => Ok(East::side),
+				"none" => Ok(East::none),
+				_ => Err(format!("Invalid East value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for East {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::up,
+				Self::side,
+				Self::none,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum East1 {
+		none,
+		low,
+		tall,
+	}
+	impl FromStr for East1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"none" => Ok(East1::none),
+				"low" => Ok(East1::low),
+				"tall" => Ok(East1::tall),
+				_ => Err(format!("Invalid East1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for East1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::none,
+				Self::low,
+				Self::tall,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Mode {
+		compare,
+		subtract,
+	}
+	impl FromStr for Mode {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"compare" => Ok(Mode::compare),
+				"subtract" => Ok(Mode::subtract),
+				_ => Err(format!("Invalid Mode value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Mode {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::compare,
+				Self::subtract,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Face {
+		floor,
+		wall,
+		ceiling,
+	}
+	impl FromStr for Face {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"floor" => Ok(Face::floor),
+				"wall" => Ok(Face::wall),
+				"ceiling" => Ok(Face::ceiling),
+				_ => Err(format!("Invalid Face value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Face {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::floor,
+				Self::wall,
+				Self::ceiling,
 			].into_iter()
 		}
 	}
@@ -21316,101 +21316,101 @@ pub mod blocks_props {
 	}
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Air;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Stone;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Granite;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedGranite;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Diorite;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedDiorite;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Andesite;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedAndesite;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GrassBlock {
 	pub r#snowy: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Dirt;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CoarseDirt;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Podzol {
 	pub r#snowy: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Cobblestone;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OakPlanks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SprucePlanks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BirchPlanks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct JunglePlanks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaPlanks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkOakPlanks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MangrovePlanks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OakSapling {
 	pub r#stage: ConstrainedInt::<0, 1>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SpruceSapling {
 	pub r#stage: ConstrainedInt::<0, 1>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BirchSapling {
 	pub r#stage: ConstrainedInt::<0, 1>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct JungleSapling {
 	pub r#stage: ConstrainedInt::<0, 1>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaSapling {
 	pub r#stage: ConstrainedInt::<0, 1>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkOakSapling {
 	pub r#stage: ConstrainedInt::<0, 1>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MangrovePropagule {
 	pub r#age: ConstrainedInt::<0, 4>,
 	pub r#hanging: bool,
@@ -21418,598 +21418,598 @@ pub struct MangrovePropagule {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Bedrock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Water {
 	pub r#level: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Lava {
 	pub r#level: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Sand;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedSand;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Gravel;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GoldOre;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeepslateGoldOre;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct IronOre;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeepslateIronOre;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CoalOre;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeepslateCoalOre;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct NetherGoldOre;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OakLog {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SpruceLog {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BirchLog {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct JungleLog {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaLog {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkOakLog {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MangroveLog {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MangroveRoots {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MuddyMangroveRoots {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StrippedSpruceLog {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StrippedBirchLog {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StrippedJungleLog {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StrippedAcaciaLog {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StrippedDarkOakLog {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StrippedOakLog {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StrippedMangroveLog {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OakWood {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SpruceWood {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BirchWood {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct JungleWood {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaWood {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkOakWood {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MangroveWood {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StrippedOakWood {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StrippedSpruceWood {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StrippedBirchWood {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StrippedJungleWood {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StrippedAcaciaWood {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StrippedDarkOakWood {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StrippedMangroveWood {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OakLeaves {
 	pub r#distance: ConstrainedInt::<1, 7>,
 	pub r#persistent: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SpruceLeaves {
 	pub r#distance: ConstrainedInt::<1, 7>,
 	pub r#persistent: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BirchLeaves {
 	pub r#distance: ConstrainedInt::<1, 7>,
 	pub r#persistent: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct JungleLeaves {
 	pub r#distance: ConstrainedInt::<1, 7>,
 	pub r#persistent: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaLeaves {
 	pub r#distance: ConstrainedInt::<1, 7>,
 	pub r#persistent: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkOakLeaves {
 	pub r#distance: ConstrainedInt::<1, 7>,
 	pub r#persistent: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MangroveLeaves {
 	pub r#distance: ConstrainedInt::<1, 7>,
 	pub r#persistent: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AzaleaLeaves {
 	pub r#distance: ConstrainedInt::<1, 7>,
 	pub r#persistent: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct FloweringAzaleaLeaves {
 	pub r#distance: ConstrainedInt::<1, 7>,
 	pub r#persistent: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Sponge;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WetSponge;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Glass;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LapisOre;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeepslateLapisOre;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LapisBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Dispenser {
 	pub r#facing: property_enums::Facing,
 	pub r#triggered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Sandstone;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ChiseledSandstone;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CutSandstone;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct NoteBlock {
 	pub r#instrument: property_enums::Instrument,
 	pub r#note: ConstrainedInt::<0, 24>,
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WhiteBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OrangeBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MagentaBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightBlueBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct YellowBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LimeBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PinkBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GrayBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightGrayBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CyanBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PurpleBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlueBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrownBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GreenBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlackBed {
 	pub r#facing: property_enums::Facing1,
 	pub r#occupied: bool,
 	pub r#part: property_enums::Part,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PoweredRail {
 	pub r#powered: bool,
 	pub r#shape: property_enums::Shape,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DetectorRail {
 	pub r#powered: bool,
 	pub r#shape: property_enums::Shape,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StickyPiston {
 	pub r#extended: bool,
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Cobweb;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Grass;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Fern;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeadBush;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Seagrass;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct TallSeagrass {
 	pub r#half: property_enums::Half,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Piston {
 	pub r#extended: bool,
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PistonHead {
 	pub r#facing: property_enums::Facing,
 	pub r#short: bool,
 	pub r#type: property_enums::Type,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WhiteWool;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OrangeWool;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MagentaWool;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightBlueWool;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct YellowWool;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LimeWool;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PinkWool;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GrayWool;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightGrayWool;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CyanWool;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PurpleWool;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlueWool;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrownWool;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GreenWool;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedWool;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlackWool;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MovingPiston {
 	pub r#facing: property_enums::Facing,
 	pub r#type: property_enums::Type,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Dandelion;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Poppy;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlueOrchid;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Allium;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AzureBluet;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedTulip;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OrangeTulip;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WhiteTulip;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PinkTulip;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OxeyeDaisy;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Cornflower;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WitherRose;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LilyOfTheValley;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrownMushroom;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedMushroom;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GoldBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct IronBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Bricks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Tnt {
 	pub r#unstable: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Bookshelf;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MossyCobblestone;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Obsidian;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Torch;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WallTorch {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Fire {
 	pub r#age: ConstrainedInt::<0, 15>,
 	pub r#east: bool,
@@ -22019,13 +22019,13 @@ pub struct Fire {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SoulFire;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Spawner;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OakStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -22033,14 +22033,14 @@ pub struct OakStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Chest {
 	pub r#facing: property_enums::Facing1,
 	pub r#type: property_enums::Type1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedstoneWire {
 	pub r#east: property_enums::East,
 	pub r#north: property_enums::North,
@@ -22049,77 +22049,77 @@ pub struct RedstoneWire {
 	pub r#west: property_enums::West,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DiamondOre;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeepslateDiamondOre;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DiamondBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CraftingTable;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Wheat {
 	pub r#age: ConstrainedInt::<0, 7>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Farmland {
 	pub r#moisture: ConstrainedInt::<0, 7>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Furnace {
 	pub r#facing: property_enums::Facing1,
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OakSign {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SpruceSign {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BirchSign {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaSign {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct JungleSign {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkOakSign {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MangroveSign {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OakDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
@@ -22128,19 +22128,19 @@ pub struct OakDoor {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Ladder {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Rail {
 	pub r#shape: property_enums::Shape2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CobblestoneStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -22148,61 +22148,61 @@ pub struct CobblestoneStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OakWallSign {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SpruceWallSign {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BirchWallSign {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaWallSign {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct JungleWallSign {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkOakWallSign {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MangroveWallSign {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Lever {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StonePressurePlate {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct IronDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
@@ -22211,99 +22211,99 @@ pub struct IronDoor {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OakPressurePlate {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SprucePressurePlate {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BirchPressurePlate {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct JunglePressurePlate {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaPressurePlate {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkOakPressurePlate {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MangrovePressurePlate {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedstoneOre {
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeepslateRedstoneOre {
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedstoneTorch {
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedstoneWallTorch {
 	pub r#facing: property_enums::Facing1,
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StoneButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Snow {
 	pub r#layers: ConstrainedInt::<1, 8>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Ice;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SnowBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Cactus {
 	pub r#age: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Clay;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SugarCane {
 	pub r#age: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Jukebox {
 	pub r#has_record: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OakFence {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -22312,60 +22312,60 @@ pub struct OakFence {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Pumpkin;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Netherrack;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SoulSand;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SoulSoil;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Basalt {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedBasalt {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SoulTorch;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SoulWallTorch {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Glowstone;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct NetherPortal {
 	pub r#axis: property_enums::Axis1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CarvedPumpkin {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct JackOLantern {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Cake {
 	pub r#bites: ConstrainedInt::<0, 6>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Repeater {
 	pub r#delay: ConstrainedInt::<1, 4>,
 	pub r#facing: property_enums::Facing1,
@@ -22373,55 +22373,55 @@ pub struct Repeater {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WhiteStainedGlass;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OrangeStainedGlass;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MagentaStainedGlass;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightBlueStainedGlass;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct YellowStainedGlass;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LimeStainedGlass;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PinkStainedGlass;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GrayStainedGlass;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightGrayStainedGlass;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CyanStainedGlass;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PurpleStainedGlass;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlueStainedGlass;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrownStainedGlass;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GreenStainedGlass;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedStainedGlass;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlackStainedGlass;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OakTrapdoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -22430,7 +22430,7 @@ pub struct OakTrapdoor {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SpruceTrapdoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -22439,7 +22439,7 @@ pub struct SpruceTrapdoor {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BirchTrapdoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -22448,7 +22448,7 @@ pub struct BirchTrapdoor {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct JungleTrapdoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -22457,7 +22457,7 @@ pub struct JungleTrapdoor {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaTrapdoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -22466,7 +22466,7 @@ pub struct AcaciaTrapdoor {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkOakTrapdoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -22475,7 +22475,7 @@ pub struct DarkOakTrapdoor {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MangroveTrapdoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -22484,43 +22484,43 @@ pub struct MangroveTrapdoor {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StoneBricks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MossyStoneBricks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CrackedStoneBricks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ChiseledStoneBricks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PackedMud;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MudBricks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct InfestedStone;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct InfestedCobblestone;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct InfestedStoneBricks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct InfestedMossyStoneBricks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct InfestedCrackedStoneBricks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct InfestedChiseledStoneBricks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrownMushroomBlock {
 	pub r#down: bool,
 	pub r#east: bool,
@@ -22530,7 +22530,7 @@ pub struct BrownMushroomBlock {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedMushroomBlock {
 	pub r#down: bool,
 	pub r#east: bool,
@@ -22540,7 +22540,7 @@ pub struct RedMushroomBlock {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MushroomStem {
 	pub r#down: bool,
 	pub r#east: bool,
@@ -22550,7 +22550,7 @@ pub struct MushroomStem {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct IronBars {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -22559,13 +22559,13 @@ pub struct IronBars {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Chain {
 	pub r#axis: property_enums::Axis,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -22574,30 +22574,30 @@ pub struct GlassPane {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Melon;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AttachedPumpkinStem {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AttachedMelonStem {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PumpkinStem {
 	pub r#age: ConstrainedInt::<0, 7>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MelonStem {
 	pub r#age: ConstrainedInt::<0, 7>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Vine {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -22606,7 +22606,7 @@ pub struct Vine {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GlowLichen {
 	pub r#down: bool,
 	pub r#east: bool,
@@ -22617,7 +22617,7 @@ pub struct GlowLichen {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OakFenceGate {
 	pub r#facing: property_enums::Facing1,
 	pub r#in_wall: bool,
@@ -22625,7 +22625,7 @@ pub struct OakFenceGate {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrickStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -22633,7 +22633,7 @@ pub struct BrickStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StoneBrickStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -22641,7 +22641,7 @@ pub struct StoneBrickStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MudBrickStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -22649,18 +22649,18 @@ pub struct MudBrickStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Mycelium {
 	pub r#snowy: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LilyPad;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct NetherBricks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct NetherBrickFence {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -22669,7 +22669,7 @@ pub struct NetherBrickFence {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct NetherBrickStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -22677,64 +22677,64 @@ pub struct NetherBrickStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct NetherWart {
 	pub r#age: ConstrainedInt::<0, 3>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct EnchantingTable;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrewingStand {
 	pub r#has_bottle_0: bool,
 	pub r#has_bottle_1: bool,
 	pub r#has_bottle_2: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Cauldron;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WaterCauldron {
 	pub r#level: ConstrainedInt::<1, 3>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LavaCauldron;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PowderSnowCauldron {
 	pub r#level: ConstrainedInt::<1, 3>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct EndPortal;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct EndPortalFrame {
 	pub r#eye: bool,
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct EndStone;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DragonEgg;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedstoneLamp {
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Cocoa {
 	pub r#age: ConstrainedInt::<0, 2>,
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SandstoneStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -22742,26 +22742,26 @@ pub struct SandstoneStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct EmeraldOre;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeepslateEmeraldOre;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct EnderChest {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct TripwireHook {
 	pub r#attached: bool,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Tripwire {
 	pub r#attached: bool,
 	pub r#disarmed: bool,
@@ -22772,10 +22772,10 @@ pub struct Tripwire {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct EmeraldBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SpruceStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -22783,7 +22783,7 @@ pub struct SpruceStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BirchStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -22791,7 +22791,7 @@ pub struct BirchStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct JungleStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -22799,16 +22799,16 @@ pub struct JungleStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CommandBlock {
 	pub r#conditional: bool,
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Beacon;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CobblestoneWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -22818,7 +22818,7 @@ pub struct CobblestoneWall {
 	pub r#west: property_enums::West1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MossyCobblestoneWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -22828,272 +22828,272 @@ pub struct MossyCobblestoneWall {
 	pub r#west: property_enums::West1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct FlowerPot;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedOakSapling;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedSpruceSapling;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedBirchSapling;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedJungleSapling;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedAcaciaSapling;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedDarkOakSapling;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedMangrovePropagule;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedFern;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedDandelion;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedPoppy;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedBlueOrchid;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedAllium;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedAzureBluet;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedRedTulip;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedOrangeTulip;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedWhiteTulip;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedPinkTulip;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedOxeyeDaisy;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedCornflower;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedLilyOfTheValley;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedWitherRose;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedRedMushroom;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedBrownMushroom;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedDeadBush;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedCactus;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Carrots {
 	pub r#age: ConstrainedInt::<0, 7>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Potatoes {
 	pub r#age: ConstrainedInt::<0, 7>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OakButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SpruceButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BirchButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct JungleButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkOakButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MangroveButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SkeletonSkull {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SkeletonWallSkull {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WitherSkeletonSkull {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WitherSkeletonWallSkull {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ZombieHead {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ZombieWallHead {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PlayerHead {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PlayerWallHead {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CreeperHead {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CreeperWallHead {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DragonHead {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DragonWallHead {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Anvil {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ChippedAnvil {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DamagedAnvil {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct TrappedChest {
 	pub r#facing: property_enums::Facing1,
 	pub r#type: property_enums::Type1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightWeightedPressurePlate {
 	pub r#power: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct HeavyWeightedPressurePlate {
 	pub r#power: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Comparator {
 	pub r#facing: property_enums::Facing1,
 	pub r#mode: property_enums::Mode,
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DaylightDetector {
 	pub r#inverted: bool,
 	pub r#power: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedstoneBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct NetherQuartzOre;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Hopper {
 	pub r#enabled: bool,
 	pub r#facing: property_enums::Facing2,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct QuartzBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ChiseledQuartzBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct QuartzPillar {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct QuartzStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -23101,68 +23101,68 @@ pub struct QuartzStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ActivatorRail {
 	pub r#powered: bool,
 	pub r#shape: property_enums::Shape,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Dropper {
 	pub r#facing: property_enums::Facing,
 	pub r#triggered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WhiteTerracotta;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OrangeTerracotta;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MagentaTerracotta;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightBlueTerracotta;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct YellowTerracotta;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LimeTerracotta;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PinkTerracotta;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GrayTerracotta;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightGrayTerracotta;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CyanTerracotta;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PurpleTerracotta;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlueTerracotta;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrownTerracotta;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GreenTerracotta;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedTerracotta;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlackTerracotta;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WhiteStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23171,7 +23171,7 @@ pub struct WhiteStainedGlassPane {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OrangeStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23180,7 +23180,7 @@ pub struct OrangeStainedGlassPane {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MagentaStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23189,7 +23189,7 @@ pub struct MagentaStainedGlassPane {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightBlueStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23198,7 +23198,7 @@ pub struct LightBlueStainedGlassPane {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct YellowStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23207,7 +23207,7 @@ pub struct YellowStainedGlassPane {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LimeStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23216,7 +23216,7 @@ pub struct LimeStainedGlassPane {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PinkStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23225,7 +23225,7 @@ pub struct PinkStainedGlassPane {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GrayStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23234,7 +23234,7 @@ pub struct GrayStainedGlassPane {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightGrayStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23243,7 +23243,7 @@ pub struct LightGrayStainedGlassPane {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CyanStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23252,7 +23252,7 @@ pub struct CyanStainedGlassPane {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PurpleStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23261,7 +23261,7 @@ pub struct PurpleStainedGlassPane {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlueStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23270,7 +23270,7 @@ pub struct BlueStainedGlassPane {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrownStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23279,7 +23279,7 @@ pub struct BrownStainedGlassPane {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GreenStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23288,7 +23288,7 @@ pub struct GreenStainedGlassPane {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23297,7 +23297,7 @@ pub struct RedStainedGlassPane {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlackStainedGlassPane {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23306,7 +23306,7 @@ pub struct BlackStainedGlassPane {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -23314,7 +23314,7 @@ pub struct AcaciaStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkOakStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -23322,7 +23322,7 @@ pub struct DarkOakStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MangroveStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -23330,19 +23330,19 @@ pub struct MangroveStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SlimeBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Barrier;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Light {
 	pub r#level: ConstrainedInt::<0, 15>,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct IronTrapdoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -23351,16 +23351,16 @@ pub struct IronTrapdoor {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Prismarine;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PrismarineBricks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkPrismarine;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PrismarineStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -23368,7 +23368,7 @@ pub struct PrismarineStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PrismarineBrickStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -23376,7 +23376,7 @@ pub struct PrismarineBrickStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkPrismarineStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -23384,289 +23384,289 @@ pub struct DarkPrismarineStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PrismarineSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PrismarineBrickSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkPrismarineSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SeaLantern;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct HayBlock {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WhiteCarpet;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OrangeCarpet;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MagentaCarpet;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightBlueCarpet;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct YellowCarpet;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LimeCarpet;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PinkCarpet;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GrayCarpet;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightGrayCarpet;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CyanCarpet;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PurpleCarpet;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlueCarpet;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrownCarpet;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GreenCarpet;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedCarpet;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlackCarpet;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Terracotta;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CoalBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PackedIce;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Sunflower {
 	pub r#half: property_enums::Half,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Lilac {
 	pub r#half: property_enums::Half,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RoseBush {
 	pub r#half: property_enums::Half,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Peony {
 	pub r#half: property_enums::Half,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct TallGrass {
 	pub r#half: property_enums::Half,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LargeFern {
 	pub r#half: property_enums::Half,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WhiteBanner {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OrangeBanner {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MagentaBanner {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightBlueBanner {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct YellowBanner {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LimeBanner {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PinkBanner {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GrayBanner {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightGrayBanner {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CyanBanner {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PurpleBanner {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlueBanner {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrownBanner {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GreenBanner {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedBanner {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlackBanner {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WhiteWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OrangeWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MagentaWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightBlueWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct YellowWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LimeWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PinkWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GrayWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightGrayWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CyanWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PurpleWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlueWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrownWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GreenWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlackWallBanner {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedSandstone;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ChiseledRedSandstone;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CutRedSandstone;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedSandstoneStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -23674,145 +23674,145 @@ pub struct RedSandstoneStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OakSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SpruceSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BirchSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct JungleSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkOakSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MangroveSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SmoothStoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SandstoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CutSandstoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PetrifiedOakSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CobblestoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrickSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StoneBrickSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MudBrickSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct NetherBrickSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct QuartzSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedSandstoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CutRedSandstoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PurpurSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SmoothStone;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SmoothSandstone;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SmoothQuartz;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SmoothRedSandstone;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SpruceFenceGate {
 	pub r#facing: property_enums::Facing1,
 	pub r#in_wall: bool,
@@ -23820,7 +23820,7 @@ pub struct SpruceFenceGate {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BirchFenceGate {
 	pub r#facing: property_enums::Facing1,
 	pub r#in_wall: bool,
@@ -23828,7 +23828,7 @@ pub struct BirchFenceGate {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct JungleFenceGate {
 	pub r#facing: property_enums::Facing1,
 	pub r#in_wall: bool,
@@ -23836,7 +23836,7 @@ pub struct JungleFenceGate {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaFenceGate {
 	pub r#facing: property_enums::Facing1,
 	pub r#in_wall: bool,
@@ -23844,7 +23844,7 @@ pub struct AcaciaFenceGate {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkOakFenceGate {
 	pub r#facing: property_enums::Facing1,
 	pub r#in_wall: bool,
@@ -23852,7 +23852,7 @@ pub struct DarkOakFenceGate {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MangroveFenceGate {
 	pub r#facing: property_enums::Facing1,
 	pub r#in_wall: bool,
@@ -23860,7 +23860,7 @@ pub struct MangroveFenceGate {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SpruceFence {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23869,7 +23869,7 @@ pub struct SpruceFence {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BirchFence {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23878,7 +23878,7 @@ pub struct BirchFence {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct JungleFence {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23887,7 +23887,7 @@ pub struct JungleFence {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaFence {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23896,7 +23896,7 @@ pub struct AcaciaFence {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkOakFence {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23905,7 +23905,7 @@ pub struct DarkOakFence {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MangroveFence {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23914,7 +23914,7 @@ pub struct MangroveFence {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SpruceDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
@@ -23923,7 +23923,7 @@ pub struct SpruceDoor {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BirchDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
@@ -23932,7 +23932,7 @@ pub struct BirchDoor {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct JungleDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
@@ -23941,7 +23941,7 @@ pub struct JungleDoor {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
@@ -23950,7 +23950,7 @@ pub struct AcaciaDoor {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkOakDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
@@ -23959,7 +23959,7 @@ pub struct DarkOakDoor {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MangroveDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
@@ -23968,12 +23968,12 @@ pub struct MangroveDoor {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct EndRod {
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ChorusPlant {
 	pub r#down: bool,
 	pub r#east: bool,
@@ -23983,20 +23983,20 @@ pub struct ChorusPlant {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ChorusFlower {
 	pub r#age: ConstrainedInt::<0, 5>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PurpurBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PurpurPillar {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PurpurStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -24004,567 +24004,567 @@ pub struct PurpurStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct EndStoneBricks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Beetroots {
 	pub r#age: ConstrainedInt::<0, 3>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DirtPath;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct EndGateway;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RepeatingCommandBlock {
 	pub r#conditional: bool,
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ChainCommandBlock {
 	pub r#conditional: bool,
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct FrostedIce {
 	pub r#age: ConstrainedInt::<0, 3>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MagmaBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct NetherWartBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedNetherBricks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BoneBlock {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StructureVoid;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Observer {
 	pub r#facing: property_enums::Facing,
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WhiteShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OrangeShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MagentaShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightBlueShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct YellowShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LimeShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PinkShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GrayShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightGrayShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CyanShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PurpleShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlueShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrownShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GreenShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlackShulkerBox {
 	pub r#facing: property_enums::Facing,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WhiteGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OrangeGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MagentaGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightBlueGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct YellowGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LimeGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PinkGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GrayGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightGrayGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CyanGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PurpleGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlueGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrownGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GreenGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlackGlazedTerracotta {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WhiteConcrete;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OrangeConcrete;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MagentaConcrete;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightBlueConcrete;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct YellowConcrete;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LimeConcrete;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PinkConcrete;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GrayConcrete;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightGrayConcrete;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CyanConcrete;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PurpleConcrete;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlueConcrete;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrownConcrete;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GreenConcrete;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedConcrete;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlackConcrete;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WhiteConcretePowder;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OrangeConcretePowder;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MagentaConcretePowder;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightBlueConcretePowder;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct YellowConcretePowder;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LimeConcretePowder;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PinkConcretePowder;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GrayConcretePowder;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightGrayConcretePowder;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CyanConcretePowder;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PurpleConcretePowder;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlueConcretePowder;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrownConcretePowder;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GreenConcretePowder;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedConcretePowder;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlackConcretePowder;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Kelp {
 	pub r#age: ConstrainedInt::<0, 25>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct KelpPlant;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DriedKelpBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct TurtleEgg {
 	pub r#eggs: ConstrainedInt::<1, 4>,
 	pub r#hatch: ConstrainedInt::<0, 2>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeadTubeCoralBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeadBrainCoralBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeadBubbleCoralBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeadFireCoralBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeadHornCoralBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct TubeCoralBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrainCoralBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BubbleCoralBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct FireCoralBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct HornCoralBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeadTubeCoral {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeadBrainCoral {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeadBubbleCoral {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeadFireCoral {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeadHornCoral {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct TubeCoral {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrainCoral {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BubbleCoral {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct FireCoral {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct HornCoral {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeadTubeCoralFan {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeadBrainCoralFan {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeadBubbleCoralFan {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeadFireCoralFan {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeadHornCoralFan {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct TubeCoralFan {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrainCoralFan {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BubbleCoralFan {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct FireCoralFan {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct HornCoralFan {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeadTubeCoralWallFan {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeadBrainCoralWallFan {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeadBubbleCoralWallFan {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeadFireCoralWallFan {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeadHornCoralWallFan {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct TubeCoralWallFan {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrainCoralWallFan {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BubbleCoralWallFan {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct FireCoralWallFan {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct HornCoralWallFan {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SeaPickle {
 	pub r#pickles: ConstrainedInt::<1, 4>,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlueIce;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Conduit {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BambooSapling;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Bamboo {
 	pub r#age: ConstrainedInt::<0, 1>,
 	pub r#leaves: property_enums::Leaves,
 	pub r#stage: ConstrainedInt::<0, 1>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedBamboo;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct VoidAir;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CaveAir;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BubbleColumn {
 	pub r#drag: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedGraniteStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -24572,7 +24572,7 @@ pub struct PolishedGraniteStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SmoothRedSandstoneStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -24580,7 +24580,7 @@ pub struct SmoothRedSandstoneStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MossyStoneBrickStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -24588,7 +24588,7 @@ pub struct MossyStoneBrickStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedDioriteStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -24596,7 +24596,7 @@ pub struct PolishedDioriteStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MossyCobblestoneStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -24604,7 +24604,7 @@ pub struct MossyCobblestoneStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct EndStoneBrickStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -24612,7 +24612,7 @@ pub struct EndStoneBrickStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StoneStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -24620,7 +24620,7 @@ pub struct StoneStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SmoothSandstoneStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -24628,7 +24628,7 @@ pub struct SmoothSandstoneStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SmoothQuartzStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -24636,7 +24636,7 @@ pub struct SmoothQuartzStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GraniteStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -24644,7 +24644,7 @@ pub struct GraniteStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AndesiteStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -24652,7 +24652,7 @@ pub struct AndesiteStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedNetherBrickStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -24660,7 +24660,7 @@ pub struct RedNetherBrickStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedAndesiteStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -24668,7 +24668,7 @@ pub struct PolishedAndesiteStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DioriteStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -24676,85 +24676,85 @@ pub struct DioriteStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedGraniteSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SmoothRedSandstoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MossyStoneBrickSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedDioriteSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MossyCobblestoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct EndStoneBrickSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SmoothSandstoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SmoothQuartzSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GraniteSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AndesiteSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedNetherBrickSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedAndesiteSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DioriteSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrickWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -24764,7 +24764,7 @@ pub struct BrickWall {
 	pub r#west: property_enums::West1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PrismarineWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -24774,7 +24774,7 @@ pub struct PrismarineWall {
 	pub r#west: property_enums::West1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedSandstoneWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -24784,7 +24784,7 @@ pub struct RedSandstoneWall {
 	pub r#west: property_enums::West1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MossyStoneBrickWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -24794,7 +24794,7 @@ pub struct MossyStoneBrickWall {
 	pub r#west: property_enums::West1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GraniteWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -24804,7 +24804,7 @@ pub struct GraniteWall {
 	pub r#west: property_enums::West1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StoneBrickWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -24814,7 +24814,7 @@ pub struct StoneBrickWall {
 	pub r#west: property_enums::West1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MudBrickWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -24824,7 +24824,7 @@ pub struct MudBrickWall {
 	pub r#west: property_enums::West1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct NetherBrickWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -24834,7 +24834,7 @@ pub struct NetherBrickWall {
 	pub r#west: property_enums::West1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AndesiteWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -24844,7 +24844,7 @@ pub struct AndesiteWall {
 	pub r#west: property_enums::West1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedNetherBrickWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -24854,7 +24854,7 @@ pub struct RedNetherBrickWall {
 	pub r#west: property_enums::West1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SandstoneWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -24864,7 +24864,7 @@ pub struct SandstoneWall {
 	pub r#west: property_enums::West1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct EndStoneBrickWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -24874,7 +24874,7 @@ pub struct EndStoneBrickWall {
 	pub r#west: property_enums::West1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DioriteWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -24884,83 +24884,83 @@ pub struct DioriteWall {
 	pub r#west: property_enums::West1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Scaffolding {
 	pub r#bottom: bool,
 	pub r#distance: ConstrainedInt::<0, 7>,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Loom {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Barrel {
 	pub r#facing: property_enums::Facing,
 	pub r#open: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Smoker {
 	pub r#facing: property_enums::Facing1,
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlastFurnace {
 	pub r#facing: property_enums::Facing1,
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CartographyTable;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct FletchingTable;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Grindstone {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Lectern {
 	pub r#facing: property_enums::Facing1,
 	pub r#has_book: bool,
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SmithingTable;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Stonecutter {
 	pub r#facing: property_enums::Facing1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Bell {
 	pub r#attachment: property_enums::Attachment,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Lantern {
 	pub r#hanging: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SoulLantern {
 	pub r#hanging: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Campfire {
 	pub r#facing: property_enums::Facing1,
 	pub r#lit: bool,
@@ -24968,7 +24968,7 @@ pub struct Campfire {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SoulCampfire {
 	pub r#facing: property_enums::Facing1,
 	pub r#lit: bool,
@@ -24976,123 +24976,123 @@ pub struct SoulCampfire {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SweetBerryBush {
 	pub r#age: ConstrainedInt::<0, 3>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WarpedStem {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StrippedWarpedStem {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WarpedHyphae {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StrippedWarpedHyphae {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WarpedNylium;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WarpedFungus;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WarpedWartBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WarpedRoots;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct NetherSprouts;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CrimsonStem {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StrippedCrimsonStem {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CrimsonHyphae {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StrippedCrimsonHyphae {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CrimsonNylium;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CrimsonFungus;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Shroomlight;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WeepingVines {
 	pub r#age: ConstrainedInt::<0, 25>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WeepingVinesPlant;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct TwistingVines {
 	pub r#age: ConstrainedInt::<0, 25>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct TwistingVinesPlant;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CrimsonRoots;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CrimsonPlanks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WarpedPlanks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CrimsonSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WarpedSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CrimsonPressurePlate {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WarpedPressurePlate {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CrimsonFence {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -25101,7 +25101,7 @@ pub struct CrimsonFence {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WarpedFence {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -25110,7 +25110,7 @@ pub struct WarpedFence {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CrimsonTrapdoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -25119,7 +25119,7 @@ pub struct CrimsonTrapdoor {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WarpedTrapdoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -25128,7 +25128,7 @@ pub struct WarpedTrapdoor {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CrimsonFenceGate {
 	pub r#facing: property_enums::Facing1,
 	pub r#in_wall: bool,
@@ -25136,7 +25136,7 @@ pub struct CrimsonFenceGate {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WarpedFenceGate {
 	pub r#facing: property_enums::Facing1,
 	pub r#in_wall: bool,
@@ -25144,7 +25144,7 @@ pub struct WarpedFenceGate {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CrimsonStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -25152,7 +25152,7 @@ pub struct CrimsonStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WarpedStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -25160,21 +25160,21 @@ pub struct WarpedStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CrimsonButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WarpedButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CrimsonDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
@@ -25183,7 +25183,7 @@ pub struct CrimsonDoor {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WarpedDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
@@ -25192,101 +25192,101 @@ pub struct WarpedDoor {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CrimsonSign {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WarpedSign {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CrimsonWallSign {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WarpedWallSign {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StructureBlock {
 	pub r#mode: property_enums::Mode1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Jigsaw {
 	pub r#orientation: property_enums::Orientation,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Composter {
 	pub r#level: ConstrainedInt::<0, 8>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Target {
 	pub r#power: ConstrainedInt::<0, 15>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BeeNest {
 	pub r#facing: property_enums::Facing1,
 	pub r#honey_level: ConstrainedInt::<0, 5>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Beehive {
 	pub r#facing: property_enums::Facing1,
 	pub r#honey_level: ConstrainedInt::<0, 5>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct HoneyBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct HoneycombBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct NetheriteBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AncientDebris;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CryingObsidian;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RespawnAnchor {
 	pub r#charges: ConstrainedInt::<0, 4>,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedCrimsonFungus;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedWarpedFungus;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedCrimsonRoots;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedWarpedRoots;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Lodestone;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Blackstone;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlackstoneStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -25294,7 +25294,7 @@ pub struct BlackstoneStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlackstoneWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -25304,31 +25304,31 @@ pub struct BlackstoneWall {
 	pub r#west: property_enums::West1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlackstoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedBlackstone;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedBlackstoneBricks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CrackedPolishedBlackstoneBricks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ChiseledPolishedBlackstone;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedBlackstoneBrickSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedBlackstoneBrickStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -25336,7 +25336,7 @@ pub struct PolishedBlackstoneBrickStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedBlackstoneBrickWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -25346,10 +25346,10 @@ pub struct PolishedBlackstoneBrickWall {
 	pub r#west: property_enums::West1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GildedBlackstone;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedBlackstoneStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -25357,25 +25357,25 @@ pub struct PolishedBlackstoneStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedBlackstoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedBlackstonePressurePlate {
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedBlackstoneButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedBlackstoneWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -25385,272 +25385,272 @@ pub struct PolishedBlackstoneWall {
 	pub r#west: property_enums::West1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ChiseledNetherBricks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CrackedNetherBricks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct QuartzBricks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Candle {
 	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WhiteCandle {
 	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OrangeCandle {
 	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MagentaCandle {
 	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightBlueCandle {
 	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct YellowCandle {
 	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LimeCandle {
 	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PinkCandle {
 	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GrayCandle {
 	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightGrayCandle {
 	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CyanCandle {
 	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PurpleCandle {
 	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlueCandle {
 	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrownCandle {
 	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GreenCandle {
 	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedCandle {
 	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlackCandle {
 	pub r#candles: ConstrainedInt::<1, 4>,
 	pub r#lit: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CandleCake {
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WhiteCandleCake {
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OrangeCandleCake {
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MagentaCandleCake {
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightBlueCandleCake {
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct YellowCandleCake {
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LimeCandleCake {
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PinkCandleCake {
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GrayCandleCake {
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightGrayCandleCake {
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CyanCandleCake {
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PurpleCandleCake {
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlueCandleCake {
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BrownCandleCake {
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct GreenCandleCake {
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedCandleCake {
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BlackCandleCake {
 	pub r#lit: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AmethystBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BuddingAmethyst;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AmethystCluster {
 	pub r#facing: property_enums::Facing,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LargeAmethystBud {
 	pub r#facing: property_enums::Facing,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MediumAmethystBud {
 	pub r#facing: property_enums::Facing,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SmallAmethystBud {
 	pub r#facing: property_enums::Facing,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Tuff;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Calcite;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct TintedGlass;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PowderSnow;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SculkSensor {
 	pub r#power: ConstrainedInt::<0, 15>,
 	pub r#sculk_sensor_phase: property_enums::SculkSensorPhase,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Sculk;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SculkVein {
 	pub r#down: bool,
 	pub r#east: bool,
@@ -25661,49 +25661,49 @@ pub struct SculkVein {
 	pub r#west: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SculkCatalyst {
 	pub r#bloom: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SculkShrieker {
 	pub r#can_summon: bool,
 	pub r#shrieking: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OxidizedCopper;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WeatheredCopper;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ExposedCopper;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CopperBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CopperOre;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeepslateCopperOre;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OxidizedCutCopper;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WeatheredCutCopper;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ExposedCutCopper;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CutCopper;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OxidizedCutCopperStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -25711,7 +25711,7 @@ pub struct OxidizedCutCopperStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WeatheredCutCopperStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -25719,7 +25719,7 @@ pub struct WeatheredCutCopperStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ExposedCutCopperStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -25727,7 +25727,7 @@ pub struct ExposedCutCopperStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CutCopperStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -25735,55 +25735,55 @@ pub struct CutCopperStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OxidizedCutCopperSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WeatheredCutCopperSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ExposedCutCopperSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CutCopperSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WaxedCopperBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WaxedWeatheredCopper;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WaxedExposedCopper;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WaxedOxidizedCopper;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WaxedOxidizedCutCopper;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WaxedWeatheredCutCopper;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WaxedExposedCutCopper;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WaxedCutCopper;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WaxedOxidizedCutCopperStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -25791,7 +25791,7 @@ pub struct WaxedOxidizedCutCopperStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WaxedWeatheredCutCopperStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -25799,7 +25799,7 @@ pub struct WaxedWeatheredCutCopperStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WaxedExposedCutCopperStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -25807,7 +25807,7 @@ pub struct WaxedExposedCutCopperStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WaxedCutCopperStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -25815,113 +25815,113 @@ pub struct WaxedCutCopperStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WaxedOxidizedCutCopperSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WaxedWeatheredCutCopperSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WaxedExposedCutCopperSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct WaxedCutCopperSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct LightningRod {
 	pub r#facing: property_enums::Facing,
 	pub r#powered: bool,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PointedDripstone {
 	pub r#thickness: property_enums::Thickness,
 	pub r#vertical_direction: property_enums::VerticalDirection,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DripstoneBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CaveVines {
 	pub r#age: ConstrainedInt::<0, 25>,
 	pub r#berries: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CaveVinesPlant {
 	pub r#berries: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SporeBlossom;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Azalea;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct FloweringAzalea;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MossCarpet;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MossBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BigDripleaf {
 	pub r#facing: property_enums::Facing1,
 	pub r#tilt: property_enums::Tilt,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct BigDripleafStem {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SmallDripleaf {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct HangingRoots {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RootedDirt;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Mud;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Deepslate {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CobbledDeepslate;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CobbledDeepslateStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -25929,13 +25929,13 @@ pub struct CobbledDeepslateStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CobbledDeepslateSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CobbledDeepslateWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -25945,10 +25945,10 @@ pub struct CobbledDeepslateWall {
 	pub r#west: property_enums::West1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedDeepslate;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedDeepslateStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -25956,13 +25956,13 @@ pub struct PolishedDeepslateStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedDeepslateSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PolishedDeepslateWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -25972,10 +25972,10 @@ pub struct PolishedDeepslateWall {
 	pub r#west: property_enums::West1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeepslateTiles;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeepslateTileStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -25983,13 +25983,13 @@ pub struct DeepslateTileStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeepslateTileSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeepslateTileWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -25999,10 +25999,10 @@ pub struct DeepslateTileWall {
 	pub r#west: property_enums::West1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeepslateBricks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeepslateBrickStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
@@ -26010,13 +26010,13 @@ pub struct DeepslateBrickStairs {
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeepslateBrickSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DeepslateBrickWall {
 	pub r#east: property_enums::East1,
 	pub r#north: property_enums::North1,
@@ -26026,57 +26026,57 @@ pub struct DeepslateBrickWall {
 	pub r#west: property_enums::West1,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ChiseledDeepslate;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CrackedDeepslateBricks;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CrackedDeepslateTiles;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct InfestedDeepslate {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SmoothBasalt;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RawIronBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RawCopperBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RawGoldBlock;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedAzaleaBush;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedFloweringAzaleaBush;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OchreFroglight {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct VerdantFroglight {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PearlescentFroglight {
 	pub r#axis: property_enums::Axis,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Frogspawn;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ReinforcedDeepslate;
 
 

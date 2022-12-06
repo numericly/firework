@@ -85,8 +85,10 @@ impl<'a> AsyncWrite for ProtocolWriter {
     ) -> Poll<Result<usize, io::Error>> {
         let mut buf = buf.to_vec();
         if let Some(cipher) = &mut self.cipher {
+            // let start = std::time::Instant::now();
             let buf = InOutBuf::from(buf.as_mut_slice()).into_chunks().0;
             cipher.encrypt_blocks_inout_mut(buf);
+            // println!("Encryption took {:?}", start.elapsed());
         }
         match OwnedWriteHalf::poll_write(Pin::new(&mut self.writer), cx, buf.as_slice()) {
             Poll::Ready(Ok(_)) => {
@@ -176,23 +178,22 @@ impl Protocol {
     ) -> Result<(), ProtocolError> {
         let packet_data = packet.serialize();
 
-        let mut data_length_buf = Vec::new();
-        VarInt(packet_data.len() as i32).serialize(&mut data_length_buf);
+        let mut packet_data_len = Vec::new();
+        VarInt(packet_data.len() as i32).serialize(&mut packet_data_len);
 
-        let packet = match self.compression_enabled {
-            true => {
-                let compressed_data = compress_to_vec_zlib(&packet_data, 10);
-                let mut full_data_length_buf = Vec::new();
-                VarInt(compressed_data.len() as i32 + data_length_buf.len() as i32)
-                    .serialize(&mut full_data_length_buf);
-                full_data_length_buf.extend(data_length_buf);
-                full_data_length_buf.extend(compressed_data);
-                full_data_length_buf
-            }
-            false => {
-                data_length_buf.extend(packet_data);
-                data_length_buf
-            }
+        let packet = if self.compression_enabled {
+            // let start = std::time::Instant::now();
+            let compressed_data = compress_to_vec_zlib(&packet_data, 2);
+            // println!("Compression ratio: {}", compressed_data.len() as f32 / packet_data.len() as f32);
+            // println!("Compression took {:?}", start.elapsed());
+            let mut compressed_packet_data = Vec::with_capacity(compressed_data.len() + packet_data_len.len() + 5);
+            VarInt(compressed_data.len() as i32 + packet_data_len.len() as i32).serialize(&mut compressed_packet_data);
+            compressed_packet_data.extend(packet_data_len);
+            compressed_packet_data.extend(compressed_data);
+            compressed_packet_data
+        } else {
+            packet_data_len.extend(packet_data);
+            packet_data_len
         };
 
         self.writer.lock().await.write_all(&packet).await.map_err(|err| {

@@ -5,9 +5,11 @@ macro_rules! log {
     }
 }
 
+mod biomes;
 mod blocks;
 
 fn main() {
     blocks::build_blocks();
+    biomes::build_biomes();
     println!("cargo:rerun-if-changed=data");
 }

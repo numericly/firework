@@ -2,10 +2,10 @@ use std::env;
 
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use minecraft_data::blocks::Block;
-use nbt::{from_zlib_reader, Blob, Map};
+use nbt::from_zlib_reader;
 use serde::Deserialize;
 use std::hash::Hash;
-use world::world::{Region, RegionChunk};
+use world::world::RegionChunk;
 
 fn criterion_benchmark(c: &mut Criterion) {
     env::set_var("RUST_BACKTRACE", "1");
@@ -33,7 +33,7 @@ fn criterion_benchmark(c: &mut Criterion) {
         pub block_states: Option<PalettedContainer<Block, 4096>>,
     }
 
-    #[derive(Debug, Deserialize)]
+    #[derive(Debug, Deserialize, Clone)]
     pub struct PalettedContainer<T, const CONTAINER_SIZE: usize> {
         pub palette: Vec<T>,
         pub data: Option<Vec<i64>>,
@@ -43,15 +43,15 @@ fn criterion_benchmark(c: &mut Criterion) {
 
     impl<T, const CONTAINER_SIZE: usize> PalettedContainer<T, CONTAINER_SIZE>
     where
-        T: std::fmt::Debug + Eq + Hash,
+        T: std::fmt::Debug + Eq + Hash + Clone,
     {
         pub fn get(&self, index: usize) -> Option<&T> {
             let Some(data) = self.data.as_ref() else {
-            if self.palette.len() != 1 {
-                panic!("Palette length is not 1");
-            }
-            return Some(&self.palette[0]);
-        };
+                if self.palette.len() != 1 {
+                    panic!("Palette length is not 1");
+                }
+                return Some(&self.palette[0]);
+            };
             let bits_per_value = data.len() * BITS_PER_ENTRY / CONTAINER_SIZE;
             let values_per_long = BITS_PER_ENTRY / bits_per_value;
             let array_index = index / values_per_long;
@@ -72,51 +72,90 @@ fn criterion_benchmark(c: &mut Criterion) {
 
     let world = world::world::World::new("./world/region/");
 
+    println!("Size of block {}", std::mem::size_of::<Block>());
+
+    enum Data {
+        None,
+        Single(Vec<u8>),
+        Double(Vec<u16>),
+    }
+
+    struct FastPalettedContainer<T, const CONTAINER_SIZE: usize> {
+        pub palette: Vec<T>,
+        pub data: Data,
+    }
+
+    impl<T, const CONTAINER_SIZE: usize> FastPalettedContainer<T, CONTAINER_SIZE>
+    where
+        T: std::fmt::Debug + Eq + Hash + Clone,
+    {
+        pub fn get(&self, index: usize) -> Option<&T> {
+            match self.data {
+                Data::None => {
+                    if self.palette.len() != 1 {
+                        panic!("Palette length is not 1");
+                    }
+                    return Some(&self.palette[0]);
+                }
+                Data::Single(ref data) => {
+                    let Some(palette_index) = data.get(index) else {
+                        return None;
+                    };
+                    self.palette.get(*palette_index as usize)
+                }
+                Data::Double(ref data) => {
+                    let Some(paletted_index) = data.get(index) else {
+                        return None;
+                    };
+                    self.palette.get(*paletted_index as usize)
+                }
+            }
+        }
+    }
+
     let region = world.get_region(0, 0).unwrap().unwrap();
 
-    c.bench_function("deserialize chunk", |a| {
-        a.iter(|| {
-            let lock = region.sections.lock();
-            if let RegionChunk::ChunkBytes(bytes) = &lock.unwrap()[32] {
-                let reader = bytes[5..].to_vec();
-                let chunk_data: Chunk = from_zlib_reader(reader.as_slice()).unwrap();
-                let block = chunk_data.sections[1]
-                    .block_states
-                    .as_ref()
-                    .unwrap()
-                    .get(3337);
-                println!("{:?}", block);
-                black_box(chunk_data);
-            };
-        });
-    });
-
-    // let data = std::fs::File::open("./world/region/r.0.0.mca").unwrap();
-    // let region = Region::deserialize(data).unwrap();
-
-    // for x in 0..1 {
-    //     for z in 0..1 {
-    //         let chunk = &region.get_chunk(x, z).unwrap();
-    //         let mut data = Vec::new();
-    //         chunk.as_ref().unwrap().write(&mut data);
-    //         // for data in data.data {
-    //         //     print!("{:08b} ", data);
-    //         // }
-    //         println!("{:?}", data.len());
-    //         black_box(chunk);
-    //     }
-    // }
+    let lock = region.sections.lock();
+    if let RegionChunk::ChunkBytes(bytes) = &lock.unwrap()[32] {
+        let reader = bytes[5..].to_vec();
+        let chunk_data: Chunk = from_zlib_reader(reader.as_slice()).unwrap();
+        let blocks: &PalettedContainer<Block, 4096> =
+            chunk_data.sections[1].block_states.as_ref().unwrap();
+    };
 
     // c.bench_function("deserialize chunk", |a| {
     //     a.iter(|| {
-    //         for x in 0..32 {
-    //             for z in 0..32 {
-    //                 let chunk = &region.get_chunk(x, z).unwrap();
-    //                 black_box(chunk);
-    //             }
-    //         }
+    //         let lock = region.sections.lock();
+    //         if let RegionChunk::ChunkBytes(bytes) = &lock.unwrap()[32] {
+    //             let reader = bytes[5..].to_vec();
+    //             let chunk_data: Chunk = from_zlib_reader(reader.as_slice()).unwrap();
+    //             let block = chunk_data.sections[1]
+    //                 .block_states
+    //                 .as_ref()
+    //                 .unwrap()
+    //                 .get(3337);
+    //             println!("{:?}", block);
+    //             black_box(chunk_data);
+    //         };
     //     });
     // });
+    c.bench_function("read from vec", |a| {
+        let vec = {
+            let mut vec = Vec::new();
+            vec.push(rand::random::<u8>());
+            vec
+        };
+
+        a.iter(|| {
+            let mut blocks = 0u32;
+            for i in &vec {
+                if *i != 0 {
+                    blocks += 1;
+                }
+            }
+            black_box(blocks);
+        });
+    });
 }
 
 criterion_group!(benches, criterion_benchmark);

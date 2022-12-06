@@ -1,4 +1,6 @@
-use minecraft_data::blocks::{create_global_palette, Block};
+use std::{mem, time::Instant};
+
+use minecraft_data::{blocks::Block, Palette};
 
 fn main() {
     let string = r#"
@@ -35,13 +37,14 @@ fn main() {
         }
       ]
     "#;
-    let start = std::time::Instant::now();
+    let start = Instant::now();
     let block: Vec<Block> = serde_json::from_str(string).unwrap();
     println!("Time taken: {:?}", start.elapsed());
 
-    println!("{:?}", block);
-
-    let global_palette = create_global_palette();
-
-    println!("{:?}", global_palette.len());
+    for block in &block {
+        let start = Instant::now();
+        print!("Id: {} for {:?}", block.get(), block);
+        println!(" in: {:?}", start.elapsed());
+        println!("Datasize: {}", mem::size_of::<Block>());
+    }
 }

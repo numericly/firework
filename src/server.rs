@@ -4,7 +4,7 @@ use std::time::Duration;
 use authentication::{authenticate, AuthenticationError};
 use dashmap::mapref::entry::Entry::Vacant;
 use dashmap::DashMap;
-use data::v1_19_2::tags::{REGISTRY, TAGS};
+use minecraft_data::tags::{REGISTRY, TAGS};
 use protocol::client_bound::{
     ChangeDifficulty, ClientBoundKeepAlive, EncryptionRequest, InitializeWorldBorder,
     LoginDisconnect, LoginSuccess, LoginWorld, PlayDisconnect, PlayerAbilities, Pong, ServerStatus,
@@ -20,7 +20,7 @@ use tokio::sync::{broadcast, mpsc};
 use tokio::time::sleep;
 use tokio::{net::TcpListener, select};
 use tokio_util::sync::CancellationToken;
-use world::world::{ToPacket, World};
+use world::world::World;
 
 macro_rules! read_packet_or_err {
     ($packet:ident, $stream:expr, $connection_state:expr) => {
@@ -376,17 +376,21 @@ impl VanillaServerHandler {
             };
             connection.write_packet(set_center_chunk).await.unwrap();
         }
-        for x in -10..=10 {
-            for z in -10..=10 {
+        let start = std::time::Instant::now();
+        for x in -3..=3 {
+            for z in -3..=3 {
                 let packet;
                 {
+                    let start = std::time::Instant::now();
                     let chunk_lock = self.world.get_chunk(x, z).await.unwrap().unwrap();
                     let chunk = chunk_lock.read().unwrap();
-                    packet = chunk.to_packet();
+                    packet = chunk.into_packet();
+                    println!("Time to get chunk {:?}", start.elapsed());
                 }
                 connection.write_packet(packet).await.unwrap();
             }
         }
+        println!("Chunk sending took {:?}", start.elapsed());
 
         let initialize_world_border = InitializeWorldBorder {
             x: 0.0,
@@ -447,6 +451,14 @@ impl VanillaServerHandler {
         };
 
         connection.write_packet(ping).await.unwrap();
+
+        {
+            let chunk_locked = self.world.get_chunk(0, -1).await.unwrap().unwrap();
+            let chunk_lock = chunk_locked.read().unwrap();
+
+            let block = chunk_lock.get_block(9, 61, -1);
+            println!("Block: {:?}", block.unwrap().get_emit_light());
+        }
 
         let (tx, rx) = broadcast::channel::<ClientEvent>(10);
 

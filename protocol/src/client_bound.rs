@@ -36,10 +36,10 @@ macro_rules! define_client_bound_protocol {
 }
 
 use authentication::ProfileProperty;
+use minecraft_data::tags::VarIntList;
 use std::{collections::HashMap, io::Write};
 
 use byteorder::{BigEndian, WriteBytesExt};
-use data::v1_19_2::{data_structure::BitSet, tags::VarIntList};
 use nbt::{Blob, Value};
 
 use super::data_types::*;

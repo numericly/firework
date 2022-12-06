@@ -2,7 +2,7 @@ use std::time::Duration;
 use tokio::time::sleep;
 
 mod client;
-mod commands;
+// mod commands;
 mod server;
 
 #[tokio::main]

@@ -380,14 +380,23 @@ dependencies = [
 ]
 
 [[package]]
-name = "data"
-version = "0.1.0"
+name = "datasize"
+version = "0.2.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6eeb75c8424b31fc9e13aa703f73e40aa9b7e3c0d22059162f61abe18f24128b"
 dependencies = [
- "get-size",
- "hematite-nbt",
- "lazy_static",
- "loop_chain",
- "serde",
+ "datasize_derive",
+]
+
+[[package]]
+name = "datasize_derive"
+version = "0.2.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ecd3ee63556774dd6d8a6b98416475dd5e35872985699bbb19c4d7ad4ccecaff"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -574,12 +583,6 @@ dependencies = [
  "typenum",
  "version_check",
 ]
-
-[[package]]
-name = "get-size"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ffff7b577402f46b6e0069ae9c31a7859ab3f2abe7ff0fb614fe6441a1d6c306"
 
 [[package]]
 name = "getrandom"
@@ -825,12 +828,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "loop_chain"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "452ebe4cd90ccf9babf24ded1c5893c3b0a1b27fd78a2ead5d41934317d76bb1"
-
-[[package]]
 name = "matches"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -869,7 +866,6 @@ dependencies = [
  "cipher",
  "criterion",
  "dashmap",
- "data",
  "futures",
  "hematite-nbt",
  "minecraft_data",
@@ -898,6 +894,7 @@ name = "minecraft_data"
 version = "0.1.0"
 dependencies = [
  "convert_case",
+ "datasize",
  "hematite-nbt",
  "lazy_static",
  "serde",
@@ -1245,8 +1242,8 @@ dependencies = [
  "byteorder",
  "cfb-mode",
  "cfb8",
- "data",
  "hematite-nbt",
+ "minecraft_data",
  "miniz_oxide 0.6.2",
  "modular-bitfield",
  "quartz_nbt",
@@ -2084,10 +2081,11 @@ version = "0.1.0"
 dependencies = [
  "byteorder",
  "dashmap",
- "data",
  "hematite-nbt",
+ "minecraft_data",
  "protocol",
  "quartz_nbt",
+ "rand",
  "serde",
  "serde_json",
  "server_state",

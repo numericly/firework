@@ -1,18 +1,13 @@
 use byteorder::{BigEndian, ReadBytesExt};
 use dashmap::DashMap;
-use data::v1_19_2::biomes::Biomes;
-use data::v1_19_2::blocks::state::BlockStates;
-use data::v1_19_2::chunk::Chunk;
-use data::v1_19_2::data_structure::{BitSet, PalettedContainer};
-use data::v1_19_2::Palette;
-use nbt::Blob;
-use protocol::client_bound::{ChunkUpdateAndLightUpdate, SerializeField, SerializePacket};
-use protocol::data_types::VarInt;
+use protocol::client_bound::{SerializeField, SerializePacket};
+use protocol::data_types::{BitSet};
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::fs::File;
 use std::hash::Hash;
 use std::io::Read;
+use crate::chunk::Chunk;
 use std::sync::{Arc, RwLock, Mutex};
 
 pub enum Difficulty {
@@ -39,7 +34,7 @@ pub struct Region {
 pub enum RegionChunk {
     None,
     ChunkBytes(Box<Vec<u8>>),
-    Chunk(Arc<RwLock<ChunkNew>>),
+    Chunk(Arc<RwLock<Chunk>>),
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -58,78 +53,6 @@ pub trait ToPacket<T: SerializePacket> {
     fn to_packet(&self) -> T;
 }
 
-#[derive(Debug)]
-pub struct ChunkNew {
-    pub data_version: i32,
-    pub x: i32,
-    pub z: i32,
-    pub inhabited_time: i64,
-    pub last_update: i64,
-    pub post_processing: Option<Vec<Vec<i16>>>,
-    pub status: Option<String>,
-    pub sections: Vec<ChunkSectionNew>,
-}
-
-#[derive(Debug)]
-pub struct ChunkSectionNew {
-    pub non_air_blocks_count: u16,
-    pub block_states: Option<PalettedContainer<BlockStates, 4096>>,
-    pub biomes: Option<PalettedContainer<Biomes, 64>>,
-    pub sky_light: Option<Vec<i8>>,
-    pub block_light: Option<Vec<i8>>,
-}
-
-impl From<Chunk> for ChunkNew {
-    fn from(chunk: Chunk) -> Self {
-        fn non_air_blocks(container: &PalettedContainer<BlockStates, 4096>) -> u16 {
-            if container.palette.is_empty() {
-                return 0;
-            }
-
-            if !container.palette.contains(&BlockStates::Air) {
-                return 4096;
-            }
-
-            let mut count = 0;
-            for i in 0..4096 {
-                let block = container.get(i).unwrap();
-                if *block != BlockStates::Air {
-                    count += 1;
-                }
-            }
-            count
-        }
-        ChunkNew {
-            data_version: chunk.data_version,
-            x: chunk.x,
-            z: chunk.z,
-            inhabited_time: chunk.inhabited_time,
-            last_update: chunk.last_update,
-            post_processing: chunk.post_processing,
-            status: chunk.status,
-            sections: {
-                let mut sections = Vec::new();
-                for section in chunk.sections {
-                    sections.push(ChunkSectionNew {
-                        non_air_blocks_count: {
-                            if let Some(block_states) = &section.block_states {
-                                non_air_blocks(&block_states)
-                            } else {
-                                0
-                            }
-                        },
-                        block_states: section.block_states,
-                        biomes: section.biomes,
-                        sky_light: section.sky_light,
-                        block_light: section.block_light,
-                    });
-                }
-                sections
-            },
-        }
-    }
-}
-
 impl World {
     pub fn new(path: &'static str) -> World {
         World {
@@ -139,7 +62,7 @@ impl World {
             regions: DashMap::new(),
         }
     }
-    pub async fn get_chunk(&self, x: i32, z: i32) -> Result<Option<Arc<RwLock<ChunkNew>>>, String> {
+    pub async fn get_chunk(&self, x: i32, z: i32) -> Result<Option<Arc<RwLock<Chunk>>>, String> {
         let region = self.get_region(x >> 5, z >> 5)?;
 
         if let Some(region) = region {
@@ -229,7 +152,7 @@ impl Region {
         })
     }
     /// Gets and caches a chunk from the region at the given position.
-    pub fn get_chunk(& self, x: i32, z: i32) -> Result<Option<Arc<RwLock<ChunkNew>>>, String> {
+    pub fn get_chunk(& self, x: i32, z: i32) -> Result<Option<Arc<RwLock<Chunk>>>, String> {
         let index = x.rem_euclid(32) as usize + (z.rem_euclid(32) as usize * 32);
 
         let sections = self.sections.lock().unwrap();
@@ -241,7 +164,7 @@ impl Region {
                 // in order to deserialize the chunk.
                 let reader = bytes[5..].to_vec();
                 drop(sections);
-                let chunk_data = ChunkNew::from(Chunk::from_zlib_reader(reader.as_slice())?);
+                let chunk_data = crate::chunk::Chunk::from_zlib_reader(reader.as_slice()).unwrap();
                 let chunk = Arc::new(RwLock::new(chunk_data));
                 let cloned = chunk.clone();
                 self.sections.lock().unwrap()[index] = RegionChunk::Chunk(chunk);
@@ -260,137 +183,53 @@ trait Write {
     fn write(&self, packet_data: &mut Vec<u8>);
 }
 
-impl Write for ChunkNew {
-    fn write(&self, packet_data: &mut Vec<u8>) {
-        for section in &self.sections {
-            section.write(packet_data);
-        }
-    }
-}
-
-impl Write for ChunkSectionNew {
-    fn write(&self, mut packet_data: &mut Vec<u8>) {
-        if self.block_states.is_none() {
-            return;
-        }
-        self.non_air_blocks_count.serialize(&mut packet_data);
-
-        self.block_states.as_ref().unwrap().write(&mut packet_data);
-        self.biomes.as_ref().unwrap().write(&mut packet_data);
-    }
-}
-
-impl<T, const CONTAINER_SIZE: usize> Write for PalettedContainer<T, CONTAINER_SIZE>
-where
-    T: Hash + Palette + Eq + Debug,
-{
-    fn write(&self, mut packet_data: &mut Vec<u8>) {
-        match &self.bits_per_value() {
-            // If the container only contains one value send it to the client as a single value palette type
-            0 => {
-                // Bits per value
-                0u8.serialize(&mut packet_data);
-                // We don't need to write the container size since the client now knows that there is only
-                // one value in this paletted container
-
-                // Paletted item
-                let paletted_item = T::get_palette(&self.palette[0]);
-                VarInt(paletted_item).serialize(&mut packet_data);
-
-                // Empty long array
-                VarInt(0).serialize(&mut packet_data);
-            }
-            bits_per_value => {
-                // Bits per value
-                (*bits_per_value as u8).serialize(&mut packet_data);
-
-                // Palette size
-                VarInt(self.palette.len() as i32).serialize(&mut packet_data);
-                // Palette data
-                for item in &self.palette {
-                    let paletted_item = T::get_palette(item);
-                    VarInt(paletted_item).serialize(&mut packet_data);
-                }
-
-                // Container size
-                VarInt(self.data.as_ref().unwrap().len() as i32).serialize(&mut packet_data);
-                // Container data
-                for item in self.data.as_ref().unwrap() {
-                    item.serialize(&mut packet_data);
-                }
-            }
-        }
-    }
-}
-
 impl Write for BitSet {
     fn write(&self, buf: &mut Vec<u8>) {
         self.0.serialize(buf);
     }
 }
 
-impl ToPacket<ChunkUpdateAndLightUpdate> for ChunkNew {
-    fn to_packet(&self) -> ChunkUpdateAndLightUpdate {
-        let mut packet_data = Vec::new();
-        self.write(&mut packet_data);
-        let mut sky_light_refs = Vec::new();
-        let mut block_light_refs = Vec::new();
-        for i in 0..22 {
-            sky_light_refs.push(&self.sections[i].sky_light);
-            block_light_refs.push(&self.sections[i].block_light);
+pub mod test {
+
+
+    #[tokio::test]
+    async fn test() {
+        println!("Test");
+
+        let world = World::new("./region");
+
+        let lock1 = world.get_region(0, 0).unwrap().unwrap();
+        let lock = lock1.sections.lock().unwrap();
+        let value = lock.get(0);
+        let section = value.unwrap();
+
+        if let RegionChunk::ChunkBytes(bytes) = section {
+            // Cut off the first 4 bits as they are the header and must be ignored  
+            // in order to deserialize the chunk.
+            let reader = bytes[5..].to_vec();
+            let chunk_data = crate::chunk::Chunk::from_zlib_reader(reader.as_slice()).unwrap();
+            let chunk_data_old = ChunkNew::from(Chunk::from_zlib_reader(reader.as_slice()).unwrap());
+
+            let mut packet_data = Vec::new();
+            let start = std::time::Instant::now();
+
+            chunk_data.write(&mut packet_data);
+            println!("Chunk serialization took {:?}", start.elapsed());
+
+            let new_end = start.elapsed();
+            let start = std::time::Instant::now();
+            let mut packet_data_old = Vec::new();
+            chunk_data_old.write(&mut packet_data_old);
+            println!("Chunk serialization took {:?}", start.elapsed());
+            println!("Performance improvement: {:?}", start.elapsed().as_secs_f64() / new_end.as_secs_f64());
+
+            assert_eq!(packet_data, packet_data_old);
+
+            assert_eq!(ChunkUpdateAndLightUpdate::from(chunk_data), chunk_data_old.to_packet());
+            // println!("{:?}",ChunkUpdateAndLightUpdate::from(chunk_data));
+            // println!("{:?}", chunk_data_old.to_packet());
         }
-        //create bitmasks
-        let mut sky_light_mask = BitSet::new();
-        let mut block_light_mask = BitSet::new();
-        //height + 2
-        for i in 0..22 {
-            sky_light_mask.push(sky_light_refs[i].is_some());
-            block_light_mask.push(block_light_refs[i].is_some());
-        }
-        let mut empty_sky_light_mask = BitSet::new();
-        let mut empty_block_light_mask = BitSet::new();
-        for i in 0..22 {
-            empty_sky_light_mask.push(
-                sky_light_refs[i].is_some()
-                    && sky_light_refs[i].as_ref().unwrap().iter().all(|&x| x == 0),
-            );
-            empty_block_light_mask.push(
-                block_light_refs[i].is_some()
-                    && block_light_refs[i]
-                        .as_ref()
-                        .unwrap()
-                        .iter()
-                        .all(|&x| x == 0),
-            );
-        }
-        // TODO: implement support for zeroed out chunks instead of sending empty light arrays
-        //calculate outgoing lighting data
-        let mut sky_light: Vec<Vec<i8>> = Vec::new();
-        let mut block_light: Vec<Vec<i8>> = Vec::new();
-        for i in 0..sky_light_refs.len() {
-            if sky_light_mask.get(i) && !empty_sky_light_mask.get(i) {
-                sky_light.push(sky_light_refs[i].as_ref().unwrap().clone());
-            }
-        }
-        for i in 0..block_light_refs.len() {
-            if block_light_mask.get(i) && !empty_block_light_mask.get(i) {
-                block_light.push(block_light_refs[i].as_ref().unwrap().clone());
-            }
-        }
-        // println!("Lighting calculation took {:?}", start.elapsed());
-        ChunkUpdateAndLightUpdate {
-            x: self.x,
-            z: self.z,
-            heightmaps: Blob::new(),
-            data: packet_data,
-            block_entities: Vec::new(),
-            trust_edges: true,
-            sky_light_mask,
-            block_light_mask,
-            empty_sky_light_mask,
-            empty_block_light_mask,
-            sky_light,
-            block_light,
-        }
+
+        panic!("yo");
     }
 }
