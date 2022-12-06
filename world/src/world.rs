@@ -1,5 +1,6 @@
 use byteorder::{BigEndian, ReadBytesExt};
 use dashmap::DashMap;
+use minecraft_data::blocks::Block;
 use protocol::client_bound::{SerializeField, SerializePacket};
 use protocol::data_types::{BitSet};
 use std::collections::HashMap;
@@ -71,6 +72,10 @@ impl World {
             Ok(None)
         }
     }
+    pub async fn get_chunk_from_pos(&self, x: i32, z: i32) -> Result<Option<Arc<RwLock<Chunk>>>, String> {
+        println!("Getting chunk from pos: {}, {}", x >> 4, z >> 4);
+        self.get_chunk(x >> 4, z >> 4).await
+    }
     pub fn get_region(&self, x: i32, z: i32) -> Result<Option<Arc<Region>>, String> {
         Ok(match self.regions.get(&(x, z)) {
             Some(region) => Some(region.clone()),
@@ -90,6 +95,7 @@ impl World {
         })
     }
 }
+    
 
 impl Region {
     pub fn deserialize(mut reader: File) -> Result<Region, String> {

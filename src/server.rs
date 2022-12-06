@@ -453,11 +453,16 @@ impl VanillaServerHandler {
         connection.write_packet(ping).await.unwrap();
 
         {
-            let chunk_locked = self.world.get_chunk(0, -1).await.unwrap().unwrap();
+            let chunk_locked = self
+                .world
+                .get_chunk_from_pos(-3, 32)
+                .await
+                .unwrap()
+                .unwrap();
             let chunk_lock = chunk_locked.read().unwrap();
 
-            let block = chunk_lock.get_block(9, 61, -1);
-            println!("Block: {:?}", block.unwrap().get_emit_light());
+            let block = chunk_lock.get_block(-3, 76, 32);
+            println!("Block: {:?}, {}", block, block.unwrap().get_emit_light());
         }
 
         let (tx, rx) = broadcast::channel::<ClientEvent>(10);

@@ -3,8 +3,6 @@ use std::fs;
 use convert_case::{Case, Casing};
 use serde::Deserialize;
 
-use crate::blocks;
-
 #[derive(Deserialize, Debug, Clone)]
 pub struct Biome {
     id: i32,
