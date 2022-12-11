@@ -10,6 +10,17 @@ use std::hash::Hash;
 use std::io::Read;
 use crate::chunk::Chunk;
 use std::sync::{Arc, RwLock, Mutex};
+use queues::{Queue, IsQueue};
+
+// For lighting engine
+const DIRECTIONS: [(i32, i32, i32); 6] = [
+    (0, 0, -1),
+    (0, 0, 1),
+    (0, -1, 0),
+    (0, 1, 0),
+    (-1, 0, 0),
+    (1, 0, 0),
+];
 
 pub enum Difficulty {
     Peaceful = 0,
@@ -23,6 +34,10 @@ pub struct World {
     regions: DashMap<(i32, i32), Arc<Region>>,
     pub difficulty: RwLock<u8>,
     pub difficulty_locked: RwLock<bool>,
+    block_lighting_increases: Queue<LightUpdate>,
+    block_lighting_decreases: Queue<LightUpdate>,
+    sky_lighting_increases: Queue<LightUpdate>,
+    sky_lighting_decreases: Queue<LightUpdate>,
 }
 
 #[derive(Debug)]
@@ -61,6 +76,10 @@ impl World {
             difficulty: RwLock::new(1),
             difficulty_locked: RwLock::new(false),
             regions: DashMap::new(),
+            block_lighting_increases: Queue::new(),
+            block_lighting_decreases: Queue::new(),
+            sky_lighting_increases: Queue::new(),
+            sky_lighting_decreases: Queue::new(),
         }
     }
     pub async fn get_chunk(&self, x: i32, z: i32) -> Result<Option<Arc<RwLock<Chunk>>>, String> {
@@ -73,7 +92,6 @@ impl World {
         }
     }
     pub async fn get_chunk_from_pos(&self, x: i32, z: i32) -> Result<Option<Arc<RwLock<Chunk>>>, String> {
-        println!("Getting chunk from pos: {}, {}", x >> 4, z >> 4);
         self.get_chunk(x >> 4, z >> 4).await
     }
     pub fn get_region(&self, x: i32, z: i32) -> Result<Option<Arc<Region>>, String> {
@@ -94,7 +112,74 @@ impl World {
             }
         })
     }
+
+    pub async fn increase_block_light(&mut self, x: i32, y: i32, z: i32, value: u8) {
+        println!("block light increase called at {} {} {} with value {}", x, y, z, value);
+        let start_time = std::time::Instant::now();
+        self.get_chunk_from_pos(x, z).await.unwrap().unwrap().write().unwrap().set_block_light(x, y, z, value);
+        self.block_lighting_increases.add(LightUpdate {x, y, z, value}).unwrap();
+        self.propagate_block_light().await;
+        println!("block light increase finished in {}ms", start_time.elapsed().as_millis());
+    }
+
+    pub async fn decrease_block_light(&mut self, x: i32, y: i32, z: i32, value: u8) {
+        self.block_lighting_decreases.add(LightUpdate {x, y, z, value}).unwrap();
+        self.propagate_block_light().await;
+    }
+
+    pub async fn propagate_block_light(&mut self) {
+        println!("propagate start");
+        let mut propagations: u32 = 0;
+        while !(self.block_lighting_decreases.size() == 0) {
+            let light_decrease = self.block_lighting_decreases.remove().unwrap();
+            propagations+=1;
+            todo!();
+        }
+        while !(self.block_lighting_increases.size() == 0) {
+            propagations+=1;
+            let light_increase = self.block_lighting_increases.remove().unwrap();
+            for direction in DIRECTIONS {
+                let (x, y, z) = direction;
+                let (x, y, z) = (
+                    light_increase.x + x,
+                    light_increase.y + y,
+                    light_increase.z + z,
+                );
+                let chunk = self.get_chunk_from_pos(x, z).await.unwrap();
+                let Some(chunk) = chunk else { println!("chunk wasn't real"); continue; };
+                let chunk_read = chunk.read().unwrap();
+                let block = chunk_read.get_block(x, y, z);
+                let Some(block) = block else { println!("block wasn't real"); continue; };
+                let light = chunk_read.get_block_light(x, y, z);
+                let light = match light {
+                    Some(light) => light,
+                    None => 0,
+                };
+                if light != 1 && light < light_increase.value - 1 && block.get_transparency() {
+                    drop(chunk_read);
+                    let mut chunk_write = chunk.write().unwrap();
+                    chunk_write.set_block_light(x, y, z, light_increase.value - 1);                    self.block_lighting_increases.add(LightUpdate {
+                        x,
+                        y,
+                        z,
+                        value: light_increase.value - 1,
+                    }).unwrap();
+                }    
+            }
+        }
+        println!("propagate end with count {}", propagations);
+    }
 }
+
+// An item in either the lighting increase or decrease queue for block or sky light, depending on which queue it is in
+#[derive(Clone, Debug)]
+struct LightUpdate {
+    x: i32,
+    y: i32,
+    z: i32,
+    value: u8,
+}
+
     
 
 impl Region {

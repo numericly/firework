@@ -260,6 +260,67 @@ impl Chunk {
         let block_index = (x & 0xF) | ((z & 0xF) << 4) | ((y & 0xF) << 8);
         section.block_states.as_ref().map(|x| x.get(block_index as usize)).unwrap()
     }
+    pub fn get_block_light(&self, x: i32, y: i32, z: i32) -> Option<u8> {
+        let section_index = (y >> 4) - self.section_offset as i32;
+        if section_index < 0 || section_index >= self.sections.len() as i32 {
+            println!("section wasn't real");
+            return None;
+        }
+        let section = &self.sections[section_index as usize];
+        let block_index = (x & 0xF) | ((z & 0xF) << 4) | ((y & 0xF) << 8);
+        match &section.block_light {
+            Some(block_light) => match block_index % 2 {
+                0 => Some((block_light[block_index as usize / 2] & 0xF) as u8),
+                1 => Some((block_light[block_index as usize / 2] >> 4) as u8),
+                _ => unreachable!(),
+            },
+            None => {println!("block light wasn't real"); None},
+        }
+    }
+    pub fn get_sky_light(&self, x: i32, y: i32, z: i32) -> Option<u8> {
+        let section_index = (y >> 4) - self.section_offset as i32;
+        if section_index < 0 || section_index >= self.sections.len() as i32 {
+            return None;
+        }
+        let section = &self.sections[section_index as usize];
+        let block_index = (x & 0xF) | ((z & 0xF) << 4) | ((y & 0xF) << 8);
+        match &section.sky_light {
+            Some(sky_light) => match block_index % 2 {
+                0 => Some((sky_light[block_index as usize / 2] & 0xF) as u8),
+                1 => Some((sky_light[block_index as usize / 2] >> 4) as u8),
+                _ => unreachable!(),
+            }
+            None => None,
+        }
+    }
+    pub fn set_block_light(&mut self, x: i32, y: i32, z: i32, light: u8) {
+        let section_index = (y >> 4) - self.section_offset as i32;
+        if section_index < 0 || section_index >= self.sections.len() as i32 {
+            return;
+        }
+        let section = &mut self.sections[section_index as usize];
+        let block_index = (x & 0xF) | ((z & 0xF) << 4) | ((y & 0xF) << 8);
+        let block_light = section.block_light.as_mut();
+        if block_light.is_none() {
+            section.block_light = Some(vec![0; 2048]);
+        }
+        let block_light = section.block_light.as_mut().unwrap();
+        match block_index % 2 {
+            0 => block_light[block_index as usize / 2] = (block_light[block_index as usize / 2] & 0xF0u8 as i8) | (light as i8 & 0xF),
+            1 => block_light[block_index as usize / 2] = (block_light[block_index as usize / 2] & 0xF) | ((light as i8 & 0xF) << 4),
+            _ => unreachable!(),
+        }
+    }
+    pub fn set_sky_light(&mut self, x: i32, y: i32, z: i32, light: u8) {
+        let section_index = (y >> 4) - self.section_offset as i32;
+        if section_index < 0 || section_index >= self.sections.len() as i32 {
+            return;
+        }
+        let section = &mut self.sections[section_index as usize];
+        let block_index = (x & 0xF) | ((z & 0xF) << 4) | ((y & 0xF) << 8);
+        let sky_light = section.sky_light.as_mut().unwrap();
+        sky_light[block_index as usize] = light as i8;
+    }
 }
 
 #[derive(Debug)]

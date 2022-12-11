@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use std::thread;
 use std::time::Duration;
 
 use authentication::{authenticate, AuthenticationError};
@@ -153,6 +154,13 @@ pub enum ClientCommand {}
 
 impl VanillaServerHandler {
     fn new() -> Self {
+        let mut test = VanillaServerHandler {
+            world: World::new("./world/region/"),
+            player_list: DashMap::new(),
+        };
+        tokio::task::spawn(async move {
+            test.world.increase_block_light(20, 73, 19, 15).await;
+        });
         VanillaServerHandler {
             world: World::new("./world/region/"),
             player_list: DashMap::new(),
