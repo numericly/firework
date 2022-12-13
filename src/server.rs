@@ -1,26 +1,34 @@
-use std::sync::Arc;
-use std::time::Duration;
-
-use authentication::{authenticate, AuthenticationError};
+use async_trait::async_trait;
+use authentication::{authenticate, AuthenticationError, Profile};
 use dashmap::mapref::entry::Entry::Vacant;
 use dashmap::DashMap;
 use minecraft_data::tags::{REGISTRY, TAGS};
 use protocol::client_bound::{
-    ChangeDifficulty, ClientBoundKeepAlive, EncryptionRequest, InitializeWorldBorder,
-    LoginDisconnect, LoginSuccess, LoginWorld, PlayDisconnect, PlayerAbilities, Pong, ServerStatus,
-    SetCenterChunk, SetCompression, SetHeldItem, SetRecipes, SetTags, SynchronizePlayerPosition,
+    ChangeDifficulty, ClientBoundKeepAlive, Commands, EncryptionRequest, InitializeWorldBorder,
+    LoginDisconnect, LoginSuccess, LoginWorld, PlayDisconnect, PlayerAbilities, PlayerInfo, Pong,
+    ServerStatus, SetCenterChunk, SetCompression, SetHeldItem, SetRecipes, SetTags, SpawnPlayer,
+    SynchronizePlayerPosition, UnloadChunk,
 };
-use protocol::data_types::{PlayerAbilityFlags, PlayerPositionFlags, TestBytes, VarInt};
-use protocol::protocol::{ConnectionState, Protocol, ProtocolError};
+use protocol::data_types::{
+    CommandNode, FloatProps, NodeType, Parser, PlayerAbilityFlags, PlayerInfoAction,
+    PlayerInfoAddPlayer, PlayerPositionFlags, SuggestionsType,
+};
 use protocol::server_bound::ServerBoundPacket;
+use protocol::{ConnectionState, Protocol, ProtocolError};
+use protocol_core::{UnsizedVec, VarInt};
 use rand::Rng;
 use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
+use std::collections::HashMap;
+use std::error::Error;
+use std::sync::Arc;
+use std::time::{Duration, Instant};
+use std::vec;
 use thiserror::Error;
-use tokio::sync::{broadcast, mpsc};
+use tokio::sync::broadcast;
 use tokio::time::sleep;
 use tokio::{net::TcpListener, select};
 use tokio_util::sync::CancellationToken;
-use world::world::World;
+use world::World;
 
 macro_rules! read_packet_or_err {
     ($packet:ident, $stream:expr, $connection_state:expr) => {
@@ -82,8 +90,10 @@ pub struct ServerManager {
 }
 
 pub struct VanillaServerHandler {
-    world: World,
-    player_list: DashMap<i32, Player>,
+    world: Arc<World>,
+    sender: broadcast::Sender<ServerCommand>,
+    receiver: broadcast::Receiver<ServerCommand>,
+    player_list: Arc<DashMap<i32, Player>>,
 }
 #[derive(Debug, Clone)]
 pub struct Vec3 {
@@ -111,34 +121,52 @@ impl Rotation {
 }
 
 #[derive(Debug)]
+pub enum PlayerCachedChunk {
+    Loading { token: CancellationToken },
+    Loaded,
+}
+
+#[derive(Debug)]
 pub struct Player {
     pub uuid: u128,
-    pub player_name: String,
+    pub profile: Profile,
     pub gamemode: u8,
     pub previous_gamemode: i8,
     pub reduced_debug_info: bool,
     pub selected_slot: u8,
     pub position: Vec3,
     pub rotation: Rotation,
-    pub rx: Option<mpsc::Sender<ClientCommand>>,
-    pub tx: Option<broadcast::Receiver<ClientEvent>>,
+    pub receiver: broadcast::Receiver<ClientEvent>,
+    pub loaded_chunks: HashMap<(i32, i32), PlayerCachedChunk>,
 }
 
 impl Player {
-    fn new(uuid: u128, player_name: String) -> Player {
+    fn new(uuid: u128, profile: Profile, receiver: broadcast::Receiver<ClientEvent>) -> Player {
         Player {
             uuid,
-            player_name,
+            profile,
             gamemode: 0,
             previous_gamemode: 0,
             reduced_debug_info: false,
             selected_slot: 0,
             position: Vec3::new(0.0, 0.0, 0.0),
             rotation: Rotation::new(0.0, 0.0),
-            rx: None,
-            tx: None,
+            receiver,
+            loaded_chunks: HashMap::new(),
         }
     }
+}
+
+#[async_trait]
+pub trait Server {
+    async fn handle_server_event(event: ServerCommand) -> Result<(), Box<dyn Error>>;
+    async fn handle_client_event(event: ClientEvent) -> Result<(), Box<dyn Error>>;
+}
+
+#[derive(Debug, Clone)]
+pub enum ServerCommand {
+    SpawnPlayer { entity_id: i32 },
+    RemovePlayer { entity_id: i32 },
 }
 
 #[derive(Debug, Clone)]
@@ -148,14 +176,96 @@ pub enum ClientEvent {
     MoveChunk,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ClientCommand {}
+
+async fn update_player_chunks(
+    player: Arc<DashMap<i32, Player>>,
+    entity_id: i32,
+    connection: Arc<Protocol>,
+    world: Arc<World>,
+    chunk_x: i32,
+    chunk_z: i32,
+) -> Result<(), ConnectionError> {
+    let loaded_chunks = {
+        let player = player
+            .get(&entity_id)
+            .ok_or_else(|| ConnectionError::PlayerUnregisteredError)?;
+        player.loaded_chunks.keys().cloned().collect::<Vec<_>>()
+    };
+    // Unload chunks
+    for (x, z) in loaded_chunks {
+        if (x - chunk_x).abs() > 5 || (z - chunk_z).abs() > 5 {
+            connection
+                .write_packet(UnloadChunk {
+                    x: x.clone(),
+                    z: z.clone(),
+                })
+                .await
+                .unwrap();
+            player
+                .get_mut(&entity_id)
+                .unwrap()
+                .loaded_chunks
+                .remove(&(x, z));
+            // println!("Unloaded chunk {} {}", x, z);
+        }
+    }
+
+    // Find unloaded chunks that need to load
+    let unloaded_chunks = {
+        let mut unloaded_chunks = Vec::new();
+        for (x, z) in CHUNK_LOADER.clone() {
+            let x = x + chunk_x;
+            let z = z + chunk_z;
+            if (x - chunk_x).abs() > 5 || (z - chunk_z).abs() > 5 {
+                continue;
+            }
+            if !player
+                .get(&entity_id)
+                .unwrap()
+                .loaded_chunks
+                .contains_key(&(x, z))
+            {
+                unloaded_chunks.push((x, z));
+            }
+        }
+        unloaded_chunks
+    };
+
+    // Load chunks
+    tokio::task::spawn(async move {
+        let start = Instant::now();
+        for (x, z) in unloaded_chunks {
+            let packet = {
+                let chunk_lock = world.get_chunk(x, z).await.unwrap().unwrap();
+                let chunk = chunk_lock.read().unwrap();
+                chunk.into_packet()
+            };
+
+            connection.write_packet(packet).await.unwrap();
+            player
+                .get_mut(&entity_id)
+                .unwrap()
+                .loaded_chunks
+                .insert((x, z), PlayerCachedChunk::Loaded);
+
+            // println!("Loaded chunk {} {}", x, z);
+        }
+        // println!("Loaded chunks in {:?}", start.elapsed());
+    });
+
+    Ok(())
+}
 
 impl VanillaServerHandler {
     fn new() -> Self {
+        let (sender, receiver) = broadcast::channel(10);
         VanillaServerHandler {
-            world: World::new("./world/region/"),
-            player_list: DashMap::new(),
+            world: Arc::new(World::new("./world/region/")),
+            player_list: Arc::new(DashMap::new()),
+            sender,
+            receiver,
         }
     }
     async fn on_connect(
@@ -197,7 +307,7 @@ impl VanillaServerHandler {
             version_protocol: 760,
         }
         .to_string();
-        let server_status = ServerStatus { response: motd };
+        let server_status = ServerStatus { motd };
 
         connection.write_packet(server_status).await?;
 
@@ -277,13 +387,16 @@ impl VanillaServerHandler {
         let login_success = LoginSuccess {
             uuid: uuid.clone(),
             username: profile.name.clone(),
-            properties: profile.properties,
+            properties: profile.properties.clone(),
         };
 
         connection.write_packet(login_success).await.unwrap();
-        let entity_id = self.add_client(uuid, profile.name)?;
+        let (tx, rx) = broadcast::channel::<ClientEvent>(10);
 
-        self.handle_world_loading(connection, entity_id).await?;
+        let player = Player::new(uuid, profile, rx);
+        let entity_id = self.add_client(player)?;
+
+        self.handle_world_loading(connection, entity_id, tx).await?;
 
         self.remove_client(entity_id);
         Ok(())
@@ -292,6 +405,7 @@ impl VanillaServerHandler {
         &self,
         mut connection: Protocol,
         entity_id: i32,
+        sender: broadcast::Sender<ClientEvent>,
     ) -> Result<(), ConnectionError> {
         {
             let player = self
@@ -308,7 +422,7 @@ impl VanillaServerHandler {
                     "minecraft:the_nether".to_string(),
                     "minecraft:the_end".to_string(),
                 ],
-                registry_codec: TestBytes(REGISTRY.clone()),
+                registry_codec: UnsizedVec(REGISTRY.clone()),
                 dimension_type: "minecraft:overworld".to_string(),
                 dimension_name: "minecraft:overworld".to_string(),
                 hashed_seed: 0,
@@ -365,6 +479,87 @@ impl VanillaServerHandler {
 
         connection.write_packet(update_tags).await.unwrap();
 
+        let node = CommandNode::new(
+            NodeType::Root,
+            None,
+            false,
+            vec![CommandNode::new(
+                NodeType::Literal {
+                    name: "test_command".to_string(),
+                },
+                None,
+                false,
+                vec![
+                    CommandNode::new(
+                        NodeType::Argument {
+                            name: "true_or_false".to_string(),
+                            parser: Parser::Bool,
+                            suggestions_type: None,
+                        },
+                        None,
+                        true,
+                        vec![],
+                    ),
+                    CommandNode::new(
+                        NodeType::Argument {
+                            name: "0_to_1".to_string(),
+                            parser: Parser::Float(FloatProps {
+                                min: Some(0.0),
+                                max: Some(1.0),
+                            }),
+                            suggestions_type: None,
+                        },
+                        None,
+                        true,
+                        vec![],
+                    ),
+                ],
+            )],
+        );
+
+        let commands = Commands { root: node };
+
+        connection.write_packet(commands).await.unwrap();
+
+        {
+            let player = self
+                .player_list
+                .get(&entity_id)
+                .ok_or_else(|| ConnectionError::PlayerUnregisteredError)?;
+            let position_sync = SynchronizePlayerPosition {
+                x: player.position.x,
+                y: player.position.y,
+                z: player.position.z,
+                yaw: 0.0,
+                pitch: 0.0,
+                flags: PlayerPositionFlags::new(),
+                teleport_id: VarInt(0),
+                dismount_vehicle: false,
+            };
+
+            connection.write_packet(position_sync).await.unwrap();
+        }
+
+        let mut player_list = Vec::new();
+
+        for player in self.player_list.iter() {
+            player_list.push(PlayerInfoAddPlayer {
+                uuid: player.uuid,
+                name: player.profile.name.clone(),
+                properties: player.profile.properties.clone(),
+                gamemode: VarInt(player.gamemode as i32),
+                ping: VarInt(0),
+                display_name: None,
+                has_signature: false,
+            });
+        }
+
+        let player_info = PlayerInfo {
+            action: PlayerInfoAction::AddPlayer(player_list),
+        };
+
+        connection.write_packet(player_info).await.unwrap();
+
         {
             let player = self
                 .player_list
@@ -381,11 +576,18 @@ impl VanillaServerHandler {
             for z in -3..=3 {
                 let packet;
                 {
-                    let start = std::time::Instant::now();
                     let chunk_lock = self.world.get_chunk(x, z).await.unwrap().unwrap();
                     let chunk = chunk_lock.read().unwrap();
                     packet = chunk.into_packet();
-                    println!("Time to get chunk {:?}", start.elapsed());
+                }
+                {
+                    let mut player = self
+                        .player_list
+                        .get_mut(&entity_id)
+                        .expect("Failed to insert client");
+                    player
+                        .loaded_chunks
+                        .insert((x, z), PlayerCachedChunk::Loaded);
                 }
                 connection.write_packet(packet).await.unwrap();
             }
@@ -438,13 +640,14 @@ impl VanillaServerHandler {
             connection.write_packet(position_sync).await.unwrap();
         }
 
-        self.register_client(connection, entity_id).await?;
+        self.register_client(connection, entity_id, sender).await?;
         Ok(())
     }
     async fn register_client(
         &self,
         connection: Protocol,
         entity_id: i32,
+        sender: broadcast::Sender<ClientEvent>,
     ) -> Result<(), ConnectionError> {
         let ping = ClientBoundKeepAlive {
             id: rand::thread_rng().gen(),
@@ -452,23 +655,19 @@ impl VanillaServerHandler {
 
         connection.write_packet(ping).await.unwrap();
 
-        {
-            let chunk_locked = self
-                .world
-                .get_chunk_from_pos(-3, 32)
-                .await
-                .unwrap()
-                .unwrap();
-            let chunk_lock = chunk_locked.read().unwrap();
-
-            let block = chunk_lock.get_block(-3, 76, 32);
-            println!("Block: {:?}, {}", block, block.unwrap().get_emit_light());
-        }
-
-        let (tx, rx) = broadcast::channel::<ClientEvent>(10);
-
         let connection = Arc::new(connection);
         let token = CancellationToken::new();
+
+        update_player_chunks(
+            self.player_list.clone(),
+            entity_id,
+            connection.clone(),
+            self.world.clone(),
+            0,
+            0,
+        )
+        .await?;
+
         loop {
             select! {
                 packet = connection.read_and_serialize() => async {
@@ -498,17 +697,19 @@ impl VanillaServerHandler {
         }
         None
     }
-    fn add_client(&self, uuid: u128, username: String) -> Result<i32, ConnectionError> {
+    fn add_client(&self, player: Player) -> Result<i32, ConnectionError> {
         let entity_id = self
             .get_lowest_entity_id()
             .expect("Could not get an id for player");
 
-        let player_arc = Player::new(uuid, username);
         let entry = self.player_list.entry(entity_id.clone());
         let Vacant(e) = entry else {
             panic!("Entity already exists");
         };
-        e.insert(player_arc);
+        e.insert(player);
+        self.sender
+            .send(ServerCommand::SpawnPlayer { entity_id })
+            .unwrap();
         Ok(entity_id)
     }
     fn remove_client(&self, entity_id: i32) {
@@ -548,16 +749,37 @@ impl VanillaServerHandler {
                     player.position.z = pos.z;
                 }
                 if moved_chunks {
-                    let player = self
-                        .player_list
-                        .get(&entity_id)
-                        .ok_or_else(|| ConnectionError::PlayerUnregisteredError)?;
-                    let set_center_chunk = SetCenterChunk {
-                        x: VarInt((player.position.x / 16.0).floor() as i32),
-                        z: VarInt((player.position.z / 16.0).floor() as i32),
-                    };
-                    println!("Sending set center chunk {:?}", set_center_chunk);
+                    let set_center_chunk;
+                    let chunk_x;
+                    let chunk_z;
+                    {
+                        let player = self
+                            .player_list
+                            .get(&entity_id)
+                            .ok_or_else(|| ConnectionError::PlayerUnregisteredError)?;
+                        chunk_x = (player.position.x / 16.0).floor() as i32;
+                        chunk_z = (player.position.z / 16.0).floor() as i32;
+                        set_center_chunk = SetCenterChunk {
+                            x: VarInt(chunk_x.clone()),
+                            z: VarInt(chunk_z.clone()),
+                        };
+                    }
                     connection.write_packet(set_center_chunk).await.unwrap();
+
+                    println!("Moved to chunk {} {}", chunk_x, chunk_z);
+
+                    let check_time = Instant::now();
+                    update_player_chunks(
+                        self.player_list.clone(),
+                        entity_id,
+                        connection.clone(),
+                        self.world.clone(),
+                        chunk_x,
+                        chunk_z,
+                    )
+                    .await?;
+
+                    // println!("Unload time: {:?}", check_time.elapsed());
                 }
             }
             ServerBoundPacket::SetPlayerPositionAndRotation(pos_rot) => {
@@ -579,17 +801,37 @@ impl VanillaServerHandler {
                     player.rotation.pitch = pos_rot.pitch;
                 }
                 if moved_chunks {
-                    let player = self
-                        .player_list
-                        .get(&entity_id)
-                        .ok_or_else(|| ConnectionError::PlayerUnregisteredError)?;
-                    let set_center_chunk = SetCenterChunk {
-                        x: VarInt((player.position.x / 16.0).floor() as i32),
-                        z: VarInt((player.position.z / 16.0).floor() as i32),
-                    };
-
-                    println!("Sending set center chunk {:?}", set_center_chunk);
+                    let set_center_chunk;
+                    let chunk_x;
+                    let chunk_z;
+                    {
+                        let player = self
+                            .player_list
+                            .get(&entity_id)
+                            .ok_or_else(|| ConnectionError::PlayerUnregisteredError)?;
+                        chunk_x = (player.position.x / 16.0).floor() as i32;
+                        chunk_z = (player.position.z / 16.0).floor() as i32;
+                        set_center_chunk = SetCenterChunk {
+                            x: VarInt(chunk_x.clone()),
+                            z: VarInt(chunk_z.clone()),
+                        };
+                    }
                     connection.write_packet(set_center_chunk).await.unwrap();
+
+                    println!("Moved to chunk {} {}", chunk_x, chunk_z);
+
+                    let check_time = Instant::now();
+                    update_player_chunks(
+                        self.player_list.clone(),
+                        entity_id,
+                        connection.clone(),
+                        self.world.clone(),
+                        chunk_x,
+                        chunk_z,
+                    )
+                    .await?;
+
+                    // println!("Unload time: {:?}", check_time.elapsed());
                 }
             }
             ServerBoundPacket::ServerBoundKeepAlive(_) => {
@@ -633,8 +875,8 @@ impl Encryption {
             rsa_der::public_key_to_der(&pub_key.n().to_bytes_be(), &pub_key.e().to_bytes_be());
 
         Encryption {
-            pub_key: pub_key,
-            priv_key: priv_key,
+            pub_key,
+            priv_key,
             encoded_pub: pub_encoded_bytes,
         }
     }
@@ -667,7 +909,11 @@ impl ServerManager {
                     tokio::task::spawn(async move {
                         select! {
                             _ = cloned_token.cancelled() => (),
-                            _ = cloned_handler.on_connect(connection, cloned_encryption) => ()
+                            res = cloned_handler.on_connect(connection, cloned_encryption) => {
+                                if let Err(e) = res {
+                                    println!("{}", e);
+                                }
+                            }
                         }
                     });
                 }
@@ -720,4 +966,28 @@ impl ToString for DefaultMOTD {
             self.version_protocol
         )
     }
+}
+
+use lazy_static::lazy_static;
+
+lazy_static! {
+    static ref CHUNK_LOADER: vec::IntoIter<(i32, i32)> = {
+        let mut chunk_grid = Vec::new();
+
+        for x in -5..=5 {
+            for z in -5..=5 {
+                chunk_grid.push((x, z));
+            }
+        }
+
+        chunk_grid.sort_by(|a, b| {
+            let (ax, az) = *a;
+            let (bx, bz) = *b;
+            let a = (ax as i32).abs() + (az as i32).abs();
+            let b = (bx as i32).abs() + (bz as i32).abs();
+            a.cmp(&b)
+        });
+
+        chunk_grid.into_iter()
+    };
 }

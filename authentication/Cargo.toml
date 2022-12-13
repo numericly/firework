@@ -12,3 +12,5 @@ serde = {version = "1.0.144", features = ["derive"]}
 num-bigint = "0.4.3"
 sha1 = "0.10.4"
 thiserror = "1.0.37"
+protocol_derive = { path = "../protocol/protocol_derive" }
+protocol_core = { path = "../protocol/protocol_core" }

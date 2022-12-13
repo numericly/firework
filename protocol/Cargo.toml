@@ -16,9 +16,12 @@ modular-bitfield = "0.11.2"
 thiserror = "1.0.37"
 byteorder = "1.4.3"
 minecraft_data = { version = "*", path = "../minecraft_data" }
+protocol_derive = { version = "*", path = "./protocol_derive" }
+protocol_core = { version = "*", path = "./protocol_core" }
 authentication = { version = "*", path = "../authentication" }
 async-trait = "0.1.58"
 hematite-nbt = "0.5.2"
+rand = "0.8.5"
 
 [profile.dev]
 opt-level = 2

@@ -5,7 +5,7 @@ use minecraft_data::blocks::Block;
 use nbt::from_zlib_reader;
 use serde::Deserialize;
 use std::hash::Hash;
-use world::world::RegionChunk;
+use world::{RegionChunk, World};
 
 fn criterion_benchmark(c: &mut Criterion) {
     env::set_var("RUST_BACKTRACE", "1");
@@ -70,7 +70,7 @@ fn criterion_benchmark(c: &mut Criterion) {
         }
     }
 
-    let world = world::world::World::new("./world/region/");
+    let world = World::new("./world/region/");
 
     println!("Size of block {}", std::mem::size_of::<Block>());
 

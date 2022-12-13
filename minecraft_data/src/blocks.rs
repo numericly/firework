@@ -9916,58 +9916,34 @@ pub mod property_enums {
 	use std::str::FromStr;
 	
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Half1 {
-		top,
-		bottom,
-	}
-	impl FromStr for Half1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"top" => Ok(Half1::top),
-				"bottom" => Ok(Half1::bottom),
-				_ => Err(format!("Invalid Half1 value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Half1 {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::top,
-				Self::bottom,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum South {
-		up,
-		side,
+	pub enum Tilt {
 		none,
+		unstable,
+		partial,
+		full,
 	}
-	impl FromStr for South {
+	impl FromStr for Tilt {
 		type Err = String;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
 			match s {
-				"up" => Ok(South::up),
-				"side" => Ok(South::side),
-				"none" => Ok(South::none),
-				_ => Err(format!("Invalid South value: {}", s)),
+				"none" => Ok(Tilt::none),
+				"unstable" => Ok(Tilt::unstable),
+				"partial" => Ok(Tilt::partial),
+				"full" => Ok(Tilt::full),
+				_ => Err(format!("Invalid Tilt value: {}", s)),
 			}
 		}
 	}
-	impl crate::Values for South {
+	impl crate::Values for Tilt {
 		type ValueIterator = std::vec::IntoIter<Self>;
 
 		fn possible_values() -> Self::ValueIterator {
 			vec![
-				Self::up,
-				Self::side,
 				Self::none,
+				Self::unstable,
+				Self::partial,
+				Self::full,
 			].into_iter()
 		}
 	}
@@ -10000,130 +9976,28 @@ pub mod property_enums {
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Leaves {
-		none,
-		small,
-		large,
+	pub enum Axis1 {
+		x,
+		z,
 	}
-	impl FromStr for Leaves {
+	impl FromStr for Axis1 {
 		type Err = String;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
 			match s {
-				"none" => Ok(Leaves::none),
-				"small" => Ok(Leaves::small),
-				"large" => Ok(Leaves::large),
-				_ => Err(format!("Invalid Leaves value: {}", s)),
+				"x" => Ok(Axis1::x),
+				"z" => Ok(Axis1::z),
+				_ => Err(format!("Invalid Axis1 value: {}", s)),
 			}
 		}
 	}
-	impl crate::Values for Leaves {
+	impl crate::Values for Axis1 {
 		type ValueIterator = std::vec::IntoIter<Self>;
 
 		fn possible_values() -> Self::ValueIterator {
 			vec![
-				Self::none,
-				Self::small,
-				Self::large,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Instrument {
-		harp,
-		basedrum,
-		snare,
-		hat,
-		bass,
-		flute,
-		bell,
-		guitar,
-		chime,
-		xylophone,
-		iron_xylophone,
-		cow_bell,
-		didgeridoo,
-		bit,
-		banjo,
-		pling,
-	}
-	impl FromStr for Instrument {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"harp" => Ok(Instrument::harp),
-				"basedrum" => Ok(Instrument::basedrum),
-				"snare" => Ok(Instrument::snare),
-				"hat" => Ok(Instrument::hat),
-				"bass" => Ok(Instrument::bass),
-				"flute" => Ok(Instrument::flute),
-				"bell" => Ok(Instrument::bell),
-				"guitar" => Ok(Instrument::guitar),
-				"chime" => Ok(Instrument::chime),
-				"xylophone" => Ok(Instrument::xylophone),
-				"iron_xylophone" => Ok(Instrument::iron_xylophone),
-				"cow_bell" => Ok(Instrument::cow_bell),
-				"didgeridoo" => Ok(Instrument::didgeridoo),
-				"bit" => Ok(Instrument::bit),
-				"banjo" => Ok(Instrument::banjo),
-				"pling" => Ok(Instrument::pling),
-				_ => Err(format!("Invalid Instrument value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Instrument {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::harp,
-				Self::basedrum,
-				Self::snare,
-				Self::hat,
-				Self::bass,
-				Self::flute,
-				Self::bell,
-				Self::guitar,
-				Self::chime,
-				Self::xylophone,
-				Self::iron_xylophone,
-				Self::cow_bell,
-				Self::didgeridoo,
-				Self::bit,
-				Self::banjo,
-				Self::pling,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Type2 {
-		top,
-		bottom,
-		double,
-	}
-	impl FromStr for Type2 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"top" => Ok(Type2::top),
-				"bottom" => Ok(Type2::bottom),
-				"double" => Ok(Type2::double),
-				_ => Err(format!("Invalid Type2 value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Type2 {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::top,
-				Self::bottom,
-				Self::double,
+				Self::x,
+				Self::z,
 			].into_iter()
 		}
 	}
@@ -10154,123 +10028,6 @@ pub mod property_enums {
 				Self::up,
 				Self::side,
 				Self::none,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Axis1 {
-		x,
-		z,
-	}
-	impl FromStr for Axis1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"x" => Ok(Axis1::x),
-				"z" => Ok(Axis1::z),
-				_ => Err(format!("Invalid Axis1 value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Axis1 {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::x,
-				Self::z,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum North1 {
-		none,
-		low,
-		tall,
-	}
-	impl FromStr for North1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"none" => Ok(North1::none),
-				"low" => Ok(North1::low),
-				"tall" => Ok(North1::tall),
-				_ => Err(format!("Invalid North1 value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for North1 {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::none,
-				Self::low,
-				Self::tall,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Hinge {
-		left,
-		right,
-	}
-	impl FromStr for Hinge {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"left" => Ok(Hinge::left),
-				"right" => Ok(Hinge::right),
-				_ => Err(format!("Invalid Hinge value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Hinge {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::left,
-				Self::right,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Mode1 {
-		save,
-		load,
-		corner,
-		data,
-	}
-	impl FromStr for Mode1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"save" => Ok(Mode1::save),
-				"load" => Ok(Mode1::load),
-				"corner" => Ok(Mode1::corner),
-				"data" => Ok(Mode1::data),
-				_ => Err(format!("Invalid Mode1 value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Mode1 {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::save,
-				Self::load,
-				Self::corner,
-				Self::data,
 			].into_iter()
 		}
 	}
@@ -10312,66 +10069,6 @@ pub mod property_enums {
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Type {
-		normal,
-		sticky,
-	}
-	impl FromStr for Type {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"normal" => Ok(Type::normal),
-				"sticky" => Ok(Type::sticky),
-				_ => Err(format!("Invalid Type value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Type {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::normal,
-				Self::sticky,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Tilt {
-		none,
-		unstable,
-		partial,
-		full,
-	}
-	impl FromStr for Tilt {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"none" => Ok(Tilt::none),
-				"unstable" => Ok(Tilt::unstable),
-				"partial" => Ok(Tilt::partial),
-				"full" => Ok(Tilt::full),
-				_ => Err(format!("Invalid Tilt value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Tilt {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::none,
-				Self::unstable,
-				Self::partial,
-				Self::full,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 	pub enum Half {
 		upper,
 		lower,
@@ -10399,31 +10096,40 @@ pub mod property_enums {
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum West {
-		up,
-		side,
-		none,
+	pub enum Shape {
+		north_south,
+		east_west,
+		ascending_east,
+		ascending_west,
+		ascending_north,
+		ascending_south,
 	}
-	impl FromStr for West {
+	impl FromStr for Shape {
 		type Err = String;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
 			match s {
-				"up" => Ok(West::up),
-				"side" => Ok(West::side),
-				"none" => Ok(West::none),
-				_ => Err(format!("Invalid West value: {}", s)),
+				"north_south" => Ok(Shape::north_south),
+				"east_west" => Ok(Shape::east_west),
+				"ascending_east" => Ok(Shape::ascending_east),
+				"ascending_west" => Ok(Shape::ascending_west),
+				"ascending_north" => Ok(Shape::ascending_north),
+				"ascending_south" => Ok(Shape::ascending_south),
+				_ => Err(format!("Invalid Shape value: {}", s)),
 			}
 		}
 	}
-	impl crate::Values for West {
+	impl crate::Values for Shape {
 		type ValueIterator = std::vec::IntoIter<Self>;
 
 		fn possible_values() -> Self::ValueIterator {
 			vec![
-				Self::up,
-				Self::side,
-				Self::none,
+				Self::north_south,
+				Self::east_west,
+				Self::ascending_east,
+				Self::ascending_west,
+				Self::ascending_north,
+				Self::ascending_south,
 			].into_iter()
 		}
 	}
@@ -10462,154 +10168,58 @@ pub mod property_enums {
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Shape1 {
-		straight,
-		inner_left,
-		inner_right,
-		outer_left,
-		outer_right,
+	pub enum Type {
+		normal,
+		sticky,
 	}
-	impl FromStr for Shape1 {
+	impl FromStr for Type {
 		type Err = String;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
 			match s {
-				"straight" => Ok(Shape1::straight),
-				"inner_left" => Ok(Shape1::inner_left),
-				"inner_right" => Ok(Shape1::inner_right),
-				"outer_left" => Ok(Shape1::outer_left),
-				"outer_right" => Ok(Shape1::outer_right),
-				_ => Err(format!("Invalid Shape1 value: {}", s)),
+				"normal" => Ok(Type::normal),
+				"sticky" => Ok(Type::sticky),
+				_ => Err(format!("Invalid Type value: {}", s)),
 			}
 		}
 	}
-	impl crate::Values for Shape1 {
+	impl crate::Values for Type {
 		type ValueIterator = std::vec::IntoIter<Self>;
 
 		fn possible_values() -> Self::ValueIterator {
 			vec![
-				Self::straight,
-				Self::inner_left,
-				Self::inner_right,
-				Self::outer_left,
-				Self::outer_right,
+				Self::normal,
+				Self::sticky,
 			].into_iter()
 		}
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Facing {
-		north,
-		east,
-		south,
-		west,
-		up,
-		down,
+	pub enum SculkSensorPhase {
+		inactive,
+		active,
+		cooldown,
 	}
-	impl FromStr for Facing {
+	impl FromStr for SculkSensorPhase {
 		type Err = String;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
 			match s {
-				"north" => Ok(Facing::north),
-				"east" => Ok(Facing::east),
-				"south" => Ok(Facing::south),
-				"west" => Ok(Facing::west),
-				"up" => Ok(Facing::up),
-				"down" => Ok(Facing::down),
-				_ => Err(format!("Invalid Facing value: {}", s)),
+				"inactive" => Ok(SculkSensorPhase::inactive),
+				"active" => Ok(SculkSensorPhase::active),
+				"cooldown" => Ok(SculkSensorPhase::cooldown),
+				_ => Err(format!("Invalid SculkSensorPhase value: {}", s)),
 			}
 		}
 	}
-	impl crate::Values for Facing {
+	impl crate::Values for SculkSensorPhase {
 		type ValueIterator = std::vec::IntoIter<Self>;
 
 		fn possible_values() -> Self::ValueIterator {
 			vec![
-				Self::north,
-				Self::east,
-				Self::south,
-				Self::west,
-				Self::up,
-				Self::down,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Part {
-		head,
-		foot,
-	}
-	impl FromStr for Part {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"head" => Ok(Part::head),
-				"foot" => Ok(Part::foot),
-				_ => Err(format!("Invalid Part value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Part {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::head,
-				Self::foot,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Shape2 {
-		north_south,
-		east_west,
-		ascending_east,
-		ascending_west,
-		ascending_north,
-		ascending_south,
-		south_east,
-		south_west,
-		north_west,
-		north_east,
-	}
-	impl FromStr for Shape2 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"north_south" => Ok(Shape2::north_south),
-				"east_west" => Ok(Shape2::east_west),
-				"ascending_east" => Ok(Shape2::ascending_east),
-				"ascending_west" => Ok(Shape2::ascending_west),
-				"ascending_north" => Ok(Shape2::ascending_north),
-				"ascending_south" => Ok(Shape2::ascending_south),
-				"south_east" => Ok(Shape2::south_east),
-				"south_west" => Ok(Shape2::south_west),
-				"north_west" => Ok(Shape2::north_west),
-				"north_east" => Ok(Shape2::north_east),
-				_ => Err(format!("Invalid Shape2 value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Shape2 {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::north_south,
-				Self::east_west,
-				Self::ascending_east,
-				Self::ascending_west,
-				Self::ascending_north,
-				Self::ascending_south,
-				Self::south_east,
-				Self::south_west,
-				Self::north_west,
-				Self::north_east,
+				Self::inactive,
+				Self::active,
+				Self::cooldown,
 			].into_iter()
 		}
 	}
@@ -10681,6 +10291,123 @@ pub mod property_enums {
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum West1 {
+		none,
+		low,
+		tall,
+	}
+	impl FromStr for West1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"none" => Ok(West1::none),
+				"low" => Ok(West1::low),
+				"tall" => Ok(West1::tall),
+				_ => Err(format!("Invalid West1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for West1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::none,
+				Self::low,
+				Self::tall,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Type2 {
+		top,
+		bottom,
+		double,
+	}
+	impl FromStr for Type2 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"top" => Ok(Type2::top),
+				"bottom" => Ok(Type2::bottom),
+				"double" => Ok(Type2::double),
+				_ => Err(format!("Invalid Type2 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Type2 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::top,
+				Self::bottom,
+				Self::double,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Part {
+		head,
+		foot,
+	}
+	impl FromStr for Part {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"head" => Ok(Part::head),
+				"foot" => Ok(Part::foot),
+				_ => Err(format!("Invalid Part value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Part {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::head,
+				Self::foot,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum South {
+		up,
+		side,
+		none,
+	}
+	impl FromStr for South {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"up" => Ok(South::up),
+				"side" => Ok(South::side),
+				"none" => Ok(South::none),
+				_ => Err(format!("Invalid South value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for South {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::up,
+				Self::side,
+				Self::none,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 	pub enum Face {
 		floor,
 		wall,
@@ -10706,6 +10433,75 @@ pub mod property_enums {
 				Self::floor,
 				Self::wall,
 				Self::ceiling,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Leaves {
+		none,
+		small,
+		large,
+	}
+	impl FromStr for Leaves {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"none" => Ok(Leaves::none),
+				"small" => Ok(Leaves::small),
+				"large" => Ok(Leaves::large),
+				_ => Err(format!("Invalid Leaves value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Leaves {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::none,
+				Self::small,
+				Self::large,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Facing {
+		north,
+		east,
+		south,
+		west,
+		up,
+		down,
+	}
+	impl FromStr for Facing {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"north" => Ok(Facing::north),
+				"east" => Ok(Facing::east),
+				"south" => Ok(Facing::south),
+				"west" => Ok(Facing::west),
+				"up" => Ok(Facing::up),
+				"down" => Ok(Facing::down),
+				_ => Err(format!("Invalid Facing value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Facing {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::north,
+				Self::east,
+				Self::south,
+				Self::west,
+				Self::up,
+				Self::down,
 			].into_iter()
 		}
 	}
@@ -10738,154 +10534,37 @@ pub mod property_enums {
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Type1 {
-		single,
-		left,
-		right,
+	pub enum Shape1 {
+		straight,
+		inner_left,
+		inner_right,
+		outer_left,
+		outer_right,
 	}
-	impl FromStr for Type1 {
+	impl FromStr for Shape1 {
 		type Err = String;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
 			match s {
-				"single" => Ok(Type1::single),
-				"left" => Ok(Type1::left),
-				"right" => Ok(Type1::right),
-				_ => Err(format!("Invalid Type1 value: {}", s)),
+				"straight" => Ok(Shape1::straight),
+				"inner_left" => Ok(Shape1::inner_left),
+				"inner_right" => Ok(Shape1::inner_right),
+				"outer_left" => Ok(Shape1::outer_left),
+				"outer_right" => Ok(Shape1::outer_right),
+				_ => Err(format!("Invalid Shape1 value: {}", s)),
 			}
 		}
 	}
-	impl crate::Values for Type1 {
+	impl crate::Values for Shape1 {
 		type ValueIterator = std::vec::IntoIter<Self>;
 
 		fn possible_values() -> Self::ValueIterator {
 			vec![
-				Self::single,
-				Self::left,
-				Self::right,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Axis {
-		x,
-		y,
-		z,
-	}
-	impl FromStr for Axis {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"x" => Ok(Axis::x),
-				"y" => Ok(Axis::y),
-				"z" => Ok(Axis::z),
-				_ => Err(format!("Invalid Axis value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Axis {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::x,
-				Self::y,
-				Self::z,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Attachment {
-		floor,
-		ceiling,
-		single_wall,
-		double_wall,
-	}
-	impl FromStr for Attachment {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"floor" => Ok(Attachment::floor),
-				"ceiling" => Ok(Attachment::ceiling),
-				"single_wall" => Ok(Attachment::single_wall),
-				"double_wall" => Ok(Attachment::double_wall),
-				_ => Err(format!("Invalid Attachment value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Attachment {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::floor,
-				Self::ceiling,
-				Self::single_wall,
-				Self::double_wall,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum SculkSensorPhase {
-		inactive,
-		active,
-		cooldown,
-	}
-	impl FromStr for SculkSensorPhase {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"inactive" => Ok(SculkSensorPhase::inactive),
-				"active" => Ok(SculkSensorPhase::active),
-				"cooldown" => Ok(SculkSensorPhase::cooldown),
-				_ => Err(format!("Invalid SculkSensorPhase value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for SculkSensorPhase {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::inactive,
-				Self::active,
-				Self::cooldown,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum West1 {
-		none,
-		low,
-		tall,
-	}
-	impl FromStr for West1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"none" => Ok(West1::none),
-				"low" => Ok(West1::low),
-				"tall" => Ok(West1::tall),
-				_ => Err(format!("Invalid West1 value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for West1 {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::none,
-				Self::low,
-				Self::tall,
+				Self::straight,
+				Self::inner_left,
+				Self::inner_right,
+				Self::outer_left,
+				Self::outer_right,
 			].into_iter()
 		}
 	}
@@ -10978,40 +10657,91 @@ pub mod property_enums {
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Shape {
-		north_south,
-		east_west,
-		ascending_east,
-		ascending_west,
-		ascending_north,
-		ascending_south,
+	pub enum Hinge {
+		left,
+		right,
 	}
-	impl FromStr for Shape {
+	impl FromStr for Hinge {
 		type Err = String;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
 			match s {
-				"north_south" => Ok(Shape::north_south),
-				"east_west" => Ok(Shape::east_west),
-				"ascending_east" => Ok(Shape::ascending_east),
-				"ascending_west" => Ok(Shape::ascending_west),
-				"ascending_north" => Ok(Shape::ascending_north),
-				"ascending_south" => Ok(Shape::ascending_south),
-				_ => Err(format!("Invalid Shape value: {}", s)),
+				"left" => Ok(Hinge::left),
+				"right" => Ok(Hinge::right),
+				_ => Err(format!("Invalid Hinge value: {}", s)),
 			}
 		}
 	}
-	impl crate::Values for Shape {
+	impl crate::Values for Hinge {
 		type ValueIterator = std::vec::IntoIter<Self>;
 
 		fn possible_values() -> Self::ValueIterator {
 			vec![
-				Self::north_south,
-				Self::east_west,
-				Self::ascending_east,
-				Self::ascending_west,
-				Self::ascending_north,
-				Self::ascending_south,
+				Self::left,
+				Self::right,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Attachment {
+		floor,
+		ceiling,
+		single_wall,
+		double_wall,
+	}
+	impl FromStr for Attachment {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"floor" => Ok(Attachment::floor),
+				"ceiling" => Ok(Attachment::ceiling),
+				"single_wall" => Ok(Attachment::single_wall),
+				"double_wall" => Ok(Attachment::double_wall),
+				_ => Err(format!("Invalid Attachment value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Attachment {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::floor,
+				Self::ceiling,
+				Self::single_wall,
+				Self::double_wall,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Axis {
+		x,
+		y,
+		z,
+	}
+	impl FromStr for Axis {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"x" => Ok(Axis::x),
+				"y" => Ok(Axis::y),
+				"z" => Ok(Axis::z),
+				_ => Err(format!("Invalid Axis value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Axis {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::x,
+				Self::y,
+				Self::z,
 			].into_iter()
 		}
 	}
@@ -11042,6 +10772,276 @@ pub mod property_enums {
 				Self::none,
 				Self::low,
 				Self::tall,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Type1 {
+		single,
+		left,
+		right,
+	}
+	impl FromStr for Type1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"single" => Ok(Type1::single),
+				"left" => Ok(Type1::left),
+				"right" => Ok(Type1::right),
+				_ => Err(format!("Invalid Type1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Type1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::single,
+				Self::left,
+				Self::right,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Instrument {
+		harp,
+		basedrum,
+		snare,
+		hat,
+		bass,
+		flute,
+		bell,
+		guitar,
+		chime,
+		xylophone,
+		iron_xylophone,
+		cow_bell,
+		didgeridoo,
+		bit,
+		banjo,
+		pling,
+	}
+	impl FromStr for Instrument {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"harp" => Ok(Instrument::harp),
+				"basedrum" => Ok(Instrument::basedrum),
+				"snare" => Ok(Instrument::snare),
+				"hat" => Ok(Instrument::hat),
+				"bass" => Ok(Instrument::bass),
+				"flute" => Ok(Instrument::flute),
+				"bell" => Ok(Instrument::bell),
+				"guitar" => Ok(Instrument::guitar),
+				"chime" => Ok(Instrument::chime),
+				"xylophone" => Ok(Instrument::xylophone),
+				"iron_xylophone" => Ok(Instrument::iron_xylophone),
+				"cow_bell" => Ok(Instrument::cow_bell),
+				"didgeridoo" => Ok(Instrument::didgeridoo),
+				"bit" => Ok(Instrument::bit),
+				"banjo" => Ok(Instrument::banjo),
+				"pling" => Ok(Instrument::pling),
+				_ => Err(format!("Invalid Instrument value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Instrument {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::harp,
+				Self::basedrum,
+				Self::snare,
+				Self::hat,
+				Self::bass,
+				Self::flute,
+				Self::bell,
+				Self::guitar,
+				Self::chime,
+				Self::xylophone,
+				Self::iron_xylophone,
+				Self::cow_bell,
+				Self::didgeridoo,
+				Self::bit,
+				Self::banjo,
+				Self::pling,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Shape2 {
+		north_south,
+		east_west,
+		ascending_east,
+		ascending_west,
+		ascending_north,
+		ascending_south,
+		south_east,
+		south_west,
+		north_west,
+		north_east,
+	}
+	impl FromStr for Shape2 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"north_south" => Ok(Shape2::north_south),
+				"east_west" => Ok(Shape2::east_west),
+				"ascending_east" => Ok(Shape2::ascending_east),
+				"ascending_west" => Ok(Shape2::ascending_west),
+				"ascending_north" => Ok(Shape2::ascending_north),
+				"ascending_south" => Ok(Shape2::ascending_south),
+				"south_east" => Ok(Shape2::south_east),
+				"south_west" => Ok(Shape2::south_west),
+				"north_west" => Ok(Shape2::north_west),
+				"north_east" => Ok(Shape2::north_east),
+				_ => Err(format!("Invalid Shape2 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Shape2 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::north_south,
+				Self::east_west,
+				Self::ascending_east,
+				Self::ascending_west,
+				Self::ascending_north,
+				Self::ascending_south,
+				Self::south_east,
+				Self::south_west,
+				Self::north_west,
+				Self::north_east,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum North1 {
+		none,
+		low,
+		tall,
+	}
+	impl FromStr for North1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"none" => Ok(North1::none),
+				"low" => Ok(North1::low),
+				"tall" => Ok(North1::tall),
+				_ => Err(format!("Invalid North1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for North1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::none,
+				Self::low,
+				Self::tall,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum West {
+		up,
+		side,
+		none,
+	}
+	impl FromStr for West {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"up" => Ok(West::up),
+				"side" => Ok(West::side),
+				"none" => Ok(West::none),
+				_ => Err(format!("Invalid West value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for West {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::up,
+				Self::side,
+				Self::none,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Half1 {
+		top,
+		bottom,
+	}
+	impl FromStr for Half1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"top" => Ok(Half1::top),
+				"bottom" => Ok(Half1::bottom),
+				_ => Err(format!("Invalid Half1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Half1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::top,
+				Self::bottom,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Mode1 {
+		save,
+		load,
+		corner,
+		data,
+	}
+	impl FromStr for Mode1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"save" => Ok(Mode1::save),
+				"load" => Ok(Mode1::load),
+				"corner" => Ok(Mode1::corner),
+				"data" => Ok(Mode1::data),
+				_ => Err(format!("Invalid Mode1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Mode1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::save,
+				Self::load,
+				Self::corner,
+				Self::data,
 			].into_iter()
 		}
 	}

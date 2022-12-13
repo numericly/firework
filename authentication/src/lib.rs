@@ -1,4 +1,8 @@
+use std::io::Write;
+
 use num_bigint::BigInt;
+use protocol_core::SerializeField;
+use protocol_derive::{DeserializeField};
 use serde::{Deserialize, Serialize};
 use sha1::{Digest, Sha1};
 use thiserror::Error;
@@ -10,11 +14,19 @@ pub struct Profile {
     pub properties: Vec<ProfileProperty>,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
-pub struct ProfileProperty {
+#[derive(Debug, Serialize, Deserialize, PartialEq, DeserializeField, Clone)]
+pub struct ProfileProperty {    
     pub name: String,
     pub value: String,
     pub signature: Option<String>,
+}
+
+impl SerializeField for ProfileProperty {
+    fn serialize<W: Write>(&self, mut writer: W) {
+        SerializeField::serialize(&self.name, &mut writer);
+        SerializeField::serialize(&self.value, &mut writer);
+        SerializeField::serialize(&self.signature, &mut writer);
+    }
 }
 
 #[derive(Debug, Error)]

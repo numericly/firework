@@ -6,6 +6,7 @@
     "BUILDABLE",
     "byteorder",
     "Composter",
+    "constituion",
     "consts",
     "cooldown",
     "dashmap",
@@ -20,6 +21,7 @@
     "Glowstone",
     "hasher",
     "heightmaps",
+    "idents",
     "keystream",
     "mapref",
     "memmap",
@@ -51,6 +53,7 @@
     "snbt",
     "stacksize",
     "structureblock",
+    "Summonable",
     "thiserror",
     "varint"
   ],
@@ -63,5 +66,7 @@
       "path": "/bin/zsh", // your path here
       "args": ["-l"]
     }
-  }
+  },
+  "rust-analyzer.trace.server": "verbose",
+  "rust-analyzer.server.extraEnv": null
 }

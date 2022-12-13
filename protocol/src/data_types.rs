@@ -1,66 +1,8 @@
+use authentication::ProfileProperty;
 use modular_bitfield::bitfield;
-
-use super::server_bound::DeserializeField;
-
-#[derive(Debug, PartialEq)]
-pub struct Position {
-    pub x: i32,
-    pub y: i16,
-    pub z: i32,
-}
-
-#[derive(Debug, PartialEq)]
-#[repr(transparent)]
-pub struct UnsizedVec<T: DeserializeField>(pub Vec<T>);
-
-#[derive(Debug, PartialEq)]
-#[repr(transparent)]
-pub struct VarInt(pub i32);
-
-impl From<i32> for VarInt {
-    fn from(num: i32) -> VarInt {
-        VarInt(num)
-    }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct SignatureData {
-    pub timestamp: i64,
-    pub public_key: Vec<u8>,
-    pub signature: Vec<u8>,
-}
-
-#[derive(Debug, PartialEq)]
-pub enum VerifyTokenOrSignature {
-    VerifyToken {
-        verify_token: Vec<u8>,
-    },
-    MessageSignature {
-        salt: i64,
-        message_signature: Vec<u8>,
-    },
-}
-
-#[derive(Debug, PartialEq)]
-pub enum PlayerActionStatus {
-    StartDigging,
-    CancelDigging,
-    FinishDigging,
-    DropItemStack,
-    DropItem,
-    ShootArrowOrFinishEating,
-    SwapItemInHand,
-}
-
-#[derive(Debug, PartialEq)]
-pub enum BlockFace {
-    Bottom,
-    Top,
-    North,
-    South,
-    West,
-    East,
-}
+use protocol_core::{Position, SerializeField, VarInt};
+use protocol_derive::{DeserializeField, SerializeField};
+use std::io::Write;
 
 #[derive(Debug, PartialEq)]
 pub struct DeathLocation {
@@ -100,25 +42,74 @@ pub struct DisplaySkinParts {
 }
 
 #[derive(Debug, PartialEq)]
+pub struct Recipe {}
+
+#[derive(Debug, PartialEq)]
+pub struct SignatureData {
+    pub timestamp: i64,
+    pub public_key: Vec<u8>,
+    pub signature: Vec<u8>,
+}
+
+#[derive(Debug, PartialEq, DeserializeField)]
+#[protocol(typ = "u8")]
+pub enum VerifyTokenOrSignature {
+    MessageSignature {
+        salt: i64,
+        message_signature: Vec<u8>,
+    },
+    VerifyToken {
+        verify_token: Vec<u8>,
+    },
+}
+
+#[derive(Debug, PartialEq, DeserializeField)]
+#[protocol(typ = "protocol_core::VarInt")]
+pub enum PlayerActionStatus {
+    StartDigging,
+    CancelDigging,
+    FinishDigging,
+    DropItemStack,
+    DropItem,
+    ShootArrowOrFinishEating,
+    SwapItemInHand,
+}
+
+#[derive(Debug, PartialEq, DeserializeField)]
+#[protocol(typ = "protocol_core::VarInt")]
+pub enum BlockFace {
+    Bottom,
+    Top,
+    North,
+    South,
+    West,
+    East,
+}
+
+#[derive(Debug, PartialEq, DeserializeField)]
+#[protocol(typ = "protocol_core::VarInt")]
 pub enum ChatMode {
     Enabled,
     CommandsOnly,
     Hidden,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, DeserializeField)]
+#[protocol(typ = "protocol_core::VarInt")]
 pub enum MainHand {
     Left,
     Right,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, DeserializeField)]
+#[protocol(typ = "protocol_core::VarInt")]
 pub enum Arm {
     Main,
     Off,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, DeserializeField)]
+#[protocol(typ = "protocol_core::VarInt")]
 pub enum PlayerCommandAction {
     StartSneaking,
     StopSneaking,
@@ -131,7 +122,8 @@ pub enum PlayerCommandAction {
     StartFlyingWithElytra,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, DeserializeField)]
+#[protocol(typ = "protocol_core::VarInt")]
 pub enum RecipeBookType {
     Crafting,
     Furnace,
@@ -140,47 +132,278 @@ pub enum RecipeBookType {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Recipe {}
-
-#[derive(Debug, PartialEq)]
 pub struct BlockEntity {}
 
-#[derive(Debug, PartialEq)]
-pub struct TestBytes(pub Vec<u8>);
+#[derive(Debug, PartialEq, SerializeField)]
+#[protocol(typ = "protocol_core::VarInt")]
+pub enum PlayerInfoAction {
+    AddPlayer(Vec<PlayerInfoAddPlayer>),
+}
+
+#[derive(Debug, PartialEq, SerializeField)]
+pub struct PlayerInfoAddPlayer {
+    pub uuid: u128,
+    pub name: String,
+    pub properties: Vec<ProfileProperty>,
+    pub gamemode: VarInt,
+    pub ping: VarInt,
+    pub display_name: Option<String>,
+    pub has_signature: bool,
+}
+
+impl SerializeField for DeathLocation {
+    fn serialize<W: Write>(&self, mut writer: W) {
+        self.dimension_name.serialize(&mut writer);
+        self.position.serialize(writer);
+    }
+}
+
+impl SerializeField for PlayerAbilityFlags {
+    fn serialize<W: Write>(&self, writer: W) {
+        self.into_bytes().serialize(writer);
+    }
+}
+
+impl SerializeField for PlayerPositionFlags {
+    fn serialize<W: Write>(&self, writer: W) {
+        self.into_bytes().serialize(writer);
+    }
+}
+
+impl SerializeField for Recipe {
+    fn serialize<W: Write>(&self, _writer: W) {
+        todo!()
+    }
+}
+
+use std::{cell::Cell, fmt::Debug};
 
 #[derive(Debug, PartialEq)]
+pub struct CommandNode {
+    pub node_type: NodeType,
+    pub redirect: Option<Box<CommandNode>>,
+    pub is_executable: bool,
+    pub children: Vec<CommandNode>,
 
-pub struct BitSet(
-    pub Vec<u64>, // data
-    pub usize,    // number of bits
-);
-impl BitSet {
-    ///Create a new BitSet
-    pub fn new() -> BitSet {
-        BitSet(Vec::new(), 0)
-    }
-    ///Set the bit at the given index
-    pub fn set(&mut self, index: usize, value: bool) {
-        let byte_index = index / 64;
-        let bit_index = index % 64;
-        if self.0.len() <= byte_index {
-            self.0.resize(byte_index + 1, 0);
+    node_index: Cell<Option<i32>>,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum NodeType {
+    Root,
+    Literal {
+        name: String,
+    },
+    Argument {
+        name: String,
+        parser: Parser,
+        suggestions_type: Option<SuggestionsType>,
+    },
+}
+
+#[derive(Debug, PartialEq, SerializeField)]
+#[protocol(typ = "protocol_core::VarInt")]
+pub enum Parser {
+    Bool,
+    Float(FloatProps),
+}
+
+#[derive(Debug, PartialEq)]
+pub struct FloatProps {
+    pub min: Option<f32>,
+    pub max: Option<f32>,
+}
+
+impl SerializeField for FloatProps {
+    fn serialize<W: std::io::Write>(&self, mut writer: W) {
+        let flags = {
+            let mut flags = 0x00u8;
+            if self.min.is_some() {
+                flags |= 0x01;
+            }
+            if self.max.is_some() {
+                flags |= 0x02;
+            }
+            flags
+        };
+        flags.serialize(&mut writer);
+        if let Some(min) = self.min {
+            min.serialize(&mut writer);
         }
-        self.0[byte_index] |= (value as u64) << bit_index;
-    }
-    ///Get the bit at the given index
-    pub fn get(&self, index: usize) -> bool {
-        let byte_index = index / 64;
-        let bit_index = index % 64;
-        if self.0.len() <= byte_index {
-            false
-        } else {
-            self.0[byte_index] & (1 << bit_index) != 0
+        if let Some(max) = self.max {
+            max.serialize(&mut writer);
         }
     }
-    ///Push a bit to the end of the BitSet
-    pub fn push(&mut self, value: bool) {
-        self.set(self.1, value);
-        self.1 += 1;
+}
+
+#[derive(Debug, PartialEq)]
+pub enum SuggestionsType {
+    AskServer,
+    AllRecipes,
+    AvailableSounds,
+    AvailableBiomes,
+    SummonableEntities,
+}
+
+impl SerializeField for CommandNode {
+    fn serialize<W: std::io::Write>(&self, mut writer: W) {
+        let mut start_index = 0;
+        self.assign_index(&mut start_index);
+
+        VarInt(start_index).serialize(&mut writer);
+
+        self.write(&mut writer);
+
+        VarInt(0).serialize(&mut writer);
+    }
+}
+
+impl CommandNode {
+    pub fn new(
+        node_type: NodeType,
+        redirect: Option<Box<CommandNode>>,
+        is_executable: bool,
+        children: Vec<CommandNode>,
+    ) -> Self {
+        CommandNode {
+            node_type,
+            redirect,
+            is_executable,
+            children,
+            node_index: Cell::new(None),
+        }
+    }
+    fn write<W: std::io::Write>(&self, mut writer: &mut W) {
+        let flags = {
+            let mut flags = 0x00u8;
+
+            match self.node_type {
+                NodeType::Root => flags |= 0x00,
+                NodeType::Literal { .. } => flags |= 0x01,
+                NodeType::Argument {
+                    ref suggestions_type,
+                    ..
+                } => {
+                    flags |= 0x02;
+                    if let Some(_) = suggestions_type {
+                        flags |= 0x10;
+                    }
+                }
+            }
+
+            if self.is_executable {
+                flags |= 0x04;
+            }
+
+            if let Some(_) = self.redirect {
+                flags |= 0x08;
+            }
+
+            flags
+        };
+
+        flags.serialize(&mut writer);
+
+        VarInt(self.children.len() as i32).serialize(&mut writer);
+        for child in &self.children {
+            VarInt(child.node_index.get().expect("Node indexes not calculated"))
+                .serialize(&mut writer);
+        }
+
+        if let Some(redirect) = &self.redirect {
+            VarInt(
+                redirect
+                    .node_index
+                    .get()
+                    .expect("Node indexes not calculated"),
+            )
+            .serialize(&mut writer);
+        }
+
+        match &self.node_type {
+            NodeType::Root => (),
+            NodeType::Literal { name } => {
+                name.serialize(&mut writer);
+            }
+            NodeType::Argument {
+                name,
+                parser,
+                suggestions_type,
+            } => {
+                name.serialize(&mut writer);
+                parser.serialize(&mut writer);
+                if let Some(suggestions_type) = suggestions_type {
+                    suggestions_type.serialize(&mut writer);
+                }
+            }
+        }
+
+        for child in &self.children {
+            child.write(writer);
+        }
+    }
+    fn assign_index(&self, current_index: &mut i32) {
+        self.node_index.set(Some(*current_index));
+        *current_index += 1;
+
+        for child in &self.children {
+            child.assign_index(current_index);
+        }
+    }
+}
+
+impl SerializeField for SuggestionsType {
+    fn serialize<W: std::io::Write>(&self, mut writer: W) {
+        match self {
+            SuggestionsType::AskServer => {
+                "minecraft:ask_server".to_string().serialize(&mut writer);
+            }
+            SuggestionsType::AllRecipes => {
+                "minecraft:all_recipes".to_string().serialize(&mut writer);
+            }
+            SuggestionsType::AvailableSounds => {
+                "minecraft:available_sounds"
+                    .to_string()
+                    .serialize(&mut writer);
+            }
+            SuggestionsType::AvailableBiomes => {
+                "minecraft:available_biomes"
+                    .to_string()
+                    .serialize(&mut writer);
+            }
+            SuggestionsType::SummonableEntities => {
+                "minecraft:summonable_entities"
+                    .to_string()
+                    .serialize(&mut writer);
+            }
+        }
+    }
+}
+
+mod test {
+    #[allow(unused_imports)]
+    use super::*;
+
+    #[test]
+    fn test() {
+        let node = CommandNode::new(
+            NodeType::Root,
+            None,
+            false,
+            vec![CommandNode::new(
+                NodeType::Literal {
+                    name: "test".to_string(),
+                },
+                None,
+                false,
+                vec![],
+            )],
+        );
+        let mut buffer = Vec::new();
+
+        node.serialize(&mut buffer);
+
+        println!("{:?}", buffer);
+        panic!();
     }
 }

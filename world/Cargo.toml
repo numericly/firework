@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 quartz_nbt = "0.2.6"
 protocol = {path = "../protocol", version = "*"}
+protocol_core = {path = "../protocol/protocol_core", version = "*"}
 serde = { version = "1.0.130", features = ["derive"] }
 serde_json = "1.0.70"
 server_state = {path = "../server_state", version = "*"}

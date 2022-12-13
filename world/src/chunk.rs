@@ -3,7 +3,8 @@ use minecraft_data::{
     Palette, biomes::Biome,
 };
 use nbt::{from_zlib_reader, Blob};
-use protocol::{client_bound::{SerializeField, ChunkUpdateAndLightUpdate}, data_types::{VarInt, BitSet}};
+use protocol::{client_bound::{ChunkUpdateAndLightUpdate}};
+use protocol_core::{BitSet, SerializeField, VarInt};
 use serde::Deserialize;
 use std::{fmt::Debug, hash::Hash, cmp};
 

@@ -58,6 +58,8 @@ name = "authentication"
 version = "0.1.0"
 dependencies = [
  "num-bigint",
+ "protocol_core",
+ "protocol_derive",
  "reqwest",
  "serde",
  "serde_json",
@@ -367,6 +369,41 @@ dependencies = [
 ]
 
 [[package]]
+name = "darling"
+version = "0.14.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b0dd3cd20dc6b5a876612a6e5accfe7f3dd883db6d07acfbf14c128f61550dfa"
+dependencies = [
+ "darling_core",
+ "darling_macro",
+]
+
+[[package]]
+name = "darling_core"
+version = "0.14.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a784d2ccaf7c98501746bf0be29b2022ba41fd62a2e622af997a03e9f972859f"
+dependencies = [
+ "fnv",
+ "ident_case",
+ "proc-macro2",
+ "quote",
+ "strsim",
+ "syn",
+]
+
+[[package]]
+name = "darling_macro"
+version = "0.14.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7618812407e9402654622dd402b0a89dff9ba93badd6540781526117b92aab7e"
+dependencies = [
+ "darling_core",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "dashmap"
 version = "5.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -446,12 +483,12 @@ dependencies = [
 
 [[package]]
 name = "flate2"
-version = "1.0.24"
+version = "1.0.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f82b0f4c27ad9f8bfd1f3208d882da2b09c301bc1c828fd3a00d0216d2fbbff6"
+checksum = "a8a2db397cb1c8772f31494cb8917e48cd1e64f0fa7efac59fbd741a0a8ce841"
 dependencies = [
  "crc32fast",
- "miniz_oxide 0.5.4",
+ "miniz_oxide",
 ]
 
 [[package]]
@@ -719,6 +756,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "ident_case"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
+
+[[package]]
 name = "idna"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -868,11 +911,13 @@ dependencies = [
  "dashmap",
  "futures",
  "hematite-nbt",
+ "lazy_static",
  "minecraft_data",
- "miniz_oxide 0.6.2",
+ "miniz_oxide",
  "modular-bitfield",
  "num-bigint",
  "protocol",
+ "protocol_core",
  "quartz_nbt",
  "rand",
  "reqwest",
@@ -899,15 +944,6 @@ dependencies = [
  "lazy_static",
  "serde",
  "serde_json",
-]
-
-[[package]]
-name = "miniz_oxide"
-version = "0.5.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "96590ba8f175222643a85693f33d26e9c8a015f599c216509b1a6894af675d34"
-dependencies = [
- "adler",
 ]
 
 [[package]]
@@ -1244,11 +1280,36 @@ dependencies = [
  "cfb8",
  "hematite-nbt",
  "minecraft_data",
- "miniz_oxide 0.6.2",
+ "miniz_oxide",
  "modular-bitfield",
+ "protocol_core",
+ "protocol_derive",
  "quartz_nbt",
+ "rand",
  "thiserror",
  "tokio",
+]
+
+[[package]]
+name = "protocol_core"
+version = "0.1.0"
+dependencies = [
+ "byteorder",
+ "hematite-nbt",
+ "minecraft_data",
+ "modular-bitfield",
+ "thiserror",
+]
+
+[[package]]
+name = "protocol_derive"
+version = "0.1.0"
+dependencies = [
+ "darling",
+ "proc-macro2",
+ "protocol_core",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -1624,6 +1685,12 @@ name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
+
+[[package]]
+name = "strsim"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "73473c0e59e6d5812c5dfe2a064a6444949f089e20eec9a2e5506596494e4623"
 
 [[package]]
 name = "subtle"
@@ -2084,6 +2151,7 @@ dependencies = [
  "hematite-nbt",
  "minecraft_data",
  "protocol",
+ "protocol_core",
  "quartz_nbt",
  "rand",
  "serde",
