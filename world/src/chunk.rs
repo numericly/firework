@@ -274,7 +274,7 @@ impl Chunk {
                 1 => Some((block_light[block_index as usize / 2] >> 4) as u8),
                 _ => unreachable!(),
             },
-            None => {println!("block light wasn't real"); None},
+            None => None,
         }
     }
     pub fn get_sky_light(&self, x: i32, y: i32, z: i32) -> Option<u8> {

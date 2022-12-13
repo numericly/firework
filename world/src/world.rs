@@ -8,6 +8,7 @@ use std::fmt::Debug;
 use std::fs::File;
 use std::hash::Hash;
 use std::io::Read;
+use std::time::Duration;
 use crate::chunk::Chunk;
 use std::sync::{Arc, RwLock, Mutex};
 use queues::{Queue, IsQueue};
@@ -118,8 +119,10 @@ impl World {
         let start_time = std::time::Instant::now();
         self.get_chunk_from_pos(x, z).await.unwrap().unwrap().write().unwrap().set_block_light(x, y, z, value);
         self.block_lighting_increases.add(LightUpdate {x, y, z, value}).unwrap();
+        println!("block light increase started in {:?}", start_time.elapsed());
+        println!("asdfasdfasdf print test in {:?}", start_time.elapsed());
         self.propagate_block_light().await;
-        println!("block light increase finished in {}ms", start_time.elapsed().as_millis());
+        println!("block light increase finished in {:?}", start_time.elapsed());
     }
 
     pub async fn decrease_block_light(&mut self, x: i32, y: i32, z: i32, value: u8) {
@@ -128,15 +131,14 @@ impl World {
     }
 
     pub async fn propagate_block_light(&mut self) {
-        println!("propagate start");
-        let mut propagations: u32 = 0;
+        let mut tally = Duration::new(0, 0);
+        let start = std::time::Instant::now();
         while !(self.block_lighting_decreases.size() == 0) {
             let light_decrease = self.block_lighting_decreases.remove().unwrap();
-            propagations+=1;
             todo!();
         }
         while !(self.block_lighting_increases.size() == 0) {
-            propagations+=1;
+            let mut chunk_map: HashMap<(i32, i32), Arc<RwLock<Chunk>>> = HashMap::new();
             let light_increase = self.block_lighting_increases.remove().unwrap();
             for direction in DIRECTIONS {
                 let (x, y, z) = direction;
@@ -145,29 +147,39 @@ impl World {
                     light_increase.y + y,
                     light_increase.z + z,
                 );
-                let chunk = self.get_chunk_from_pos(x, z).await.unwrap();
-                let Some(chunk) = chunk else { println!("chunk wasn't real"); continue; };
-                let chunk_read = chunk.read().unwrap();
-                let block = chunk_read.get_block(x, y, z);
-                let Some(block) = block else { println!("block wasn't real"); continue; };
-                let light = chunk_read.get_block_light(x, y, z);
+                let start = std::time::Instant::now();
+                let chunk = match chunk_map.get(&(x >> 4, z >> 4)) {
+                    Some(chunk) => {println!("it works????");chunk.clone()},
+                    None => {
+                        let chunk = match self.get_chunk_from_pos(x, z).await {
+                            Ok(Some(chunk)) => chunk,
+                            _ => continue,
+                        };
+                        chunk_map.insert((x >> 4, z >> 4), chunk.clone());
+                        chunk
+                    }
+                };
+                tally += start.elapsed();
+                let mut chunk_lock = chunk.write().unwrap();
+                let block = chunk_lock.get_block(x, y, z);
+                let Some(block) = block else { continue; };
+                let light = chunk_lock.get_block_light(x, y, z);
                 let light = match light {
                     Some(light) => light,
                     None => 0,
                 };
                 if light != 1 && light < light_increase.value - 1 && block.get_transparency() {
-                    drop(chunk_read);
-                    let mut chunk_write = chunk.write().unwrap();
-                    chunk_write.set_block_light(x, y, z, light_increase.value - 1);                    self.block_lighting_increases.add(LightUpdate {
+                    chunk_lock.set_block_light(x, y, z, light_increase.value - 1);
+                    self.block_lighting_increases.add(LightUpdate {
                         x,
                         y,
                         z,
                         value: light_increase.value - 1,
                     }).unwrap();
-                }    
+                }
             }
         }
-        println!("propagate end with count {}", propagations);
+        println!("block light propagation finished in {:?} with tally {:?}", start.elapsed(), tally);
     }
 }
 

@@ -159,6 +159,9 @@ impl VanillaServerHandler {
             player_list: DashMap::new(),
         };
         tokio::task::spawn(async move {
+            test.world.increase_block_light(20, 120, 19, 15).await;
+            test.world.increase_block_light(20, 256, 19, 15).await;
+            test.world.increase_block_light(20, 73, 19, 15).await;
             test.world.increase_block_light(20, 73, 19, 15).await;
         });
         VanillaServerHandler {
