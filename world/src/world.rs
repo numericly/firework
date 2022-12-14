@@ -119,10 +119,9 @@ impl World {
         let start_time = std::time::Instant::now();
         self.get_chunk_from_pos(x, z).await.unwrap().unwrap().write().unwrap().set_block_light(x, y, z, value);
         self.block_lighting_increases.add(LightUpdate {x, y, z, value}).unwrap();
-        println!("block light increase started in {:?}", start_time.elapsed());
-        println!("asdfasdfasdf print test in {:?}", start_time.elapsed());
         self.propagate_block_light().await;
-        println!("block light increase finished in {:?}", start_time.elapsed());
+        let end = start_time.elapsed();
+        println!("block light increase finished in {:?}", end);
     }
 
     pub async fn decrease_block_light(&mut self, x: i32, y: i32, z: i32, value: u8) {
@@ -131,26 +130,34 @@ impl World {
     }
 
     pub async fn propagate_block_light(&mut self) {
-        let mut tally = Duration::new(0, 0);
-        let start = std::time::Instant::now();
+        // let mut tally = Duration::new(0, 0);
+        // let mut tally2 = Duration::new(0, 0);
+        // let mut tally3 = Duration::new(0, 0);
+        // let mut tally4 = Duration::new(0, 0);
+        // let start = std::time::Instant::now();
+        let mut chunk_map: HashMap<(i32, i32), Arc<RwLock<Chunk>>> = HashMap::new();
         while !(self.block_lighting_decreases.size() == 0) {
             let light_decrease = self.block_lighting_decreases.remove().unwrap();
             todo!();
         }
         while !(self.block_lighting_increases.size() == 0) {
-            let mut chunk_map: HashMap<(i32, i32), Arc<RwLock<Chunk>>> = HashMap::new();
             let light_increase = self.block_lighting_increases.remove().unwrap();
             for direction in DIRECTIONS {
+                // let start = std::time::Instant::now();
                 let (x, y, z) = direction;
                 let (x, y, z) = (
                     light_increase.x + x,
                     light_increase.y + y,
                     light_increase.z + z,
                 );
-                let start = std::time::Instant::now();
+                // tally += start.elapsed();
+                // let start = std::time::Instant::now();
+                // let mut geewhiz = true;
+                // println!("coords {} {} turned into {} {}", x, z, x >> 4, z >> 4);
                 let chunk = match chunk_map.get(&(x >> 4, z >> 4)) {
-                    Some(chunk) => {println!("it works????");chunk.clone()},
+                    Some(chunk) => chunk.clone(),
                     None => {
+                        // geewhiz = false;
                         let chunk = match self.get_chunk_from_pos(x, z).await {
                             Ok(Some(chunk)) => chunk,
                             _ => continue,
@@ -159,27 +166,33 @@ impl World {
                         chunk
                     }
                 };
-                tally += start.elapsed();
+                // tally2 += start.elapsed();
+                // println!("Chunk cache: {} at coords {} {} {}", geewhiz, x, y, z);
+                // let start = std::time::Instant::now();
                 let mut chunk_lock = chunk.write().unwrap();
-                let block = chunk_lock.get_block(x, y, z);
-                let Some(block) = block else { continue; };
                 let light = chunk_lock.get_block_light(x, y, z);
                 let light = match light {
                     Some(light) => light,
                     None => 0,
                 };
-                if light != 1 && light < light_increase.value - 1 && block.get_transparency() {
-                    chunk_lock.set_block_light(x, y, z, light_increase.value - 1);
-                    self.block_lighting_increases.add(LightUpdate {
-                        x,
-                        y,
-                        z,
-                        value: light_increase.value - 1,
-                    }).unwrap();
-                }
+                // tally3 += start.elapsed();
+                // let start = std::time::Instant::now();
+                if light == 1 || light >= light_increase.value - 1 { continue; }
+                let block = chunk_lock.get_block(x, y, z);
+                let Some(block) = block else { continue; };
+                if !block.get_transparency() { continue; }
+
+                chunk_lock.set_block_light(x, y, z, light_increase.value - 1);
+                self.block_lighting_increases.add(LightUpdate {
+                    x,
+                    y,
+                    z,
+                    value: light_increase.value - 1,
+                }).unwrap();
+                // tally4 += start.elapsed();
             }
         }
-        println!("block light propagation finished in {:?} with tally {:?}", start.elapsed(), tally);
+        // println!("block light propagation finished in {:?} with tallies {:?} {:?} {:?} {:?}", start.elapsed(), tally, tally2, tally3, tally4);
     }
 }
 
