@@ -170,7 +170,7 @@ impl Region {
                 // in order to deserialize the chunk.
                 let reader = bytes[5..].to_vec();
                 drop(sections);
-                let chunk_data = crate::chunk::Chunk::from_zlib_reader(reader.as_slice()).unwrap();
+                let chunk_data = Chunk::from_zlib_reader(reader.as_slice())?;
                 let chunk = Arc::new(RwLock::new(chunk_data));
                 let cloned = chunk.clone();
                 self.sections.lock().unwrap()[index] = RegionChunk::Chunk(chunk);

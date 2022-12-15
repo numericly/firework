@@ -21,7 +21,7 @@ use tokio::{
         tcp::{OwnedReadHalf, OwnedWriteHalf},
         TcpStream,
     },
-    sync::Mutex,
+    sync::{Mutex, RwLock},
 };
 
 pub mod client_bound;
@@ -53,18 +53,21 @@ pub enum ConnectionState {
     Play,
 }
 
+#[derive(Debug)]
 pub struct Protocol {
-    pub connection_state: ConnectionState,
+    pub connection_state: RwLock<ConnectionState>,
     writer: Mutex<ProtocolWriter>,
     reader: Mutex<ProtocolReader>,
     compression_enabled: bool,
 }
 
+#[derive(Debug)]
 pub struct ProtocolReader {
     reader: OwnedReadHalf,
     cipher: Option<Decryptor<Aes128>>,
 }
 
+#[derive(Debug)]
 pub struct ProtocolWriter {
     writer: OwnedWriteHalf,
     cipher: Option<Encryptor<Aes128>>,
@@ -116,12 +119,12 @@ impl Protocol {
                 reader,
                 cipher: None,
             }),
-            connection_state: ConnectionState::HandShaking,
+            connection_state: RwLock::new(ConnectionState::HandShaking),
         }
     }
     pub async fn read_and_serialize(&self) -> Result<ServerBoundPacket, ProtocolError> {
         let packet_data = self.read_packet().await?;
-        let packet = ServerBoundPacket::deserialize(packet_data.as_slice(), &self.connection_state)?;
+        let packet = ServerBoundPacket::deserialize(packet_data.as_slice(), &self.connection_state).await?;
         Ok(packet)
     }
     pub async fn read_packet(&self) -> Result<Vec<u8>, ProtocolError> {

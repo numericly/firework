@@ -35,7 +35,8 @@ macro_rules! define_server_bound_protocol {
 
 
         impl ServerBoundPacket {
-            pub fn deserialize<R: Read>(mut reader: R, state: &ConnectionState) -> Result<Self, DeserializeError> {
+            pub async fn deserialize<R: Read>(mut reader: R, state: &tokio::sync::RwLock<ConnectionState>) -> Result<Self, DeserializeError> {
+                let state = *state.read().await;
                 match (state, VarInt::deserialize(&mut reader)?.0) {
                     $(
                         (ConnectionState::$state, $id) => Ok(Self::$name($name::deserialize(reader).map_err(|e| {
@@ -44,7 +45,7 @@ macro_rules! define_server_bound_protocol {
                             e
                         })?)),
                     )*
-                    (state, id) => Err(DeserializeError::InvalidPacketID { id, state: *state as u8 }),
+                    (state, id) => Err(DeserializeError::InvalidPacketID { id, state: state as u8 }),
                 }
             }
         }

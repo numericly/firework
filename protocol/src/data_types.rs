@@ -101,7 +101,7 @@ pub enum MainHand {
     Right,
 }
 
-#[derive(Debug, PartialEq, DeserializeField)]
+#[derive(Debug, PartialEq, DeserializeField, Clone)]
 #[protocol(typ = "protocol_core::VarInt")]
 pub enum Arm {
     Main,

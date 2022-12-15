@@ -89,8 +89,8 @@ define_client_bound_protocol! {
         x: f64,
         y: f64,
         z: f64,
-        yaw: u8,
-        pitch: u8,
+        yaw: i8,
+        pitch: i8,
     },
     ChangeDifficulty, 0x0B, Play => {
         difficulty: u8,
@@ -152,6 +152,28 @@ define_client_bound_protocol! {
         is_flat: bool,
         death_location: Option<DeathLocation>
     },
+    UpdateEntityPosition, 0x28, Play => {
+        entity_id: VarInt,
+        delta_x: i16,
+        delta_y: i16,
+        delta_z: i16,
+        on_ground: bool
+    },
+    UpdateEntityPositionAndRotation, 0x29, Play => {
+        entity_id: VarInt,
+        delta_x: i16,
+        delta_y: i16,
+        delta_z: i16,
+        yaw: i8,
+        pitch: i8,
+        on_ground: bool
+    },
+    UpdateEntityRotation, 0x2A, Play => {
+        entity_id: VarInt,
+        yaw: u8,
+        pitch: u8,
+        on_ground: bool
+    },
     PlayerAbilities, 0x31, Play => {
         flags: PlayerAbilityFlags,
         flying_speed: f32,
@@ -176,6 +198,15 @@ define_client_bound_protocol! {
     SetCenterChunk, 0x4B, Play => {
         x: VarInt,
         z: VarInt
+    },
+    TeleportEntity, 0x66, Play => {
+        entity_id: VarInt,
+        x: f64,
+        y: f64,
+        z: f64,
+        yaw: i8,
+        pitch: i8,
+        on_ground: bool
     },
     SetRecipes, 0x6A, Play => {
         recipes: Vec<Recipe>
