@@ -462,11 +462,11 @@ impl ServerManager {
                     .register_player(self, to_client_receiver, from_client_sender.clone())
                     .await
                 {
-                    let uuid = client.uuid;
-                    let entity_id = client.entity_id;
-                    self.player_list.remove(&uuid);
+                    let uuid = client.uuid.clone();
+                    let entity_id = client.entity_id.clone();
                     drop(client);
                     sender.send(ServerCommand::RemovePlayer { uuid, entity_id })?;
+                    self.player_list.remove(&uuid);
                     return Err(err);
                 }
 
