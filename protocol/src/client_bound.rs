@@ -37,14 +37,15 @@ macro_rules! define_client_bound_protocol {
 
 use authentication::ProfileProperty;
 use minecraft_data::tags::VarIntList;
-use protocol_core::SerializeField;
 use protocol_core::{BitSet, UnsizedVec, VarInt};
+use protocol_core::{Position, SerializeField};
 use std::collections::HashMap;
 
 use nbt::Blob;
 
 use crate::data_types::{
     CommandNode, DeathLocation, PlayerAbilityFlags, PlayerInfoAction, PlayerPositionFlags, Recipe,
+    Slot,
 };
 
 pub trait ClientBoundPacketID {
@@ -98,6 +99,12 @@ define_client_bound_protocol! {
     },
     Commands, 0x0F, Play => {
         root: CommandNode
+    },
+    SetContainerContent, 0x11, Play => {
+        window_id: u8,
+        state_id: VarInt,
+        items: Vec<Option<Slot>>,
+        held_item: Option<Slot>
     },
     PlayDisconnect, 0x19, Play => {
         reason: String
@@ -198,6 +205,13 @@ define_client_bound_protocol! {
     SetCenterChunk, 0x4B, Play => {
         x: VarInt,
         z: VarInt
+    },
+    SetDefaultSpawn, 0x4D, Play => {
+        position: Position
+    },
+    SystemChatMessage, 0x62, Play => {
+        message: String,
+        action_bar: bool
     },
     TeleportEntity, 0x66, Play => {
         entity_id: VarInt,

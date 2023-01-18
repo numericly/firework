@@ -1,19 +1,22 @@
+use crate::{
+    client_bound::{ClientBoundPacketID, SerializePacket},
+    server_bound::ServerBoundPacket,
+};
+use aes::cipher::{inout::InOutBuf, BlockDecryptMut, BlockEncryptMut};
+use aes::{cipher::KeyIvInit, Aes128};
+use cfb8::{self, Decryptor, Encryptor};
+use miniz_oxide::{
+    deflate::compress_to_vec_zlib,
+    inflate::{decompress_to_vec_zlib, DecompressError},
+};
+use protocol_core::{DeserializeError, DeserializeField, SerializeField, VarInt};
+use protocol_derive::DeserializeField;
 use std::{
     fmt::Debug,
     io::{self, Cursor, ErrorKind},
     pin::Pin,
     task::{Context, Poll},
 };
-use crate::{
-        client_bound::{SerializePacket, ClientBoundPacketID},
-    server_bound::{ServerBoundPacket}
-};
-use aes::cipher::{inout::InOutBuf, BlockDecryptMut, BlockEncryptMut};
-use aes::{cipher::KeyIvInit, Aes128};
-use cfb8::{self, Decryptor, Encryptor};
-use miniz_oxide::{deflate::compress_to_vec_zlib, inflate::{decompress_to_vec_zlib, DecompressError}};
-use protocol_core::{DeserializeError, VarInt, SerializeField, DeserializeField};
-use protocol_derive::DeserializeField;
 use thiserror::Error;
 use tokio::{
     io::{AsyncRead, AsyncReadExt, AsyncWriteExt, ReadBuf},
@@ -124,7 +127,8 @@ impl Protocol {
     }
     pub async fn read_and_serialize(&self) -> Result<ServerBoundPacket, ProtocolError> {
         let packet_data = self.read_packet().await?;
-        let packet = ServerBoundPacket::deserialize(packet_data.as_slice(), &self.connection_state).await?;
+        let packet =
+            ServerBoundPacket::deserialize(packet_data.as_slice(), &self.connection_state).await?;
         Ok(packet)
     }
     pub async fn read_packet(&self) -> Result<Vec<u8>, ProtocolError> {
@@ -144,10 +148,8 @@ impl Protocol {
             let mut packet_data = Cursor::new(buffer.as_slice());
             VarInt::deserialize(&mut packet_data)?;
 
-            let decompressed =
-                decompress_to_vec_zlib(&buffer[packet_data.position() as usize..]).map_err(|err| {
-                    ProtocolError::DecompressError(err)
-                })?;
+            let decompressed = decompress_to_vec_zlib(&buffer[packet_data.position() as usize..])
+                .map_err(|err| ProtocolError::DecompressError(err))?;
 
             Ok(decompressed)
         } else {
@@ -165,8 +167,10 @@ impl Protocol {
 
         let packet = if self.compression_enabled {
             let compressed_data = compress_to_vec_zlib(&packet_data, 2); // Level 2 is optimal for net performance
-            let mut compressed_packet_data = Vec::with_capacity(compressed_data.len() + packet_data_len.len() + 5);
-            VarInt(compressed_data.len() as i32 + packet_data_len.len() as i32).serialize(&mut compressed_packet_data);
+            let mut compressed_packet_data =
+                Vec::with_capacity(compressed_data.len() + packet_data_len.len() + 5);
+            VarInt(compressed_data.len() as i32 + packet_data_len.len() as i32)
+                .serialize(&mut compressed_packet_data);
             compressed_packet_data.extend(packet_data_len);
             compressed_packet_data.extend(compressed_data);
             compressed_packet_data

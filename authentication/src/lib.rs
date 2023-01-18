@@ -2,7 +2,7 @@ use std::io::Write;
 
 use num_bigint::BigInt;
 use protocol_core::SerializeField;
-use protocol_derive::{DeserializeField};
+use protocol_derive::DeserializeField;
 use serde::{Deserialize, Serialize};
 use sha1::{Digest, Sha1};
 use thiserror::Error;
@@ -15,7 +15,7 @@ pub struct Profile {
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, DeserializeField, Clone)]
-pub struct ProfileProperty {    
+pub struct ProfileProperty {
     pub name: String,
     pub value: String,
     pub signature: Option<String>,

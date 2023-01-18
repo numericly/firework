@@ -10,7 +10,7 @@ mod server;
 async fn main() {
     std::env::set_var("RUST_BACKTRACE", "1");
 
-    let server = ServerManager::new();
+    let _server = ServerManager::run();
 
     sleep(Duration::from_secs(10000000000)).await;
 

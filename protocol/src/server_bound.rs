@@ -97,6 +97,9 @@ define_server_bound_protocol! {
     ConfirmTeleport, 0x00, Play => {
         teleport_id: VarInt
     },
+    ChatMessage, 0x05, Play => {
+        message: String // cryptography is mean
+    },
     CloseContainer, 0x0C, Play => {
         window_id: u8
     },
@@ -171,6 +174,10 @@ define_server_bound_protocol! {
         cursor_y: f32,
         cursor_z: f32,
         inside_block: bool,
+        sequence: VarInt
+    },
+    UseItem, 0x32, Play => {
+        arm: Arm,
         sequence: VarInt
     }
 }

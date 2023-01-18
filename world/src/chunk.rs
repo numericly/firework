@@ -1,12 +1,13 @@
 use minecraft_data::{
+    biomes::Biome,
     blocks::{Air, Block},
-    Palette, biomes::Biome,
+    Palette,
 };
 use nbt::{from_zlib_reader, Blob};
-use protocol::{client_bound::{ChunkUpdateAndLightUpdate}};
+use protocol::client_bound::ChunkUpdateAndLightUpdate;
 use protocol_core::{BitSet, SerializeField, VarInt};
 use serde::Deserialize;
-use std::{fmt::Debug, hash::Hash, cmp};
+use std::{cmp, fmt::Debug, hash::Hash};
 
 #[derive(Deserialize, Debug)]
 struct RawChunkData {
@@ -21,9 +22,9 @@ struct RawChunkData {
     #[serde(rename = "LastUpdate")]
     pub last_update: i64,
     #[serde(rename = "PostProcessing")]
-    pub post_processing: Option<Vec<Vec<i16>>>,
+    pub _post_processing: Option<Vec<Vec<i16>>>,
     #[serde(rename = "Status")]
-    pub status: Option<String>,
+    pub _status: Option<String>,
     pub sections: Vec<RawChunkSection>,
 }
 
@@ -46,7 +47,8 @@ pub struct CompactedPalettedContainer<T, const CONTAINER_SIZE: usize> {
 }
 
 const BITS_PER_ENTRY: usize = 64;
-impl<T, const CONTAINER_SIZE: usize, const MINIMUM_BITS: usize> Into<DirectPalettedContainer<T, CONTAINER_SIZE, MINIMUM_BITS>>
+impl<T, const CONTAINER_SIZE: usize, const MINIMUM_BITS: usize>
+    Into<DirectPalettedContainer<T, CONTAINER_SIZE, MINIMUM_BITS>>
     for CompactedPalettedContainer<T, CONTAINER_SIZE>
 where
     T: Debug,
@@ -259,7 +261,11 @@ impl Chunk {
         }
         let section = &self.sections[section_index as usize];
         let block_index = (x & 0xF) | ((z & 0xF) << 4) | ((y & 0xF) << 8);
-        section.block_states.as_ref().map(|x| x.get(block_index as usize)).unwrap()
+        section
+            .block_states
+            .as_ref()
+            .map(|x| x.get(block_index as usize))
+            .unwrap()
     }
 }
 
@@ -276,7 +282,8 @@ struct DirectPalettedContainer<T, const CONTAINER_SIZE: usize, const MINIMUM_BIT
     data: Data,
 }
 
-impl<T, const CONTAINER_SIZE: usize, const MINIMUM_BITS: usize> DirectPalettedContainer<T, CONTAINER_SIZE, MINIMUM_BITS>
+impl<T, const CONTAINER_SIZE: usize, const MINIMUM_BITS: usize>
+    DirectPalettedContainer<T, CONTAINER_SIZE, MINIMUM_BITS>
 where
     T: std::fmt::Debug + Eq + Hash + Clone,
 {
@@ -324,7 +331,9 @@ impl Write for ChunkSection {
     }
 }
 
-impl<T: Palette + Debug, const CONTAINER_SIZE: usize, const MINIMUM_BITS: usize> Write for DirectPalettedContainer<T, CONTAINER_SIZE, MINIMUM_BITS> {
+impl<T: Palette + Debug, const CONTAINER_SIZE: usize, const MINIMUM_BITS: usize> Write
+    for DirectPalettedContainer<T, CONTAINER_SIZE, MINIMUM_BITS>
+{
     fn write(&self, mut packet_data: &mut Vec<u8>) {
         match self.data {
             Data::None => {
@@ -346,7 +355,11 @@ impl<T: Palette + Debug, const CONTAINER_SIZE: usize, const MINIMUM_BITS: usize>
             }
             Data::Single(ref data) => {
                 // Bits per value
-                let bits_per_value = cmp::max(MINIMUM_BITS as u8, (self.palette.len() as f32).log2().ceil() as u8);
+                let bits_per_value = cmp::max(
+                    MINIMUM_BITS as u8,
+                    (self.palette.len() as f32).log2().ceil() as u8,
+                );
+
                 bits_per_value.serialize(&mut packet_data);
 
                 // Palette size
@@ -359,8 +372,10 @@ impl<T: Palette + Debug, const CONTAINER_SIZE: usize, const MINIMUM_BITS: usize>
 
                 // Data array
                 let values_per_long = BITS_PER_ENTRY as u8 / bits_per_value;
-                let long_array_size = (CONTAINER_SIZE as f32 / values_per_long as f32).ceil() as usize;
-                let mask = 2u8.pow(bits_per_value as u32) - 1;
+                let long_array_size =
+                    (CONTAINER_SIZE as f32 / values_per_long as f32).ceil() as usize;
+                let mask = 2u32.pow(bits_per_value as u32) - 1;
+                let byte_mask = mask as u8;
 
                 // Data array length
                 VarInt(long_array_size as i32).serialize(&mut packet_data);
@@ -372,7 +387,7 @@ impl<T: Palette + Debug, const CONTAINER_SIZE: usize, const MINIMUM_BITS: usize>
                         let Some(value) = data.get(index) else {
                             break;
                         };
-                        let masked_value = value & mask;
+                        let masked_value = value & byte_mask;
                         let shifted_value = (masked_value as u64) << (bits_per_value * value_index);
                         long |= shifted_value;
                     }
@@ -389,7 +404,7 @@ impl<T: Palette + Debug, const CONTAINER_SIZE: usize, const MINIMUM_BITS: usize>
 
 pub mod test {
     #[allow(unused_imports)]
-    use minecraft_data::blocks::{Stone, Dirt, Granite, StoneBricks};
+    use minecraft_data::blocks::{Dirt, Granite, Stone, StoneBricks};
 
     #[allow(unused_imports)]
     use super::*;
@@ -404,14 +419,17 @@ pub mod test {
             }
 
             let palette = vec![
-                            Block::Air(Air), 
-                            Block::Stone(Stone), 
-                            Block::Dirt(Dirt), 
-                            Block::Granite(Granite), 
-                            Block::StoneBricks(StoneBricks)
-                        ];
+                Block::Air(Air),
+                Block::Stone(Stone),
+                Block::Dirt(Dirt),
+                Block::Granite(Granite),
+                Block::StoneBricks(StoneBricks),
+            ];
 
-            DirectPalettedContainer::<_, 4096> { palette, data: Data::Single(data) }
+            DirectPalettedContainer::<_, 4096> {
+                palette,
+                data: Data::Single(data),
+            }
         };
         println!("Container: {:?}", container);
 

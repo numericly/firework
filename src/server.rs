@@ -1,10 +1,11 @@
 use async_trait::async_trait;
-use authentication::{authenticate, AuthenticationError, Profile};
-use dashmap::mapref::one::Ref;
+use authentication::{authenticate, AuthenticationError};
 use dashmap::DashMap;
+use nbt::Blob;
 use protocol::client_bound::{
     EncryptionRequest, LoginDisconnect, LoginSuccess, Pong, ServerStatus, SetCompression,
 };
+use protocol::data_types::Slot;
 use protocol::server_bound::Ping;
 use protocol::{ConnectionState, Protocol, ProtocolError};
 use protocol_core::VarInt;
@@ -15,7 +16,7 @@ use std::time::{Duration, Instant};
 use std::vec;
 use thiserror::Error;
 use tokio::net::TcpListener;
-use tokio::sync::{broadcast, mpsc, Mutex};
+use tokio::sync::{broadcast, Mutex};
 use tokio_util::sync::CancellationToken;
 use world::World;
 
@@ -105,7 +106,7 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
-    pub fn new(x: f64, y: f64, z: f64) -> Vec3 {
+    pub const fn new(x: f64, y: f64, z: f64) -> Vec3 {
         Vec3 { x, y, z }
     }
 }
@@ -122,16 +123,10 @@ impl Rotation {
     }
 }
 
-#[derive(Debug)]
-pub enum PlayerCachedChunk {
-    Loading { token: CancellationToken },
-    Loaded,
-}
-
 #[async_trait]
 pub trait Server {
-    async fn handle_server_event(event: ServerCommand) -> Result<(), Box<dyn Error>>;
-    async fn handle_client_event(event: ClientEvent) -> Result<(), Box<dyn Error>>;
+    type Error: Error + Send + Sync + 'static;
+    async fn created(manager: &ServerManager) -> Result<(), Self::Error>;
 }
 
 #[derive(Debug, Clone)]
@@ -252,7 +247,7 @@ impl Encryption {
 }
 
 impl ServerManager {
-    pub fn new() -> Arc<ServerManager> {
+    pub fn run() {
         let token = CancellationToken::new();
 
         let (sender, receiver) = broadcast::channel(10);
@@ -295,10 +290,9 @@ impl ServerManager {
         tokio::task::spawn(async move {
             cloned_server.tick_loop(receiver).await;
         });
-        server
     }
     async fn handle_connection(
-        &self,
+        self: Arc<Self>,
         mut connection: Protocol,
         sender: broadcast::Sender<ServerCommand>,
     ) -> Result<(), ConnectionError> {
@@ -408,7 +402,25 @@ impl ServerManager {
                     *connection.connection_state.write().await = ConnectionState::Login;
                 }
 
-                let player = handle_login(&mut connection, self.encryption.clone()).await?;
+                let mut player = handle_login(&mut connection, self.encryption.clone()).await?;
+
+                player.inventory.set_hotbar_slot(
+                    4,
+                    Slot {
+                        item_id: VarInt(833),
+                        item_count: 1,
+                        nbt: Blob::new(),
+                    },
+                );
+
+                player.inventory.set_armor_slot(
+                    1,
+                    Slot {
+                        item_id: VarInt(697),
+                        item_count: 1,
+                        nbt: Blob::new(),
+                    },
+                );
 
                 let (to_client_sender, to_client_receiver) =
                     broadcast::channel::<ClientCommand>(10);
@@ -454,17 +466,47 @@ impl ServerManager {
 
                 sender.send(ServerCommand::SpawnPlayer { uuid: client.uuid })?;
 
-                client.load_world(self).await?;
+                client.load_world(self.as_ref()).await?;
 
                 println!("Loaded world");
 
+                let token = CancellationToken::new();
+
+                let cloned_server = self.clone();
+                let cloned_uuid = client.uuid.clone();
+                let cloned_from_client_sender = from_client_sender.clone();
+                let cloned_token = token.clone();
+
+                let command_listener = tokio::task::spawn(async move {
+                    let client = cloned_server.player_list.get(&cloned_uuid).unwrap();
+
+                    client
+                        .register_command_listener(
+                            cloned_server.clone(),
+                            to_client_receiver,
+                            cloned_from_client_sender,
+                            cloned_token,
+                        )
+                        .await
+                        .unwrap();
+                });
+
+                client
+                    .to_client
+                    .send(ClientCommand::SendSystemMessage {
+                        message: r#"{"text": "Welcome to the server!"}"#.to_string(),
+                    })
+                    .unwrap();
+
                 if let Err(err) = client
-                    .register_player(self, to_client_receiver, from_client_sender.clone())
+                    .register_packet_listener(self.clone(), from_client_sender.clone())
                     .await
                 {
                     let uuid = client.uuid.clone();
                     let entity_id = client.entity_id.clone();
                     drop(client);
+                    token.cancel();
+                    command_listener.await.unwrap();
                     sender.send(ServerCommand::RemovePlayer { uuid, entity_id })?;
                     self.player_list.remove(&uuid);
                     return Err(err);
@@ -515,7 +557,10 @@ impl ServerManager {
                                 .unwrap();
                         }
                     }
-                    ServerCommand::RemovePlayer { uuid, entity_id } => {
+                    ServerCommand::RemovePlayer {
+                        uuid,
+                        entity_id: _entity_id,
+                    } => {
                         for client in self.player_list.iter() {
                             if client.uuid == uuid {
                                 continue;
@@ -523,8 +568,6 @@ impl ServerManager {
                         }
                     }
                 }
-
-                println!("Received command: {:?}", command);
             }
 
             for client in self.player_list.iter() {
@@ -645,7 +688,7 @@ impl ServerManager {
                             }
                         }
                         event => {
-                            // println!("Received event: {:?}", event);
+                            println!("Received event: {:?}", event);
                         }
                     }
                 }

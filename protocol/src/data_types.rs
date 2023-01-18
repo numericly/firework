@@ -1,5 +1,6 @@
 use authentication::ProfileProperty;
 use modular_bitfield::bitfield;
+use nbt::Blob;
 use protocol_core::{Position, SerializeField, VarInt};
 use protocol_derive::{DeserializeField, SerializeField};
 use std::io::Write;
@@ -149,6 +150,13 @@ pub struct PlayerInfoAddPlayer {
     pub ping: VarInt,
     pub display_name: Option<String>,
     pub has_signature: bool,
+}
+
+#[derive(Debug, PartialEq, SerializeField, Clone)]
+pub struct Slot {
+    pub item_id: VarInt,
+    pub item_count: u8,
+    pub nbt: Blob,
 }
 
 impl SerializeField for DeathLocation {

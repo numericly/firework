@@ -4,7 +4,7 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum DeserializeError {
-    #[error("Invalid packet ID {id} for state {state:?}")]
+    #[error("Invalid packet ID 0x{id:2x?} for state {state}")]
     InvalidPacketID { id: i32, state: u8 },
 
     #[error("Could not deserialize VarInt because it is greater than 5 bytes")]
@@ -20,7 +20,7 @@ pub enum DeserializeError {
     IoError(#[from] io::Error),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 #[repr(transparent)]
 pub struct VarInt(pub i32);
 

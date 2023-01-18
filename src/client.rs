@@ -4,25 +4,27 @@ use minecraft_data::tags::{REGISTRY, TAGS};
 use protocol::{
     client_bound::{
         ChangeDifficulty, ClientBoundKeepAlive, Commands, InitializeWorldBorder, LoginWorld,
-        PlayerAbilities, PlayerInfo, SetCenterChunk, SetHeldItem, SetRecipes, SetTags, SpawnPlayer,
-        SynchronizePlayerPosition, TeleportEntity, UpdateEntityPosition,
-        UpdateEntityPositionAndRotation, UpdateEntityRotation,
+        PlayerAbilities, PlayerInfo, SetCenterChunk, SetContainerContent, SetHeldItem, SetRecipes,
+        SetTags, SpawnPlayer, SynchronizePlayerPosition, SystemChatMessage, TeleportEntity,
+        UpdateEntityPosition, UpdateEntityPositionAndRotation, UpdateEntityRotation,
     },
     data_types::{
         Arm, CommandNode, FloatProps, NodeType, Parser, PlayerAbilityFlags, PlayerCommandAction,
-        PlayerInfoAction, PlayerInfoAddPlayer, PlayerPositionFlags,
+        PlayerInfoAction, PlayerInfoAddPlayer, PlayerPositionFlags, Slot,
     },
-    server_bound::ServerBoundPacket,
+    server_bound::{ChatMessage, ServerBoundPacket},
     ConnectionState, Protocol,
 };
 use protocol_core::{UnsizedVec, VarInt};
 use rand::Rng;
+use serde_json::json;
 use std::{sync::Arc, time::Duration};
 use tokio::{
     select,
     sync::{broadcast, Mutex, RwLock},
     time::sleep,
 };
+use tokio_util::sync::CancellationToken;
 
 #[derive(Debug, Clone)]
 pub enum ClientEvent {
@@ -53,6 +55,9 @@ pub enum ClientEvent {
     SwingArm {
         hand: Arm,
     },
+    ChatMessage {
+        message: String,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -79,13 +84,12 @@ pub enum ClientCommand {
         rotation: Rotation,
         on_ground: bool,
     },
+    SendSystemMessage {
+        message: String,
+    },
 }
 
-const SPAWN_POSITION: Vec3 = Vec3 {
-    x: 0.0,
-    y: 150.0,
-    z: 0.0,
-};
+const SPAWN_POSITION: Vec3 = Vec3::new(0.5, 47.0, 0.5);
 
 #[derive(Debug)]
 pub struct Player {
@@ -102,6 +106,7 @@ pub struct Player {
     pub sneaking: bool,
     pub sprinting: bool,
     pub flying: bool,
+    pub inventory: Inventory,
 }
 
 impl Player {
@@ -119,7 +124,40 @@ impl Player {
             sneaking: false,
             sprinting: false,
             flying: false,
+            inventory: Inventory::new(),
         }
+    }
+}
+
+#[derive(Debug)]
+pub struct Inventory {
+    slots: [Option<Slot>; 46],
+}
+
+impl Inventory {
+    const ARMOR_OFFSET: usize = 5;
+    const HOTBAR_OFFSET: usize = 36;
+    pub const fn new() -> Inventory {
+        const EMPTY_SLOT: Option<Slot> = None;
+        Inventory {
+            slots: [EMPTY_SLOT; 46],
+        }
+    }
+    pub fn get_hotbar_slot(&self, slot: usize) -> Option<&Slot> {
+        self.slots
+            .get(slot + Self::HOTBAR_OFFSET)
+            .and_then(|slot| slot.as_ref())
+    }
+    pub fn set_hotbar_slot(&mut self, slot: usize, item: Slot) {
+        self.slots[slot + Self::HOTBAR_OFFSET] = Some(item);
+    }
+    pub fn get_armor_slot(&self, slot: usize) -> Option<&Slot> {
+        self.slots
+            .get(slot + Self::ARMOR_OFFSET)
+            .and_then(|slot| slot.as_ref())
+    }
+    pub fn set_armor_slot(&mut self, slot: usize, item: Slot) {
+        self.slots[slot + Self::ARMOR_OFFSET] = Some(item);
     }
 }
 
@@ -169,7 +207,7 @@ impl Client {
                 dimension_name: "minecraft:overworld".to_string(),
                 hashed_seed: 0,
                 max_players: VarInt(10),
-                view_distance: VarInt(5),
+                view_distance: VarInt(7),
                 simulation_distance: VarInt(5),
                 reduced_debug_info: player.reduced_debug_info,
                 enable_respawn_screen: true,
@@ -209,6 +247,19 @@ impl Client {
                 slot: player.selected_slot,
             };
             self.connection.write_packet(set_selected_slot).await?;
+        }
+
+        {
+            let player = self.player.read().await;
+
+            let container_content = SetContainerContent {
+                window_id: 0,
+                state_id: VarInt(0),
+                items: player.inventory.slots.to_vec(),
+                held_item: None,
+            };
+
+            self.connection.write_packet(container_content).await?;
         }
 
         let update_recipes = SetRecipes {
@@ -309,8 +360,8 @@ impl Client {
             self.connection.write_packet(set_center_chunk).await?;
         }
         let start = std::time::Instant::now();
-        for x in -3..=3 {
-            for z in -3..=3 {
+        for x in -7..=7 {
+            for z in -7..=7 {
                 let packet;
                 {
                     let chunk_lock = server.world.get_chunk(x, z).await.unwrap().unwrap();
@@ -376,10 +427,9 @@ impl Client {
 
         Ok(())
     }
-    pub async fn register_player(
+    pub async fn register_packet_listener(
         &self,
-        server: &ServerManager,
-        mut rx: broadcast::Receiver<ClientCommand>,
+        server: Arc<ServerManager>,
         tx: broadcast::Sender<ClientEvent>,
     ) -> Result<(), ConnectionError> {
         let ping = ClientBoundKeepAlive {
@@ -389,14 +439,30 @@ impl Client {
         self.connection.write_packet(ping).await?;
 
         loop {
+            let packet = self.connection.read_and_serialize().await?;
+            self.handle_packet(packet, server.clone(), tx.clone())
+                .await?;
+        }
+    }
+    pub async fn register_command_listener(
+        &self,
+        server: Arc<ServerManager>,
+        mut rx: broadcast::Receiver<ClientCommand>,
+        tx: broadcast::Sender<ClientEvent>,
+        token: CancellationToken,
+    ) -> Result<(), ConnectionError> {
+        loop {
             select! {
-                packet = self.connection.read_and_serialize() => {
-                    let packet = packet?;
-                    self.handle_packet(packet, server, tx.clone()).await?;
-                }
                 command = rx.recv() => {
                     let command = command?;
-                    self.handle_command(command, server, tx.clone()).await?;
+                    self.handle_command(command, server.clone(), tx.clone()).await?;
+                }
+                _ = token.cancelled() => {
+                    for _ in 0..rx.len() {
+                        let command = rx.recv().await?;
+                        self.handle_command(command, server.clone(), tx.clone()).await?;
+                    }
+                    return Ok(());
                 }
             }
         }
@@ -404,7 +470,7 @@ impl Client {
     async fn handle_packet(
         &self,
         packet: ServerBoundPacket,
-        server: &ServerManager,
+        _server: Arc<ServerManager>,
         tx: broadcast::Sender<ClientEvent>,
     ) -> Result<(), ConnectionError> {
         match packet {
@@ -534,7 +600,9 @@ impl Client {
                 PlayerCommandAction::StartJumpWithHorse => todo!(),
                 PlayerCommandAction::StopJumpWithHorse => todo!(),
                 PlayerCommandAction::OpenHorseInventory => todo!(),
-                PlayerCommandAction::StartFlyingWithElytra => todo!(),
+                PlayerCommandAction::StartFlyingWithElytra => {
+                    println!("Start flying with elytra");
+                }
             },
             ServerBoundPacket::PlayerAbilitiesServerBound(abilities) => {
                 let mut player = self.player.write().await;
@@ -542,6 +610,38 @@ impl Client {
             }
             ServerBoundPacket::SwingArm(arm) => {
                 tx.send(ClientEvent::SwingArm { hand: arm.arm })?;
+            }
+            ServerBoundPacket::ChatMessage(message) => {
+                let ChatMessage { message } = message;
+                let event = ClientEvent::ChatMessage {
+                    message: message.clone(),
+                };
+                tx.send(event)?;
+
+                let chat_message = {
+                    let player = self.player.read().await;
+                    SystemChatMessage {
+                        action_bar: false,
+                        message: json!({
+                            "text": format!("<{}> {}", player.profile.name, message),
+                            "color": "#800000",
+                            "clickEvent": {
+                                "action": "open_url",
+                                "value": "https://www.google.com"
+                            },
+                            "hoverEvent": {
+                                "action": "show_text",
+                                "value": {
+                                    "text": "https://www.google.com",
+                                    "color": "#3abff8",
+                                    "underlined": true,
+                                },
+                            }
+                        })
+                        .to_string(),
+                    }
+                };
+                self.connection.write_packet(chat_message).await?;
             }
             _ => {
                 println!("Received packet: {:?}", packet);
@@ -552,8 +652,8 @@ impl Client {
     async fn handle_command(
         &self,
         command: ClientCommand,
-        server: &ServerManager,
-        tx: broadcast::Sender<ClientEvent>,
+        server: Arc<ServerManager>,
+        _tx: broadcast::Sender<ClientEvent>,
     ) -> Result<(), ConnectionError> {
         match command {
             ClientCommand::SpawnPlayer { uuid } => {
@@ -598,7 +698,7 @@ impl Client {
                 on_ground,
                 rotation,
             } => match rotation {
-                Some(rotation) => {
+                Some(_rotation) => {
                     let entity_move_rotate = UpdateEntityPositionAndRotation {
                         entity_id: VarInt(entity_id),
                         delta_x,
@@ -623,7 +723,7 @@ impl Client {
             },
             ClientCommand::RotateEntity {
                 entity_id,
-                rotation,
+                rotation: _rotation,
                 on_ground,
             } => {
                 let entity_rotate = UpdateEntityRotation {
@@ -637,7 +737,7 @@ impl Client {
             ClientCommand::TeleportEntity {
                 entity_id,
                 position,
-                rotation,
+                rotation: _rotation,
                 on_ground,
             } => {
                 let entity_teleport = TeleportEntity {
@@ -651,9 +751,18 @@ impl Client {
                 };
                 self.connection.write_packet(entity_teleport).await?;
             }
-            command => {
-                println!("Received command: {:?}", command);
-            }
+            ClientCommand::SendSystemMessage { message } => {
+                let chat_message = SystemChatMessage {
+                    message: message,
+                    action_bar: false,
+                };
+
+                println!("Sending system message: {:?}", chat_message);
+
+                self.connection.write_packet(chat_message).await?;
+            } // command => {
+              //     println!("Received command: {:?}", command);
+              // }
         };
         Ok(())
     }
