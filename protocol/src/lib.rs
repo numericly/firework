@@ -59,6 +59,7 @@ pub enum ConnectionState {
 #[derive(Debug)]
 pub struct Protocol {
     pub connection_state: RwLock<ConnectionState>,
+    pub joined_world: RwLock<bool>,
     writer: Mutex<ProtocolWriter>,
     reader: Mutex<ProtocolReader>,
     compression_enabled: bool,
@@ -122,6 +123,7 @@ impl Protocol {
                 reader,
                 cipher: None,
             }),
+            joined_world: RwLock::new(false),
             connection_state: RwLock::new(ConnectionState::HandShaking),
         }
     }
