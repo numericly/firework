@@ -11,7 +11,6 @@ protocol = {path = "../protocol", version = "*"}
 protocol_core = {path = "../protocol/protocol_core", version = "*"}
 serde = { version = "1.0.130", features = ["derive"] }
 serde_json = "1.0.70"
-server_state = {path = "../server_state", version = "*"}
 minecraft_data = {path = "../minecraft_data", version = "*"}
 byteorder = "1.4.3"
 hematite-nbt = "0.5.2"

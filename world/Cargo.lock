@@ -1194,17 +1194,6 @@ dependencies = [
  "serde",
 ]
 
-[[package]]
-name = "server_state"
-version = "0.1.0"
-dependencies = [
- "dashmap",
- "rand",
- "rsa",
- "rsa-der",
- "serde",
- "serde_json",
-]
 
 [[package]]
 name = "sha1"
@@ -1692,7 +1681,6 @@ dependencies = [
  "rand",
  "serde",
  "serde_json",
- "server_state",
  "tokio",
 ]
 
