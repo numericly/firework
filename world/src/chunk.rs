@@ -34,9 +34,9 @@ struct RawChunkSection {
     y: i8,
     block_states: Option<CompactedPalettedContainer<Block, 4096>>,
     biomes: Option<CompactedPalettedContainer<Biome, 64>>,
-    #[serde(rename = "SkyLight")]
+    #[serde(skip)]
     pub sky_light: Option<Vec<i8>>,
-    #[serde(rename = "BlockLight")]
+    #[serde(skip)]
     pub block_light: Option<Vec<i8>>,
 }
 

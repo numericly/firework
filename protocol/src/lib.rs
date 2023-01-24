@@ -160,6 +160,7 @@ impl Protocol {
     where
         T: SerializePacket + ClientBoundPacketID + Debug,
     {
+        // println!("Sending packet: {:?}", packet);
         let packet_data = packet.serialize();
 
         let mut packet_data_len = Vec::new();

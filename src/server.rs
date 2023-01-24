@@ -4,18 +4,21 @@ use dashmap::DashMap;
 use nbt::Blob;
 use protocol::client_bound::{
     EncryptionRequest, LoginDisconnect, LoginSuccess, Pong, ServerStatus, SetCompression,
+    UnloadChunk,
 };
 use protocol::data_types::Slot;
 use protocol::server_bound::Ping;
 use protocol::{ConnectionState, Protocol, ProtocolError};
 use protocol_core::VarInt;
 use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
+use std::borrow::BorrowMut;
 use std::error::Error;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 use std::vec;
 use thiserror::Error;
 use tokio::net::TcpListener;
+use tokio::sync::broadcast::error::RecvError;
 use tokio::sync::{broadcast, Mutex};
 use tokio_util::sync::CancellationToken;
 use world::World;
@@ -145,80 +148,6 @@ const SERVER_MOTD: DefaultMOTD = DefaultMOTD {
     version_protocol: 760,
 };
 const PORT: u16 = 25566;
-
-// async fn update_player_chunks(
-//     player: Arc<DashMap<i32, Player>>,
-//     entity_id: i32,
-//     connection: Arc<Protocol>,
-//     world: Arc<World>,
-//     chunk_x: i32,
-//     chunk_z: i32,
-// ) -> Result<(), ConnectionError> {
-//     let loaded_chunks = {
-//         let player = player
-//             .get(&entity_id)
-//             .ok_or_else(|| ConnectionError::PlayerUnregisteredError)?;
-//         player.loaded_chunks.keys().cloned().collect::<Vec<_>>()
-//     };
-//     // Unload chunks
-//     for (x, z) in loaded_chunks {
-//         if (x - chunk_x).abs() > 5 || (z - chunk_z).abs() > 5 {
-//             connection
-//                 .write_packet(UnloadChunk {
-//                     x: x.clone(),
-//                     z: z.clone(),
-//                 })
-//                 .await
-//                 .unwrap();
-//             player
-//                 .get_mut(&entity_id)
-//                 .unwrap()
-//                 .loaded_chunks
-//                 .remove(&(x, z));
-//             // println!("Unloaded chunk {} {}", x, z);
-//         }
-//     }
-//     // Find unloaded chunks that need to load
-//     let unloaded_chunks = {
-//         let mut unloaded_chunks = Vec::new();
-//         for (x, z) in CHUNK_LOADER.clone() {
-//             let x = x + chunk_x;
-//             let z = z + chunk_z;
-//             if (x - chunk_x).abs() > 5 || (z - chunk_z).abs() > 5 {
-//                 continue;
-//             }
-//             if !player
-//                 .get(&entity_id)
-//                 .unwrap()
-//                 .loaded_chunks
-//                 .contains_key(&(x, z))
-//             {
-//                 unloaded_chunks.push((x, z));
-//             }
-//         }
-//         unloaded_chunks
-//     };
-//     // Load chunks
-//     tokio::task::spawn(async move {
-//         let start = Instant::now();
-//         for (x, z) in unloaded_chunks {
-//             let packet = {
-//                 let chunk_lock = world.get_chunk(x, z).await.unwrap().unwrap();
-//                 let chunk = chunk_lock.read().unwrap();
-//                 chunk.into_packet()
-//             };
-//             connection.write_packet(packet).await.unwrap();
-//             player
-//                 .get_mut(&entity_id)
-//                 .unwrap()
-//                 .loaded_chunks
-//                 .insert((x, z), PlayerCachedChunk::Loaded);
-//             // println!("Loaded chunk {} {}", x, z);
-//         }
-//         // println!("Loaded chunks in {:?}", start.elapsed());
-//     });
-//     Ok(())
-// }
 
 pub struct Encryption {
     pub pub_key: RsaPublicKey,
@@ -491,12 +420,12 @@ impl ServerManager {
                         .unwrap();
                 });
 
-                client
-                    .to_client
-                    .send(ClientCommand::SendSystemMessage {
-                        message: r#"{"text": "Welcome to the server!"}"#.to_string(),
-                    })
-                    .unwrap();
+                // client
+                //     .to_client
+                //     .send(ClientCommand::SendSystemMessage {
+                //         message: r#"{"text": "Welcome to the server!"}"#.to_string(),
+                //     })
+                //     .unwrap();
 
                 if let Err(err) = client
                     .register_packet_listener(self.clone(), from_client_sender.clone())
@@ -521,8 +450,10 @@ impl ServerManager {
     async fn tick_loop(&self, mut rx: broadcast::Receiver<ServerCommand>) {
         const TICK_DURATION: Duration = Duration::from_millis(50);
         let mut last_tick = Instant::now();
+        let mut ticks = -1;
 
         loop {
+            ticks += 1;
             // Tick logic
             {
                 let now = Instant::now();
@@ -736,28 +667,4 @@ impl MOTD for DefaultMOTD {
     }
 }
 
-use lazy_static::lazy_static;
-
 use crate::client::{Client, ClientCommand, ClientEvent, Player};
-
-lazy_static! {
-    static ref CHUNK_LOADER: vec::IntoIter<(i32, i32)> = {
-        let mut chunk_grid = Vec::new();
-
-        for x in -5..=5 {
-            for z in -5..=5 {
-                chunk_grid.push((x, z));
-            }
-        }
-
-        chunk_grid.sort_by(|a, b| {
-            let (ax, az) = *a;
-            let (bx, bz) = *b;
-            let a = (ax as i32).abs() + (az as i32).abs();
-            let b = (bx as i32).abs() + (bz as i32).abs();
-            a.cmp(&b)
-        });
-
-        chunk_grid.into_iter()
-    };
-}

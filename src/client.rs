@@ -6,7 +6,7 @@ use protocol::{
         ChangeDifficulty, ClientBoundKeepAlive, Commands, InitializeWorldBorder, LoginWorld,
         PlayerAbilities, PlayerInfo, SetCenterChunk, SetContainerContent, SetHeldItem, SetRecipes,
         SetTags, SpawnPlayer, SynchronizePlayerPosition, SystemChatMessage, TeleportEntity,
-        UpdateEntityPosition, UpdateEntityPositionAndRotation, UpdateEntityRotation,
+        UnloadChunk, UpdateEntityPosition, UpdateEntityPositionAndRotation, UpdateEntityRotation,
     },
     data_types::{
         Arm, CommandNode, FloatProps, NodeType, Parser, PlayerAbilityFlags, PlayerCommandAction,
@@ -18,7 +18,7 @@ use protocol::{
 use protocol_core::{UnsizedVec, VarInt};
 use rand::Rng;
 use serde_json::json;
-use std::{sync::Arc, time::Duration};
+use std::{collections::HashSet, sync::Arc, time::Duration};
 use tokio::{
     select,
     sync::{broadcast, Mutex, RwLock},
@@ -169,6 +169,8 @@ pub struct Client {
     pub entity_id: i32,
     pub to_client: broadcast::Sender<ClientCommand>,
     pub from_client: Mutex<broadcast::Receiver<ClientEvent>>,
+    render_distance: RwLock<i32>,
+    loaded_chunks: RwLock<HashSet<(i32, i32)>>,
 }
 
 impl Client {
@@ -187,6 +189,8 @@ impl Client {
             entity_id,
             to_client,
             from_client: Mutex::new(from_client),
+            render_distance: RwLock::new(8),
+            loaded_chunks: RwLock::new(HashSet::new()),
         }
     }
     pub async fn load_world(&self, server: &ServerManager) -> Result<(), ConnectionError> {
@@ -207,7 +211,7 @@ impl Client {
                 dimension_name: "minecraft:overworld".to_string(),
                 hashed_seed: 0,
                 max_players: VarInt(10),
-                view_distance: VarInt(7),
+                view_distance: VarInt(32),
                 simulation_distance: VarInt(5),
                 reduced_debug_info: player.reduced_debug_info,
                 enable_respawn_screen: true,
@@ -239,7 +243,13 @@ impl Client {
 
         self.connection.write_packet(player_abilities).await?;
 
-        read_packet_or_err!(ClientInformation, self.connection, ConnectionState::Play);
+        let client_info =
+            read_packet_or_err!(ClientInformation, self.connection, ConnectionState::Play);
+        // set the render distance to the client's render distance
+        {
+            // not sure if this scope is necessary but it can't hurt so whatever
+            *self.render_distance.write().await = client_info.view_distance as i32;
+        }
 
         {
             let player = self.player.read().await;
@@ -360,15 +370,17 @@ impl Client {
             self.connection.write_packet(set_center_chunk).await?;
         }
         let start = std::time::Instant::now();
-        for x in -7..=7 {
-            for z in -7..=7 {
-                let packet;
+        for x in -1..=1 {
+            for z in -1..=1 {
+                let load_chunk;
                 {
                     let chunk_lock = server.world.get_chunk(x, z).await.unwrap().unwrap();
                     let chunk = chunk_lock.read().unwrap();
-                    packet = chunk.into_packet();
+                    load_chunk = chunk.into_packet();
                 }
-                self.connection.write_packet(packet).await?;
+                self.connection.write_packet(load_chunk).await?;
+                // add the coords to the hash set on the player
+                self.loaded_chunks.write().await.insert((x, z));
             }
         }
         println!("Chunk sending took {:?}", start.elapsed());
@@ -424,7 +436,8 @@ impl Client {
 
             self.connection.write_packet(spawn_player).await?;
         }
-
+        let mut a: u128 = 0;
+        let mut b: u128 = 1;
         Ok(())
     }
     pub async fn register_packet_listener(
@@ -470,7 +483,7 @@ impl Client {
     async fn handle_packet(
         &self,
         packet: ServerBoundPacket,
-        _server: Arc<ServerManager>,
+        server: Arc<ServerManager>,
         tx: broadcast::Sender<ClientEvent>,
     ) -> Result<(), ConnectionError> {
         match packet {
@@ -484,20 +497,23 @@ impl Client {
                 })?;
             }
             ServerBoundPacket::SetPlayerPosition(pos) => {
+                let old_pos;
+                let new_pos;
                 if {
                     let mut player = self.player.write().await;
                     let moved_chunks = (player.position.x / 16.0).floor() as i32
                         != (pos.x / 16.0).floor() as i32
                         || (player.position.z / 16.0).floor() as i32
                             != (pos.z / 16.0).floor() as i32;
-                    let old_pos = player.position.clone();
+                    old_pos = player.position.clone();
                     player.position.x = pos.x;
                     player.position.y = pos.y;
                     player.position.z = pos.z;
+                    new_pos = player.position.clone();
                     player.on_ground = pos.on_ground;
 
                     tx.send(ClientEvent::Move {
-                        old_pos,
+                        old_pos: old_pos.clone(),
                         pos: player.position.clone(),
                         on_ground: pos.on_ground,
                     })?;
@@ -520,25 +536,79 @@ impl Client {
                         }
                     };
                     self.connection.write_packet(set_center_chunk).await?;
+                    {
+                        let player_chunk_x = (new_pos.x / 16.0).floor() as i32;
+                        let player_chunk_z = (new_pos.z / 16.0).floor() as i32;
+                        let render_distance = self.render_distance.read().await.clone();
+
+                        // loop through the loaded chunks and unload the ones that are out of render distance
+
+                        let loaded_chunks = self.loaded_chunks.read().await.clone();
+
+                        for chunk in loaded_chunks.iter() {
+                            if (chunk.0 - player_chunk_x).abs() > render_distance
+                                || (chunk.1 - player_chunk_z).abs() > render_distance
+                            {
+                                let unload_chunk = UnloadChunk {
+                                    x: chunk.0,
+                                    z: chunk.1,
+                                };
+                                self.connection.write_packet(unload_chunk).await?;
+                                self.loaded_chunks.write().await.remove(chunk);
+                            }
+                        }
+
+                        // loop through all the chunks in render distance and load the ones that aren't loaded
+                        for x in -render_distance..=render_distance {
+                            for z in -render_distance..=render_distance {
+                                let chunk_x = player_chunk_x + x;
+                                let chunk_z = player_chunk_z + z;
+                                if !self
+                                    .loaded_chunks
+                                    .read()
+                                    .await
+                                    .contains(&(chunk_x, chunk_z))
+                                {
+                                    let load_chunk;
+
+                                    let chunk_lock =
+                                        server.world.get_chunk(chunk_x, chunk_z).await.unwrap();
+                                    if let Some(chunk_lock) = chunk_lock {
+                                        let chunk = chunk_lock.read().unwrap();
+
+                                        load_chunk = chunk.into_packet();
+                                    } else {
+                                        continue;
+                                    }
+
+                                    self.connection.write_packet(load_chunk).await?;
+                                    self.loaded_chunks.write().await.insert((chunk_x, chunk_z));
+                                }
+                            }
+                        }
+                    }
                 }
             }
             ServerBoundPacket::SetPlayerPositionAndRotation(pos_rot) => {
+                let old_pos;
+                let new_pos;
                 if {
                     let mut player = self.player.write().await;
                     let moved_chunks = (player.position.x / 16.0).floor() as i32
                         != (pos_rot.x / 16.0).floor() as i32
                         || (player.position.z / 16.0).floor() as i32
                             != (pos_rot.z / 16.0).floor() as i32;
-                    let old_pos = player.position.clone();
+                    old_pos = player.position.clone();
                     player.position.x = pos_rot.x;
                     player.position.y = pos_rot.y;
                     player.position.z = pos_rot.z;
+                    new_pos = player.position.clone();
                     player.on_ground = pos_rot.on_ground;
                     player.rotation.yaw = pos_rot.yaw;
                     player.rotation.pitch = pos_rot.pitch;
 
                     tx.send(ClientEvent::MoveAndRotate {
-                        old_pos,
+                        old_pos: old_pos.clone(),
                         pos: player.position.clone(),
                         rotation: player.rotation.clone(),
                         on_ground: pos_rot.on_ground,
@@ -562,6 +632,56 @@ impl Client {
                         }
                     };
                     self.connection.write_packet(set_center_chunk).await?;
+                    {
+                        let player_chunk_x = (new_pos.x / 16.0).floor() as i32;
+                        let player_chunk_z = (new_pos.z / 16.0).floor() as i32;
+                        let render_distance = self.render_distance.read().await.clone();
+
+                        // loop through the loaded chunks and unload the ones that are out of render distance
+                        let loaded_chunks = self.loaded_chunks.read().await.clone();
+
+                        for chunk in loaded_chunks.iter() {
+                            if (chunk.0 - player_chunk_x).abs() > render_distance
+                                || (chunk.1 - player_chunk_z).abs() > render_distance
+                            {
+                                let unload_chunk = UnloadChunk {
+                                    x: chunk.0,
+                                    z: chunk.1,
+                                };
+                                self.connection.write_packet(unload_chunk).await?;
+                                self.loaded_chunks.write().await.remove(chunk);
+                            }
+                        }
+
+                        // loop through all the chunks in render distance and load the ones that aren't loaded
+                        for x in -render_distance..=render_distance {
+                            for z in -render_distance..=render_distance {
+                                let chunk_x = player_chunk_x + x;
+                                let chunk_z = player_chunk_z + z;
+                                if !self
+                                    .loaded_chunks
+                                    .read()
+                                    .await
+                                    .contains(&(chunk_x, chunk_z))
+                                {
+                                    let load_chunk;
+
+                                    let chunk_lock =
+                                        server.world.get_chunk(chunk_x, chunk_z).await.unwrap();
+                                    if let Some(chunk_lock) = chunk_lock {
+                                        let chunk = chunk_lock.read().unwrap();
+
+                                        load_chunk = chunk.into_packet();
+                                    } else {
+                                        continue;
+                                    }
+
+                                    self.connection.write_packet(load_chunk).await?;
+                                    self.loaded_chunks.write().await.insert((chunk_x, chunk_z));
+                                }
+                            }
+                        }
+                    }
                 }
             }
             ServerBoundPacket::ServerBoundKeepAlive(_) => {
@@ -642,6 +762,10 @@ impl Client {
                     }
                 };
                 self.connection.write_packet(chat_message).await?;
+            }
+            ServerBoundPacket::ClientInformation(info) => {
+                let mut render_distance = self.render_distance.write().await;
+                *render_distance = info.view_distance as i32;
             }
             _ => {
                 println!("Received packet: {:?}", packet);
