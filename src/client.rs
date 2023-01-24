@@ -2,6 +2,7 @@ use crate::server::{
     read_packet_or_err, ConnectionError, Rotation, Server, ServerHandler, ServerManager, Vec3,
 };
 use authentication::Profile;
+use futures::{future::BoxFuture, Future};
 use minecraft_data::tags::{REGISTRY, TAGS};
 use protocol::{
     client_bound::{
@@ -24,7 +25,7 @@ use std::{sync::Arc, time::Duration};
 use tokio::{
     select,
     sync::{broadcast, Mutex, RwLock},
-    time::sleep,
+    time::{sleep, timeout, Timeout},
 };
 use tokio_util::sync::CancellationToken;
 
@@ -167,10 +168,11 @@ impl Inventory {
 pub struct Client {
     pub player: RwLock<Player>,
     pub uuid: u128,
-    connection: Arc<Protocol>,
     pub entity_id: i32,
     pub to_client: broadcast::Sender<ClientCommand>,
     pub from_client: Mutex<broadcast::Receiver<ClientEvent>>,
+    connection: Arc<Protocol>,
+    ping_acknowledged: Mutex<bool>,
 }
 
 impl Client {
@@ -189,7 +191,11 @@ impl Client {
             entity_id,
             to_client,
             from_client: Mutex::new(from_client),
+            ping_acknowledged: Mutex::new(true),
         }
+    }
+    pub async fn read_packet(&self) -> Result<ServerBoundPacket, ConnectionError> {
+        Ok(self.connection.read_and_serialize().await?)
     }
     pub async fn load_world<T: ServerHandler>(
         &self,
@@ -433,11 +439,48 @@ impl Client {
 
         Ok(())
     }
+
     pub async fn handle_command<T: ServerHandler>(
         &self,
         command: ClientCommand,
         server: &Server<T>,
     ) -> Result<(), ConnectionError> {
+        Ok(())
+    }
+    pub async fn handle_packet<T: ServerHandler>(
+        &self,
+        packet: ServerBoundPacket,
+        server: &Server<T>,
+    ) -> Result<(), ConnectionError> {
+        // Handle Ping
+        if let ServerBoundPacket::ServerBoundKeepAlive(_) = &packet {
+            println!("Received pong from client");
+            let mut ping_acknowledged = self.ping_acknowledged.lock().await;
+
+            if *ping_acknowledged == true {
+                println!("Client is being weird");
+            }
+
+            *ping_acknowledged = true;
+        }
+        Ok(())
+    }
+    pub async fn ping(&self) -> Result<(), ConnectionError> {
+        {
+            let mut ping_acknowledged = self.ping_acknowledged.lock().await;
+            println!("Pinging client {}", ping_acknowledged);
+            if !*ping_acknowledged {
+                return Err(ConnectionError::ClientTimedOut);
+            } else {
+                *ping_acknowledged = false;
+            }
+        }
+        let ping = ClientBoundKeepAlive {
+            id: rand::thread_rng().gen(),
+        };
+
+        self.connection.write_packet(ping).await?;
+
         Ok(())
     }
 }

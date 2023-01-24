@@ -33,17 +33,17 @@ pub mod server_bound;
 
 #[derive(Debug, Error)]
 pub enum ProtocolError {
-    #[error("Client disconnected")]
+    #[error("client disconnected")]
     ClientDisconnect,
-    #[error("Client forcibly disconnected")]
+    #[error("client forcibly disconnected")]
     ClientForceDisconnect,
-    #[error("io error read: {0}")]
+    #[error("io error read {0}")]
     ReadError(io::Error),
-    #[error("io error write: {0}")]
+    #[error("io error write {0}")]
     WriteError(io::Error),
-    #[error("Failed to deserialize packet {0}")]
+    #[error("failed to deserialize packet {0}")]
     DeserializeError(#[from] DeserializeError),
-    #[error("Failed to decompress packet")]
+    #[error("failed to decompress packet")]
     DecompressError(DecompressError),
 }
 

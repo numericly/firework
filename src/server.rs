@@ -1,21 +1,22 @@
 use async_trait::async_trait;
 use authentication::{authenticate, AuthenticationError, Profile};
 use dashmap::{DashMap, DashSet};
-use futures::Future;
 use protocol::client_bound::{
     EncryptionRequest, LoginDisconnect, LoginSuccess, PlayDisconnect, Pong, ServerStatus,
     SetCompression,
 };
-use protocol::server_bound::Ping;
+use protocol::server_bound::{Ping, ServerBoundPacket};
 use protocol::{ConnectionState, Protocol, ProtocolError};
 use protocol_core::VarInt;
 use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
 use std::sync::Arc;
-use std::time::Instant;
+use std::time::Duration;
 use thiserror::Error;
 use tokio::net::TcpListener;
 use tokio::sync::{broadcast, Mutex};
-use tokio::task;
+use tokio::task::JoinHandle;
+use tokio::time::sleep;
+use tokio::{select, task};
 use tokio_util::sync::CancellationToken;
 use world::World;
 
@@ -60,21 +61,21 @@ use crate::client::{Client, ClientCommand, ClientEvent, Player};
 
 #[derive(Debug, Error)]
 pub enum ConnectionError {
-    #[error("protocol error: {0}")]
+    #[error("protocol error {0}")]
     ProtocolError(#[from] ProtocolError),
-    #[error("unexpected next connection state: {0:?}")]
+    #[error("unexpected next connection state {0:?}")]
     UnexpectedNextState(ConnectionState),
     #[error("invalid shared secret length, expected 16, got {0}")]
     InvalidSharedSecretLength(usize),
-    #[error("unexpected packet: expected {expected}, got {got} in state {state}")]
+    #[error("unexpected packet, expected {expected}, got {got} in state {state}")]
     UnexpectedPacket {
         got: String,
         expected: &'static str,
         state: &'static str,
     },
-    #[error("authentication error: {0}")]
+    #[error("authentication error {0}")]
     AuthenticationError(#[from] AuthenticationError),
-    #[error("recv error: {0}")]
+    #[error("recv error {0}")]
     RecvError(#[from] broadcast::error::RecvError),
     #[error("client is already connected")]
     ClientAlreadyConnected,
@@ -85,6 +86,8 @@ pub enum ConnectionError {
         reason: String,
         disconnect_message: String,
     },
+    #[error("client timed out")]
+    ClientTimedOut,
 }
 
 #[derive(Clone, Debug)]
@@ -328,6 +331,8 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
 
                 let disconnect_status = self.proxy.player_connection(limbo_player).await;
 
+                println!("Player {:?} disconnected", disconnect_status);
+
                 #[allow(unused_must_use)]
                 if let Err(ConnectionError::ClientRejected {
                     reason: _reason,
@@ -384,12 +389,21 @@ pub struct Server<T> {
 #[async_trait]
 pub trait ServerHandler {
     fn new() -> Self;
-    fn load_player(&self, profile: Profile, uuid: u128) -> Player;
+    fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError>;
     async fn client_command(
         &self,
         client: &Client,
         command: ClientCommand,
-    ) -> Result<Option<ClientCommand>, ConnectionError>;
+    ) -> Result<Option<ClientCommand>, ConnectionError> {
+        Ok(Some(command))
+    }
+    async fn client_packet(
+        &self,
+        client: &Client,
+        packet: ServerBoundPacket,
+    ) -> Result<Option<ServerBoundPacket>, ConnectionError> {
+        Ok(Some(packet))
+    }
 }
 
 impl<T: ServerHandler + std::marker::Send + std::marker::Sync + 'static> Server<T> {
@@ -408,7 +422,7 @@ impl<T: ServerHandler + std::marker::Send + std::marker::Sync + 'static> Server<
     ) -> Result<(), ConnectionError> {
         let player = self
             .handler
-            .load_player(limbo_player.profile, limbo_player.uuid);
+            .load_player(limbo_player.profile, limbo_player.uuid)?;
 
         let (to_client_sender, mut to_client_receiver) = broadcast::channel::<ClientCommand>(10);
         let (from_client_sender, from_client_receiver) = broadcast::channel::<ClientEvent>(10);
@@ -431,43 +445,149 @@ impl<T: ServerHandler + std::marker::Send + std::marker::Sync + 'static> Server<
                 from_client_receiver,
             );
 
+            // MAY DEADLOCK HERE
             self.player_list.insert(client.uuid.clone(), client);
 
             let client = self
                 .player_list
                 .get(&uuid)
-                .ok_or(ConnectionError::ClientAlreadyConnected)?;
+                .ok_or(ConnectionError::ClientNotInPlayerList)?;
 
             client
         };
 
         client.load_world(&self).await?;
 
-        let command_listener_server = self.clone();
-        let command_listener_token = CancellationToken::new();
+        let token = CancellationToken::new();
 
-        let command_listener_handle: task::JoinHandle<Result<(), ConnectionError>> =
+        let command_listener_server = self.clone();
+        let command_listener_token = token.clone();
+
+        let command_listener_handle: JoinHandle<Result<(), ConnectionError>> =
             task::spawn(async move {
-                println!("Starting message listener for client");
                 let client = command_listener_server
                     .player_list
                     .get(&uuid)
                     .ok_or(ConnectionError::ClientAlreadyConnected)?;
+
                 loop {
-                    let command = to_client_receiver.recv().await?;
-                    println!("{:?}", command);
-                    if let Some(command) = command_listener_server
-                        .handler
-                        .client_command(client.value(), command)
-                        .await?
-                    {
-                        client
-                            .handle_command(command, &command_listener_server)
-                            .await?;
-                    }
+                    select! {
+                        command = to_client_receiver.recv() => {
+                            let command = command?;
+
+                            if let Some(command) = command_listener_server
+                                .handler
+                                .client_command(client.value(), command)
+                                .await?
+                            {
+                                client
+                                    .handle_command(command, &command_listener_server)
+                                    .await?;
+                            }
+                        }
+                        _ = command_listener_token.cancelled() => {
+                            break
+                        }
+                    };
                 }
+                Ok(())
             });
 
-        Ok(())
+        let event_listener_server = self.clone();
+        let event_listener_token = token.clone();
+
+        let event_listener_handle: JoinHandle<Result<(), ConnectionError>> =
+            task::spawn(async move {
+                let client = event_listener_server
+                    .player_list
+                    .get(&uuid)
+                    .ok_or(ConnectionError::ClientAlreadyConnected)?;
+
+                loop {
+                    select! {
+                        event = client.read_packet() => {
+                            let event = event?;
+                            if let Some(event) = event_listener_server
+                                .handler
+                                .client_packet(client.value(), event)
+                                .await?
+                            {
+                                client
+                                    .handle_packet(event, &event_listener_server)
+                                    .await?;
+                            }
+                        }
+                        _ = event_listener_token.cancelled() => {
+                            break
+                        }
+                    };
+                }
+                Ok(())
+            });
+
+        let timeout_handler_server = self.clone();
+        let timeout_handler_token = token.clone();
+
+        let timeout_handler_handle: JoinHandle<Result<(), ConnectionError>> =
+            task::spawn(async move {
+                let client = timeout_handler_server
+                    .player_list
+                    .get(&uuid)
+                    .ok_or(ConnectionError::ClientAlreadyConnected)?;
+
+                client.ping().await?;
+
+                loop {
+                    select! {
+                        _ = sleep(Duration::from_secs(15)) => {
+                            client.ping().await?;
+                        }
+                        _ = timeout_handler_token.cancelled() => {
+                            break;
+                        }
+                    };
+                }
+                Ok(())
+            });
+
+        // WARNING BAD CODE
+        #[allow(unused_must_use)]
+        let result = {
+            tokio::pin!(
+                command_listener_handle,
+                event_listener_handle,
+                timeout_handler_handle
+            );
+            select! {
+                result = command_listener_handle.as_mut() => {
+                    token.cancel();
+                    event_listener_handle.await;
+                    timeout_handler_handle.await;
+                    result
+                }
+                result = event_listener_handle.as_mut() => {
+                    token.cancel();
+                    command_listener_handle.await;
+                    timeout_handler_handle.await;
+                    result
+                }
+                result = timeout_handler_handle.as_mut() => {
+                    token.cancel();
+                    command_listener_handle.await;
+                    event_listener_handle.await;
+                    result
+                }
+            }
+        };
+
+        drop(client);
+
+        self.player_list.remove(&uuid);
+
+        if let Ok(err) = result {
+            err
+        } else {
+            Ok(())
+        }
     }
 }

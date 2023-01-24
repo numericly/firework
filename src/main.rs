@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use authentication::Profile;
 use client::{Client, ClientCommand, Player};
+use protocol::server_bound::ServerBoundPacket;
 use server::{ConnectionError, LimboPlayer, Server, ServerHandler, ServerManager, ServerProxy};
 use std::{sync::Arc, time::Duration};
 use tokio::time::sleep;
@@ -17,16 +18,8 @@ impl ServerHandler for LobbyServerHandler {
     fn new() -> Self {
         Self {}
     }
-    fn load_player(&self, profile: Profile, uuid: u128) -> Player {
-        Player::new(uuid, profile)
-    }
-    async fn client_command(
-        &self,
-        client: &Client,
-        command: ClientCommand,
-    ) -> Result<Option<ClientCommand>, ConnectionError> {
-        println!("Client command: {:?}", command);
-        Ok(Some(command))
+    fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError> {
+        Ok(Player::new(uuid, profile))
     }
 }
 
