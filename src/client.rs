@@ -15,7 +15,7 @@ use protocol::{
         Arm, CommandNode, FloatProps, NodeType, Parser, PlayerAbilityFlags, PlayerCommandAction,
         PlayerInfoAction, PlayerInfoAddPlayer, PlayerPositionFlags, Slot,
     },
-    server_bound::{ChatMessage, ServerBoundPacket},
+    server_bound::{ChatCommand, ChatMessage, ServerBoundPacket},
     ConnectionState, Protocol,
 };
 use protocol_core::{UnsizedVec, VarInt};
@@ -194,6 +194,7 @@ impl Client {
             ping_acknowledged: Mutex::new(true),
         }
     }
+    #[doc(hidden)]
     pub async fn read_packet(&self) -> Result<ServerBoundPacket, ConnectionError> {
         Ok(self.connection.read_and_serialize().await?)
     }
@@ -447,28 +448,64 @@ impl Client {
     ) -> Result<(), ConnectionError> {
         Ok(())
     }
-    pub async fn handle_packet<T: ServerHandler>(
+    pub async fn handle_packet<T>(
         &self,
         packet: ServerBoundPacket,
         server: &Server<T>,
-    ) -> Result<(), ConnectionError> {
-        // Handle Ping
-        if let ServerBoundPacket::ServerBoundKeepAlive(_) = &packet {
-            println!("Received pong from client");
-            let mut ping_acknowledged = self.ping_acknowledged.lock().await;
+    ) -> Result<(), ConnectionError>
+    where
+        T: ServerHandler + Send + Sync + 'static,
+    {
+        match packet {
+            ServerBoundPacket::ServerBoundKeepAlive(_) => {
+                let mut ping_acknowledged = self.ping_acknowledged.lock().await;
 
-            if *ping_acknowledged == true {
-                println!("Client is being weird");
+                if *ping_acknowledged == true {
+                    println!("Client is being weird");
+                }
+
+                *ping_acknowledged = true;
             }
-
-            *ping_acknowledged = true;
-        }
+            ServerBoundPacket::ChatMessage(ChatMessage { message }) => {
+                server.handle_chat(self, message).await?
+            }
+            ServerBoundPacket::SetPlayerPositionAndRotation(pos_rot) => {
+                server
+                    .handle_position_update(
+                        self,
+                        pos_rot.on_ground,
+                        Some(Vec3::new(pos_rot.x, pos_rot.y, pos_rot.z)),
+                        Some(Rotation::new(pos_rot.yaw, pos_rot.pitch)),
+                    )
+                    .await?;
+            }
+            ServerBoundPacket::SetPlayerPosition(pos) => {
+                server
+                    .handle_position_update(
+                        self,
+                        pos.on_ground,
+                        Some(Vec3::new(pos.x, pos.y, pos.z)),
+                        None,
+                    )
+                    .await?;
+            }
+            ServerBoundPacket::SetPlayerRotation(rot) => {
+                server
+                    .handle_position_update(
+                        self,
+                        rot.on_ground,
+                        None,
+                        Some(Rotation::new(rot.yaw, rot.pitch)),
+                    )
+                    .await?;
+            }
+            _ => (),
+        };
         Ok(())
     }
     pub async fn ping(&self) -> Result<(), ConnectionError> {
         {
             let mut ping_acknowledged = self.ping_acknowledged.lock().await;
-            println!("Pinging client {}", ping_acknowledged);
             if !*ping_acknowledged {
                 return Err(ConnectionError::ClientTimedOut);
             } else {
@@ -480,6 +517,16 @@ impl Client {
         };
 
         self.connection.write_packet(ping).await?;
+
+        Ok(())
+    }
+    pub async fn display_message(&self, message: &str) -> Result<(), ConnectionError> {
+        let chat_message = SystemChatMessage {
+            message: message.to_string(),
+            action_bar: false,
+        };
+
+        self.connection.write_packet(chat_message).await?;
 
         Ok(())
     }

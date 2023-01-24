@@ -3,7 +3,8 @@ use authentication::{authenticate, AuthenticationError, Profile};
 use dashmap::{DashMap, DashSet};
 use protocol::client_bound::{
     EncryptionRequest, LoginDisconnect, LoginSuccess, PlayDisconnect, Pong, ServerStatus,
-    SetCompression,
+    SetCompression, TeleportEntity, UpdateEntityPosition, UpdateEntityPositionAndRotation,
+    UpdateEntityRotation,
 };
 use protocol::server_bound::{Ping, ServerBoundPacket};
 use protocol::{ConnectionState, Protocol, ProtocolError};
@@ -115,6 +116,10 @@ pub struct Rotation {
 impl Rotation {
     pub fn new(yaw: f32, pitch: f32) -> Rotation {
         Rotation { yaw, pitch }
+    }
+    pub fn serialize(&self) -> (i8, i8) {
+        // NOT YET IMPLEMENTED
+        (0, 0)
     }
 }
 
@@ -383,7 +388,7 @@ pub struct Server<T> {
     pub player_list: Arc<DashMap<u128, Client>>,
     lowest_free_id: Mutex<i32>,
 
-    handler: T,
+    pub handler: T,
 }
 
 #[async_trait]
@@ -404,9 +409,34 @@ pub trait ServerHandler {
     ) -> Result<Option<ServerBoundPacket>, ConnectionError> {
         Ok(Some(packet))
     }
+    async fn on_chat(
+        &self,
+        client: &Client,
+        chat: String,
+    ) -> Result<Option<String>, ConnectionError> {
+        let name = &client.player.read().await.profile.name;
+        Ok(Some(format!(r#"{{ "text": "<{}> {}"}}"#, name, chat)))
+    }
+    async fn on_player_move(
+        &self,
+        client: &Client,
+        pos: Vec3,
+    ) -> Result<Option<Vec3>, ConnectionError> {
+        Ok(Some(pos))
+    }
+    async fn on_player_look(
+        &self,
+        client: &Client,
+        rotation: Rotation,
+    ) -> Result<Option<Rotation>, ConnectionError> {
+        Ok(Some(rotation))
+    }
 }
 
-impl<T: ServerHandler + std::marker::Send + std::marker::Sync + 'static> Server<T> {
+impl<T> Server<T>
+where
+    T: ServerHandler + Send + Sync + 'static,
+{
     pub fn new(world: World) -> Self {
         Self {
             world: Arc::new(world),
@@ -589,5 +619,200 @@ impl<T: ServerHandler + std::marker::Send + std::marker::Sync + 'static> Server<
         } else {
             Ok(())
         }
+    }
+    pub async fn handle_chat(
+        &self,
+        client: &Client,
+        message: String,
+    ) -> Result<(), ConnectionError> {
+        let message = self.handler.on_chat(client, message).await?;
+        if let Some(message) = message {
+            self.broadcast_chat(message).await?;
+        }
+        Ok(())
+    }
+    pub async fn handle_position_update(
+        &self,
+        client: &Client,
+        on_ground: bool,
+        position: Option<Vec3>,
+        rotation: Option<Rotation>,
+    ) -> Result<(), ConnectionError> {
+        let pos = if let Some(pos) = position {
+            self.handler.on_player_move(client, pos).await?
+        } else {
+            None
+        };
+        let rot = if let Some(rot) = rotation {
+            self.handler.on_player_look(client, rot).await?
+        } else {
+            None
+        };
+        match (pos, rot) {
+            (Some(pos), Some(rot)) => {
+                let current_pos = client.player.read().await.position.clone();
+
+                let (delta_x, delta_y, delta_z) = (
+                    ((pos.x * 32. - current_pos.x * 32.) * 128.),
+                    ((pos.y * 32. - current_pos.y * 32.) * 128.),
+                    ((pos.z * 32. - current_pos.z * 32.) * 128.),
+                );
+
+                if (delta_x < i16::MIN as f64 || delta_x > i16::MAX as f64)
+                    || (delta_y < i16::MIN as f64 || delta_y > i16::MAX as f64)
+                    || (delta_z < i16::MIN as f64 || delta_z > i16::MAX as f64)
+                {
+                    self.broadcast_entity_teleport(client.entity_id, pos, rot, on_ground)
+                        .await?;
+                } else {
+                    let (yaw, pitch) = rot.serialize();
+                    self.broadcast_entity_position_rotation_update(
+                        client.entity_id,
+                        delta_x as i16,
+                        delta_y as i16,
+                        delta_z as i16,
+                        0,
+                        0,
+                        on_ground,
+                    )
+                    .await?;
+                }
+            }
+            (Some(pos), None) => {
+                let current_pos = client.player.read().await.position.clone();
+
+                let (delta_x, delta_y, delta_z) = (
+                    ((pos.x * 32. - current_pos.x * 32.) * 128.),
+                    ((pos.y * 32. - current_pos.y * 32.) * 128.),
+                    ((pos.z * 32. - current_pos.z * 32.) * 128.),
+                );
+
+                if (delta_x < i16::MIN as f64 || delta_x > i16::MAX as f64)
+                    || (delta_y < i16::MIN as f64 || delta_y > i16::MAX as f64)
+                    || (delta_z < i16::MIN as f64 || delta_z > i16::MAX as f64)
+                {
+                    let rot = client.player.read().await.rotation.clone();
+                    self.broadcast_entity_teleport(client.entity_id, pos, rot, on_ground)
+                        .await?;
+                } else {
+                    self.broadcast_entity_position_update(
+                        client.entity_id,
+                        delta_x as i16,
+                        delta_y as i16,
+                        delta_z as i16,
+                        on_ground,
+                    )
+                    .await?;
+                }
+            }
+            (None, Some(rot)) => {
+                let (yaw, pitch) = rot.serialize();
+                self.broadcast_entity_rotation_update(client.entity_id, 0, 0, on_ground)
+                    .await?;
+            }
+            _ => {
+                return Ok(());
+            }
+        };
+
+        Ok(())
+    }
+    pub async fn broadcast_chat(&self, message: String) -> Result<(), ConnectionError> {
+        // TODO: join futures
+        for client in self.player_list.iter() {
+            client.display_message(&message).await?;
+        }
+        Ok(())
+    }
+    pub async fn broadcast_entity_position_update(
+        &self,
+        entity_id: i32,
+        delta_x: i16,
+        delta_y: i16,
+        delta_z: i16,
+        on_ground: bool,
+    ) -> Result<(), ConnectionError> {
+        for client in self.player_list.iter() {
+            if entity_id == client.entity_id {
+                continue;
+            }
+            let entity_move = UpdateEntityPosition {
+                entity_id: VarInt(entity_id),
+                delta_x,
+                delta_y,
+                delta_z,
+                on_ground,
+            };
+        }
+        Ok(())
+    }
+    pub async fn broadcast_entity_position_rotation_update(
+        &self,
+        entity_id: i32,
+        delta_x: i16,
+        delta_y: i16,
+        delta_z: i16,
+        yaw: i8,
+        pitch: i8,
+        on_ground: bool,
+    ) -> Result<(), ConnectionError> {
+        for client in self.player_list.iter() {
+            if entity_id == client.entity_id {
+                continue;
+            }
+            let entity_move_rotate = UpdateEntityPositionAndRotation {
+                entity_id: VarInt(entity_id),
+                delta_x,
+                delta_y,
+                delta_z,
+                yaw,
+                pitch,
+                on_ground,
+            };
+        }
+        Ok(())
+    }
+    pub async fn broadcast_entity_rotation_update(
+        &self,
+        entity_id: i32,
+        yaw: i8,
+        pitch: i8,
+        on_ground: bool,
+    ) -> Result<(), ConnectionError> {
+        for client in self.player_list.iter() {
+            if entity_id == client.entity_id {
+                continue;
+            }
+            let entity_move_rotate = UpdateEntityRotation {
+                entity_id: VarInt(entity_id),
+                yaw,
+                pitch,
+                on_ground,
+            };
+        }
+        Ok(())
+    }
+    pub async fn broadcast_entity_teleport(
+        &self,
+        entity_id: i32,
+        pos: Vec3,
+        rotation: Rotation,
+        on_ground: bool,
+    ) -> Result<(), ConnectionError> {
+        for client in self.player_list.iter() {
+            if entity_id == client.entity_id {
+                continue;
+            }
+            let entity_teleport = TeleportEntity {
+                entity_id: VarInt(entity_id),
+                x: pos.x,
+                y: pos.y,
+                z: pos.z,
+                yaw: 0,
+                pitch: 0,
+                on_ground,
+            };
+        }
+        Ok(())
     }
 }

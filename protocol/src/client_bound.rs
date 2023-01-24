@@ -177,8 +177,8 @@ define_client_bound_protocol! {
     },
     UpdateEntityRotation, 0x2A, Play => {
         entity_id: VarInt,
-        yaw: u8,
-        pitch: u8,
+        yaw: i8,
+        pitch: i8,
         on_ground: bool
     },
     PlayerAbilities, 0x31, Play => {

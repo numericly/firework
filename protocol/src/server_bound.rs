@@ -97,6 +97,9 @@ define_server_bound_protocol! {
     ConfirmTeleport, 0x00, Play => {
         teleport_id: VarInt
     },
+    ChatCommand, 0x04, Play => {
+        command: String // cryptography is mean
+    },
     ChatMessage, 0x05, Play => {
         message: String // cryptography is mean
     },
