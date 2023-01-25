@@ -171,7 +171,7 @@ pub struct Client {
     pub entity_id: i32,
     pub to_client: broadcast::Sender<ClientCommand>,
     pub from_client: Mutex<broadcast::Receiver<ClientEvent>>,
-    connection: Arc<Protocol>,
+    pub connection: Arc<Protocol>,
     ping_acknowledged: Mutex<bool>,
 }
 

@@ -3,8 +3,8 @@ use authentication::{authenticate, AuthenticationError, Profile};
 use dashmap::{DashMap, DashSet};
 use protocol::client_bound::{
     EncryptionRequest, LoginDisconnect, LoginSuccess, PlayDisconnect, Pong, ServerStatus,
-    SetCompression, TeleportEntity, UpdateEntityPosition, UpdateEntityPositionAndRotation,
-    UpdateEntityRotation,
+    SetCompression, TeleportEntity, UpdateEntityHeadRotation, UpdateEntityPosition,
+    UpdateEntityPositionAndRotation, UpdateEntityRotation,
 };
 use protocol::server_bound::{Ping, ServerBoundPacket};
 use protocol::{ConnectionState, Protocol, ProtocolError};
@@ -118,8 +118,12 @@ impl Rotation {
         Rotation { yaw, pitch }
     }
     pub fn serialize(&self) -> (i8, i8) {
-        // NOT YET IMPLEMENTED
-        (0, 0)
+        let pitch_ratio = 64. / 90.;
+        let yaw_ratio = 256. / 360.;
+
+        let pitch = (self.pitch * pitch_ratio) as i8;
+        let yaw = (self.yaw * yaw_ratio) as i8;
+        (yaw, pitch)
     }
 }
 
@@ -638,24 +642,36 @@ where
         position: Option<Vec3>,
         rotation: Option<Rotation>,
     ) -> Result<(), ConnectionError> {
-        let pos = if let Some(pos) = position {
-            self.handler.on_player_move(client, pos).await?
+        let (pos, previous_pos) = if let Some(pos) = position {
+            let pos = self.handler.on_player_move(client, pos).await?;
+            (
+                pos.clone(),
+                if let Some(pos) = &pos {
+                    let previous = client.player.read().await.position.clone();
+                    client.player.write().await.position = pos.clone();
+                    previous
+                } else {
+                    client.player.read().await.position.clone()
+                },
+            )
         } else {
-            None
+            (None, client.player.read().await.position.clone())
         };
         let rot = if let Some(rot) = rotation {
-            self.handler.on_player_look(client, rot).await?
+            let rot = self.handler.on_player_look(client, rot).await?;
+            if let Some(rot) = &rot {
+                client.player.write().await.rotation = rot.clone();
+            };
+            rot
         } else {
             None
         };
         match (pos, rot) {
             (Some(pos), Some(rot)) => {
-                let current_pos = client.player.read().await.position.clone();
-
                 let (delta_x, delta_y, delta_z) = (
-                    ((pos.x * 32. - current_pos.x * 32.) * 128.),
-                    ((pos.y * 32. - current_pos.y * 32.) * 128.),
-                    ((pos.z * 32. - current_pos.z * 32.) * 128.),
+                    ((pos.x * 32. - previous_pos.x * 32.) * 128.),
+                    ((pos.y * 32. - previous_pos.y * 32.) * 128.),
+                    ((pos.z * 32. - previous_pos.z * 32.) * 128.),
                 );
 
                 if (delta_x < i16::MIN as f64 || delta_x > i16::MAX as f64)
@@ -671,20 +687,18 @@ where
                         delta_x as i16,
                         delta_y as i16,
                         delta_z as i16,
-                        0,
-                        0,
+                        yaw,
+                        pitch,
                         on_ground,
                     )
                     .await?;
                 }
             }
             (Some(pos), None) => {
-                let current_pos = client.player.read().await.position.clone();
-
                 let (delta_x, delta_y, delta_z) = (
-                    ((pos.x * 32. - current_pos.x * 32.) * 128.),
-                    ((pos.y * 32. - current_pos.y * 32.) * 128.),
-                    ((pos.z * 32. - current_pos.z * 32.) * 128.),
+                    ((pos.x * 32. - previous_pos.x * 32.) * 128.),
+                    ((pos.y * 32. - previous_pos.y * 32.) * 128.),
+                    ((pos.z * 32. - previous_pos.z * 32.) * 128.),
                 );
 
                 if (delta_x < i16::MIN as f64 || delta_x > i16::MAX as f64)
@@ -707,7 +721,7 @@ where
             }
             (None, Some(rot)) => {
                 let (yaw, pitch) = rot.serialize();
-                self.broadcast_entity_rotation_update(client.entity_id, 0, 0, on_ground)
+                self.broadcast_entity_rotation_update(client.entity_id, yaw, pitch, on_ground)
                     .await?;
             }
             _ => {
@@ -743,6 +757,7 @@ where
                 delta_z,
                 on_ground,
             };
+            client.value().connection.write_packet(entity_move).await?;
         }
         Ok(())
     }
@@ -769,6 +784,20 @@ where
                 pitch,
                 on_ground,
             };
+            client
+                .value()
+                .connection
+                .write_packet(entity_move_rotate)
+                .await?;
+            let head_rotation = UpdateEntityHeadRotation {
+                entity_id: VarInt(entity_id),
+                yaw,
+            };
+            client
+                .value()
+                .connection
+                .write_packet(head_rotation)
+                .await?;
         }
         Ok(())
     }
@@ -789,6 +818,20 @@ where
                 pitch,
                 on_ground,
             };
+            client
+                .value()
+                .connection
+                .write_packet(entity_move_rotate)
+                .await?;
+            let head_rotation = UpdateEntityHeadRotation {
+                entity_id: VarInt(entity_id),
+                yaw,
+            };
+            client
+                .value()
+                .connection
+                .write_packet(head_rotation)
+                .await?;
         }
         Ok(())
     }
@@ -803,15 +846,30 @@ where
             if entity_id == client.entity_id {
                 continue;
             }
+            let (yaw, pitch) = rotation.serialize();
             let entity_teleport = TeleportEntity {
                 entity_id: VarInt(entity_id),
                 x: pos.x,
                 y: pos.y,
                 z: pos.z,
-                yaw: 0,
-                pitch: 0,
+                yaw,
+                pitch,
                 on_ground,
             };
+            client
+                .value()
+                .connection
+                .write_packet(entity_teleport)
+                .await?;
+            let head_rotation = UpdateEntityHeadRotation {
+                entity_id: VarInt(entity_id),
+                yaw,
+            };
+            client
+                .value()
+                .connection
+                .write_packet(head_rotation)
+                .await?;
         }
         Ok(())
     }

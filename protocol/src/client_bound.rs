@@ -199,6 +199,10 @@ define_client_bound_protocol! {
         teleport_id: VarInt,
         dismount_vehicle: bool
     },
+    UpdateEntityHeadRotation, 0x3F, Play => {
+        entity_id: VarInt,
+        yaw: i8
+    },
     SetHeldItem, 0x4A, Play => {
         slot: u8
     },
