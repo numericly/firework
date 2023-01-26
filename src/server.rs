@@ -119,10 +119,10 @@ impl Rotation {
     }
     pub fn serialize(&self) -> (i8, i8) {
         let pitch_ratio = 64. / 90.;
-        let yaw_ratio = 256. / 360.;
+        let yaw_ratio = 255. / 360.;
 
         let pitch = (self.pitch * pitch_ratio) as i8;
-        let yaw = (self.yaw * yaw_ratio) as i8;
+        let yaw = (self.yaw * yaw_ratio - 0.5) as i8;
         (yaw, pitch)
     }
 }
@@ -642,21 +642,17 @@ where
         position: Option<Vec3>,
         rotation: Option<Rotation>,
     ) -> Result<(), ConnectionError> {
-        let (pos, previous_pos) = if let Some(pos) = position {
+        let previous_pos = client.player.read().await.position.clone();
+        let pos = if let Some(pos) = position {
             let pos = self.handler.on_player_move(client, pos).await?;
-            (
-                pos.clone(),
-                if let Some(pos) = &pos {
-                    let previous = client.player.read().await.position.clone();
-                    client.player.write().await.position = pos.clone();
-                    previous
-                } else {
-                    client.player.read().await.position.clone()
-                },
-            )
+            if let Some(pos) = &pos {
+                client.player.write().await.position = pos.clone();
+            };
+            pos
         } else {
-            (None, client.player.read().await.position.clone())
+            None
         };
+        let previous_rot = client.player.read().await.rotation.clone();
         let rot = if let Some(rot) = rotation {
             let rot = self.handler.on_player_look(client, rot).await?;
             if let Some(rot) = &rot {
@@ -666,68 +662,16 @@ where
         } else {
             None
         };
-        match (pos, rot) {
-            (Some(pos), Some(rot)) => {
-                let (delta_x, delta_y, delta_z) = (
-                    ((pos.x * 32. - previous_pos.x * 32.) * 128.),
-                    ((pos.y * 32. - previous_pos.y * 32.) * 128.),
-                    ((pos.z * 32. - previous_pos.z * 32.) * 128.),
-                );
 
-                if (delta_x < i16::MIN as f64 || delta_x > i16::MAX as f64)
-                    || (delta_y < i16::MIN as f64 || delta_y > i16::MAX as f64)
-                    || (delta_z < i16::MIN as f64 || delta_z > i16::MAX as f64)
-                {
-                    self.broadcast_entity_teleport(client.entity_id, pos, rot, on_ground)
-                        .await?;
-                } else {
-                    let (yaw, pitch) = rot.serialize();
-                    self.broadcast_entity_position_rotation_update(
-                        client.entity_id,
-                        delta_x as i16,
-                        delta_y as i16,
-                        delta_z as i16,
-                        yaw,
-                        pitch,
-                        on_ground,
-                    )
-                    .await?;
-                }
-            }
-            (Some(pos), None) => {
-                let (delta_x, delta_y, delta_z) = (
-                    ((pos.x * 32. - previous_pos.x * 32.) * 128.),
-                    ((pos.y * 32. - previous_pos.y * 32.) * 128.),
-                    ((pos.z * 32. - previous_pos.z * 32.) * 128.),
-                );
-
-                if (delta_x < i16::MIN as f64 || delta_x > i16::MAX as f64)
-                    || (delta_y < i16::MIN as f64 || delta_y > i16::MAX as f64)
-                    || (delta_z < i16::MIN as f64 || delta_z > i16::MAX as f64)
-                {
-                    let rot = client.player.read().await.rotation.clone();
-                    self.broadcast_entity_teleport(client.entity_id, pos, rot, on_ground)
-                        .await?;
-                } else {
-                    self.broadcast_entity_position_update(
-                        client.entity_id,
-                        delta_x as i16,
-                        delta_y as i16,
-                        delta_z as i16,
-                        on_ground,
-                    )
-                    .await?;
-                }
-            }
-            (None, Some(rot)) => {
-                let (yaw, pitch) = rot.serialize();
-                self.broadcast_entity_rotation_update(client.entity_id, yaw, pitch, on_ground)
-                    .await?;
-            }
-            _ => {
-                return Ok(());
-            }
-        };
+        self.broadcast_entity_move(
+            client.entity_id,
+            pos,
+            previous_pos,
+            rot,
+            previous_rot,
+            on_ground,
+        )
+        .await?;
 
         Ok(())
     }
@@ -738,137 +682,28 @@ where
         }
         Ok(())
     }
-    pub async fn broadcast_entity_position_update(
+    pub async fn broadcast_entity_move(
         &self,
         entity_id: i32,
-        delta_x: i16,
-        delta_y: i16,
-        delta_z: i16,
+        position: Option<Vec3>,
+        previous_position: Vec3,
+        rotation: Option<Rotation>,
+        previous_rotation: Rotation,
         on_ground: bool,
     ) -> Result<(), ConnectionError> {
         for client in self.player_list.iter() {
             if entity_id == client.entity_id {
                 continue;
             }
-            let entity_move = UpdateEntityPosition {
-                entity_id: VarInt(entity_id),
-                delta_x,
-                delta_y,
-                delta_z,
-                on_ground,
-            };
-            client.value().connection.write_packet(entity_move).await?;
-        }
-        Ok(())
-    }
-    pub async fn broadcast_entity_position_rotation_update(
-        &self,
-        entity_id: i32,
-        delta_x: i16,
-        delta_y: i16,
-        delta_z: i16,
-        yaw: i8,
-        pitch: i8,
-        on_ground: bool,
-    ) -> Result<(), ConnectionError> {
-        for client in self.player_list.iter() {
-            if entity_id == client.entity_id {
-                continue;
-            }
-            let entity_move_rotate = UpdateEntityPositionAndRotation {
-                entity_id: VarInt(entity_id),
-                delta_x,
-                delta_y,
-                delta_z,
-                yaw,
-                pitch,
-                on_ground,
-            };
             client
-                .value()
-                .connection
-                .write_packet(entity_move_rotate)
-                .await?;
-            let head_rotation = UpdateEntityHeadRotation {
-                entity_id: VarInt(entity_id),
-                yaw,
-            };
-            client
-                .value()
-                .connection
-                .write_packet(head_rotation)
-                .await?;
-        }
-        Ok(())
-    }
-    pub async fn broadcast_entity_rotation_update(
-        &self,
-        entity_id: i32,
-        yaw: i8,
-        pitch: i8,
-        on_ground: bool,
-    ) -> Result<(), ConnectionError> {
-        for client in self.player_list.iter() {
-            if entity_id == client.entity_id {
-                continue;
-            }
-            let entity_move_rotate = UpdateEntityRotation {
-                entity_id: VarInt(entity_id),
-                yaw,
-                pitch,
-                on_ground,
-            };
-            client
-                .value()
-                .connection
-                .write_packet(entity_move_rotate)
-                .await?;
-            let head_rotation = UpdateEntityHeadRotation {
-                entity_id: VarInt(entity_id),
-                yaw,
-            };
-            client
-                .value()
-                .connection
-                .write_packet(head_rotation)
-                .await?;
-        }
-        Ok(())
-    }
-    pub async fn broadcast_entity_teleport(
-        &self,
-        entity_id: i32,
-        pos: Vec3,
-        rotation: Rotation,
-        on_ground: bool,
-    ) -> Result<(), ConnectionError> {
-        for client in self.player_list.iter() {
-            if entity_id == client.entity_id {
-                continue;
-            }
-            let (yaw, pitch) = rotation.serialize();
-            let entity_teleport = TeleportEntity {
-                entity_id: VarInt(entity_id),
-                x: pos.x,
-                y: pos.y,
-                z: pos.z,
-                yaw,
-                pitch,
-                on_ground,
-            };
-            client
-                .value()
-                .connection
-                .write_packet(entity_teleport)
-                .await?;
-            let head_rotation = UpdateEntityHeadRotation {
-                entity_id: VarInt(entity_id),
-                yaw,
-            };
-            client
-                .value()
-                .connection
-                .write_packet(head_rotation)
+                .move_entity(
+                    entity_id,
+                    position.clone(),
+                    previous_position.clone(),
+                    rotation.clone(),
+                    previous_rotation.clone(),
+                    on_ground,
+                )
                 .await?;
         }
         Ok(())

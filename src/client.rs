@@ -9,7 +9,8 @@ use protocol::{
         ChangeDifficulty, ClientBoundKeepAlive, Commands, InitializeWorldBorder, LoginWorld,
         PlayerAbilities, PlayerInfo, SetCenterChunk, SetContainerContent, SetHeldItem, SetRecipes,
         SetTags, SpawnPlayer, SynchronizePlayerPosition, SystemChatMessage, TeleportEntity,
-        UpdateEntityPosition, UpdateEntityPositionAndRotation, UpdateEntityRotation,
+        UpdateEntityHeadRotation, UpdateEntityPosition, UpdateEntityPositionAndRotation,
+        UpdateEntityRotation,
     },
     data_types::{
         Arm, CommandNode, FloatProps, NodeType, Parser, PlayerAbilityFlags, PlayerCommandAction,
@@ -171,7 +172,7 @@ pub struct Client {
     pub entity_id: i32,
     pub to_client: broadcast::Sender<ClientCommand>,
     pub from_client: Mutex<broadcast::Receiver<ClientEvent>>,
-    pub connection: Arc<Protocol>,
+    connection: Arc<Protocol>,
     ping_acknowledged: Mutex<bool>,
 }
 
@@ -528,6 +529,127 @@ impl Client {
 
         self.connection.write_packet(chat_message).await?;
 
+        Ok(())
+    }
+    pub async fn move_entity(
+        &self,
+        entity_id: i32,
+        position: Option<Vec3>,
+        previous_position: Vec3,
+        rotation: Option<Rotation>,
+        previous_rotation: Rotation,
+        on_ground: bool,
+    ) -> Result<(), ConnectionError> {
+        match (position, rotation) {
+            (Some(pos), Some(rot)) => {
+                let (delta_x, delta_y, delta_z) = (
+                    ((pos.x * 32. - previous_position.x * 32.) * 128.),
+                    ((pos.y * 32. - previous_position.y * 32.) * 128.),
+                    ((pos.z * 32. - previous_position.z * 32.) * 128.),
+                );
+
+                if (delta_x < i16::MIN as f64 || delta_x > i16::MAX as f64)
+                    || (delta_y < i16::MIN as f64 || delta_y > i16::MAX as f64)
+                    || (delta_z < i16::MIN as f64 || delta_z > i16::MAX as f64)
+                {
+                    let (yaw, pitch) = previous_rotation.serialize();
+                    let entity_teleport = TeleportEntity {
+                        entity_id: VarInt(entity_id),
+                        x: pos.x,
+                        y: pos.y,
+                        z: pos.z,
+                        yaw,
+                        pitch,
+                        on_ground,
+                    };
+                    self.connection.write_packet(entity_teleport).await?;
+                    let head_rotation = UpdateEntityHeadRotation {
+                        entity_id: VarInt(entity_id),
+                        yaw,
+                    };
+                    self.connection.write_packet(head_rotation).await?;
+                } else {
+                    let (yaw, pitch) = rot.serialize();
+                    let (delta_x, delta_y, delta_z) =
+                        (delta_x as i16, delta_y as i16, delta_z as i16);
+
+                    let entity_move_rotate = UpdateEntityPositionAndRotation {
+                        entity_id: VarInt(entity_id),
+                        delta_x,
+                        delta_y,
+                        delta_z,
+                        yaw,
+                        pitch,
+                        on_ground,
+                    };
+                    self.connection.write_packet(entity_move_rotate).await?;
+                    let head_rotation = UpdateEntityHeadRotation {
+                        entity_id: VarInt(entity_id),
+                        yaw,
+                    };
+                    self.connection.write_packet(head_rotation).await?;
+                }
+            }
+            (Some(pos), None) => {
+                let (delta_x, delta_y, delta_z) = (
+                    ((pos.x * 32. - previous_position.x * 32.) * 128.),
+                    ((pos.y * 32. - previous_position.y * 32.) * 128.),
+                    ((pos.z * 32. - previous_position.z * 32.) * 128.),
+                );
+
+                if (delta_x < i16::MIN as f64 || delta_x > i16::MAX as f64)
+                    || (delta_y < i16::MIN as f64 || delta_y > i16::MAX as f64)
+                    || (delta_z < i16::MIN as f64 || delta_z > i16::MAX as f64)
+                {
+                    let (yaw, pitch) = previous_rotation.serialize();
+                    let entity_teleport = TeleportEntity {
+                        entity_id: VarInt(entity_id),
+                        x: pos.x,
+                        y: pos.y,
+                        z: pos.z,
+                        yaw,
+                        pitch,
+                        on_ground,
+                    };
+                    self.connection.write_packet(entity_teleport).await?;
+                    let head_rotation = UpdateEntityHeadRotation {
+                        entity_id: VarInt(entity_id),
+                        yaw,
+                    };
+                    self.connection.write_packet(head_rotation).await?;
+                } else {
+                    let (delta_x, delta_y, delta_z) =
+                        (delta_x as i16, delta_y as i16, delta_z as i16);
+                    let entity_move = UpdateEntityPosition {
+                        entity_id: VarInt(entity_id),
+                        delta_x,
+                        delta_y,
+                        delta_z,
+                        on_ground,
+                    };
+                    self.connection.write_packet(entity_move).await?;
+                }
+            }
+            (None, Some(rot)) => {
+                let (yaw, pitch) = rot.serialize();
+
+                let entity_move_rotate = UpdateEntityRotation {
+                    entity_id: VarInt(entity_id),
+                    yaw,
+                    pitch,
+                    on_ground,
+                };
+                self.connection.write_packet(entity_move_rotate).await?;
+                let head_rotation = UpdateEntityHeadRotation {
+                    entity_id: VarInt(entity_id),
+                    yaw,
+                };
+                self.connection.write_packet(head_rotation).await?;
+            }
+            _ => {
+                return Ok(());
+            }
+        };
         Ok(())
     }
 }

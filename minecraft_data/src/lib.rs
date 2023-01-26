@@ -230,4 +230,5 @@ impl<'de> Deserialize<'de> for Biome {
 pub mod biomes;
 #[allow(non_camel_case_types, dead_code)]
 pub mod blocks;
+pub mod items;
 pub mod tags;

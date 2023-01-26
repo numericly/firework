@@ -942,8 +942,12 @@ dependencies = [
  "datasize",
  "hematite-nbt",
  "lazy_static",
+ "proc-macro2",
+ "quote",
+ "rust-format",
  "serde",
  "serde_json",
+ "syn",
 ]
 
 [[package]]
@@ -1497,6 +1501,12 @@ checksum = "a19473b2de3164677ff38e4309c42448ba8d0fe5ad5fa722e7d278f991859aa6"
 dependencies = [
  "simple_asn1",
 ]
+
+[[package]]
+name = "rust-format"
+version = "0.3.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "60e7c00b6c3bf5e38a880eec01d7e829d12ca682079f8238a464def3c4b31627"
 
 [[package]]
 name = "ryu"
