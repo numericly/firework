@@ -1,8 +1,5 @@
-use crate::server::{
-    read_packet_or_err, ConnectionError, Rotation, Server, ServerHandler, ServerManager, Vec3,
-};
+use crate::server::{read_packet_or_err, ConnectionError, Rotation, Server, ServerHandler, Vec3};
 use authentication::Profile;
-use futures::{future::BoxFuture, Future};
 use minecraft_data::tags::{REGISTRY, TAGS};
 use protocol::{
     client_bound::{
@@ -13,22 +10,16 @@ use protocol::{
         UpdateEntityRotation,
     },
     data_types::{
-        Arm, CommandNode, FloatProps, NodeType, Parser, PlayerAbilityFlags, PlayerCommandAction,
-        PlayerInfoAction, PlayerInfoAddPlayer, PlayerPositionFlags, Slot,
+        Arm, CommandNode, FloatProps, NodeType, Parser, PlayerAbilityFlags, PlayerInfoAction,
+        PlayerInfoAddPlayer, PlayerPositionFlags, Slot,
     },
-    server_bound::{ChatCommand, ChatMessage, ServerBoundPacket},
+    server_bound::{ChatMessage, ServerBoundPacket},
     ConnectionState, Protocol,
 };
 use protocol_core::{UnsizedVec, VarInt};
 use rand::Rng;
-use serde_json::json;
-use std::{sync::Arc, time::Duration};
-use tokio::{
-    select,
-    sync::{broadcast, Mutex, RwLock},
-    time::{sleep, timeout, Timeout},
-};
-use tokio_util::sync::CancellationToken;
+use std::sync::Arc;
+use tokio::sync::{broadcast, Mutex, RwLock};
 
 #[derive(Debug, Clone)]
 pub enum ClientEvent {

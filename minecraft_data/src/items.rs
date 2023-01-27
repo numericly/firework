@@ -8274,7 +8274,7 @@ pub enum Items {
 }
 impl Items {
     pub fn get_id(&self) -> u32 {
-        match id {
+        match self {
             Self::Air(_) => r#Air::ID,
             Self::Stone(_) => r#Stone::ID,
             Self::Granite(_) => r#Granite::ID,
@@ -9427,7 +9427,6 @@ impl Items {
             Self::PearlescentFroglight(_) => r#PearlescentFroglight::ID,
             Self::Frogspawn(_) => r#Frogspawn::ID,
             Self::EchoShard(_) => r#EchoShard::ID,
-            _ => None,
         }
     }
 }

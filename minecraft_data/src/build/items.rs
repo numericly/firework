@@ -5,7 +5,6 @@ use proc_macro2::{Ident, TokenStream as TokenStream2};
 use quote::quote;
 use rust_format::{Formatter, RustFmt};
 use serde::Deserialize;
-use syn::{__private::TokenStream, parse_macro_input, parse_quote_spanned};
 
 #[derive(Deserialize, Debug, Clone)]
 struct Item {
@@ -104,9 +103,8 @@ pub fn build_items() {
     items_rs.extend(quote! {
         impl Items {
             pub fn get_id(&self) -> u32 {
-                match id {
+                match self {
                     #get_id_inner
-                    _ => None,
                 }
             }
         }

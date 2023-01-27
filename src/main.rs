@@ -1,7 +1,6 @@
 use async_trait::async_trait;
 use authentication::Profile;
-use client::{Client, ClientCommand, Player};
-use protocol::server_bound::ServerBoundPacket;
+use client::Player;
 use server::{ConnectionError, LimboPlayer, Server, ServerHandler, ServerManager, ServerProxy};
 use std::{sync::Arc, time::Duration};
 use tokio::time::sleep;

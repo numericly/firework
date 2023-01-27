@@ -122,7 +122,13 @@ impl Rotation {
         let yaw_ratio = 255. / 360.;
 
         let pitch = (self.pitch * pitch_ratio) as i8;
-        let yaw = (self.yaw * yaw_ratio - 0.5) as i8;
+        let yaw_mod = self.yaw.rem_euclid(360.);
+        let yaw_fixed = if yaw_mod > 180. {
+            yaw_mod - 360.
+        } else {
+            yaw_mod
+        };
+        let yaw = (yaw_fixed * yaw_ratio) as i8;
         (yaw, pitch)
     }
 }
