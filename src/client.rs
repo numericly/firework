@@ -4,9 +4,10 @@ use minecraft_data::tags::{REGISTRY, TAGS};
 use protocol::{
     client_bound::{
         ChangeDifficulty, ClientBoundKeepAlive, Commands, InitializeWorldBorder, LoginWorld,
-        PlayerAbilities, PlayerInfo, SetCenterChunk, SetContainerContent, SetHeldItem, SetRecipes,
-        SetTags, SpawnPlayer, SynchronizePlayerPosition, SystemChatMessage, TeleportEntity,
-        UnloadChunk, UpdateEntityPosition, UpdateEntityPositionAndRotation, UpdateEntityRotation,
+        PlayerAbilities, PlayerInfo, ServerResourcePack, SetCenterChunk, SetContainerContent,
+        SetHeldItem, SetRecipes, SetTags, SpawnPlayer, SynchronizePlayerPosition,
+        SystemChatMessage, TeleportEntity, UnloadChunk, UpdateEntityPosition,
+        UpdateEntityPositionAndRotation, UpdateEntityRotation,
     },
     data_types::{
         Arm, CommandNode, FloatProps, NodeType, Parser, PlayerAbilityFlags, PlayerCommandAction,
@@ -370,6 +371,7 @@ impl Client {
             self.connection.write_packet(set_center_chunk).await?;
         }
         let start = std::time::Instant::now();
+        // send the minimum chunks to the client
         for x in -1..=1 {
             for z in -1..=1 {
                 let load_chunk;
@@ -762,6 +764,15 @@ impl Client {
                     }
                 };
                 self.connection.write_packet(chat_message).await?;
+                let resource_pack = ServerResourcePack::new(
+                        "https://github.com/nebuIr/Default-Dark-Mode/releases/download/v1.4.0/Default-Dark-Mode-1.19.2-v1.4.0.zip".to_string(),
+                    None
+                    );
+
+                let resource_pack_packet = resource_pack.await.unwrap();
+                println!("{:?}", resource_pack_packet);
+
+                self.connection.write_packet(resource_pack_packet).await?;
             }
             ServerBoundPacket::ClientInformation(info) => {
                 let mut render_distance = self.render_distance.write().await;

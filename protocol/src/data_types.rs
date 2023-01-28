@@ -89,6 +89,15 @@ pub enum BlockFace {
 
 #[derive(Debug, PartialEq, DeserializeField)]
 #[protocol(typ = "protocol_core::VarInt")]
+pub enum ResourcePackLoadStatus {
+    Success,
+    Declined,
+    FailedDownload,
+    Accepted,
+}
+
+#[derive(Debug, PartialEq, DeserializeField)]
+#[protocol(typ = "protocol_core::VarInt")]
 pub enum ChatMode {
     Enabled,
     CommandsOnly,

@@ -198,7 +198,7 @@ impl ServerManager {
         tokio::task::spawn(async move {
             let listener = TcpListener::bind(format!("127.0.0.1:{}", PORT))
                 .await
-                .expect("Failed to bind ser to port");
+                .expect("Failed to bind server to port");
             println!("Server started listening on port: {}", PORT);
             loop {
                 let (stream, _socket_address) = listener.accept().await.unwrap();

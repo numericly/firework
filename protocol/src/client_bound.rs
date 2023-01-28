@@ -43,6 +43,9 @@ use std::collections::HashMap;
 
 use nbt::Blob;
 
+use reqwest;
+use sha1::{Digest, Sha1};
+
 use crate::data_types::{
     CommandNode, DeathLocation, PlayerAbilityFlags, PlayerInfoAction, PlayerPositionFlags, Recipe,
     Slot,
@@ -199,6 +202,12 @@ define_client_bound_protocol! {
         teleport_id: VarInt,
         dismount_vehicle: bool
     },
+    ServerResourcePack, 0x3D, Play => {
+        url: String,
+        hash: String,
+        required: bool,
+        prompt: Option<String> // should be a chat not a string
+    },
     SetHeldItem, 0x4A, Play => {
         slot: u8
     },
@@ -227,5 +236,31 @@ define_client_bound_protocol! {
     },
     SetTags, 0x6B, Play => {
         tags: &'static HashMap<String, HashMap<String, VarIntList>>
+    }
+}
+
+impl ServerResourcePack {
+    pub async fn new(url: String, prompt: Option<String>) -> Result<Self, reqwest::Error> {
+        // get the resource pack bytes
+        let resource_pack_bytes = reqwest::get(&url).await?.bytes().await?;
+        let required = false;
+
+        // compute the sha1 hash of the resource pack
+        let mut hasher = Sha1::new();
+        hasher.update(&resource_pack_bytes);
+        let hash = format!("{:x}", hasher.finalize());
+
+        if hash.len() != 40 {
+            panic!("invalid hash length"); // what even is an error handling
+        }
+
+        println!("hash of pack {}: {}", url, hash);
+
+        Ok(Self {
+            url,
+            hash: hash,
+            required,
+            prompt,
+        })
     }
 }

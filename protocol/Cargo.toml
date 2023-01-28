@@ -22,6 +22,8 @@ authentication = { version = "*", path = "../authentication" }
 async-trait = "0.1.58"
 hematite-nbt = "0.5.2"
 rand = "0.8.5"
+reqwest = "0.11.14"
+sha1 = "0.10.5"
 
 [profile.dev]
 opt-level = 2

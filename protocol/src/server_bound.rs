@@ -55,8 +55,8 @@ macro_rules! define_server_bound_protocol {
 use crate::{
     data_types::{
         Arm, BlockFace, ChatMode, DisplaySkinParts, MainHand, PlayerAbilityFlags,
-        PlayerActionStatus, PlayerCommandAction, RecipeBookType, SignatureData,
-        VerifyTokenOrSignature,
+        PlayerActionStatus, PlayerCommandAction, RecipeBookType, ResourcePackLoadStatus,
+        SignatureData, VerifyTokenOrSignature,
     },
     ConnectionState,
 };
@@ -159,6 +159,9 @@ define_server_bound_protocol! {
         book_type: RecipeBookType,
         book_open: bool,
         filter_active: bool
+    },
+    ResourcePackStatus, 0x24, Play => {
+        result: ResourcePackLoadStatus
     },
     SetHeldItemServerBound, 0x28, Play => {
         slot: u16
