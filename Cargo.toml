@@ -19,20 +19,16 @@ serde_json = "1.0.85"
 serde = {version = "1.0.144", features = ["derive"]}
 protocol = { path = "./protocol", version = "*"}
 protocol_core = { path = "./protocol/protocol_core", version = "*"}
+protocol_derive = {path = "./protocol/protocol_derive", version = "*"}
 authentication = { path = "./authentication", version = "*"}
-# data = { path = "./data", version = "*"}
 minecraft_data = { path = "./minecraft_data", version = "*"}
 world = { path = "./world", version = "*"}
-quartz_nbt = "0.2.6"
 dashmap = "5.4.0"
-server_state = { path = "./server_state", version = "*"}
 miniz_oxide = "0.6.2"
 byteorder = "1.4.3"
 hematite-nbt = "0.5.2"
-futures = "0.3.24"
 cipher = "0.4.3"
 thiserror = "1.0.37"
-tokio-scoped = "0.2.0"
 tokio-util = "0.7.4"
 async-trait = "0.1.58"
 modular-bitfield = "0.11.2"

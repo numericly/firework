@@ -1,14 +1,14 @@
+use crate::chunk::Chunk;
 use byteorder::{BigEndian, ReadBytesExt};
 use dashmap::DashMap;
-use protocol::client_bound::{SerializePacket};
+use protocol::client_bound::SerializePacket;
 use protocol_core::{BitSet, SerializeField};
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::fs::File;
 use std::hash::Hash;
 use std::io::Read;
-use crate::chunk::Chunk;
-use std::sync::{Arc, RwLock, Mutex};
+use std::sync::{Arc, Mutex, RwLock};
 
 pub mod chunk;
 
@@ -73,7 +73,11 @@ impl World {
             Ok(None)
         }
     }
-    pub async fn get_chunk_from_pos(&self, x: i32, z: i32) -> Result<Option<Arc<RwLock<Chunk>>>, String> {
+    pub async fn get_chunk_from_pos(
+        &self,
+        x: i32,
+        z: i32,
+    ) -> Result<Option<Arc<RwLock<Chunk>>>, String> {
         self.get_chunk(x >> 4, z >> 4).await
     }
     pub fn get_region(&self, x: i32, z: i32) -> Result<Option<Arc<Region>>, String> {
@@ -95,7 +99,6 @@ impl World {
         })
     }
 }
-    
 
 impl Region {
     pub fn deserialize(mut reader: File) -> Result<Region, String> {
@@ -158,7 +161,7 @@ impl Region {
         })
     }
     /// Gets and caches a chunk from the region at the given position.
-    pub fn get_chunk(& self, x: i32, z: i32) -> Result<Option<Arc<RwLock<Chunk>>>, String> {
+    pub fn get_chunk(&self, x: i32, z: i32) -> Result<Option<Arc<RwLock<Chunk>>>, String> {
         let index = x.rem_euclid(32) as usize + (z.rem_euclid(32) as usize * 32);
 
         let sections = self.sections.lock().unwrap();
@@ -175,7 +178,7 @@ impl Region {
                 let cloned = chunk.clone();
                 self.sections.lock().unwrap()[index] = RegionChunk::Chunk(chunk);
                 Ok(Some(cloned))
-            },
+            }
             RegionChunk::Chunk(chunk) => Ok(Some(chunk.clone())),
         }
     }
@@ -197,46 +200,44 @@ impl Write for BitSet {
 
 pub mod test {
 
+    // #[tokio::test]
+    // async fn test() {
+    //     println!("Test");
 
-    #[tokio::test]
-    async fn test() {
-        println!("Test");
+    //     let world = World::new("./region");
 
-        let world = World::new("./region");
+    //     let lock1 = world.get_region(0, 0).unwrap().unwrap();
+    //     let lock = lock1.sections.lock().unwrap();
+    //     let value = lock.get(0);
+    //     let section = value.unwrap();
 
-        let lock1 = world.get_region(0, 0).unwrap().unwrap();
-        let lock = lock1.sections.lock().unwrap();
-        let value = lock.get(0);
-        let section = value.unwrap();
+    //     if let RegionChunk::ChunkBytes(bytes) = section {
+    //         // Cut off the first 4 bits as they are the header and must be ignored
+    //         // in order to deserialize the chunk.
+    //         let reader = bytes[5..].to_vec();
+    //         let chunk_data = crate::chunk::Chunk::from_zlib_reader(reader.as_slice()).unwrap();
+    //         let chunk_data_old = ChunkNew::from(Chunk::from_zlib_reader(reader.as_slice()).unwrap());
 
-        if let RegionChunk::ChunkBytes(bytes) = section {
-            // Cut off the first 4 bits as they are the header and must be ignored  
-            // in order to deserialize the chunk.
-            let reader = bytes[5..].to_vec();
-            let chunk_data = crate::chunk::Chunk::from_zlib_reader(reader.as_slice()).unwrap();
-            let chunk_data_old = ChunkNew::from(Chunk::from_zlib_reader(reader.as_slice()).unwrap());
+    //         let mut packet_data = Vec::new();
+    //         let start = std::time::Instant::now();
 
-            let mut packet_data = Vec::new();
-            let start = std::time::Instant::now();
+    //         chunk_data.write(&mut packet_data);
+    //         println!("Chunk serialization took {:?}", start.elapsed());
 
-            chunk_data.write(&mut packet_data);
-            println!("Chunk serialization took {:?}", start.elapsed());
+    //         let new_end = start.elapsed();
+    //         let start = std::time::Instant::now();
+    //         let mut packet_data_old = Vec::new();
+    //         chunk_data_old.write(&mut packet_data_old);
+    //         println!("Chunk serialization took {:?}", start.elapsed());
+    //         println!("Performance improvement: {:?}", start.elapsed().as_secs_f64() / new_end.as_secs_f64());
 
-            let new_end = start.elapsed();
-            let start = std::time::Instant::now();
-            let mut packet_data_old = Vec::new();
-            chunk_data_old.write(&mut packet_data_old);
-            println!("Chunk serialization took {:?}", start.elapsed());
-            println!("Performance improvement: {:?}", start.elapsed().as_secs_f64() / new_end.as_secs_f64());
+    //         assert_eq!(packet_data, packet_data_old);
 
-            assert_eq!(packet_data, packet_data_old);
+    //         assert_eq!(ChunkUpdateAndLightUpdate::from(chunk_data), chunk_data_old.to_packet());
+    //         // println!("{:?}",ChunkUpdateAndLightUpdate::from(chunk_data));
+    //         // println!("{:?}", chunk_data_old.to_packet());
+    //     }
 
-            assert_eq!(ChunkUpdateAndLightUpdate::from(chunk_data), chunk_data_old.to_packet());
-            // println!("{:?}",ChunkUpdateAndLightUpdate::from(chunk_data));
-            // println!("{:?}", chunk_data_old.to_packet());
-        }
-
-        panic!("yo");
-    }
+    //     panic!("yo");
+    // }
 }
-

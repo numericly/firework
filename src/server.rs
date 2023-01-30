@@ -3,8 +3,7 @@ use authentication::{authenticate, AuthenticationError, Profile};
 use dashmap::{DashMap, DashSet};
 use protocol::client_bound::{
     EncryptionRequest, LoginDisconnect, LoginSuccess, PlayDisconnect, Pong, ServerStatus,
-    SetCompression, TeleportEntity, UpdateEntityHeadRotation, UpdateEntityPosition,
-    UpdateEntityPositionAndRotation, UpdateEntityRotation,
+    SetCompression,
 };
 use protocol::server_bound::{Ping, ServerBoundPacket};
 use protocol::{ConnectionState, Protocol, ProtocolError};
@@ -59,6 +58,7 @@ macro_rules! read_packet_or_err {
 pub(crate) use read_packet_or_err;
 
 use crate::client::{Client, ClientCommand, ClientEvent, Player};
+use crate::entities::{EntityDataFlags, EntityMetadata, Pose};
 
 #[derive(Debug, Error)]
 pub enum ConnectionError {
@@ -92,7 +92,7 @@ pub enum ConnectionError {
 }
 
 #[derive(Clone, Debug)]
-pub enum Entity {}
+pub enum Entities {}
 
 #[derive(Debug, Clone)]
 pub struct Vec3 {
@@ -394,7 +394,7 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
 
 pub struct Server<T> {
     pub world: Arc<World>,
-    pub entities: Arc<DashMap<i32, Entity>>,
+    pub entities: Arc<DashMap<i32, Entities>>,
     pub player_list: Arc<DashMap<u128, Client>>,
     lowest_free_id: Mutex<i32>,
 
@@ -441,6 +441,20 @@ pub trait ServerHandler {
     ) -> Result<Option<Rotation>, ConnectionError> {
         Ok(Some(rotation))
     }
+    async fn on_player_sneak(
+        &self,
+        client: &Client,
+        sneaking: bool,
+    ) -> Result<Option<bool>, ConnectionError> {
+        Ok(Some(sneaking))
+    }
+    async fn on_player_sprint(
+        &self,
+        client: &Client,
+        sprinting: bool,
+    ) -> Result<Option<bool>, ConnectionError> {
+        Ok(Some(sprinting))
+    }
 }
 
 impl<T> Server<T>
@@ -467,12 +481,6 @@ where
         let (to_client_sender, mut to_client_receiver) = broadcast::channel::<ClientCommand>(10);
         let (from_client_sender, from_client_receiver) = broadcast::channel::<ClientEvent>(10);
 
-        to_client_sender
-            .send(ClientCommand::SendSystemMessage {
-                message: r#"{"text": "test"}"#.to_string(),
-            })
-            .unwrap();
-
         // generate client
         let uuid = player.uuid.clone();
         let client = {
@@ -482,7 +490,6 @@ where
                 limbo_player.entity_id,
                 uuid.clone(),
                 to_client_sender,
-                from_client_receiver,
             );
 
             // MAY DEADLOCK HERE
@@ -497,6 +504,8 @@ where
         };
 
         client.load_world(&self).await?;
+
+        self.broadcast_player_join(&client).await?;
 
         let token = CancellationToken::new();
 
@@ -620,6 +629,8 @@ where
             }
         };
 
+        self.broadcast_player_leave(&client).await;
+
         drop(client);
 
         self.player_list.remove(&uuid);
@@ -681,6 +692,26 @@ where
 
         Ok(())
     }
+    pub async fn handle_sneaking(
+        &self,
+        client: &Client,
+        sneaking: bool,
+    ) -> Result<(), ConnectionError> {
+        if let Some(sneaking) = self.handler.on_player_sneak(client, sneaking).await? {
+            client.player.write().await.sneaking = sneaking;
+            let metadata = vec![
+                EntityMetadata::EntityPose(if sneaking {
+                    Pose::Sneaking
+                } else {
+                    Pose::Standing
+                }),
+                EntityMetadata::EntityFlags(EntityDataFlags::new().with_is_crouching(sneaking)),
+            ];
+            self.broadcast_entity_metadata_update(client.entity_id, metadata)
+                .await?;
+        }
+        Ok(())
+    }
     pub async fn broadcast_chat(&self, message: String) -> Result<(), ConnectionError> {
         // TODO: join futures
         for client in self.player_list.iter() {
@@ -711,6 +742,39 @@ where
                     on_ground,
                 )
                 .await?;
+        }
+        Ok(())
+    }
+    pub async fn broadcast_entity_metadata_update(
+        &self,
+        entity_id: i32,
+        metadata: Vec<EntityMetadata>,
+    ) -> Result<(), ConnectionError> {
+        for client in self.player_list.iter() {
+            if entity_id == client.entity_id {
+                continue;
+            }
+            client
+                .update_entity_metadata(entity_id, metadata.clone())
+                .await?;
+        }
+        Ok(())
+    }
+    pub async fn broadcast_player_leave(&self, client: &Client) -> Result<(), ConnectionError> {
+        for other_client in self.player_list.iter() {
+            if other_client.entity_id == client.entity_id {
+                continue;
+            }
+            other_client.remove_player(&client).await?;
+        }
+        Ok(())
+    }
+    pub async fn broadcast_player_join(&self, client: &Client) -> Result<(), ConnectionError> {
+        for other_client in self.player_list.iter() {
+            if other_client.entity_id == client.entity_id {
+                continue;
+            }
+            other_client.add_player(&client).await?;
         }
         Ok(())
     }

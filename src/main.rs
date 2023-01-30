@@ -8,11 +8,12 @@ use world::World;
 
 mod client;
 // mod commands;
+mod entities;
 mod server;
 
 struct LobbyServerHandler {}
 
-#[async_trait]
+// #[async_trait]
 impl ServerHandler for LobbyServerHandler {
     fn new() -> Self {
         Self {}

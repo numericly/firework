@@ -45,26 +45,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "datasize"
-version = "0.2.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6eeb75c8424b31fc9e13aa703f73e40aa9b7e3c0d22059162f61abe18f24128b"
-dependencies = [
- "datasize_derive",
-]
-
-[[package]]
-name = "datasize_derive"
-version = "0.2.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ecd3ee63556774dd6d8a6b98416475dd5e35872985699bbb19c4d7ad4ccecaff"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "flate2"
 version = "1.0.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -103,7 +83,6 @@ name = "minecraft_data"
 version = "0.1.0"
 dependencies = [
  "convert_case",
- "datasize",
  "hematite-nbt",
  "lazy_static",
  "proc-macro2",
@@ -111,7 +90,6 @@ dependencies = [
  "rust-format",
  "serde",
  "serde_json",
- "syn",
 ]
 
 [[package]]

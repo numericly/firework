@@ -199,6 +199,9 @@ define_client_bound_protocol! {
         teleport_id: VarInt,
         dismount_vehicle: bool
     },
+    RemoveEntities, 0x3B, Play => {
+        entity_ids: Vec<VarInt>
+    },
     UpdateEntityHeadRotation, 0x3F, Play => {
         entity_id: VarInt,
         yaw: i8
@@ -212,6 +215,10 @@ define_client_bound_protocol! {
     },
     SetDefaultSpawn, 0x4D, Play => {
         position: Position
+    },
+    SetEntityMetadata, 0x50, Play => {
+        entity_id: VarInt,
+        metadata: UnsizedVec<u8>
     },
     SystemChatMessage, 0x62, Play => {
         message: String,

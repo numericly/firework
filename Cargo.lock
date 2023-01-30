@@ -26,12 +26,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4b46cbb362ab8752921c97e041f5e366ee6297bd428a31275b9fcf1e380f7299"
 
 [[package]]
-name = "anyhow"
-version = "1.0.64"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b9a8f622bcf6ff3df478e9deba3e03e4e04b300f8e6a139e192c05fa3490afc7"
-
-[[package]]
 name = "async-trait"
 version = "0.1.58"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -135,15 +129,6 @@ name = "cesu8"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6d43a04d8753f35258c91f8ec639f792891f748a1edbd759cf1dcea3382ad83c"
-
-[[package]]
-name = "cfb-mode"
-version = "0.8.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "738b8d467867f80a71351933f70461f5b56f24d5c93e0cf216e59229c968d330"
-dependencies = [
- "cipher",
-]
 
 [[package]]
 name = "cfb8"
@@ -417,26 +402,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "datasize"
-version = "0.2.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6eeb75c8424b31fc9e13aa703f73e40aa9b7e3c0d22059162f61abe18f24128b"
-dependencies = [
- "datasize_derive",
-]
-
-[[package]]
-name = "datasize_derive"
-version = "0.2.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ecd3ee63556774dd6d8a6b98416475dd5e35872985699bbb19c4d7ad4ccecaff"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
 name = "der"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -523,28 +488,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "futures"
-version = "0.3.24"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f21eda599937fba36daeb58a22e8f5cee2d14c4a17b5b7739c7c8e5e3b8230c"
-dependencies = [
- "futures-channel",
- "futures-core",
- "futures-executor",
- "futures-io",
- "futures-sink",
- "futures-task",
- "futures-util",
-]
-
-[[package]]
 name = "futures-channel"
 version = "0.3.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "30bdd20c28fadd505d0fd6712cdfcb0d4b5648baf45faef7f852afb2399bb050"
 dependencies = [
  "futures-core",
- "futures-sink",
 ]
 
 [[package]]
@@ -552,34 +501,6 @@ name = "futures-core"
 version = "0.3.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4e5aa3de05362c3fb88de6531e6296e85cde7739cccad4b9dfeeb7f6ebce56bf"
-
-[[package]]
-name = "futures-executor"
-version = "0.3.24"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9ff63c23854bee61b6e9cd331d523909f238fc7636290b96826e9cfa5faa00ab"
-dependencies = [
- "futures-core",
- "futures-task",
- "futures-util",
-]
-
-[[package]]
-name = "futures-io"
-version = "0.3.24"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bbf4d2a7a308fd4578637c0b17c7e1c7ba127b8f6ba00b29f717e9655d85eb68"
-
-[[package]]
-name = "futures-macro"
-version = "0.3.24"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "42cd15d1c7456c04dbdf7e88bcd69760d74f3a798d6444e16974b505b0e62f17"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
 
 [[package]]
 name = "futures-sink"
@@ -599,16 +520,10 @@ version = "0.3.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "44fb6cb1be61cc1d2e43b262516aafcf63b241cffdb1d3fa115f91d9c7b09c90"
 dependencies = [
- "futures-channel",
  "futures-core",
- "futures-io",
- "futures-macro",
- "futures-sink",
  "futures-task",
- "memchr",
  "pin-project-lite",
  "pin-utils",
- "slab",
 ]
 
 [[package]]
@@ -909,7 +824,6 @@ dependencies = [
  "cipher",
  "criterion",
  "dashmap",
- "futures",
  "hematite-nbt",
  "lazy_static",
  "minecraft_data",
@@ -918,18 +832,16 @@ dependencies = [
  "num-bigint",
  "protocol",
  "protocol_core",
- "quartz_nbt",
+ "protocol_derive",
  "rand",
  "reqwest",
  "rsa",
  "rsa-der",
  "serde",
  "serde_json",
- "server_state",
  "sha1",
  "thiserror",
  "tokio",
- "tokio-scoped",
  "tokio-util",
  "world",
 ]
@@ -939,7 +851,6 @@ name = "minecraft_data"
 version = "0.1.0"
 dependencies = [
  "convert_case",
- "datasize",
  "hematite-nbt",
  "lazy_static",
  "proc-macro2",
@@ -947,7 +858,6 @@ dependencies = [
  "rust-format",
  "serde",
  "serde_json",
- "syn",
 ]
 
 [[package]]
@@ -1277,10 +1187,8 @@ name = "protocol"
 version = "0.1.0"
 dependencies = [
  "aes",
- "async-trait",
  "authentication",
  "byteorder",
- "cfb-mode",
  "cfb8",
  "hematite-nbt",
  "minecraft_data",
@@ -1288,8 +1196,6 @@ dependencies = [
  "modular-bitfield",
  "protocol_core",
  "protocol_derive",
- "quartz_nbt",
- "rand",
  "thiserror",
  "tokio",
 ]
@@ -1301,7 +1207,6 @@ dependencies = [
  "byteorder",
  "hematite-nbt",
  "minecraft_data",
- "modular-bitfield",
  "thiserror",
 ]
 
@@ -1312,30 +1217,6 @@ dependencies = [
  "darling",
  "proc-macro2",
  "protocol_core",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "quartz_nbt"
-version = "0.2.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "348031720b71761481d77969dcb3c89ab06f04132ee1503aca1bd9313eef5e67"
-dependencies = [
- "anyhow",
- "byteorder",
- "cesu8",
- "flate2",
- "quartz_nbt_macros",
-]
-
-[[package]]
-name = "quartz_nbt_macros"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "289baa0c8a4d1f840d2de528a7f8c29e0e9af48b3018172b3edad4f716e8daed"
-dependencies = [
- "proc-macro2",
  "quote",
  "syn",
 ]
@@ -1606,18 +1487,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "server_state"
-version = "0.1.0"
-dependencies = [
- "dashmap",
- "rand",
- "rsa",
- "rsa-der",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "sha1"
 version = "0.10.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1840,27 +1709,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f7d995660bd2b7f8c1568414c1126076c13fbb725c40112dc0120b78eb9b717b"
 dependencies = [
  "native-tls",
- "tokio",
-]
-
-[[package]]
-name = "tokio-scoped"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e4beb8ba13bc53ac53ce1d52b42f02e5d8060f0f42138862869beb769722b256"
-dependencies = [
- "tokio",
- "tokio-stream",
-]
-
-[[package]]
-name = "tokio-stream"
-version = "0.1.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d660770404473ccd7bc9f8b28494a811bc18542b915c0855c51e8f419d5223ce"
-dependencies = [
- "futures-core",
- "pin-project-lite",
  "tokio",
 ]
 
@@ -2162,11 +2010,8 @@ dependencies = [
  "minecraft_data",
  "protocol",
  "protocol_core",
- "quartz_nbt",
- "rand",
  "serde",
  "serde_json",
- "server_state",
  "tokio",
 ]
 

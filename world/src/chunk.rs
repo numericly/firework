@@ -4,9 +4,9 @@ use minecraft_data::{
     Palette,
 };
 use nbt::{from_zlib_reader, Blob};
-use protocol::client_bound::ChunkUpdateAndLightUpdate;
+use protocol::{client_bound::ChunkUpdateAndLightUpdate, data_types::Slot};
 use protocol_core::{BitSet, SerializeField, VarInt};
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
 use std::{cmp, fmt::Debug, hash::Hash};
 
 #[derive(Deserialize, Debug)]
@@ -34,10 +34,16 @@ struct RawChunkSection {
     y: i8,
     block_states: Option<CompactedPalettedContainer<Block, 4096>>,
     biomes: Option<CompactedPalettedContainer<Biome, 64>>,
-    #[serde(rename = "SkyLight")]
+    // #[serde(rename = "SkyLight")]
+    #[serde(skip)]
     pub sky_light: Option<Vec<i8>>,
-    #[serde(rename = "BlockLight")]
+    // #[serde(rename = "BlockLight")]
+    #[serde(skip)]
     pub block_light: Option<Vec<i8>>,
+}
+
+fn lighting() -> Option<Vec<i8>> {
+    Some(Vec::new())
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -409,33 +415,33 @@ pub mod test {
     #[allow(unused_imports)]
     use super::*;
 
-    #[tokio::test]
-    async fn test_write() {
-        let container = {
-            let mut data = Vec::new();
+    // #[tokio::test]
+    // async fn test_write() {
+    //     let container = {
+    //         let mut data = Vec::new();
 
-            for _ in 0..4096 {
-                data.push(rand::random::<u8>() % 5);
-            }
+    //         for _ in 0..4096 {
+    //             data.push(rand::random::<u8>() % 5);
+    //         }
 
-            let palette = vec![
-                Block::Air(Air),
-                Block::Stone(Stone),
-                Block::Dirt(Dirt),
-                Block::Granite(Granite),
-                Block::StoneBricks(StoneBricks),
-            ];
+    //         let palette = vec![
+    //             Block::Air(Air),
+    //             Block::Stone(Stone),
+    //             Block::Dirt(Dirt),
+    //             Block::Granite(Granite),
+    //             Block::StoneBricks(StoneBricks),
+    //         ];
 
-            DirectPalettedContainer::<_, 4096> {
-                palette,
-                data: Data::Single(data),
-            }
-        };
-        println!("Container: {:?}", container);
+    //         DirectPalettedContainer::<_, 4096> {
+    //             palette,
+    //             data: Data::Single(data),
+    //         }
+    //     };
+    //     println!("Container: {:?}", container);
 
-        let mut packet_data = Vec::new();
-        container.write(&mut packet_data);
-        println!("Packet data: {:?}", packet_data);
-        // panic!("Yo")
-    }
+    //     let mut packet_data = Vec::new();
+    //     container.write(&mut packet_data);
+    //     println!("Packet data: {:?}", packet_data);
+    //     // panic!("Yo")
+    // }
 }

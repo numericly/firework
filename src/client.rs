@@ -1,19 +1,22 @@
-use crate::server::{read_packet_or_err, ConnectionError, Rotation, Server, ServerHandler, Vec3};
+use crate::{
+    entities::{DisplayedSkinPartsFlags, EntityMetadata, END_INDEX},
+    server::{read_packet_or_err, ConnectionError, Rotation, Server, ServerHandler, Vec3},
+};
 use authentication::Profile;
 use minecraft_data::tags::{REGISTRY, TAGS};
 use protocol::{
     client_bound::{
         ChangeDifficulty, ClientBoundKeepAlive, Commands, InitializeWorldBorder, LoginWorld,
-        PlayerAbilities, PlayerInfo, SetCenterChunk, SetContainerContent, SetHeldItem, SetRecipes,
-        SetTags, SpawnPlayer, SynchronizePlayerPosition, SystemChatMessage, TeleportEntity,
-        UpdateEntityHeadRotation, UpdateEntityPosition, UpdateEntityPositionAndRotation,
-        UpdateEntityRotation,
+        PlayerAbilities, PlayerInfo, RemoveEntities, SerializePacket, SetCenterChunk,
+        SetContainerContent, SetEntityMetadata, SetHeldItem, SetRecipes, SetTags, SpawnPlayer,
+        SynchronizePlayerPosition, SystemChatMessage, TeleportEntity, UpdateEntityHeadRotation,
+        UpdateEntityPosition, UpdateEntityPositionAndRotation, UpdateEntityRotation,
     },
     data_types::{
-        Arm, CommandNode, FloatProps, NodeType, Parser, PlayerAbilityFlags, PlayerInfoAction,
-        PlayerInfoAddPlayer, PlayerPositionFlags, Slot,
+        Arm, CommandNode, FloatProps, NodeType, Parser, PlayerAbilityFlags, PlayerCommandAction,
+        PlayerInfoAction, PlayerInfoAddPlayer, PlayerPositionFlags, Slot,
     },
-    server_bound::{ChatMessage, ServerBoundPacket},
+    server_bound::{ChatMessage, PlayerCommand, ServerBoundPacket},
     ConnectionState, Protocol,
 };
 use protocol_core::{UnsizedVec, VarInt};
@@ -162,7 +165,6 @@ pub struct Client {
     pub uuid: u128,
     pub entity_id: i32,
     pub to_client: broadcast::Sender<ClientCommand>,
-    pub from_client: Mutex<broadcast::Receiver<ClientEvent>>,
     connection: Arc<Protocol>,
     ping_acknowledged: Mutex<bool>,
 }
@@ -174,7 +176,6 @@ impl Client {
         entity_id: i32,
         uuid: u128,
         to_client: broadcast::Sender<ClientCommand>,
-        from_client: broadcast::Receiver<ClientEvent>,
     ) -> Client {
         Client {
             player: RwLock::new(player),
@@ -182,7 +183,6 @@ impl Client {
             uuid,
             entity_id,
             to_client,
-            from_client: Mutex::new(from_client),
             ping_acknowledged: Mutex::new(true),
         }
     }
@@ -244,7 +244,8 @@ impl Client {
 
         self.connection.write_packet(player_abilities).await?;
 
-        read_packet_or_err!(ClientInformation, self.connection, ConnectionState::Play);
+        let client_information =
+            read_packet_or_err!(ClientInformation, self.connection, ConnectionState::Play);
 
         {
             let player = self.player.read().await;
@@ -348,6 +349,21 @@ impl Client {
                 display_name: None,
                 has_signature: false,
             });
+
+            client
+                .update_entity_metadata(
+                    self.entity_id,
+                    vec![EntityMetadata::PlayerDisplayedSkinParts(
+                        DisplayedSkinPartsFlags::new()
+                            .with_cape(true)
+                            .with_hat(true)
+                            .with_left_pants(true)
+                            .with_right_pants(true)
+                            .with_left_sleeve(true)
+                            .with_right_sleeve(true),
+                    )],
+                )
+                .await?;
         }
 
         let player_info = PlayerInfo {
@@ -460,6 +476,27 @@ impl Client {
             }
             ServerBoundPacket::ChatMessage(ChatMessage { message }) => {
                 server.handle_chat(self, message).await?
+            }
+            ServerBoundPacket::PlayerCommand(PlayerCommand {
+                entity_id,
+                action,
+                action_parameter,
+            }) => {
+                if i32::from(entity_id) != self.entity_id {
+                    return Ok(());
+                }
+
+                match action {
+                    PlayerCommandAction::StartSprinting => {}
+                    PlayerCommandAction::StopSprinting => {}
+                    PlayerCommandAction::StartSneaking => {
+                        server.handle_sneaking(self, true).await?
+                    }
+                    PlayerCommandAction::StopSneaking => {
+                        server.handle_sneaking(self, false).await?
+                    }
+                    _ => {}
+                }
             }
             ServerBoundPacket::SetPlayerPositionAndRotation(pos_rot) => {
                 server
@@ -643,344 +680,82 @@ impl Client {
         };
         Ok(())
     }
+    pub async fn update_entity_metadata(
+        &self,
+        entity_id: i32,
+        metadata: Vec<EntityMetadata>,
+    ) -> Result<(), ConnectionError> {
+        let mut entity_metadata_inner = Vec::new();
+        for meta in metadata {
+            meta.serialize(&mut entity_metadata_inner);
+        }
+        entity_metadata_inner.push(END_INDEX);
+        let entity_metadata = SetEntityMetadata {
+            entity_id: VarInt(entity_id),
+            metadata: UnsizedVec(entity_metadata_inner),
+        };
+        self.connection.write_packet(entity_metadata).await?;
+        Ok(())
+    }
+    pub async fn remove_player(&self, client: &Client) -> Result<(), ConnectionError> {
+        let player_info = PlayerInfo {
+            action: PlayerInfoAction::RemovePlayer(vec![client.uuid]),
+        };
+        self.connection.write_packet(player_info).await?;
+        let remove_entities = RemoveEntities {
+            entity_ids: vec![VarInt(client.entity_id)],
+        };
+        self.connection.write_packet(remove_entities).await?;
+        Ok(())
+    }
+    pub async fn add_player(&self, client: &Client) -> Result<(), ConnectionError> {
+        let player_info = {
+            let player = client.player.read().await;
+            PlayerInfo {
+                action: PlayerInfoAction::AddPlayer(vec![PlayerInfoAddPlayer {
+                    uuid: player.uuid,
+                    name: player.profile.name.clone(),
+                    properties: player.profile.properties.clone(),
+                    gamemode: VarInt(player.gamemode as i32),
+                    ping: VarInt(0),
+                    display_name: None,
+                    has_signature: false,
+                }]),
+            }
+        };
+
+        self.connection.write_packet(player_info).await?;
+
+        let spawn_player = {
+            let player = client.player.read().await;
+
+            SpawnPlayer {
+                entity_id: VarInt(client.entity_id),
+                uuid: client.uuid,
+                x: player.position.x,
+                y: player.position.y,
+                z: player.position.z,
+                yaw: 0,
+                pitch: 0,
+            }
+        };
+
+        self.connection.write_packet(spawn_player).await?;
+
+        self.update_entity_metadata(
+            client.entity_id,
+            vec![EntityMetadata::PlayerDisplayedSkinParts(
+                DisplayedSkinPartsFlags::new()
+                    .with_cape(true)
+                    .with_hat(true)
+                    .with_left_pants(true)
+                    .with_right_pants(true)
+                    .with_left_sleeve(true)
+                    .with_right_sleeve(true)
+                    .with_jacket(true),
+            )],
+        )
+        .await?;
+        Ok(())
+    }
 }
-//     pub async fn register_packet_listener(
-//         &self,
-//         server: Arc<ServerManager>,
-//         tx: broadcast::Sender<ClientEvent>,
-//     ) -> Result<(), ConnectionError> {
-//         let ping = ClientBoundKeepAlive {
-//             id: rand::thread_rng().gen(),
-//         };
-
-//         self.connection.write_packet(ping).await?;
-
-//         loop {
-//             let packet = self.connection.read_and_serialize().await?;
-//             self.handle_packet(packet, server.clone(), tx.clone())
-//                 .await?;
-//         }
-//     }
-//     pub async fn register_command_listener(
-//         &self,
-//         server: Arc<ServerManager>,
-//         mut rx: broadcast::Receiver<ClientCommand>,
-//         tx: broadcast::Sender<ClientEvent>,
-//         token: CancellationToken,
-//     ) -> Result<(), ConnectionError> {
-//         loop {
-//             select! {
-//                 command = rx.recv() => {
-//                     let command = command?;
-//                     self.handle_command(command, server.clone(), tx.clone()).await?;
-//                 }
-//                 _ = token.cancelled() => {
-//                     for _ in 0..rx.len() {
-//                         let command = rx.recv().await?;
-//                         self.handle_command(command, server.clone(), tx.clone()).await?;
-//                     }
-//                     return Ok(());
-//                 }
-//             }
-//         }
-//     }
-//     async fn handle_packet(
-//         &self,
-//         packet: ServerBoundPacket,
-//         _server: Arc<ServerManager>,
-//         tx: broadcast::Sender<ClientEvent>,
-//     ) -> Result<(), ConnectionError> {
-//         match packet {
-//             ServerBoundPacket::SetPlayerRotation(rot) => {
-//                 let mut player = self.player.write().await;
-//                 player.rotation.yaw = rot.yaw;
-//                 player.rotation.pitch = rot.pitch;
-
-//                 tx.send(ClientEvent::Rotation {
-//                     rotation: player.rotation.clone(),
-//                 })?;
-//             }
-//             ServerBoundPacket::SetPlayerPosition(pos) => {
-//                 if {
-//                     let mut player = self.player.write().await;
-//                     let moved_chunks = (player.position.x / 16.0).floor() as i32
-//                         != (pos.x / 16.0).floor() as i32
-//                         || (player.position.z / 16.0).floor() as i32
-//                             != (pos.z / 16.0).floor() as i32;
-//                     let old_pos = player.position.clone();
-//                     player.position.x = pos.x;
-//                     player.position.y = pos.y;
-//                     player.position.z = pos.z;
-//                     player.on_ground = pos.on_ground;
-
-//                     tx.send(ClientEvent::Move {
-//                         old_pos,
-//                         pos: player.position.clone(),
-//                         on_ground: pos.on_ground,
-//                     })?;
-
-//                     moved_chunks
-//                 } {
-//                     let set_center_chunk = {
-//                         let player = self.player.write().await;
-//                         let chunk_x = (player.position.x / 16.0).floor() as i32;
-//                         let chunk_z = (player.position.z / 16.0).floor() as i32;
-
-//                         tx.send(ClientEvent::MoveChunk {
-//                             x: chunk_x,
-//                             z: chunk_z,
-//                         })?;
-
-//                         SetCenterChunk {
-//                             x: VarInt(chunk_x),
-//                             z: VarInt(chunk_z),
-//                         }
-//                     };
-//                     self.connection.write_packet(set_center_chunk).await?;
-//                 }
-//             }
-//             ServerBoundPacket::SetPlayerPositionAndRotation(pos_rot) => {
-//                 if {
-//                     let mut player = self.player.write().await;
-//                     let moved_chunks = (player.position.x / 16.0).floor() as i32
-//                         != (pos_rot.x / 16.0).floor() as i32
-//                         || (player.position.z / 16.0).floor() as i32
-//                             != (pos_rot.z / 16.0).floor() as i32;
-//                     let old_pos = player.position.clone();
-//                     player.position.x = pos_rot.x;
-//                     player.position.y = pos_rot.y;
-//                     player.position.z = pos_rot.z;
-//                     player.on_ground = pos_rot.on_ground;
-//                     player.rotation.yaw = pos_rot.yaw;
-//                     player.rotation.pitch = pos_rot.pitch;
-
-//                     tx.send(ClientEvent::MoveAndRotate {
-//                         old_pos,
-//                         pos: player.position.clone(),
-//                         rotation: player.rotation.clone(),
-//                         on_ground: pos_rot.on_ground,
-//                     })?;
-
-//                     moved_chunks
-//                 } {
-//                     let set_center_chunk = {
-//                         let player = self.player.write().await;
-//                         let chunk_x = (player.position.x / 16.0).floor() as i32;
-//                         let chunk_z = (player.position.z / 16.0).floor() as i32;
-
-//                         tx.send(ClientEvent::MoveChunk {
-//                             x: chunk_x,
-//                             z: chunk_z,
-//                         })?;
-
-//                         SetCenterChunk {
-//                             x: VarInt(chunk_x),
-//                             z: VarInt(chunk_z),
-//                         }
-//                     };
-//                     self.connection.write_packet(set_center_chunk).await?;
-//                 }
-//             }
-//             ServerBoundPacket::ServerBoundKeepAlive(_) => {
-//                 let connection = self.connection.clone();
-//                 #[allow(unused_must_use)]
-//                 tokio::task::spawn(async move {
-//                     sleep(Duration::from_secs(15)).await;
-//                     let keep_alive = ClientBoundKeepAlive {
-//                         id: rand::thread_rng().gen(),
-//                     };
-//                     connection.write_packet(keep_alive).await;
-//                 });
-//             }
-//             ServerBoundPacket::PlayerCommand(command) => match command.action {
-//                 PlayerCommandAction::StartSneaking => {
-//                     let mut player = self.player.write().await;
-//                     player.sneaking = true;
-//                     tx.send(ClientEvent::Sneaking { sneaking: true })?;
-//                 }
-//                 PlayerCommandAction::StopSneaking => {
-//                     let mut player = self.player.write().await;
-//                     player.sneaking = false;
-//                     tx.send(ClientEvent::Sneaking { sneaking: false })?;
-//                 }
-//                 PlayerCommandAction::LeaveBed => todo!(),
-//                 PlayerCommandAction::StartSprinting => {
-//                     let mut player = self.player.write().await;
-//                     player.sprinting = true;
-//                     tx.send(ClientEvent::Sprinting { sprinting: true })?;
-//                 }
-//                 PlayerCommandAction::StopSprinting => {
-//                     let mut player = self.player.write().await;
-//                     player.sprinting = false;
-//                     tx.send(ClientEvent::Sprinting { sprinting: false })?;
-//                 }
-//                 PlayerCommandAction::StartJumpWithHorse => todo!(),
-//                 PlayerCommandAction::StopJumpWithHorse => todo!(),
-//                 PlayerCommandAction::OpenHorseInventory => todo!(),
-//                 PlayerCommandAction::StartFlyingWithElytra => {
-//                     println!("Start flying with elytra");
-//                 }
-//             },
-//             ServerBoundPacket::PlayerAbilitiesServerBound(abilities) => {
-//                 let mut player = self.player.write().await;
-//                 player.flying = abilities.flags.flying();
-//             }
-//             ServerBoundPacket::SwingArm(arm) => {
-//                 tx.send(ClientEvent::SwingArm { hand: arm.arm })?;
-//             }
-//             ServerBoundPacket::ChatMessage(message) => {
-//                 let ChatMessage { message } = message;
-//                 let event = ClientEvent::ChatMessage {
-//                     message: message.clone(),
-//                 };
-//                 tx.send(event)?;
-
-//                 let chat_message = {
-//                     let player = self.player.read().await;
-//                     SystemChatMessage {
-//                         action_bar: false,
-//                         message: json!({
-//                             "text": format!("<{}> {}", player.profile.name, message),
-//                             "color": "#800000",
-//                             "clickEvent": {
-//                                 "action": "open_url",
-//                                 "value": "https://www.google.com"
-//                             },
-//                             "hoverEvent": {
-//                                 "action": "show_text",
-//                                 "value": {
-//                                     "text": "https://www.google.com",
-//                                     "color": "#3abff8",
-//                                     "underlined": true,
-//                                 },
-//                             }
-//                         })
-//                         .to_string(),
-//                     }
-//                 };
-//                 self.connection.write_packet(chat_message).await?;
-//             }
-//             _ => {
-//                 println!("Received packet: {:?}", packet);
-//             }
-//         }
-//         Ok(())
-//     }
-//     async fn handle_command(
-//         &self,
-//         command: ClientCommand,
-//         server: Arc<ServerManager>,
-//         _tx: broadcast::Sender<ClientEvent>,
-//     ) -> Result<(), ConnectionError> {
-//         match command {
-//             ClientCommand::SpawnPlayer { uuid } => {
-//                 let client = server.player_list.get(&uuid).unwrap();
-
-//                 let (player_info, spawn_player) = {
-//                     let player = client.player.read().await;
-//                     (
-//                         PlayerInfo {
-//                             action: PlayerInfoAction::AddPlayer(vec![PlayerInfoAddPlayer {
-//                                 uuid: player.uuid,
-//                                 name: player.profile.name.clone(),
-//                                 properties: player.profile.properties.clone(),
-//                                 gamemode: VarInt(player.gamemode as i32),
-//                                 ping: VarInt(0),
-//                                 display_name: None,
-//                                 has_signature: false,
-//                             }]),
-//                         },
-//                         SpawnPlayer {
-//                             entity_id: VarInt(client.entity_id),
-//                             uuid,
-//                             x: player.position.x,
-//                             y: player.position.y,
-//                             z: player.position.z,
-//                             yaw: 0,
-//                             pitch: 0,
-//                         },
-//                     )
-//                 };
-
-//                 println!("Spawning player: {:?}", spawn_player);
-
-//                 self.connection.write_packet(player_info).await?;
-//                 self.connection.write_packet(spawn_player).await?;
-//             }
-//             ClientCommand::MoveEntity {
-//                 entity_id,
-//                 delta_x,
-//                 delta_y,
-//                 delta_z,
-//                 on_ground,
-//                 rotation,
-//             } => match rotation {
-//                 Some(_rotation) => {
-//                     let entity_move_rotate = UpdateEntityPositionAndRotation {
-//                         entity_id: VarInt(entity_id),
-//                         delta_x,
-//                         delta_y,
-//                         delta_z,
-//                         yaw: 0,
-//                         pitch: 0,
-//                         on_ground,
-//                     };
-//                     self.connection.write_packet(entity_move_rotate).await?;
-//                 }
-//                 None => {
-//                     let entity_move_rotate = UpdateEntityPosition {
-//                         entity_id: VarInt(entity_id),
-//                         delta_x,
-//                         delta_y,
-//                         delta_z,
-//                         on_ground,
-//                     };
-//                     self.connection.write_packet(entity_move_rotate).await?;
-//                 }
-//             },
-//             ClientCommand::RotateEntity {
-//                 entity_id,
-//                 rotation: _rotation,
-//                 on_ground,
-//             } => {
-//                 let entity_rotate = UpdateEntityRotation {
-//                     entity_id: VarInt(entity_id),
-//                     yaw: 0,
-//                     pitch: 0,
-//                     on_ground,
-//                 };
-//                 self.connection.write_packet(entity_rotate).await?;
-//             }
-//             ClientCommand::TeleportEntity {
-//                 entity_id,
-//                 position,
-//                 rotation: _rotation,
-//                 on_ground,
-//             } => {
-//                 let entity_teleport = TeleportEntity {
-//                     entity_id: VarInt(entity_id),
-//                     x: position.x,
-//                     y: position.y,
-//                     z: position.z,
-//                     yaw: 0,
-//                     pitch: 0,
-//                     on_ground,
-//                 };
-//                 self.connection.write_packet(entity_teleport).await?;
-//             }
-//             ClientCommand::SendSystemMessage { message } => {
-//                 let chat_message = SystemChatMessage {
-//                     message: message,
-//                     action_bar: false,
-//                 };
-
-//                 println!("Sending system message: {:?}", chat_message);
-
-//                 self.connection.write_packet(chat_message).await?;
-//             } // command => {
-//               //     println!("Received command: {:?}", command);
-//               // }
-//         };
-//         Ok(())
-//     }
-// }

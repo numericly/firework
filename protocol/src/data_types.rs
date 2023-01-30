@@ -139,6 +139,10 @@ pub struct BlockEntity {}
 #[protocol(typ = "protocol_core::VarInt")]
 pub enum PlayerInfoAction {
     AddPlayer(Vec<PlayerInfoAddPlayer>),
+    UpdateGamemode,
+    UpdateLatency,
+    UpdateDisplayName,
+    RemovePlayer(Vec<u128>),
 }
 
 #[derive(Debug, PartialEq, SerializeField)]
