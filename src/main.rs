@@ -33,14 +33,10 @@ impl ServerProxy for MiniGameProxy {
         let lobby_server = Arc::new(Server::new(World::new("./world/region")));
         Self { lobby_server }
     }
-    async fn player_connection(&self, limbo_player: LimboPlayer) -> Result<(), ConnectionError> {
-        println!(
-            "Player connected: {}, uuid: {:x?}",
-            limbo_player.profile.name, limbo_player.uuid
-        );
+    async fn handle_connection(&self, limbo_player: LimboPlayer) -> Result<(), ConnectionError> {
         self.lobby_server
             .clone()
-            .handle_player(limbo_player)
+            .handle_connection(limbo_player)
             .await?;
         Ok(())
     }

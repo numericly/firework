@@ -2,8 +2,7 @@ use async_trait::async_trait;
 use authentication::{authenticate, AuthenticationError, Profile};
 use dashmap::{DashMap, DashSet};
 use protocol::client_bound::{
-    EncryptionRequest, LoginDisconnect, LoginSuccess, PlayDisconnect, Pong, ServerStatus,
-    SetCompression,
+    EncryptionRequest, LoginDisconnect, LoginSuccess, Pong, ServerStatus, SetCompression,
 };
 use protocol::server_bound::{Ping, ServerBoundPacket};
 use protocol::{ConnectionState, Protocol, ProtocolError};
@@ -57,7 +56,7 @@ macro_rules! read_packet_or_err {
 
 pub(crate) use read_packet_or_err;
 
-use crate::client::{Client, ClientCommand, ClientEvent, Player};
+use crate::client::{Client, ClientCommand, Player};
 use crate::entities::{EntityDataFlags, EntityMetadata, Pose};
 
 #[derive(Debug, Error)]
@@ -89,6 +88,8 @@ pub enum ConnectionError {
     },
     #[error("client timed out")]
     ClientTimedOut,
+    #[error("client disconnected")]
+    ClientDisconnected { reason: String },
 }
 
 #[derive(Clone, Debug)]
@@ -176,7 +177,7 @@ pub struct ServerManager<T, const PLAYER_RESERVED_ENTITY_IDS: i32 = 1_000_000> {
 #[async_trait]
 pub trait ServerProxy {
     fn new() -> Self;
-    async fn player_connection(&self, limbo_player: LimboPlayer) -> Result<(), ConnectionError>;
+    async fn handle_connection(&self, limbo_player: LimboPlayer) -> Result<(), ConnectionError>;
     fn motd(&self) -> Result<String, ConnectionError>;
 }
 
@@ -332,11 +333,6 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
 
                 let entity_id = self.get_entity_id().await;
 
-                println!(
-                    "Player {} logged in with entity id {}",
-                    profile.name, entity_id
-                );
-
                 let limbo_player = LimboPlayer {
                     connection: connection.clone(),
                     entity_id: entity_id.clone(),
@@ -344,21 +340,7 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                     profile,
                 };
 
-                let disconnect_status = self.proxy.player_connection(limbo_player).await;
-
-                println!("Player {:?} disconnected", disconnect_status);
-
-                #[allow(unused_must_use)]
-                if let Err(ConnectionError::ClientRejected {
-                    reason: _reason,
-                    disconnect_message,
-                }) = &disconnect_status
-                {
-                    let disconnect = PlayDisconnect {
-                        reason: disconnect_message.clone(),
-                    };
-                    connection.write_packet(disconnect).await;
-                };
+                let disconnect_status = self.proxy.handle_connection(limbo_player).await;
 
                 self.remove_entity_id(entity_id).await;
 
@@ -470,7 +452,7 @@ where
             handler: T::new(),
         }
     }
-    pub async fn handle_player(
+    pub async fn handle_connection(
         self: Arc<Self>,
         limbo_player: LimboPlayer,
     ) -> Result<(), ConnectionError> {
@@ -478,8 +460,7 @@ where
             .handler
             .load_player(limbo_player.profile, limbo_player.uuid)?;
 
-        let (to_client_sender, mut to_client_receiver) = broadcast::channel::<ClientCommand>(10);
-        let (from_client_sender, from_client_receiver) = broadcast::channel::<ClientEvent>(10);
+        let (to_client_sender, to_client_receiver) = broadcast::channel::<ClientCommand>(10);
 
         // generate client
         let uuid = player.uuid.clone();
@@ -492,7 +473,22 @@ where
                 to_client_sender,
             );
 
-            // MAY DEADLOCK HERE
+            #[allow(unused_must_use)]
+            if let Some(other_client) = self.player_list.get(&uuid) {
+                other_client.to_client.send(ClientCommand::Disconnect {
+                    reason: r#"{"text": "You logged in from another location"}"#.to_string(),
+                });
+                client
+                    .handle_command(
+                        ClientCommand::Disconnect {
+                            reason: r#"{"text": "You are already logged in"}"#.to_string(),
+                        },
+                        &self,
+                    )
+                    .await;
+                return Err(ConnectionError::ClientAlreadyConnected);
+            }
+
             self.player_list.insert(client.uuid.clone(), client);
 
             let client = self
@@ -503,9 +499,32 @@ where
             client
         };
 
-        client.load_world(&self).await?;
+        self.broadcast_player_join(&client).await;
+        self.broadcast_chat(format!(
+            r#"{{"text": "{} joined the game"}}"#,
+            client.player.read().await.profile.name
+        ))
+        .await;
 
-        self.broadcast_player_join(&client).await?;
+        let status = self
+            .clone()
+            .handle_player(&client, uuid, to_client_receiver)
+            .await;
+
+        self.broadcast_player_leave(&client).await;
+
+        drop(client);
+
+        self.player_list.remove(&uuid);
+        status
+    }
+    pub async fn handle_player(
+        self: Arc<Self>,
+        client: &Client,
+        uuid: u128,
+        mut to_client_receiver: broadcast::Receiver<ClientCommand>,
+    ) -> Result<(), ConnectionError> {
+        client.load_world(&self).await.unwrap();
 
         let token = CancellationToken::new();
 
@@ -584,12 +603,12 @@ where
                     .get(&uuid)
                     .ok_or(ConnectionError::ClientAlreadyConnected)?;
 
-                client.ping().await?;
+                client.to_client.send(ClientCommand::Ping);
 
                 loop {
                     select! {
                         _ = sleep(Duration::from_secs(15)) => {
-                            client.ping().await?;
+                            client.to_client.send(ClientCommand::Ping);
                         }
                         _ = timeout_handler_token.cancelled() => {
                             break;
@@ -629,12 +648,6 @@ where
             }
         };
 
-        self.broadcast_player_leave(&client).await;
-
-        drop(client);
-
-        self.player_list.remove(&uuid);
-
         if let Ok(err) = result {
             err
         } else {
@@ -648,7 +661,7 @@ where
     ) -> Result<(), ConnectionError> {
         let message = self.handler.on_chat(client, message).await?;
         if let Some(message) = message {
-            self.broadcast_chat(message).await?;
+            self.broadcast_chat(message).await;
         }
         Ok(())
     }
@@ -688,7 +701,7 @@ where
             previous_rot,
             on_ground,
         )
-        .await?;
+        .await;
 
         Ok(())
     }
@@ -708,16 +721,32 @@ where
                 EntityMetadata::EntityFlags(EntityDataFlags::new().with_is_crouching(sneaking)),
             ];
             self.broadcast_entity_metadata_update(client.entity_id, metadata)
-                .await?;
+                .await;
         }
         Ok(())
     }
-    pub async fn broadcast_chat(&self, message: String) -> Result<(), ConnectionError> {
-        // TODO: join futures
-        for client in self.player_list.iter() {
-            client.display_message(&message).await?;
+    pub async fn handle_sprinting(
+        &self,
+        client: &Client,
+        sprinting: bool,
+    ) -> Result<(), ConnectionError> {
+        if let Some(sprinting) = self.handler.on_player_sprint(client, sprinting).await? {
+            client.player.write().await.sprinting = sprinting;
+            let metadata = vec![EntityMetadata::EntityFlags(
+                EntityDataFlags::new().with_is_sprinting(sprinting),
+            )];
+            self.broadcast_entity_metadata_update(client.entity_id, metadata)
+                .await;
         }
         Ok(())
+    }
+    pub async fn broadcast_chat(&self, message: String) {
+        // TODO: join futures
+        for client in self.player_list.iter() {
+            client.to_client.send(ClientCommand::ChatMessage {
+                message: message.clone(),
+            });
+        }
     }
     pub async fn broadcast_entity_move(
         &self,
@@ -727,55 +756,65 @@ where
         rotation: Option<Rotation>,
         previous_rotation: Rotation,
         on_ground: bool,
-    ) -> Result<(), ConnectionError> {
+    ) {
         for client in self.player_list.iter() {
             if entity_id == client.entity_id {
                 continue;
             }
-            client
-                .move_entity(
-                    entity_id,
-                    position.clone(),
-                    previous_position.clone(),
-                    rotation.clone(),
-                    previous_rotation.clone(),
-                    on_ground,
-                )
-                .await?;
+            client.to_client.send(ClientCommand::MoveEntity {
+                entity_id,
+                position: position.clone(),
+                previous_position: previous_position.clone(),
+                rotation: rotation.clone(),
+                previous_rotation: previous_rotation.clone(),
+                on_ground,
+            });
         }
-        Ok(())
     }
     pub async fn broadcast_entity_metadata_update(
         &self,
         entity_id: i32,
         metadata: Vec<EntityMetadata>,
-    ) -> Result<(), ConnectionError> {
+    ) {
         for client in self.player_list.iter() {
             if entity_id == client.entity_id {
                 continue;
             }
-            client
-                .update_entity_metadata(entity_id, metadata.clone())
-                .await?;
+            client.to_client.send(ClientCommand::UpdateEntityMetadata {
+                entity_id,
+                metadata: metadata.clone(),
+            });
         }
-        Ok(())
     }
-    pub async fn broadcast_player_leave(&self, client: &Client) -> Result<(), ConnectionError> {
+    pub async fn broadcast_player_leave(&self, client: &Client) {
         for other_client in self.player_list.iter() {
             if other_client.entity_id == client.entity_id {
                 continue;
             }
-            other_client.remove_player(&client).await?;
+            other_client.to_client.send(ClientCommand::RemovePlayer {
+                entity_id: client.entity_id,
+                uuid: client.uuid,
+            });
         }
-        Ok(())
     }
-    pub async fn broadcast_player_join(&self, client: &Client) -> Result<(), ConnectionError> {
+    pub async fn broadcast_player_join(&self, client: &Client) {
         for other_client in self.player_list.iter() {
             if other_client.entity_id == client.entity_id {
                 continue;
             }
-            other_client.add_player(&client).await?;
+            let add_player = {
+                let player = client.player.read().await;
+                ClientCommand::AddPlayer {
+                    entity_id: client.entity_id,
+                    uuid: client.uuid,
+                    position: player.position.clone(),
+                    rotation: player.rotation.clone(),
+                    name: player.profile.name.clone(),
+                    properties: player.profile.properties.clone(),
+                    gamemode: player.gamemode,
+                }
+            };
+            other_client.to_client.send(add_player);
         }
-        Ok(())
     }
 }

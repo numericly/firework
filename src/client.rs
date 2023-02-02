@@ -1,19 +1,19 @@
 use crate::{
     entities::{DisplayedSkinPartsFlags, EntityMetadata, END_INDEX},
-    server::{read_packet_or_err, ConnectionError, Rotation, Server, ServerHandler, Vec3},
+    server::{self, read_packet_or_err, ConnectionError, Rotation, Server, ServerHandler, Vec3},
 };
-use authentication::Profile;
+use authentication::{Profile, ProfileProperty};
 use minecraft_data::tags::{REGISTRY, TAGS};
 use protocol::{
     client_bound::{
         ChangeDifficulty, ClientBoundKeepAlive, Commands, InitializeWorldBorder, LoginWorld,
-        PlayerAbilities, PlayerInfo, RemoveEntities, SerializePacket, SetCenterChunk,
+        PlayDisconnect, PlayerAbilities, PlayerInfo, RemoveEntities, SetCenterChunk,
         SetContainerContent, SetEntityMetadata, SetHeldItem, SetRecipes, SetTags, SpawnPlayer,
         SynchronizePlayerPosition, SystemChatMessage, TeleportEntity, UpdateEntityHeadRotation,
         UpdateEntityPosition, UpdateEntityPositionAndRotation, UpdateEntityRotation,
     },
     data_types::{
-        Arm, CommandNode, FloatProps, NodeType, Parser, PlayerAbilityFlags, PlayerCommandAction,
+        CommandNode, FloatProps, NodeType, Parser, PlayerAbilityFlags, PlayerCommandAction,
         PlayerInfoAction, PlayerInfoAddPlayer, PlayerPositionFlags, Slot,
     },
     server_bound::{ChatMessage, PlayerCommand, ServerBoundPacket},
@@ -25,65 +25,38 @@ use std::sync::Arc;
 use tokio::sync::{broadcast, Mutex, RwLock};
 
 #[derive(Debug, Clone)]
-pub enum ClientEvent {
-    Move {
-        old_pos: Vec3,
-        pos: Vec3,
+pub enum ClientCommand {
+    Disconnect {
+        reason: String,
+    },
+    Ping,
+    MoveEntity {
+        entity_id: i32,
+        position: Option<Vec3>,
+        previous_position: Vec3,
+        rotation: Option<Rotation>,
+        previous_rotation: Rotation,
         on_ground: bool,
-    },
-    MoveAndRotate {
-        old_pos: Vec3,
-        pos: Vec3,
-        rotation: Rotation,
-        on_ground: bool,
-    },
-    MoveChunk {
-        x: i32,
-        z: i32,
-    },
-    Rotation {
-        rotation: Rotation,
-    },
-    Sprinting {
-        sprinting: bool,
-    },
-    Sneaking {
-        sneaking: bool,
-    },
-    SwingArm {
-        hand: Arm,
     },
     ChatMessage {
         message: String,
     },
-}
-
-#[derive(Debug, Clone)]
-pub enum ClientCommand {
-    SpawnPlayer {
+    UpdateEntityMetadata {
+        entity_id: i32,
+        metadata: Vec<EntityMetadata>,
+    },
+    RemovePlayer {
+        entity_id: i32,
         uuid: u128,
     },
-    MoveEntity {
-        entity_id: i32,
-        delta_x: i16,
-        delta_y: i16,
-        delta_z: i16,
-        on_ground: bool,
-        rotation: Option<Rotation>,
-    },
-    RotateEntity {
-        entity_id: i32,
-        rotation: Rotation,
-        on_ground: bool,
-    },
-    TeleportEntity {
+    AddPlayer {
+        uuid: u128,
+        name: String,
+        properties: Vec<ProfileProperty>,
+        gamemode: u8,
         entity_id: i32,
         position: Vec3,
         rotation: Rotation,
-        on_ground: bool,
-    },
-    SendSystemMessage {
-        message: String,
     },
 }
 
@@ -186,7 +159,6 @@ impl Client {
             ping_acknowledged: Mutex::new(true),
         }
     }
-    #[doc(hidden)]
     pub async fn read_packet(&self) -> Result<ServerBoundPacket, ConnectionError> {
         Ok(self.connection.read_and_serialize().await?)
     }
@@ -349,21 +321,6 @@ impl Client {
                 display_name: None,
                 has_signature: false,
             });
-
-            client
-                .update_entity_metadata(
-                    self.entity_id,
-                    vec![EntityMetadata::PlayerDisplayedSkinParts(
-                        DisplayedSkinPartsFlags::new()
-                            .with_cape(true)
-                            .with_hat(true)
-                            .with_left_pants(true)
-                            .with_right_pants(true)
-                            .with_left_sleeve(true)
-                            .with_right_sleeve(true),
-                    )],
-                )
-                .await?;
         }
 
         let player_info = PlayerInfo {
@@ -380,7 +337,6 @@ impl Client {
             };
             self.connection.write_packet(set_center_chunk).await?;
         }
-        let start = std::time::Instant::now();
         for x in -7..=7 {
             for z in -7..=7 {
                 let packet;
@@ -392,7 +348,6 @@ impl Client {
                 self.connection.write_packet(packet).await?;
             }
         }
-        println!("Chunk sending took {:?}", start.elapsed());
 
         let initialize_world_border = InitializeWorldBorder {
             x: 0.0,
@@ -431,6 +386,7 @@ impl Client {
             }
             let spawn_player = {
                 let player = client.player.read().await;
+                let (yaw, pitch) = player.rotation.serialize();
 
                 SpawnPlayer {
                     entity_id: VarInt(client.entity_id),
@@ -438,22 +394,104 @@ impl Client {
                     x: player.position.x,
                     y: player.position.y,
                     z: player.position.z,
-                    yaw: 0,
-                    pitch: 0,
+                    yaw,
+                    pitch,
                 }
             };
 
             self.connection.write_packet(spawn_player).await?;
+
+            self.update_entity_metadata(
+                client.entity_id,
+                vec![EntityMetadata::PlayerDisplayedSkinParts(
+                    DisplayedSkinPartsFlags::new()
+                        .with_cape(true)
+                        .with_hat(true)
+                        .with_left_pants(true)
+                        .with_right_pants(true)
+                        .with_left_sleeve(true)
+                        .with_right_sleeve(true)
+                        .with_jacket(true),
+                )],
+            )
+            .await?;
         }
+
+        self.update_entity_metadata(
+            self.entity_id,
+            vec![EntityMetadata::PlayerDisplayedSkinParts(
+                DisplayedSkinPartsFlags::new()
+                    .with_cape(true)
+                    .with_hat(true)
+                    .with_left_pants(true)
+                    .with_right_pants(true)
+                    .with_left_sleeve(true)
+                    .with_right_sleeve(true)
+                    .with_jacket(true),
+            )],
+        )
+        .await?;
 
         Ok(())
     }
-
     pub async fn handle_command<T: ServerHandler>(
         &self,
         command: ClientCommand,
         server: &Server<T>,
     ) -> Result<(), ConnectionError> {
+        match command {
+            ClientCommand::MoveEntity {
+                entity_id,
+                position,
+                previous_position,
+                rotation,
+                previous_rotation,
+                on_ground,
+            } => {
+                self.move_entity(
+                    entity_id,
+                    position,
+                    previous_position,
+                    rotation,
+                    previous_rotation,
+                    on_ground,
+                )
+                .await?;
+            }
+            ClientCommand::ChatMessage { message } => {
+                self.display_message(&message).await?;
+            }
+            ClientCommand::Ping => {
+                self.ping().await?;
+            }
+            ClientCommand::UpdateEntityMetadata {
+                entity_id,
+                metadata,
+            } => {
+                self.update_entity_metadata(entity_id, metadata).await?;
+            }
+            ClientCommand::RemovePlayer { entity_id, uuid } => {
+                self.remove_player(uuid, entity_id).await?;
+            }
+            ClientCommand::AddPlayer {
+                uuid,
+                name,
+                properties,
+                gamemode,
+                entity_id,
+                position,
+                rotation,
+            } => {
+                self.add_player(
+                    uuid, name, properties, gamemode, entity_id, position, rotation,
+                )
+                .await?;
+            }
+            ClientCommand::Disconnect { reason } => {
+                self.disconnect(reason.clone()).await?;
+                return Err(ConnectionError::ClientDisconnected { reason });
+            }
+        }
         Ok(())
     }
     pub async fn handle_packet<T>(
@@ -487,8 +525,12 @@ impl Client {
                 }
 
                 match action {
-                    PlayerCommandAction::StartSprinting => {}
-                    PlayerCommandAction::StopSprinting => {}
+                    PlayerCommandAction::StartSprinting => {
+                        server.handle_sprinting(self, true).await?
+                    }
+                    PlayerCommandAction::StopSprinting => {
+                        server.handle_sprinting(self, false).await?
+                    }
                     PlayerCommandAction::StartSneaking => {
                         server.handle_sneaking(self, true).await?
                     }
@@ -528,11 +570,12 @@ impl Client {
                     )
                     .await?;
             }
+
             _ => (),
         };
         Ok(())
     }
-    pub async fn ping(&self) -> Result<(), ConnectionError> {
+    async fn ping(&self) -> Result<(), ConnectionError> {
         {
             let mut ping_acknowledged = self.ping_acknowledged.lock().await;
             if !*ping_acknowledged {
@@ -549,7 +592,7 @@ impl Client {
 
         Ok(())
     }
-    pub async fn display_message(&self, message: &str) -> Result<(), ConnectionError> {
+    async fn display_message(&self, message: &str) -> Result<(), ConnectionError> {
         let chat_message = SystemChatMessage {
             message: message.to_string(),
             action_bar: false,
@@ -559,7 +602,7 @@ impl Client {
 
         Ok(())
     }
-    pub async fn move_entity(
+    async fn move_entity(
         &self,
         entity_id: i32,
         position: Option<Vec3>,
@@ -680,7 +723,7 @@ impl Client {
         };
         Ok(())
     }
-    pub async fn update_entity_metadata(
+    async fn update_entity_metadata(
         &self,
         entity_id: i32,
         metadata: Vec<EntityMetadata>,
@@ -697,53 +740,55 @@ impl Client {
         self.connection.write_packet(entity_metadata).await?;
         Ok(())
     }
-    pub async fn remove_player(&self, client: &Client) -> Result<(), ConnectionError> {
+    async fn remove_player(&self, uuid: u128, entity_id: i32) -> Result<(), ConnectionError> {
         let player_info = PlayerInfo {
-            action: PlayerInfoAction::RemovePlayer(vec![client.uuid]),
+            action: PlayerInfoAction::RemovePlayer(vec![uuid]),
         };
         self.connection.write_packet(player_info).await?;
         let remove_entities = RemoveEntities {
-            entity_ids: vec![VarInt(client.entity_id)],
+            entity_ids: vec![VarInt(entity_id)],
         };
         self.connection.write_packet(remove_entities).await?;
         Ok(())
     }
-    pub async fn add_player(&self, client: &Client) -> Result<(), ConnectionError> {
-        let player_info = {
-            let player = client.player.read().await;
-            PlayerInfo {
-                action: PlayerInfoAction::AddPlayer(vec![PlayerInfoAddPlayer {
-                    uuid: player.uuid,
-                    name: player.profile.name.clone(),
-                    properties: player.profile.properties.clone(),
-                    gamemode: VarInt(player.gamemode as i32),
-                    ping: VarInt(0),
-                    display_name: None,
-                    has_signature: false,
-                }]),
-            }
+    async fn add_player(
+        &self,
+        uuid: u128,
+        name: String,
+        properties: Vec<ProfileProperty>,
+        gamemode: u8,
+        entity_id: i32,
+        position: Vec3,
+        rotation: Rotation,
+    ) -> Result<(), ConnectionError> {
+        let player_info = PlayerInfo {
+            action: PlayerInfoAction::AddPlayer(vec![PlayerInfoAddPlayer {
+                uuid,
+                name,
+                properties: properties,
+                gamemode: VarInt(gamemode as i32),
+                ping: VarInt(0),
+                display_name: None,
+                has_signature: false,
+            }]),
+        };
+
+        let (yaw, pitch) = rotation.serialize();
+        let spawn_player = SpawnPlayer {
+            entity_id: VarInt(entity_id),
+            uuid,
+            x: position.x,
+            y: position.y,
+            z: position.z,
+            yaw,
+            pitch,
         };
 
         self.connection.write_packet(player_info).await?;
-
-        let spawn_player = {
-            let player = client.player.read().await;
-
-            SpawnPlayer {
-                entity_id: VarInt(client.entity_id),
-                uuid: client.uuid,
-                x: player.position.x,
-                y: player.position.y,
-                z: player.position.z,
-                yaw: 0,
-                pitch: 0,
-            }
-        };
-
         self.connection.write_packet(spawn_player).await?;
 
         self.update_entity_metadata(
-            client.entity_id,
+            entity_id,
             vec![EntityMetadata::PlayerDisplayedSkinParts(
                 DisplayedSkinPartsFlags::new()
                     .with_cape(true)
@@ -756,6 +801,26 @@ impl Client {
             )],
         )
         .await?;
+
+        // self.update_entity_metadata(
+        //     entity_id,
+        //     vec![EntityMetadata::PlayerDisplayedSkinParts(
+        //         DisplayedSkinPartsFlags::new()
+        //             .with_cape(true)
+        //             .with_hat(true)
+        //             .with_left_pants(true)
+        //             .with_right_pants(true)
+        //             .with_left_sleeve(true)
+        //             .with_right_sleeve(true)
+        //             .with_jacket(true),
+        //     )],
+        // )
+        // .await?;
+        Ok(())
+    }
+    pub(crate) async fn disconnect(&self, reason: String) -> Result<(), ConnectionError> {
+        let disconnect = PlayDisconnect { reason };
+        self.connection.write_packet(disconnect).await?;
         Ok(())
     }
 }
