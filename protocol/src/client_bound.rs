@@ -97,23 +97,23 @@ define_client_bound_protocol! {
         difficulty: u8,
         locked: bool
     },
-    Commands, 0x0F, Play => {
+    Commands, 0x0E, Play => {
         root: CommandNode
     },
-    SetContainerContent, 0x11, Play => {
+    SetContainerContent, 0x10, Play => {
         window_id: u8,
         state_id: VarInt,
         items: Vec<Option<Slot>>,
         held_item: Option<Slot>
     },
-    PlayDisconnect, 0x19, Play => {
+    PlayDisconnect, 0x17, Play => {
         reason: String
     },
-    UnloadChunk, 0x1C, Play => {
+    UnloadChunk, 0x1B, Play => {
         x: i32,
         z: i32
     },
-    InitializeWorldBorder, 0x1F, Play => {
+    InitializeWorldBorder, 0x1E, Play => {
         x: f64,
         z: f64,
         old_diameter: f64,
@@ -123,10 +123,10 @@ define_client_bound_protocol! {
         warning_time: VarInt,
         warning_blocks: VarInt
     },
-    ClientBoundKeepAlive, 0x20, Play => {
+    ClientBoundKeepAlive, 0x1F, Play => {
         id: i64
     },
-    ChunkUpdateAndLightUpdate, 0x21, Play => {
+    ChunkUpdateAndLightUpdate, 0x20, Play => {
         x: i32,
         z: i32,
         heightmaps: Blob,
@@ -140,7 +140,7 @@ define_client_bound_protocol! {
         sky_light: Vec<Vec<i8>>,
         block_light: Vec<Vec<i8>>
     },
-    LoginWorld, 0x25, Play => {
+    LoginPlay, 0x24, Play => {
         entity_id: i32,
         is_hardcore: bool,
         game_mode: u8,
@@ -159,14 +159,14 @@ define_client_bound_protocol! {
         is_flat: bool,
         death_location: Option<DeathLocation>
     },
-    UpdateEntityPosition, 0x28, Play => {
+    UpdateEntityPosition, 0x27, Play => {
         entity_id: VarInt,
         delta_x: i16,
         delta_y: i16,
         delta_z: i16,
         on_ground: bool
     },
-    UpdateEntityPositionAndRotation, 0x29, Play => {
+    UpdateEntityPositionAndRotation, 0x28, Play => {
         entity_id: VarInt,
         delta_x: i16,
         delta_y: i16,
@@ -175,21 +175,24 @@ define_client_bound_protocol! {
         pitch: i8,
         on_ground: bool
     },
-    UpdateEntityRotation, 0x2A, Play => {
+    UpdateEntityRotation, 0x29, Play => {
         entity_id: VarInt,
         yaw: i8,
         pitch: i8,
         on_ground: bool
     },
-    PlayerAbilities, 0x31, Play => {
+    PlayerAbilities, 0x30, Play => {
         flags: PlayerAbilityFlags,
         flying_speed: f32,
         walking_speed: f32
     },
-    PlayerInfo, 0x37, Play => {
+    RemoveInfoPlayer, 0x35, Play => {
+        players: Vec<u128>
+    },
+    PlayerInfo, 0x36, Play => {
         action: PlayerInfoAction
     },
-    SynchronizePlayerPosition, 0x39, Play => {
+    SynchronizePlayerPosition, 0x38, Play => {
         x: f64,
         y: f64,
         z: f64,
@@ -199,32 +202,33 @@ define_client_bound_protocol! {
         teleport_id: VarInt,
         dismount_vehicle: bool
     },
-    RemoveEntities, 0x3B, Play => {
+    RemoveEntities, 0x3A, Play => {
         entity_ids: Vec<VarInt>
     },
-    UpdateEntityHeadRotation, 0x3F, Play => {
+    UpdateEntityHeadRotation, 0x3E, Play => {
         entity_id: VarInt,
         yaw: i8
     },
-    SetHeldItem, 0x4A, Play => {
+    SetHeldItem, 0x49, Play => {
         slot: u8
     },
-    SetCenterChunk, 0x4B, Play => {
+    SetCenterChunk, 0x4A, Play => {
         x: VarInt,
         z: VarInt
     },
-    SetDefaultSpawn, 0x4D, Play => {
-        position: Position
+    SetDefaultSpawn, 0x4C, Play => {
+        position: Position,
+        yaw: f32
     },
-    SetEntityMetadata, 0x50, Play => {
+    SetEntityMetadata, 0x4E, Play => {
         entity_id: VarInt,
         metadata: UnsizedVec<u8>
     },
-    SystemChatMessage, 0x62, Play => {
+    SystemChatMessage, 0x60, Play => {
         message: String,
         action_bar: bool
     },
-    TeleportEntity, 0x66, Play => {
+    TeleportEntity, 0x64, Play => {
         entity_id: VarInt,
         x: f64,
         y: f64,
@@ -233,10 +237,10 @@ define_client_bound_protocol! {
         pitch: i8,
         on_ground: bool
     },
-    SetRecipes, 0x6A, Play => {
+    SetRecipes, 0x69, Play => {
         recipes: Vec<Recipe>
     },
-    SetTags, 0x6B, Play => {
+    SetTags, 0x6A, Play => {
         tags: &'static HashMap<String, HashMap<String, VarIntList>>
     }
 }

@@ -501,7 +501,7 @@ where
 
         self.broadcast_player_join(&client).await;
         self.broadcast_chat(format!(
-            r#"{{"text": "{} joined the game"}}"#,
+            r#"{{"text": "{} joined the game","color":"yellow"}}"#,
             client.player.read().await.profile.name
         ))
         .await;
@@ -511,6 +511,11 @@ where
             .handle_player(&client, uuid, to_client_receiver)
             .await;
 
+        self.broadcast_chat(format!(
+            r#"{{"text": "{} left the game","color":"yellow"}}"#,
+            client.player.read().await.profile.name
+        ))
+        .await;
         self.broadcast_player_leave(&client).await;
 
         drop(client);
@@ -524,7 +529,7 @@ where
         uuid: u128,
         mut to_client_receiver: broadcast::Receiver<ClientCommand>,
     ) -> Result<(), ConnectionError> {
-        client.load_world(&self).await.unwrap();
+        client.load_world(&self).await?;
 
         let token = CancellationToken::new();
 

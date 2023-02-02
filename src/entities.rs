@@ -44,7 +44,7 @@ macro_rules! define_entity_metadata {
 
 define_entity_metadata_types! {
     EntityDataFlags => 0i32,
-    Pose => 18i32,
+    Pose => 19i32,
     DisplayedSkinPartsFlags => 0i32
 }
 

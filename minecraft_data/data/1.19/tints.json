@@ -3,63 +3,63 @@
     "data": [
       {
         "keys": [
-          "the_void",
-          "plains",
-          "sunflower_plains",
-          "snowy_plains",
-          "ice_spikes",
-          "desert",
-          "forest",
-          "flower_forest",
+          "bamboo_jungle",
+          "basalt_deltas",
+          "beach",
           "birch_forest",
+          "cold_ocean",
+          "crimson_forest",
+          "deep_cold_ocean",
+          "deep_dark",
+          "deep_frozen_ocean",
+          "deep_lukewarm_ocean",
+          "deep_ocean",
+          "desert",
+          "dripstone_caves",
+          "end_barrens",
+          "end_highlands",
+          "end_midlands",
+          "flower_forest",
+          "forest",
+          "frozen_ocean",
+          "frozen_peaks",
+          "frozen_river",
+          "grove",
+          "ice_spikes",
+          "jagged_peaks",
+          "jungle",
+          "lukewarm_ocean",
+          "lush_caves",
+          "meadow",
+          "mushroom_fields",
+          "nether_wastes",
+          "ocean",
           "old_growth_birch_forest",
           "old_growth_pine_taiga",
           "old_growth_spruce_taiga",
-          "taiga",
-          "snowy_taiga",
+          "plains",
+          "river",
           "savanna",
           "savanna_plateau",
-          "windswept_hills",
-          "windswept_gravelly_hills",
-          "windswept_forest",
-          "windswept_savanna",
-          "jungle",
-          "sparse_jungle",
-          "bamboo_jungle",
-          "meadow",
-          "grove",
-          "snowy_slopes",
-          "frozen_peaks",
-          "jagged_peaks",
-          "stony_peaks",
-          "river",
-          "frozen_river",
-          "beach",
-          "snowy_beach",
-          "stony_shore",
-          "warm_ocean",
-          "lukewarm_ocean",
-          "deep_lukewarm_ocean",
-          "ocean",
-          "deep_ocean",
-          "cold_ocean",
-          "deep_cold_ocean",
-          "frozen_ocean",
-          "deep_frozen_ocean",
-          "mushroom_fields",
-          "dripstone_caves",
-          "lush_caves",
-          "deep_dark",
-          "nether_wastes",
-          "warped_forest",
-          "crimson_forest",
-          "soul_sand_valley",
-          "basalt_deltas",
-          "the_end",
-          "end_highlands",
-          "end_midlands",
           "small_end_islands",
-          "end_barrens"
+          "snowy_beach",
+          "snowy_plains",
+          "snowy_slopes",
+          "snowy_taiga",
+          "soul_sand_valley",
+          "sparse_jungle",
+          "stony_peaks",
+          "stony_shore",
+          "sunflower_plains",
+          "taiga",
+          "the_end",
+          "the_void",
+          "warm_ocean",
+          "warped_forest",
+          "windswept_forest",
+          "windswept_gravelly_hills",
+          "windswept_hills",
+          "windswept_savanna"
         ],
         "color": 0
       },
@@ -71,8 +71,8 @@
       },
       {
         "keys": [
-          "swamp",
-          "mangrove_swamp"
+          "mangrove_swamp",
+          "swamp"
         ],
         "color": 6975545
       },
@@ -90,66 +90,72 @@
     "data": [
       {
         "keys": [
-          "the_void",
-          "plains",
-          "sunflower_plains",
-          "snowy_plains",
-          "ice_spikes",
-          "desert",
-          "forest",
-          "flower_forest",
+          "bamboo_jungle",
+          "basalt_deltas",
+          "beach",
           "birch_forest",
+          "cold_ocean",
+          "crimson_forest",
           "dark_forest",
+          "deep_cold_ocean",
+          "deep_dark",
+          "deep_frozen_ocean",
+          "deep_lukewarm_ocean",
+          "deep_ocean",
+          "desert",
+          "dripstone_caves",
+          "end_barrens",
+          "end_highlands",
+          "end_midlands",
+          "flower_forest",
+          "forest",
+          "frozen_ocean",
+          "frozen_peaks",
+          "frozen_river",
+          "grove",
+          "ice_spikes",
+          "jagged_peaks",
+          "jungle",
+          "lukewarm_ocean",
+          "lush_caves",
+          "meadow",
+          "mushroom_fields",
+          "nether_wastes",
+          "ocean",
           "old_growth_birch_forest",
           "old_growth_pine_taiga",
           "old_growth_spruce_taiga",
-          "taiga",
-          "snowy_taiga",
+          "plains",
+          "river",
           "savanna",
           "savanna_plateau",
-          "windswept_hills",
-          "windswept_gravelly_hills",
-          "windswept_forest",
-          "windswept_savanna",
-          "jungle",
-          "sparse_jungle",
-          "bamboo_jungle",
-          "meadow",
-          "grove",
-          "snowy_slopes",
-          "frozen_peaks",
-          "jagged_peaks",
-          "stony_peaks",
-          "river",
-          "frozen_river",
-          "beach",
-          "snowy_beach",
-          "stony_shore",
-          "warm_ocean",
-          "lukewarm_ocean",
-          "deep_lukewarm_ocean",
-          "ocean",
-          "deep_ocean",
-          "cold_ocean",
-          "deep_cold_ocean",
-          "frozen_ocean",
-          "deep_frozen_ocean",
-          "mushroom_fields",
-          "dripstone_caves",
-          "lush_caves",
-          "deep_dark",
-          "nether_wastes",
-          "warped_forest",
-          "crimson_forest",
-          "soul_sand_valley",
-          "basalt_deltas",
-          "the_end",
-          "end_highlands",
-          "end_midlands",
           "small_end_islands",
-          "end_barrens"
+          "snowy_beach",
+          "snowy_plains",
+          "snowy_slopes",
+          "snowy_taiga",
+          "soul_sand_valley",
+          "sparse_jungle",
+          "stony_peaks",
+          "stony_shore",
+          "sunflower_plains",
+          "taiga",
+          "the_end",
+          "the_void",
+          "warm_ocean",
+          "warped_forest",
+          "windswept_forest",
+          "windswept_gravelly_hills",
+          "windswept_hills",
+          "windswept_savanna"
         ],
         "color": 0
+      },
+      {
+        "keys": [
+          "swamp"
+        ],
+        "color": 6975545
       },
       {
         "keys": [
@@ -158,12 +164,6 @@
           "wooded_badlands"
         ],
         "color": 10387789
-      },
-      {
-        "keys": [
-          "swamp"
-        ],
-        "color": 6975545
       },
       {
         "keys": [
@@ -177,17 +177,17 @@
     "data": [
       {
         "keys": [
-          "frozen_river",
-          "frozen_ocean",
-          "deep_frozen_ocean"
-        ],
-        "color": 3750089
-      },
-      {
-        "keys": [
           "mangrove_swamp"
         ],
         "color": 3832426
+      },
+      {
+        "keys": [
+          "deep_frozen_ocean",
+          "frozen_ocean",
+          "frozen_river"
+        ],
+        "color": 3750089
       },
       {
         "keys": [
@@ -203,72 +203,72 @@
       },
       {
         "keys": [
-          "lukewarm_ocean",
-          "deep_lukewarm_ocean"
+          "deep_lukewarm_ocean",
+          "lukewarm_ocean"
         ],
         "color": 4566514
       },
       {
         "keys": [
-          "snowy_taiga",
-          "snowy_beach",
           "cold_ocean",
-          "deep_cold_ocean"
+          "deep_cold_ocean",
+          "snowy_beach",
+          "snowy_taiga"
         ],
         "color": 4020182
       },
       {
         "keys": [
-          "the_void",
-          "plains",
-          "sunflower_plains",
-          "snowy_plains",
-          "ice_spikes",
-          "desert",
-          "forest",
-          "flower_forest",
+          "badlands",
+          "bamboo_jungle",
+          "basalt_deltas",
+          "beach",
           "birch_forest",
+          "crimson_forest",
           "dark_forest",
+          "deep_dark",
+          "deep_ocean",
+          "desert",
+          "dripstone_caves",
+          "end_barrens",
+          "end_highlands",
+          "end_midlands",
+          "eroded_badlands",
+          "flower_forest",
+          "forest",
+          "frozen_peaks",
+          "grove",
+          "ice_spikes",
+          "jagged_peaks",
+          "jungle",
+          "lush_caves",
+          "mushroom_fields",
+          "nether_wastes",
+          "ocean",
           "old_growth_birch_forest",
           "old_growth_pine_taiga",
           "old_growth_spruce_taiga",
-          "taiga",
+          "plains",
+          "river",
           "savanna",
           "savanna_plateau",
-          "windswept_hills",
-          "windswept_gravelly_hills",
-          "windswept_forest",
-          "windswept_savanna",
-          "jungle",
-          "sparse_jungle",
-          "bamboo_jungle",
-          "badlands",
-          "eroded_badlands",
-          "wooded_badlands",
-          "grove",
-          "snowy_slopes",
-          "frozen_peaks",
-          "jagged_peaks",
-          "stony_peaks",
-          "river",
-          "beach",
-          "stony_shore",
-          "ocean",
-          "deep_ocean",
-          "mushroom_fields",
-          "dripstone_caves",
-          "lush_caves",
-          "deep_dark",
-          "nether_wastes",
-          "warped_forest",
-          "crimson_forest",
-          "soul_sand_valley",
-          "basalt_deltas",
-          "the_end",
-          "end_highlands",
-          "end_midlands",
           "small_end_islands",
-          "end_barrens"
+          "snowy_plains",
+          "snowy_slopes",
+          "soul_sand_valley",
+          "sparse_jungle",
+          "stony_peaks",
+          "stony_shore",
+          "sunflower_plains",
+          "taiga",
+          "the_end",
+          "the_void",
+          "warped_forest",
+          "windswept_forest",
+          "windswept_gravelly_hills",
+          "windswept_hills",
+          "windswept_savanna",
+          "wooded_badlands"
         ],
         "color": 4159204
       },
@@ -384,13 +384,13 @@
     "data": [
       {
         "keys": [
-          "lily_pad"
+          "birch_leaves"
         ],
-        "color": 2129968
+        "color": 8431445
       },
       {
         "keys": [
-          "attached_melon_stem"
+          "attached_pumpkin_stem"
         ],
         "color": 14731036
       },
@@ -408,21 +408,21 @@
       },
       {
         "keys": [
-          "attached_pumpkin_stem"
-        ],
-        "color": 14731036
-      },
-      {
-        "keys": [
           "spruce_leaves"
         ],
         "color": 6396257
       },
       {
         "keys": [
-          "birch_leaves"
+          "lily_pad"
         ],
-        "color": 8431445
+        "color": 2129968
+      },
+      {
+        "keys": [
+          "attached_melon_stem"
+        ],
+        "color": 14731036
       }
     ]
   }

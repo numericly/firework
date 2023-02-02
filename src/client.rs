@@ -6,22 +6,24 @@ use authentication::{Profile, ProfileProperty};
 use minecraft_data::tags::{REGISTRY, TAGS};
 use protocol::{
     client_bound::{
-        ChangeDifficulty, ClientBoundKeepAlive, Commands, InitializeWorldBorder, LoginWorld,
-        PlayDisconnect, PlayerAbilities, PlayerInfo, RemoveEntities, SetCenterChunk,
-        SetContainerContent, SetEntityMetadata, SetHeldItem, SetRecipes, SetTags, SpawnPlayer,
-        SynchronizePlayerPosition, SystemChatMessage, TeleportEntity, UpdateEntityHeadRotation,
-        UpdateEntityPosition, UpdateEntityPositionAndRotation, UpdateEntityRotation,
+        ChangeDifficulty, ClientBoundKeepAlive, Commands, InitializeWorldBorder, LoginPlay,
+        PlayDisconnect, PlayerAbilities, PlayerInfo, RemoveEntities, RemoveInfoPlayer,
+        SetCenterChunk, SetContainerContent, SetDefaultSpawn, SetEntityMetadata, SetHeldItem,
+        SetRecipes, SetTags, SpawnPlayer, SynchronizePlayerPosition, SystemChatMessage,
+        TeleportEntity, UpdateEntityHeadRotation, UpdateEntityPosition,
+        UpdateEntityPositionAndRotation, UpdateEntityRotation,
     },
     data_types::{
-        CommandNode, FloatProps, NodeType, Parser, PlayerAbilityFlags, PlayerCommandAction,
-        PlayerInfoAction, PlayerInfoAddPlayer, PlayerPositionFlags, Slot,
+        AddPlayer, CommandNode, FloatProps, NodeType, Parser, PlayerAbilityFlags,
+        PlayerCommandAction, PlayerInfoAction, PlayerPositionFlags, Slot, UpdateGameMode,
+        UpdateLatency, UpdateListed,
     },
     server_bound::{ChatMessage, PlayerCommand, ServerBoundPacket},
     ConnectionState, Protocol,
 };
-use protocol_core::{UnsizedVec, VarInt};
+use protocol_core::{Position, UnsizedVec, VarInt};
 use rand::Rng;
-use std::sync::Arc;
+use std::{ops::Add, sync::Arc};
 use tokio::sync::{broadcast, Mutex, RwLock};
 
 #[derive(Debug, Clone)]
@@ -168,7 +170,7 @@ impl Client {
     ) -> Result<(), ConnectionError> {
         {
             let player = self.player.read().await;
-            let world_login = LoginWorld {
+            let world_login = LoginPlay {
                 entity_id: self.entity_id,
                 is_hardcore: false,
                 game_mode: player.gamemode,
@@ -205,6 +207,13 @@ impl Client {
             };
             self.connection.write_packet(change_difficulty).await?;
         }
+
+        let set_default_spawn = SetDefaultSpawn {
+            position: Position { x: 0, y: 47, z: 0 },
+            yaw: 90.0,
+        };
+
+        self.connection.write_packet(set_default_spawn).await?;
 
         let player_abilities = PlayerAbilities {
             flags: PlayerAbilityFlags::new()
@@ -312,19 +321,24 @@ impl Client {
 
         for client in server.player_list.iter() {
             let player = client.player.read().await;
-            player_list.push(PlayerInfoAddPlayer {
-                uuid: player.uuid,
-                name: player.profile.name.clone(),
-                properties: player.profile.properties.clone(),
-                gamemode: VarInt(player.gamemode as i32),
-                ping: VarInt(0),
-                display_name: None,
-                has_signature: false,
-            });
+            player_list.push((
+                client.uuid,
+                AddPlayer {
+                    name: player.profile.name.clone(),
+                    properties: player.profile.properties.clone(),
+                },
+                UpdateGameMode {
+                    gamemode: VarInt::from(player.gamemode as i32),
+                },
+                UpdateListed { listed: true },
+                UpdateLatency {
+                    latency: VarInt::from(0),
+                },
+            ));
         }
 
         let player_info = PlayerInfo {
-            action: PlayerInfoAction::AddPlayer(player_list),
+            action: PlayerInfoAction::AddAllPlayers(player_list),
         };
 
         self.connection.write_packet(player_info).await?;
@@ -741,8 +755,8 @@ impl Client {
         Ok(())
     }
     async fn remove_player(&self, uuid: u128, entity_id: i32) -> Result<(), ConnectionError> {
-        let player_info = PlayerInfo {
-            action: PlayerInfoAction::RemovePlayer(vec![uuid]),
+        let player_info = RemoveInfoPlayer {
+            players: vec![uuid],
         };
         self.connection.write_packet(player_info).await?;
         let remove_entities = RemoveEntities {
@@ -762,15 +776,17 @@ impl Client {
         rotation: Rotation,
     ) -> Result<(), ConnectionError> {
         let player_info = PlayerInfo {
-            action: PlayerInfoAction::AddPlayer(vec![PlayerInfoAddPlayer {
+            action: PlayerInfoAction::AddSinglePlayer(
                 uuid,
-                name,
-                properties: properties,
-                gamemode: VarInt(gamemode as i32),
-                ping: VarInt(0),
-                display_name: None,
-                has_signature: false,
-            }]),
+                AddPlayer { name, properties },
+                UpdateGameMode {
+                    gamemode: VarInt::from(gamemode as i32),
+                },
+                UpdateListed { listed: true },
+                UpdateLatency {
+                    latency: VarInt::from(0),
+                },
+            ),
         };
 
         let (yaw, pitch) = rotation.serialize();
@@ -801,21 +817,6 @@ impl Client {
             )],
         )
         .await?;
-
-        // self.update_entity_metadata(
-        //     entity_id,
-        //     vec![EntityMetadata::PlayerDisplayedSkinParts(
-        //         DisplayedSkinPartsFlags::new()
-        //             .with_cape(true)
-        //             .with_hat(true)
-        //             .with_left_pants(true)
-        //             .with_right_pants(true)
-        //             .with_left_sleeve(true)
-        //             .with_right_sleeve(true)
-        //             .with_jacket(true),
-        //     )],
-        // )
-        // .await?;
         Ok(())
     }
     pub(crate) async fn disconnect(&self, reason: String) -> Result<(), ConnectionError> {
