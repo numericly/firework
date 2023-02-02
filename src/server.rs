@@ -90,6 +90,8 @@ pub enum ConnectionError {
     ClientTimedOut,
     #[error("client disconnected")]
     ClientDisconnected { reason: String },
+    #[error("client cancelled")]
+    ClientCancelled,
 }
 
 #[derive(Clone, Debug)]
@@ -176,6 +178,7 @@ pub struct ServerManager<T, const PLAYER_RESERVED_ENTITY_IDS: i32 = 1_000_000> {
 
 #[async_trait]
 pub trait ServerProxy {
+    type TransferData;
     fn new() -> Self;
     async fn handle_connection(&self, limbo_player: LimboPlayer) -> Result<(), ConnectionError>;
     fn motd(&self) -> Result<String, ConnectionError>;
@@ -439,23 +442,20 @@ pub trait ServerHandler {
     }
 }
 
-impl<T> Server<T>
-where
-    T: ServerHandler + Send + Sync + 'static,
-{
+impl<Handler: ServerHandler + Send + Sync + 'static> Server<Handler> {
     pub fn new(world: World) -> Self {
         Self {
             world: Arc::new(world),
             player_list: Arc::new(DashMap::new()),
             entities: Arc::new(DashMap::new()),
             lowest_free_id: Mutex::new(0),
-            handler: T::new(),
+            handler: Handler::new(),
         }
     }
     pub async fn handle_connection(
         self: Arc<Self>,
         limbo_player: LimboPlayer,
-    ) -> Result<(), ConnectionError> {
+    ) -> Result<Option<()>, ConnectionError> {
         let player = self
             .handler
             .load_player(limbo_player.profile, limbo_player.uuid)?;
@@ -528,7 +528,7 @@ where
         client: &Client,
         uuid: u128,
         mut to_client_receiver: broadcast::Receiver<ClientCommand>,
-    ) -> Result<(), ConnectionError> {
+    ) -> Result<Option<()>, ConnectionError> {
         client.load_world(&self).await?;
 
         let token = CancellationToken::new();
@@ -536,7 +536,7 @@ where
         let command_listener_server = self.clone();
         let command_listener_token = token.clone();
 
-        let command_listener_handle: JoinHandle<Result<(), ConnectionError>> =
+        let command_listener_handle: JoinHandle<Result<Option<()>, ConnectionError>> =
             task::spawn(async move {
                 let client = command_listener_server
                     .player_list
@@ -559,17 +559,16 @@ where
                             }
                         }
                         _ = command_listener_token.cancelled() => {
-                            break
+                            return Err(ConnectionError::ClientCancelled)
                         }
                     };
                 }
-                Ok(())
             });
 
         let event_listener_server = self.clone();
         let event_listener_token = token.clone();
 
-        let event_listener_handle: JoinHandle<Result<(), ConnectionError>> =
+        let event_listener_handle: JoinHandle<Result<Option<()>, ConnectionError>> =
             task::spawn(async move {
                 let client = event_listener_server
                     .player_list
@@ -591,17 +590,16 @@ where
                             }
                         }
                         _ = event_listener_token.cancelled() => {
-                            break
+                            return Err(ConnectionError::ClientCancelled)
                         }
                     };
                 }
-                Ok(())
             });
 
         let timeout_handler_server = self.clone();
         let timeout_handler_token = token.clone();
 
-        let timeout_handler_handle: JoinHandle<Result<(), ConnectionError>> =
+        let timeout_handler_handle: JoinHandle<Result<Option<()>, ConnectionError>> =
             task::spawn(async move {
                 let client = timeout_handler_server
                     .player_list
@@ -616,11 +614,10 @@ where
                             client.to_client.send(ClientCommand::Ping);
                         }
                         _ = timeout_handler_token.cancelled() => {
-                            break;
+                            return Err(ConnectionError::ClientCancelled)
                         }
                     };
                 }
-                Ok(())
             });
 
         // WARNING BAD CODE
@@ -656,7 +653,7 @@ where
         if let Ok(err) = result {
             err
         } else {
-            Ok(())
+            Err(ConnectionError::ClientCancelled)
         }
     }
     pub async fn handle_chat(

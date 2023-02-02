@@ -224,6 +224,12 @@ define_client_bound_protocol! {
         entity_id: VarInt,
         metadata: UnsizedVec<u8>
     },
+    SetEntityVelocity, 0x50, Play => {
+        entity_id: VarInt,
+        velocity_x: i16,
+        velocity_y: i16,
+        velocity_z: i16
+    },
     SystemChatMessage, 0x60, Play => {
         message: String,
         action_bar: bool

@@ -3,14 +3,18 @@ use crate::{
     server::{self, read_packet_or_err, ConnectionError, Rotation, Server, ServerHandler, Vec3},
 };
 use authentication::{Profile, ProfileProperty};
-use minecraft_data::tags::{REGISTRY, TAGS};
+use minecraft_data::{
+    items::{Elytra, Item},
+    tags::{REGISTRY, TAGS},
+};
+use nbt::Blob;
 use protocol::{
     client_bound::{
         ChangeDifficulty, ClientBoundKeepAlive, Commands, InitializeWorldBorder, LoginPlay,
         PlayDisconnect, PlayerAbilities, PlayerInfo, RemoveEntities, RemoveInfoPlayer,
-        SetCenterChunk, SetContainerContent, SetDefaultSpawn, SetEntityMetadata, SetHeldItem,
-        SetRecipes, SetTags, SpawnPlayer, SynchronizePlayerPosition, SystemChatMessage,
-        TeleportEntity, UpdateEntityHeadRotation, UpdateEntityPosition,
+        SetCenterChunk, SetContainerContent, SetDefaultSpawn, SetEntityMetadata, SetEntityVelocity,
+        SetHeldItem, SetRecipes, SetTags, SpawnPlayer, SynchronizePlayerPosition,
+        SystemChatMessage, TeleportEntity, UpdateEntityHeadRotation, UpdateEntityPosition,
         UpdateEntityPositionAndRotation, UpdateEntityRotation,
     },
     data_types::{
@@ -234,6 +238,17 @@ impl Client {
                 slot: player.selected_slot,
             };
             self.connection.write_packet(set_selected_slot).await?;
+        }
+
+        {
+            self.player.write().await.inventory.set_armor_slot(
+                1,
+                Slot {
+                    item_id: VarInt::from(Elytra::ID as i32),
+                    item_count: 1,
+                    nbt: Blob::new(),
+                },
+            );
         }
 
         {
