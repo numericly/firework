@@ -1,5 +1,6 @@
 use crate::{
     entities::{DisplayedSkinPartsFlags, EntityMetadata, END_INDEX},
+    gui::{GameQueueMenuGui, Gui, Gui::*, GuiPackets, TestGui},
     server::{self, read_packet_or_err, ConnectionError, Rotation, Server, ServerHandler, Vec3},
 };
 use authentication::{Profile, ProfileProperty};
@@ -146,6 +147,7 @@ pub struct Client {
     pub to_client: broadcast::Sender<ClientCommand>,
     connection: Arc<Protocol>,
     ping_acknowledged: Mutex<bool>,
+    open_gui: Mutex<Option<Gui>>,
 }
 
 impl Client {
@@ -163,10 +165,11 @@ impl Client {
             entity_id,
             to_client,
             ping_acknowledged: Mutex::new(true),
+            open_gui: Mutex::new(None),
         }
     }
     pub async fn read_packet(&self) -> Result<ServerBoundPacket, ConnectionError> {
-        Ok(self.connection.read_and_serialize().await?)
+        Ok(self.connection.read_and_deserialize().await?)
     }
     pub async fn load_world<T: ServerHandler>(
         &self,
@@ -531,6 +534,7 @@ impl Client {
     where
         T: ServerHandler + Send + Sync + 'static,
     {
+        // println!("Received packet: {:?}", packet);
         match packet {
             ServerBoundPacket::ServerBoundKeepAlive(_) => {
                 let mut ping_acknowledged = self.ping_acknowledged.lock().await;
@@ -542,6 +546,13 @@ impl Client {
                 *ping_acknowledged = true;
             }
             ServerBoundPacket::ChatMessage(ChatMessage { message }) => {
+                let gui = GameQueueMenuGui {};
+
+                self.connection.write_packet(gui.open()).await?;
+
+                self.connection.write_packet(gui.draw()).await?;
+                *self.open_gui.lock().await = Some(GameQueueMenuGui(gui));
+
                 server.handle_chat(self, message).await?
             }
             ServerBoundPacket::PlayerCommand(PlayerCommand {
@@ -598,6 +609,14 @@ impl Client {
                         Some(Rotation::new(rot.yaw, rot.pitch)),
                     )
                     .await?;
+            }
+            ServerBoundPacket::ClickContainer(click) => {
+                let mut gui_lock = self.open_gui.lock().await;
+                let gui = gui_lock.as_mut();
+
+                if let Some(gui) = gui {
+                    gui.handle_click(click.slot, &self, server);
+                }
             }
 
             _ => (),

@@ -21,7 +21,7 @@ use world::World;
 
 macro_rules! read_packet_or_err {
     ($packet:ident, $stream:expr, $connection_state:expr) => {
-        match $stream.read_and_serialize().await {
+        match $stream.read_and_deserialize().await {
             Ok(protocol::server_bound::ServerBoundPacket::$packet(param)) => param,
             Ok(packet) => {
                 let error = crate::server::ConnectionError::UnexpectedPacket {

@@ -127,7 +127,7 @@ impl Protocol {
             connection_state: RwLock::new(ConnectionState::HandShaking),
         }
     }
-    pub async fn read_and_serialize(&self) -> Result<ServerBoundPacket, ProtocolError> {
+    pub async fn read_and_deserialize(&self) -> Result<ServerBoundPacket, ProtocolError> {
         let packet_data = self.read_packet().await?;
         let packet =
             ServerBoundPacket::deserialize(packet_data.as_slice(), &self.connection_state).await?;

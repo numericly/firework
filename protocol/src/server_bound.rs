@@ -54,8 +54,9 @@ macro_rules! define_server_bound_protocol {
 
 use crate::{
     data_types::{
-        Arm, BlockFace, ChatMode, DisplaySkinParts, MainHand, PlayerAbilityFlags,
-        PlayerActionStatus, PlayerCommandAction, RecipeBookType, SignatureData,
+        Arm, BlockFace, ChatMode, DisplaySkinParts, InventoryOperationMode, MainHand,
+        PlayerAbilityFlags, PlayerActionStatus, PlayerCommandAction, RecipeBookType, SignatureData,
+        Slot, SlotUpdate,
     },
     ConnectionState,
 };
@@ -113,6 +114,15 @@ define_server_bound_protocol! {
         chat_colors: bool,
         displayed_skin_parts: DisplaySkinParts,
         main_hand: MainHand
+    },
+    ClickContainer, 0x0A, Play => {
+        window_id: u8,
+        state_id: VarInt,
+        slot: i16,
+        button: i8,
+        mode: InventoryOperationMode,
+        slots: Vec<SlotUpdate>,
+        // cursor: Option<Slot>
     },
     CloseContainer, 0x0B, Play => {
         window_id: u8

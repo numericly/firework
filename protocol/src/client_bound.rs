@@ -181,6 +181,11 @@ define_client_bound_protocol! {
         pitch: i8,
         on_ground: bool
     },
+    OpenScreen, 0x2C, Play => {
+        window_id: VarInt,
+        window_type: VarInt,
+        title: String // TODO: Chat
+    },
     PlayerAbilities, 0x30, Play => {
         flags: PlayerAbilityFlags,
         flying_speed: f32,

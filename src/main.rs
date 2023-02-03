@@ -9,6 +9,7 @@ use world::World;
 mod client;
 // mod commands;
 mod entities;
+mod gui;
 mod server;
 
 struct LobbyServerHandler {}

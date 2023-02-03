@@ -1,9 +1,9 @@
 use authentication::ProfileProperty;
 use modular_bitfield::bitfield;
 use nbt::Blob;
-use protocol_core::{Position, SerializeField, VarInt};
+use protocol_core::{DeserializeError, DeserializeField, Position, SerializeField, VarInt};
 use protocol_derive::{DeserializeField, SerializeField};
-use std::io::Write;
+use std::io::{Error, Read, Write};
 
 #[derive(Debug, PartialEq)]
 pub struct DeathLocation {
@@ -210,7 +210,7 @@ pub struct UpdateLatency {
     pub latency: VarInt,
 }
 
-#[derive(Debug, PartialEq, SerializeField, Clone)]
+#[derive(Debug, PartialEq, SerializeField, Clone, DeserializeField)]
 pub struct Slot {
     pub item_id: VarInt,
     pub item_count: u8,
@@ -272,6 +272,25 @@ pub enum NodeType {
 pub enum Parser {
     Bool,
     Float(FloatProps),
+}
+
+#[derive(Debug, PartialEq, DeserializeField)]
+#[protocol(typ = "protocol_core::VarInt")]
+
+pub enum InventoryOperationMode {
+    Click,
+    ShiftClick,
+    NumberKey,
+    MiddleClick,
+    Drop,
+    Dragging,
+    DoubleClick,
+}
+
+#[derive(Debug, PartialEq, DeserializeField)]
+pub struct SlotUpdate {
+    pub slot_number: i16,
+    pub slot_value: Option<Slot>,
 }
 
 #[derive(Debug, PartialEq)]
