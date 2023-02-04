@@ -617,7 +617,7 @@ impl Client {
                 let gui = gui_lock.as_mut();
 
                 if let Some(gui) = gui {
-                    gui.handle_click(click.slot, &self, server);
+                    gui.handle_click(click.slot, &self, server).await?;
                 }
             }
 
