@@ -18,6 +18,7 @@ protocol_derive = { version = "*", path = "./protocol_derive" }
 protocol_core = { version = "*", path = "./protocol_core" }
 authentication = { version = "*", path = "../authentication" }
 hematite-nbt = "0.5.2"
+serde = { version = "1.0.144", features = ["derive"] }
 
 [profile.dev]
 opt-level = 2

@@ -1196,6 +1196,7 @@ dependencies = [
  "modular-bitfield",
  "protocol_core",
  "protocol_derive",
+ "serde",
  "thiserror",
  "tokio",
 ]

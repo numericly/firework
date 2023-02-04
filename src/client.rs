@@ -19,7 +19,7 @@ use protocol::{
         UpdateEntityPositionAndRotation, UpdateEntityRotation,
     },
     data_types::{
-        AddPlayer, CommandNode, FloatProps, NodeType, Parser, PlayerAbilityFlags,
+        AddPlayer, CommandNode, FloatProps, ItemNbt, NodeType, Parser, PlayerAbilityFlags,
         PlayerCommandAction, PlayerInfoAction, PlayerPositionFlags, Slot, UpdateGameMode,
         UpdateLatency, UpdateListed,
     },
@@ -249,7 +249,9 @@ impl Client {
                 Slot {
                     item_id: VarInt::from(Elytra::ID as i32),
                     item_count: 1,
-                    nbt: Blob::new(),
+                    nbt: ItemNbt {
+                        ..Default::default()
+                    },
                 },
             );
         }
@@ -856,6 +858,13 @@ impl Client {
     pub(crate) async fn disconnect(&self, reason: String) -> Result<(), ConnectionError> {
         let disconnect = PlayDisconnect { reason };
         self.connection.write_packet(disconnect).await?;
+        Ok(())
+    }
+    pub async fn set_container_content(
+        &self,
+        content: SetContainerContent,
+    ) -> Result<(), ConnectionError> {
+        self.connection.write_packet(content).await?;
         Ok(())
     }
 }

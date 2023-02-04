@@ -1,6 +1,7 @@
 use authentication::ProfileProperty;
+use minecraft_data::items::Item;
 use modular_bitfield::bitfield;
-use nbt::Blob;
+use nbt::{de, ser, Blob};
 use protocol_core::{DeserializeError, DeserializeField, Position, SerializeField, VarInt};
 use protocol_derive::{DeserializeField, SerializeField};
 use std::io::{Error, Read, Write};
@@ -18,6 +19,31 @@ pub struct PlayerAbilityFlags {
     pub flying: bool,
     pub allow_flying: bool,
     pub creative_mode: bool,
+}
+
+#[derive(Debug, Default, serde::Serialize, PartialEq, serde::Deserialize, Clone)]
+pub struct ItemNbt {
+    pub display: Option<ItemNbtDisplay>,
+}
+
+#[derive(Debug, Default, serde::Serialize, PartialEq, serde::Deserialize, Clone)]
+pub struct ItemNbtDisplay {
+    #[serde(rename = "Name")]
+    pub name: Option<String>, // TODO chat
+    #[serde(rename = "Lore")]
+    pub lore: Option<Vec<String>>, // TODO chat
+}
+
+impl SerializeField for ItemNbt {
+    fn serialize<W: Write>(&self, mut writer: W) {
+        ser::to_writer(&mut writer, &self, None).unwrap();
+    }
+}
+
+impl DeserializeField for ItemNbt {
+    fn deserialize<R: Read>(mut reader: R) -> Result<Self, DeserializeError> {
+        Ok(de::from_reader(reader)?)
+    }
 }
 
 #[bitfield(bits = 5)]
@@ -214,7 +240,7 @@ pub struct UpdateLatency {
 pub struct Slot {
     pub item_id: VarInt,
     pub item_count: u8,
-    pub nbt: Blob,
+    pub nbt: ItemNbt,
 }
 
 impl SerializeField for DeathLocation {

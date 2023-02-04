@@ -4,13 +4,13 @@ use minecraft_data::items::{DiamondShovel, Elytra, IronSword, Item};
 use nbt::Blob;
 use protocol::{
     client_bound::{OpenScreen, SetContainerContent},
-    data_types::Slot,
+    data_types::{ItemNbt, ItemNbtDisplay, Slot},
 };
 use protocol_core::VarInt;
 
 use crate::{
     client::Client,
-    server::{Server, ServerHandler},
+    server::{ConnectionError, Server, ServerHandler},
 };
 
 // these structs are blank for now, but if you want to add data to them, you can
@@ -35,11 +35,24 @@ pub enum Gui {
 }
 
 impl Gui {
-    pub fn handle_click<T: ServerHandler>(&self, slot: i16, client: &Client, server: &Server<T>) {
+    pub async fn handle_click<T: ServerHandler>(
+        &self,
+        slot: i16,
+        client: &Client,
+        server: &Server<T>,
+    ) -> Result<(), ConnectionError> {
+        // this is stupid looking code but I'm not sure of any better ways to do this
         match self {
-            Gui::TestGui(gui) => gui.handle_click(slot, client, server),
-            Gui::GameQueueMenuGui(gui) => gui.handle_click(slot, client, server),
+            Gui::TestGui(gui) => {
+                gui.handle_click(slot, client, server);
+                client.set_container_content(gui.draw()).await?;
+            }
+            Gui::GameQueueMenuGui(gui) => {
+                gui.handle_click(slot, client, server);
+                client.set_container_content(gui.draw()).await?;
+            }
         }
+        Ok(())
     }
 }
 
@@ -104,22 +117,44 @@ impl GuiPackets for GameQueueMenuGui {
                 Some(Slot {
                     item_id: VarInt(Elytra::ID), // elytra
                     item_count: 1,
-                    nbt: Blob::new(), //TODO name the item and lore
-                                      /*
-                                        {display:{Name:'[{"text":"Glide","italic":false}]',Lore:['[{"text":"Race against other players using elytras.","italic":false,"color":"gray"}]']},Enchantments:[{}]}
-                                      */
+                    nbt: ItemNbt {
+                        display: Some(ItemNbtDisplay {
+                            name: Some(r#"{"text":"Glide Minigame","italic":"false"}"#.to_string()),
+                            lore: Some(vec![
+                                r#"{"text":"Race other players through a course","italic":"false"}"#.to_string(),
+                                r#"{"text":"with an elytra.","italic":"false"}"#.to_string()
+                            ]),
+                        }),
+                    },
                 }),
                 None,
                 Some(Slot {
                     item_id: VarInt(IronSword::ID), // iron sword
                     item_count: 1,
-                    nbt: Blob::new(),
+                    nbt: ItemNbt {
+                        display: Some(ItemNbtDisplay {
+                            name: Some(r#"{"text":"Battle Minigame","italic":"false"}"#.to_string()),
+                            lore: Some(vec![
+                                r#"{"text":"Battle your friends in an arena, getting","italic":"false"}"#.to_string(),
+                                r#"{"text":"items to help you in the fight.","italic":"false"}"#.to_string()
+                            ]),
+                        }),
+                    },
                 }),
                 None,
                 Some(Slot {
                     item_id: VarInt(DiamondShovel::ID), // diamond shovel
                     item_count: 1,
-                    nbt: Blob::new(),
+                    nbt: ItemNbt {
+                        display: Some(ItemNbtDisplay {
+                            name: Some(r#"{"text":"Tumble Minigame","italic":"false"}"#.to_string()),
+                            lore: Some(vec![
+                                r#"{"text":"Throw snowballs to break the blocks underneath","italic":"false"}"#.to_string(),
+                                r#"{"text":"other players' feet. Last one alive wins.","italic":"false"}"#.to_string()
+
+                            ]),
+                        }),
+                    },
                 }),
                 None,
                 None,
