@@ -107,6 +107,12 @@ define_client_bound_protocol! {
         items: Vec<Option<Slot>>,
         held_item: Option<Slot>
     },
+    SetContainerSlot, 0x12, Play => {
+        window_id: u8,
+        state_id: VarInt,
+        slot: i16,
+        item: Option<Slot>
+    },
     PlayDisconnect, 0x17, Play => {
         reason: String
     },

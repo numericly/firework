@@ -114,43 +114,60 @@ impl GuiPackets for GameQueueMenuGui {
                 None,
                 None,
                 Some(Slot {
-                    item_id: VarInt(Elytra::ID as i32), // elytra
+                    item_id: VarInt(Elytra::ID.try_into().unwrap()), // elytra
                     item_count: 1,
                     nbt: ItemNbt {
                         display: Some(ItemNbtDisplay {
-                            name: Some(r#"{"text":"Glide Minigame","italic":"false"}"#.to_string()),
+                            name: Some(r#"{"text":"Glide Minigame","italic":"false","color":"green"}"#.to_string()),
                             lore: Some(vec![
-                                r#"{"text":"Race other players through a course","italic":"false"}"#.to_string(),
-                                r#"{"text":"with an elytra.","italic":"false"}"#.to_string()
+                                r#"{"text":"Race other players through a course","italic":"false","color":"gray"}"#.to_string(),
+                                r#"{"text":"with an elytra.","italic":"false","color":"gray"}"#.to_string(),
+                                r#"{"text":""}"#.to_string(),
+                                r#"{"text":"Click to Connect","color":"green","italic":false}"#.to_string(),
+                                r#"{"italic":false,"color":"gray","extra":[
+                                    {"text":"12","obfuscated":true},
+                                    {"text":" Currently Playing"}
+                                    ],"text":""}"#.to_string()
                             ]),
                         }),
                     },
                 }),
                 None,
                 Some(Slot {
-                    item_id: VarInt(IronSword::ID as i32), // iron sword
+                    item_id: VarInt(IronSword::ID.try_into().unwrap()), // iron sword
                     item_count: 1,
                     nbt: ItemNbt {
                         display: Some(ItemNbtDisplay {
-                            name: Some(r#"{"text":"Battle Minigame","italic":"false"}"#.to_string()),
+                            name: Some(r#"{"text":"Battle Minigame","italic":"false","color":"green"}"#.to_string()),
                             lore: Some(vec![
-                                r#"{"text":"Battle your friends in an arena, getting","italic":"false"}"#.to_string(),
-                                r#"{"text":"items to help you in the fight.","italic":"false"}"#.to_string()
+                                r#"{"text":"Battle your friends in an arena, getting","italic":"false","color":"gray"}"#.to_string(),
+                                r#"{"text":"items to help you in the fight.","italic":"false","color":"gray"}"#.to_string(),
+                                r#"{"text":""}"#.to_string(),
+                                r#"{"text":"Click to Connect","color":"green","italic":false}"#.to_string(),
+                                r#"{"italic":false,"color":"gray","extra":[
+                                    {"text":"12","obfuscated":true},
+                                    {"text":" Currently Playing"}
+                                    ],"text":""}"#.to_string()
                             ]),
                         }),
                     },
                 }),
                 None,
                 Some(Slot {
-                    item_id: VarInt(DiamondShovel::ID as i32), // diamond shovel
+                    item_id: VarInt(DiamondShovel::ID.try_into().unwrap()), // diamond shovel
                     item_count: 1,
                     nbt: ItemNbt {
                         display: Some(ItemNbtDisplay {
-                            name: Some(r#"{"text":"Tumble Minigame","italic":"false"}"#.to_string()),
+                            name: Some(r#"{"text":"Tumble Minigame","italic":"false","color":"green"}"#.to_string()),
                             lore: Some(vec![
-                                r#"{"text":"Throw snowballs to break the blocks underneath","italic":"false"}"#.to_string(),
-                                r#"{"text":"other players' feet. Last one alive wins.","italic":"false"}"#.to_string()
-
+                                r#"{"text":"Throw snowballs to break the blocks underneath","italic":"false","color":"gray"}"#.to_string(),
+                                r#"{"text":"other players' feet. Last one alive wins.","italic":"false","color":"gray"}"#.to_string(),
+                                r#"{"text":""}"#.to_string(),
+                                r#"{"text":"Click to Connect","color":"green","italic":false}"#.to_string(),
+                                r#"{"italic":false,"color":"gray","extra":[
+                                    {"text":"12","obfuscated":true},
+                                    {"text":" Currently Playing"}
+                                    ],"text":""}"#.to_string()
                             ]),
                         }),
                     },

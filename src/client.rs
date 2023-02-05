@@ -13,8 +13,8 @@ use protocol::{
     client_bound::{
         ChangeDifficulty, ClientBoundKeepAlive, Commands, InitializeWorldBorder, LoginPlay,
         PlayDisconnect, PlayerAbilities, PlayerInfo, RemoveEntities, RemoveInfoPlayer,
-        ResourcePack, SetCenterChunk, SetContainerContent, SetDefaultSpawn, SetEntityMetadata,
-        SetEntityVelocity, SetHeldItem, SetRecipes, SetTags, SpawnPlayer,
+        ResourcePack, SetCenterChunk, SetContainerContent, SetContainerSlot, SetDefaultSpawn,
+        SetEntityMetadata, SetEntityVelocity, SetHeldItem, SetRecipes, SetTags, SpawnPlayer,
         SynchronizePlayerPosition, SystemChatMessage, TeleportEntity, UpdateEntityHeadRotation,
         UpdateEntityPosition, UpdateEntityPositionAndRotation, UpdateEntityRotation,
     },
@@ -243,13 +243,13 @@ impl Client {
             self.connection.write_packet(set_selected_slot).await?;
         }
 
-        // TODO ok so dont do this
+        // TODO dont do this
 
         {
             self.player.write().await.inventory.set_armor_slot(
                 1,
                 Slot {
-                    item_id: VarInt(Elytra::ID as i32),
+                    item_id: VarInt(Elytra::ID.try_into().unwrap()),
                     item_count: 1,
                     nbt: ItemNbt {
                         ..Default::default()
@@ -260,12 +260,16 @@ impl Client {
 
         {
             self.player.write().await.inventory.set_hotbar_slot(7, Slot {
-                item_id: VarInt(RedDye::ID as i32),
+                item_id: VarInt(RedDye::ID.try_into().unwrap()),
                 item_count: 1,
                 nbt: ItemNbt {
                     display: Some(ItemNbtDisplay {
-                        name: Some("Resource Pack Disabled".to_string()),
-                        lore: Some(vec!["Right click to enable. The resource pack adds custom music to the minigames, and it's like 10mb probably.".to_string()]),
+                        name: Some(r#"{"italic":false,"extra":[
+                        {"color":"white","text":"Resource Pack: "},
+                        {"color":"red","text":"Disabled"},
+                        {"color":"gray","text":" (Right click)"}
+                            ],"text":""}"#.to_string()),
+                        lore: Some(vec![r#"{"text":"Right click to enable. The resource pack adds custom music to the minigames, and it's like 10mb probably.","italic":"false"}"#.to_string()]),
                     }),
                 },
             })
@@ -273,14 +277,23 @@ impl Client {
 
         {
             self.player.write().await.inventory.set_hotbar_slot(
-                4,
+                0,
                 Slot {
-                    item_id: VarInt(Compass::ID as i32),
+                    item_id: VarInt(Compass::ID.try_into().unwrap()),
                     item_count: 1,
                     nbt: ItemNbt {
                         display: Some(ItemNbtDisplay {
-                            name: Some("Minigames".to_string()),
-                            lore: Some(vec!["Right click to open the minigames menu.".to_string()]),
+                            name: Some(
+                                r#"{"italic":false,"extra":[
+                                {"color":"green","text":"Join Minigame"},
+                                {"color":"gray","text":" (Right click)"}
+                                ],"text":""}"#
+                                    .to_string(),
+                            ),
+                            lore: Some(vec![
+                                r#"{"text":"Click to open the minigames menu","italic":"false"}"#
+                                    .to_string(),
+                            ]),
                         }),
                     },
                 },
@@ -674,7 +687,7 @@ impl Client {
                     // logic for using items (this is hardcoded for now lol also it only works for the lobby server)
                     // sorry future will probably doing other servers and being like why the heck doesn't this work
 
-                    match used_item.item_id.0 {
+                    match used_item.item_id.0.try_into().unwrap() {
                         Compass::ID => {
                             // open game queue menu
                             let gui = GameQueueMenuGui {};
@@ -688,11 +701,78 @@ impl Client {
                             // generate resource pack packet from a url
 
                             // use the resource pack packet to send the resource pack to the client
+                            println!("Sending resource pack");
+                            let green_dye_slot = Slot {
+                                item_id: VarInt(GreenDye::ID as i32),
+                                item_count: 1,
+                                nbt: ItemNbt {
+                                    display: Some(ItemNbtDisplay {
+                                        name: Some(
+                                            r#"{"italic":false,"extra":[
+                                            {"color":"white","text":"Resource Pack: "},
+                                            {"color":"green","text":"Enabled"},
+                                            {"color":"gray","text":" (Right click)"}
+                                            ],"text":""}"#
+                                                .to_string(),
+                                        ),
+                                        lore: None,
+                                    }),
+                                    ..Default::default()
+                                },
+                            };
+                            // set the item in the hotbar
+                            self.connection
+                                .write_packet(SetContainerSlot {
+                                    window_id: 0,
+                                    state_id: VarInt(0),
+                                    slot: (used_item_slot as i16) + 36,
+                                    item: Some(green_dye_slot.clone()), // clone bad but this code will be changed anyways
+                                })
+                                .await?;
+
+                            self.player
+                                .write()
+                                .await
+                                .inventory
+                                .set_hotbar_slot(used_item_slot as usize, green_dye_slot);
                         }
                         GreenDye::ID => {
                             // remove the resource pack from the client
 
                             // maybe this works by sending a resource pack packet with an empty url and forced to true
+                            println!("Removing resource pack");
+                            let red_dye_slot = Slot {
+                                item_id: VarInt(RedDye::ID as i32),
+                                item_count: 1,
+                                nbt: ItemNbt {
+                                    display: Some(ItemNbtDisplay {
+                                        name: Some(
+                                            r#"{"italic":false,"extra":[
+                                            {"color":"white","text":"Resource Pack: "},
+                                            {"color":"red","text":"Disabled"},
+                                            {"color":"gray","text":" (Right click)"}
+                                            ],"text":""}"#
+                                                .to_string(),
+                                        ),
+                                        lore: None,
+                                    }),
+                                    ..Default::default()
+                                },
+                            };
+                            self.connection
+                                .write_packet(SetContainerSlot {
+                                    window_id: 0,
+                                    state_id: VarInt(0),
+                                    slot: (used_item_slot as i16) + 36,
+                                    item: Some(red_dye_slot.clone()), // clone bad but this code will be changed anyways
+                                })
+                                .await?;
+                            // set the item in the hotbar
+                            self.player
+                                .write()
+                                .await
+                                .inventory
+                                .set_hotbar_slot(used_item_slot as usize, red_dye_slot)
                         }
                         _ => {}
                     }

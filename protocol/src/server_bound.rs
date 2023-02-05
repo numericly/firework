@@ -56,7 +56,7 @@ use crate::{
     data_types::{
         Arm, BlockFace, ChatMode, DisplaySkinParts, InventoryOperationMode, MainHand,
         PlayerAbilityFlags, PlayerActionStatus, PlayerCommandAction, RecipeBookType, SignatureData,
-        Slot, SlotUpdate,
+        SlotUpdate,
     },
     ConnectionState,
 };

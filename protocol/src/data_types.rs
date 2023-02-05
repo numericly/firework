@@ -1,10 +1,9 @@
 use authentication::ProfileProperty;
-use minecraft_data::items::Item;
 use modular_bitfield::bitfield;
-use nbt::{de, ser, Blob};
+use nbt::{de, ser};
 use protocol_core::{DeserializeError, DeserializeField, Position, SerializeField, VarInt};
 use protocol_derive::{DeserializeField, SerializeField};
-use std::io::{Error, Read, Write};
+use std::io::{Read, Write};
 
 #[derive(Debug, PartialEq)]
 pub struct DeathLocation {
@@ -41,7 +40,7 @@ impl SerializeField for ItemNbt {
 }
 
 impl DeserializeField for ItemNbt {
-    fn deserialize<R: Read>(mut reader: R) -> Result<Self, DeserializeError> {
+    fn deserialize<R: Read>(reader: R) -> Result<Self, DeserializeError> {
         Ok(de::from_reader(reader)?)
     }
 }
