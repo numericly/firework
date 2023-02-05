@@ -2,3 +2,6 @@
 /test-crate
 *.DS_STORE
 .lock
+minecraft_data/src/items.rs
+minecraft_data/src/biomes.rs
+minecraft_data/src/blocks.rs
