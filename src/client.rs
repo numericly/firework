@@ -5,7 +5,7 @@ use crate::{
 };
 use authentication::{Profile, ProfileProperty};
 use minecraft_data::{
-    items::{Elytra, Item},
+    items::{Compass, Elytra, Item, RedDye},
     tags::{REGISTRY, TAGS},
 };
 use nbt::Blob;
@@ -19,9 +19,9 @@ use protocol::{
         UpdateEntityPositionAndRotation, UpdateEntityRotation,
     },
     data_types::{
-        AddPlayer, CommandNode, FloatProps, ItemNbt, NodeType, Parser, PlayerAbilityFlags,
-        PlayerCommandAction, PlayerInfoAction, PlayerPositionFlags, Slot, UpdateGameMode,
-        UpdateLatency, UpdateListed,
+        AddPlayer, CommandNode, FloatProps, ItemNbt, ItemNbtDisplay, NodeType, Parser,
+        PlayerAbilityFlags, PlayerCommandAction, PlayerInfoAction, PlayerPositionFlags, Slot,
+        UpdateGameMode, UpdateLatency, UpdateListed,
     },
     server_bound::{ChatMessage, PlayerCommand, ServerBoundPacket},
     ConnectionState, Protocol,
@@ -243,17 +243,48 @@ impl Client {
             self.connection.write_packet(set_selected_slot).await?;
         }
 
+        // TODO ok so dont do this
+
         {
             self.player.write().await.inventory.set_armor_slot(
                 1,
                 Slot {
-                    item_id: VarInt::from(Elytra::ID as i32),
+                    item_id: VarInt(Elytra::ID as i32),
                     item_count: 1,
                     nbt: ItemNbt {
                         ..Default::default()
                     },
                 },
             );
+        }
+
+        {
+            self.player.write().await.inventory.set_hotbar_slot(7, Slot {
+                item_id: VarInt(RedDye::ID as i32),
+                item_count: 1,
+                nbt: ItemNbt {
+                    display: Some(ItemNbtDisplay {
+                        name: Some("Resource Pack Disabled".to_string()),
+                        lore: Some(vec!["Right click to enable. The resource pack adds custom music to the minigames, and it's like 10mb probably.".to_string()]),
+                    }),
+                },
+            })
+        }
+
+        {
+            self.player.write().await.inventory.set_hotbar_slot(
+                4,
+                Slot {
+                    item_id: VarInt(Compass::ID as i32),
+                    item_count: 1,
+                    nbt: ItemNbt {
+                        display: Some(ItemNbtDisplay {
+                            name: Some("Minigames".to_string()),
+                            lore: Some(vec!["Right click to open the minigames menu.".to_string()]),
+                        }),
+                    },
+                },
+            )
         }
 
         {
@@ -536,7 +567,7 @@ impl Client {
     where
         T: ServerHandler + Send + Sync + 'static,
     {
-        // println!("Received packet: {:?}", packet);
+        println!("Received packet: {:?}", packet);
         match packet {
             ServerBoundPacket::ServerBoundKeepAlive(_) => {
                 let mut ping_acknowledged = self.ping_acknowledged.lock().await;
@@ -620,7 +651,43 @@ impl Client {
                     gui.handle_click(click.slot, &self, server).await?;
                 }
             }
+            ServerBoundPacket::SetHeldItemServerBound(set_held_item) => {
+                let mut player = self.player.write().await;
+                player.selected_slot = set_held_item.slot as u8;
+            }
+            ServerBoundPacket::UseItem(use_item) => {
+                let used_item_slot;
+                let used_item;
 
+                {
+                    let player_read = self.player.read().await;
+                    used_item_slot = player_read.selected_slot;
+                    used_item = player_read
+                        .inventory
+                        .get_hotbar_slot(used_item_slot as usize)
+                        .clone();
+                }
+                if let Some(used_item) = used_item {
+                    // logic for using items (this is hardcoded for now lol also it only works for the lobby server)
+                    // sorry future will probably doing other servers and being like why the heck doesn't this work
+
+                    match used_item.item_id.0 {
+                        Compass::ID => {
+                            // open game queue menu
+                            let gui = GameQueueMenuGui {};
+
+                            self.connection.write_packet(gui.open()).await?;
+
+                            self.connection.write_packet(gui.draw()).await?;
+                            *self.open_gui.lock().await = Some(GameQueueMenuGui(gui));
+                        }
+                        RedDye::ID => {
+                            // enable resource pack
+                        }
+                    }
+                }
+                Ok(())
+            }
             _ => (),
         };
         Ok(())

@@ -14,7 +14,6 @@ use crate::{
 };
 
 // these structs are blank for now, but if you want to add data to them, you can
-// insert buzzwords to justify this being a good idea
 #[derive(Debug)]
 pub struct TestGui {}
 #[derive(Debug)]
