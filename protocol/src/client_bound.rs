@@ -281,7 +281,7 @@ impl ResourcePack {
         let hash = format!("{:x}", hasher.finalize());
 
         if hash.len() != 40 {
-            panic!("invalid hash length"); // what even is an error handling
+            panic!("invalid hash length"); // should never happen
         }
 
         println!("hash of pack {}: {}", url, hash);

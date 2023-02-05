@@ -182,6 +182,9 @@ define_server_bound_protocol! {
         book_open: bool,
         filter_active: bool
     },
+    ResourcePackResponse, 0x24, Play => {
+        result: VarInt // this is technically an enum but i'm not gonna make one; it's just 4 values that we'll throw away
+    },
     SetHeldItemServerBound, 0x28, Play => {
         slot: u16
     },

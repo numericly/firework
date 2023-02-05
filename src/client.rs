@@ -5,7 +5,7 @@ use crate::{
 };
 use authentication::{Profile, ProfileProperty};
 use minecraft_data::{
-    items::{Compass, Elytra, GreenDye, Item, RedDye},
+    items::{Compass, Elytra, GrayDye, Item, LightGrayDye, LimeDye, RedDye},
     tags::{REGISTRY, TAGS},
 };
 use nbt::Blob;
@@ -580,7 +580,7 @@ impl Client {
     where
         T: ServerHandler + Send + Sync + 'static,
     {
-        println!("Received packet: {:?}", packet);
+        // println!("Received packet: {:?}", packet);
         match packet {
             ServerBoundPacket::ServerBoundKeepAlive(_) => {
                 let mut ping_acknowledged = self.ping_acknowledged.lock().await;
@@ -698,12 +698,50 @@ impl Client {
                             *self.open_gui.lock().await = Some(GameQueueMenuGui(gui));
                         }
                         RedDye::ID => {
-                            // generate resource pack packet from a url
+                            // while the resource pack is loading, use a placeholder inert item
+                            let inert_slot = Slot {
+                                item_id: VarInt(GrayDye::ID as i32),
+                                item_count: 1,
+                                nbt: ItemNbt {
+                                    display: Some(ItemNbtDisplay {
+                                        name: Some(
+                                            r#"{"italic":false,"extra":[
+                                            {"color":"white","text":"Resource Pack: "},
+                                            {"color":"aqua","text":"Loading"},
+                                            {"color":"gray","text":" (Right Click)"}
+                                            ],"text":""}"#
+                                                .to_string(),
+                                        ),
+                                        lore: None,
+                                    }),
+                                    ..Default::default()
+                                },
+                            };
+                            self.connection
+                                .write_packet(SetContainerSlot {
+                                    window_id: 0,
+                                    slot: used_item_slot as i16 + 36,
+                                    item: Some(inert_slot),
+                                    state_id: VarInt(0),
+                                })
+                                .await?;
 
-                            // use the resource pack packet to send the resource pack to the client
                             println!("Sending resource pack");
+
+                            // i just hosted it on my dropbox, you can host it on your own server or something if you want
+                            let packet = ResourcePack::new(
+                                "https://www.dropbox.com/s/vf22tuww7mcv4fe/music_pack.zip?dl=1"
+                                    .to_string(),
+                                None,
+                            )
+                            .await;
+                            if let Err(e) = packet {
+                                println!("Error sending resource pack: {:?}", e);
+                            } else {
+                                self.connection.write_packet(packet.unwrap()).await?;
+                            }
                             let green_dye_slot = Slot {
-                                item_id: VarInt(GreenDye::ID as i32),
+                                item_id: VarInt(LimeDye::ID as i32),
                                 item_count: 1,
                                 nbt: ItemNbt {
                                     display: Some(ItemNbtDisplay {
@@ -736,11 +774,18 @@ impl Client {
                                 .inventory
                                 .set_hotbar_slot(used_item_slot as usize, green_dye_slot);
                         }
-                        GreenDye::ID => {
+                        LimeDye::ID => {
                             // remove the resource pack from the client
 
                             // maybe this works by sending a resource pack packet with an empty url and forced to true
                             println!("Removing resource pack");
+                            let packet = ResourcePack {
+                                url: "".to_string(),
+                                hash: "".to_string(),
+                                forced: false,
+                                prompt: None,
+                            };
+                            self.connection.write_packet(packet).await?;
                             let red_dye_slot = Slot {
                                 item_id: VarInt(RedDye::ID as i32),
                                 item_count: 1,
