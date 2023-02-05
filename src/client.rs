@@ -5,7 +5,7 @@ use crate::{
 };
 use authentication::{Profile, ProfileProperty};
 use minecraft_data::{
-    items::{Compass, Elytra, Item, RedDye},
+    items::{Compass, Elytra, GreenDye, Item, RedDye},
     tags::{REGISTRY, TAGS},
 };
 use nbt::Blob;
@@ -13,10 +13,10 @@ use protocol::{
     client_bound::{
         ChangeDifficulty, ClientBoundKeepAlive, Commands, InitializeWorldBorder, LoginPlay,
         PlayDisconnect, PlayerAbilities, PlayerInfo, RemoveEntities, RemoveInfoPlayer,
-        SetCenterChunk, SetContainerContent, SetDefaultSpawn, SetEntityMetadata, SetEntityVelocity,
-        SetHeldItem, SetRecipes, SetTags, SpawnPlayer, SynchronizePlayerPosition,
-        SystemChatMessage, TeleportEntity, UpdateEntityHeadRotation, UpdateEntityPosition,
-        UpdateEntityPositionAndRotation, UpdateEntityRotation,
+        ResourcePack, SetCenterChunk, SetContainerContent, SetDefaultSpawn, SetEntityMetadata,
+        SetEntityVelocity, SetHeldItem, SetRecipes, SetTags, SpawnPlayer,
+        SynchronizePlayerPosition, SystemChatMessage, TeleportEntity, UpdateEntityHeadRotation,
+        UpdateEntityPosition, UpdateEntityPositionAndRotation, UpdateEntityRotation,
     },
     data_types::{
         AddPlayer, CommandNode, FloatProps, ItemNbt, ItemNbtDisplay, NodeType, Parser,
@@ -661,11 +661,14 @@ impl Client {
 
                 {
                     let player_read = self.player.read().await;
-                    used_item_slot = player_read.selected_slot;
-                    used_item = player_read
+                    used_item_slot = player_read.selected_slot.clone();
+                    used_item = match player_read
                         .inventory
-                        .get_hotbar_slot(used_item_slot as usize)
-                        .clone();
+                        .get_hotbar_slot(used_item_slot.clone() as usize)
+                    {
+                        Some(item) => Some(item.clone()),
+                        None => None,
+                    }
                 }
                 if let Some(used_item) = used_item {
                     // logic for using items (this is hardcoded for now lol also it only works for the lobby server)
@@ -682,11 +685,18 @@ impl Client {
                             *self.open_gui.lock().await = Some(GameQueueMenuGui(gui));
                         }
                         RedDye::ID => {
-                            // enable resource pack
+                            // generate resource pack packet from a url
+
+                            // use the resource pack packet to send the resource pack to the client
                         }
+                        GreenDye::ID => {
+                            // remove the resource pack from the client
+
+                            // maybe this works by sending a resource pack packet with an empty url and forced to true
+                        }
+                        _ => {}
                     }
                 }
-                Ok(())
             }
             _ => (),
         };

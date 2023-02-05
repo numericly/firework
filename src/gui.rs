@@ -114,7 +114,7 @@ impl GuiPackets for GameQueueMenuGui {
                 None,
                 None,
                 Some(Slot {
-                    item_id: VarInt(Elytra::ID), // elytra
+                    item_id: VarInt(Elytra::ID as i32), // elytra
                     item_count: 1,
                     nbt: ItemNbt {
                         display: Some(ItemNbtDisplay {
@@ -128,7 +128,7 @@ impl GuiPackets for GameQueueMenuGui {
                 }),
                 None,
                 Some(Slot {
-                    item_id: VarInt(IronSword::ID), // iron sword
+                    item_id: VarInt(IronSword::ID as i32), // iron sword
                     item_count: 1,
                     nbt: ItemNbt {
                         display: Some(ItemNbtDisplay {
@@ -142,7 +142,7 @@ impl GuiPackets for GameQueueMenuGui {
                 }),
                 None,
                 Some(Slot {
-                    item_id: VarInt(DiamondShovel::ID), // diamond shovel
+                    item_id: VarInt(DiamondShovel::ID as i32), // diamond shovel
                     item_count: 1,
                     nbt: ItemNbt {
                         display: Some(ItemNbtDisplay {

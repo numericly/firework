@@ -39,6 +39,7 @@ use authentication::ProfileProperty;
 use minecraft_data::tags::VarIntList;
 use protocol_core::{BitSet, UnsizedVec, VarInt};
 use protocol_core::{Position, SerializeField};
+use sha1::{Digest, Sha1};
 use std::collections::HashMap;
 
 use nbt::Blob;
@@ -210,6 +211,12 @@ define_client_bound_protocol! {
     RemoveEntities, 0x3A, Play => {
         entity_ids: Vec<VarInt>
     },
+    ResourcePack, 0x3C, Play => {
+        url: String,
+        hash: String,
+        forced: bool,
+        prompt: Option<String> // TODO: Chat
+    },
     UpdateEntityHeadRotation, 0x3E, Play => {
         entity_id: VarInt,
         yaw: i8
@@ -253,5 +260,31 @@ define_client_bound_protocol! {
     },
     SetTags, 0x6A, Play => {
         tags: &'static HashMap<String, HashMap<String, VarIntList>>
+    }
+}
+
+impl ResourcePack {
+    pub async fn new(url: String, prompt: Option<String>) -> Result<Self, reqwest::Error> {
+        // get the resource pack bytes
+        let resource_pack_bytes = reqwest::get(&url).await?.bytes().await?;
+        let forced = false;
+
+        // compute the sha1 hash of the resource pack
+        let mut hasher = Sha1::new();
+        hasher.update(&resource_pack_bytes);
+        let hash = format!("{:x}", hasher.finalize());
+
+        if hash.len() != 40 {
+            panic!("invalid hash length"); // what even is an error handling
+        }
+
+        println!("hash of pack {}: {}", url, hash);
+
+        Ok(Self {
+            url,
+            hash: hash,
+            forced,
+            prompt,
+        })
     }
 }
