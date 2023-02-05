@@ -41,6 +41,8 @@ name = "authentication"
 version = "0.1.0"
 dependencies = [
  "num-bigint",
+ "protocol_core",
+ "protocol_derive",
  "reqwest",
  "serde",
  "serde_json",
@@ -215,6 +217,41 @@ dependencies = [
 ]
 
 [[package]]
+name = "darling"
+version = "0.14.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b0dd3cd20dc6b5a876612a6e5accfe7f3dd883db6d07acfbf14c128f61550dfa"
+dependencies = [
+ "darling_core",
+ "darling_macro",
+]
+
+[[package]]
+name = "darling_core"
+version = "0.14.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a784d2ccaf7c98501746bf0be29b2022ba41fd62a2e622af997a03e9f972859f"
+dependencies = [
+ "fnv",
+ "ident_case",
+ "proc-macro2",
+ "quote",
+ "strsim",
+ "syn",
+]
+
+[[package]]
+name = "darling_macro"
+version = "0.14.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7618812407e9402654622dd402b0a89dff9ba93badd6540781526117b92aab7e"
+dependencies = [
+ "darling_core",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "dashmap"
 version = "5.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -225,17 +262,6 @@ dependencies = [
  "lock_api",
  "once_cell",
  "parking_lot_core",
-]
-
-[[package]]
-name = "data"
-version = "0.1.0"
-dependencies = [
- "get-size",
- "hematite-nbt",
- "lazy_static",
- "loop_chain",
- "serde",
 ]
 
 [[package]]
@@ -387,12 +413,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "get-size"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ffff7b577402f46b6e0069ae9c31a7859ab3f2abe7ff0fb614fe6441a1d6c306"
-
-[[package]]
 name = "getrandom"
 version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -521,6 +541,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "ident_case"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
+
+[[package]]
 name = "idna"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -620,12 +646,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "loop_chain"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "452ebe4cd90ccf9babf24ded1c5893c3b0a1b27fd78a2ead5d41934317d76bb1"
-
-[[package]]
 name = "memchr"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -645,8 +665,12 @@ dependencies = [
  "datasize",
  "hematite-nbt",
  "lazy_static",
+ "proc-macro2",
+ "quote",
+ "rust-format",
  "serde",
  "serde_json",
+ "syn",
 ]
 
 [[package]]
@@ -950,13 +974,38 @@ dependencies = [
  "byteorder",
  "cfb-mode",
  "cfb8",
- "data",
  "hematite-nbt",
+ "minecraft_data",
  "miniz_oxide 0.6.2",
  "modular-bitfield",
+ "protocol_core",
+ "protocol_derive",
  "quartz_nbt",
+ "rand",
  "thiserror",
  "tokio",
+]
+
+[[package]]
+name = "protocol_core"
+version = "0.1.0"
+dependencies = [
+ "byteorder",
+ "hematite-nbt",
+ "minecraft_data",
+ "modular-bitfield",
+ "thiserror",
+]
+
+[[package]]
+name = "protocol_derive"
+version = "0.1.0"
+dependencies = [
+ "darling",
+ "proc-macro2",
+ "protocol_core",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -1105,6 +1154,12 @@ checksum = "a19473b2de3164677ff38e4309c42448ba8d0fe5ad5fa722e7d278f991859aa6"
 dependencies = [
  "simple_asn1",
 ]
+
+[[package]]
+name = "rust-format"
+version = "0.3.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "60e7c00b6c3bf5e38a880eec01d7e829d12ca682079f8238a464def3c4b31627"
 
 [[package]]
 name = "ryu"
@@ -1273,6 +1328,12 @@ name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
+
+[[package]]
+name = "strsim"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "73473c0e59e6d5812c5dfe2a064a6444949f089e20eec9a2e5506596494e4623"
 
 [[package]]
 name = "subtle"
@@ -1673,10 +1734,10 @@ version = "0.1.0"
 dependencies = [
  "byteorder",
  "dashmap",
- "data",
  "hematite-nbt",
  "minecraft_data",
  "protocol",
+ "protocol_core",
  "quartz_nbt",
  "rand",
  "serde",

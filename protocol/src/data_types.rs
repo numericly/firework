@@ -1,9 +1,10 @@
 use authentication::ProfileProperty;
+use minecraft_data::items::Item;
 use modular_bitfield::bitfield;
-use nbt::Blob;
-use protocol_core::{Position, SerializeField, VarInt};
+use nbt::{de, ser, Blob};
+use protocol_core::{DeserializeError, DeserializeField, Position, SerializeField, VarInt};
 use protocol_derive::{DeserializeField, SerializeField};
-use std::io::Write;
+use std::io::{Error, Read, Write};
 
 #[derive(Debug, PartialEq)]
 pub struct DeathLocation {
@@ -18,6 +19,31 @@ pub struct PlayerAbilityFlags {
     pub flying: bool,
     pub allow_flying: bool,
     pub creative_mode: bool,
+}
+
+#[derive(Debug, Default, serde::Serialize, PartialEq, serde::Deserialize, Clone)]
+pub struct ItemNbt {
+    pub display: Option<ItemNbtDisplay>,
+}
+
+#[derive(Debug, Default, serde::Serialize, PartialEq, serde::Deserialize, Clone)]
+pub struct ItemNbtDisplay {
+    #[serde(rename = "Name")]
+    pub name: Option<String>, // TODO chat
+    #[serde(rename = "Lore")]
+    pub lore: Option<Vec<String>>, // TODO chat
+}
+
+impl SerializeField for ItemNbt {
+    fn serialize<W: Write>(&self, mut writer: W) {
+        ser::to_writer(&mut writer, &self, None).unwrap();
+    }
+}
+
+impl DeserializeField for ItemNbt {
+    fn deserialize<R: Read>(mut reader: R) -> Result<Self, DeserializeError> {
+        Ok(de::from_reader(reader)?)
+    }
 }
 
 #[bitfield(bits = 5)]
@@ -50,18 +76,6 @@ pub struct SignatureData {
     pub timestamp: i64,
     pub public_key: Vec<u8>,
     pub signature: Vec<u8>,
-}
-
-#[derive(Debug, PartialEq, DeserializeField)]
-#[protocol(typ = "u8")]
-pub enum VerifyTokenOrSignature {
-    MessageSignature {
-        salt: i64,
-        message_signature: Vec<u8>,
-    },
-    VerifyToken {
-        verify_token: Vec<u8>,
-    },
 }
 
 #[derive(Debug, PartialEq, DeserializeField)]
@@ -144,28 +158,98 @@ pub enum RecipeBookType {
 #[derive(Debug, PartialEq)]
 pub struct BlockEntity {}
 
-#[derive(Debug, PartialEq, SerializeField)]
-#[protocol(typ = "protocol_core::VarInt")]
+#[bitfield(bits = 6)]
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub struct PlayerInfoActions {
+    pub add_player: bool,
+    pub init_chat: bool,
+    pub update_gamemode: bool,
+    pub update_listed: bool,
+    pub update_latency: bool,
+    pub update_display_name: bool,
+}
+
+#[derive(Debug, PartialEq)]
 pub enum PlayerInfoAction {
-    AddPlayer(Vec<PlayerInfoAddPlayer>),
+    AddAllPlayers(Vec<(u128, AddPlayer, UpdateGameMode, UpdateListed, UpdateLatency)>),
+    AddSinglePlayer(u128, AddPlayer, UpdateGameMode, UpdateListed, UpdateLatency),
+}
+
+impl SerializeField for PlayerInfoAction {
+    fn serialize<W: Write>(&self, mut writer: W) {
+        match self {
+            PlayerInfoAction::AddAllPlayers(players) => {
+                PlayerInfoActions::new()
+                    .with_add_player(true)
+                    .with_update_gamemode(true)
+                    .with_update_listed(true)
+                    .with_update_latency(true)
+                    .bytes[0]
+                    .serialize(&mut writer);
+
+                VarInt::from(players.len() as i32).serialize(&mut writer);
+
+                for (uuid, add_player, update_gamemode, update_listed, update_latency) in players {
+                    uuid.serialize(&mut writer);
+                    add_player.serialize(&mut writer);
+                    update_gamemode.serialize(&mut writer);
+                    update_listed.serialize(&mut writer);
+                    update_latency.serialize(&mut writer);
+                }
+            }
+            PlayerInfoAction::AddSinglePlayer(
+                uuid,
+                add_player,
+                update_gamemode,
+                update_listed,
+                update_latency,
+            ) => {
+                PlayerInfoActions::new()
+                    .with_add_player(true)
+                    .with_update_gamemode(true)
+                    .with_update_listed(true)
+                    .with_update_latency(true)
+                    .bytes[0]
+                    .serialize(&mut writer);
+
+                VarInt::from(1).serialize(&mut writer);
+
+                uuid.serialize(&mut writer);
+                add_player.serialize(&mut writer);
+                update_gamemode.serialize(&mut writer);
+                update_listed.serialize(&mut writer);
+                update_latency.serialize(&mut writer);
+            }
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, SerializeField)]
-pub struct PlayerInfoAddPlayer {
-    pub uuid: u128,
+pub struct AddPlayer {
     pub name: String,
     pub properties: Vec<ProfileProperty>,
-    pub gamemode: VarInt,
-    pub ping: VarInt,
-    pub display_name: Option<String>,
-    pub has_signature: bool,
 }
 
-#[derive(Debug, PartialEq, SerializeField, Clone)]
+#[derive(Debug, PartialEq, SerializeField)]
+pub struct UpdateGameMode {
+    pub gamemode: VarInt,
+}
+
+#[derive(Debug, PartialEq, SerializeField)]
+pub struct UpdateListed {
+    pub listed: bool,
+}
+
+#[derive(Debug, PartialEq, SerializeField)]
+pub struct UpdateLatency {
+    pub latency: VarInt,
+}
+
+#[derive(Debug, PartialEq, SerializeField, Clone, DeserializeField)]
 pub struct Slot {
     pub item_id: VarInt,
     pub item_count: u8,
-    pub nbt: Blob,
+    pub nbt: ItemNbt,
 }
 
 impl SerializeField for DeathLocation {
@@ -223,6 +307,25 @@ pub enum NodeType {
 pub enum Parser {
     Bool,
     Float(FloatProps),
+}
+
+#[derive(Debug, PartialEq, DeserializeField)]
+#[protocol(typ = "protocol_core::VarInt")]
+
+pub enum InventoryOperationMode {
+    Click,
+    ShiftClick,
+    NumberKey,
+    MiddleClick,
+    Drop,
+    Dragging,
+    DoubleClick,
+}
+
+#[derive(Debug, PartialEq, DeserializeField)]
+pub struct SlotUpdate {
+    pub slot_number: i16,
+    pub slot_value: Option<Slot>,
 }
 
 #[derive(Debug, PartialEq)]

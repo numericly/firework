@@ -7,10 +7,8 @@ edition = "2021"
 
 [dependencies]
 aes = "0.8.1"
-quartz_nbt = "0.2.6"
 tokio = { version = "1.12.0", features = ["full"] }
 miniz_oxide = "0.6.2"
-cfb-mode = "0.8.2"
 cfb8 = "0.8.1"
 modular-bitfield = "0.11.2"
 thiserror = "1.0.37"
@@ -19,11 +17,8 @@ minecraft_data = { version = "*", path = "../minecraft_data" }
 protocol_derive = { version = "*", path = "./protocol_derive" }
 protocol_core = { version = "*", path = "./protocol_core" }
 authentication = { version = "*", path = "../authentication" }
-async-trait = "0.1.58"
 hematite-nbt = "0.5.2"
-rand = "0.8.5"
-reqwest = "0.11.14"
-sha1 = "0.10.5"
+serde = { version = "1.0.144", features = ["derive"] }
 
 [profile.dev]
 opt-level = 2

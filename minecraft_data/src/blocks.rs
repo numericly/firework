@@ -28,6 +28,8 @@ pub enum Block {
 	AcaciaPlanks(AcaciaPlanks),
 	DarkOakPlanks(DarkOakPlanks),
 	MangrovePlanks(MangrovePlanks),
+	BambooPlanks(BambooPlanks),
+	BambooMosaic(BambooMosaic),
 	OakSapling(OakSapling),
 	SpruceSapling(SpruceSapling),
 	BirchSapling(BirchSapling),
@@ -57,6 +59,7 @@ pub enum Block {
 	MangroveLog(MangroveLog),
 	MangroveRoots(MangroveRoots),
 	MuddyMangroveRoots(MuddyMangroveRoots),
+	BambooBlock(BambooBlock),
 	StrippedSpruceLog(StrippedSpruceLog),
 	StrippedBirchLog(StrippedBirchLog),
 	StrippedJungleLog(StrippedJungleLog),
@@ -64,6 +67,7 @@ pub enum Block {
 	StrippedDarkOakLog(StrippedDarkOakLog),
 	StrippedOakLog(StrippedOakLog),
 	StrippedMangroveLog(StrippedMangroveLog),
+	StrippedBambooBlock(StrippedBambooBlock),
 	OakWood(OakWood),
 	SpruceWood(SpruceWood),
 	BirchWood(BirchWood),
@@ -162,6 +166,7 @@ pub enum Block {
 	Bricks(Bricks),
 	Tnt(Tnt),
 	Bookshelf(Bookshelf),
+	ChiseledBookshelf(ChiseledBookshelf),
 	MossyCobblestone(MossyCobblestone),
 	Obsidian(Obsidian),
 	Torch(Torch),
@@ -186,6 +191,7 @@ pub enum Block {
 	JungleSign(JungleSign),
 	DarkOakSign(DarkOakSign),
 	MangroveSign(MangroveSign),
+	BambooSign(BambooSign),
 	OakDoor(OakDoor),
 	Ladder(Ladder),
 	Rail(Rail),
@@ -197,6 +203,27 @@ pub enum Block {
 	JungleWallSign(JungleWallSign),
 	DarkOakWallSign(DarkOakWallSign),
 	MangroveWallSign(MangroveWallSign),
+	BambooWallSign(BambooWallSign),
+	OakHangingSign(OakHangingSign),
+	SpruceHangingSign(SpruceHangingSign),
+	BirchHangingSign(BirchHangingSign),
+	AcaciaHangingSign(AcaciaHangingSign),
+	JungleHangingSign(JungleHangingSign),
+	DarkOakHangingSign(DarkOakHangingSign),
+	CrimsonHangingSign(CrimsonHangingSign),
+	WarpedHangingSign(WarpedHangingSign),
+	MangroveHangingSign(MangroveHangingSign),
+	BambooHangingSign(BambooHangingSign),
+	OakWallHangingSign(OakWallHangingSign),
+	SpruceWallHangingSign(SpruceWallHangingSign),
+	BirchWallHangingSign(BirchWallHangingSign),
+	AcaciaWallHangingSign(AcaciaWallHangingSign),
+	JungleWallHangingSign(JungleWallHangingSign),
+	DarkOakWallHangingSign(DarkOakWallHangingSign),
+	MangroveWallHangingSign(MangroveWallHangingSign),
+	CrimsonWallHangingSign(CrimsonWallHangingSign),
+	WarpedWallHangingSign(WarpedWallHangingSign),
+	BambooWallHangingSign(BambooWallHangingSign),
 	Lever(Lever),
 	StonePressurePlate(StonePressurePlate),
 	IronDoor(IronDoor),
@@ -207,6 +234,7 @@ pub enum Block {
 	AcaciaPressurePlate(AcaciaPressurePlate),
 	DarkOakPressurePlate(DarkOakPressurePlate),
 	MangrovePressurePlate(MangrovePressurePlate),
+	BambooPressurePlate(BambooPressurePlate),
 	RedstoneOre(RedstoneOre),
 	DeepslateRedstoneOre(DeepslateRedstoneOre),
 	RedstoneTorch(RedstoneTorch),
@@ -257,6 +285,7 @@ pub enum Block {
 	AcaciaTrapdoor(AcaciaTrapdoor),
 	DarkOakTrapdoor(DarkOakTrapdoor),
 	MangroveTrapdoor(MangroveTrapdoor),
+	BambooTrapdoor(BambooTrapdoor),
 	StoneBricks(StoneBricks),
 	MossyStoneBricks(MossyStoneBricks),
 	CrackedStoneBricks(CrackedStoneBricks),
@@ -353,6 +382,7 @@ pub enum Block {
 	AcaciaButton(AcaciaButton),
 	DarkOakButton(DarkOakButton),
 	MangroveButton(MangroveButton),
+	BambooButton(BambooButton),
 	SkeletonSkull(SkeletonSkull),
 	SkeletonWallSkull(SkeletonWallSkull),
 	WitherSkeletonSkull(WitherSkeletonSkull),
@@ -365,6 +395,8 @@ pub enum Block {
 	CreeperWallHead(CreeperWallHead),
 	DragonHead(DragonHead),
 	DragonWallHead(DragonWallHead),
+	PiglinHead(PiglinHead),
+	PiglinWallHead(PiglinWallHead),
 	Anvil(Anvil),
 	ChippedAnvil(ChippedAnvil),
 	DamagedAnvil(DamagedAnvil),
@@ -417,6 +449,8 @@ pub enum Block {
 	AcaciaStairs(AcaciaStairs),
 	DarkOakStairs(DarkOakStairs),
 	MangroveStairs(MangroveStairs),
+	BambooStairs(BambooStairs),
+	BambooMosaicStairs(BambooMosaicStairs),
 	SlimeBlock(SlimeBlock),
 	Barrier(Barrier),
 	Light(Light),
@@ -500,6 +534,8 @@ pub enum Block {
 	AcaciaSlab(AcaciaSlab),
 	DarkOakSlab(DarkOakSlab),
 	MangroveSlab(MangroveSlab),
+	BambooSlab(BambooSlab),
+	BambooMosaicSlab(BambooMosaicSlab),
 	StoneSlab(StoneSlab),
 	SmoothStoneSlab(SmoothStoneSlab),
 	SandstoneSlab(SandstoneSlab),
@@ -524,18 +560,21 @@ pub enum Block {
 	AcaciaFenceGate(AcaciaFenceGate),
 	DarkOakFenceGate(DarkOakFenceGate),
 	MangroveFenceGate(MangroveFenceGate),
+	BambooFenceGate(BambooFenceGate),
 	SpruceFence(SpruceFence),
 	BirchFence(BirchFence),
 	JungleFence(JungleFence),
 	AcaciaFence(AcaciaFence),
 	DarkOakFence(DarkOakFence),
 	MangroveFence(MangroveFence),
+	BambooFence(BambooFence),
 	SpruceDoor(SpruceDoor),
 	BirchDoor(BirchDoor),
 	JungleDoor(JungleDoor),
 	AcaciaDoor(AcaciaDoor),
 	DarkOakDoor(DarkOakDoor),
 	MangroveDoor(MangroveDoor),
+	BambooDoor(BambooDoor),
 	EndRod(EndRod),
 	ChorusPlant(ChorusPlant),
 	ChorusFlower(ChorusFlower),
@@ -966,6 +1005,8 @@ impl Block {
 			Block::AcaciaPlanks(_) => AcaciaPlanks::DISPLAY_NAME,
 			Block::DarkOakPlanks(_) => DarkOakPlanks::DISPLAY_NAME,
 			Block::MangrovePlanks(_) => MangrovePlanks::DISPLAY_NAME,
+			Block::BambooPlanks(_) => BambooPlanks::DISPLAY_NAME,
+			Block::BambooMosaic(_) => BambooMosaic::DISPLAY_NAME,
 			Block::OakSapling(_) => OakSapling::DISPLAY_NAME,
 			Block::SpruceSapling(_) => SpruceSapling::DISPLAY_NAME,
 			Block::BirchSapling(_) => BirchSapling::DISPLAY_NAME,
@@ -995,6 +1036,7 @@ impl Block {
 			Block::MangroveLog(_) => MangroveLog::DISPLAY_NAME,
 			Block::MangroveRoots(_) => MangroveRoots::DISPLAY_NAME,
 			Block::MuddyMangroveRoots(_) => MuddyMangroveRoots::DISPLAY_NAME,
+			Block::BambooBlock(_) => BambooBlock::DISPLAY_NAME,
 			Block::StrippedSpruceLog(_) => StrippedSpruceLog::DISPLAY_NAME,
 			Block::StrippedBirchLog(_) => StrippedBirchLog::DISPLAY_NAME,
 			Block::StrippedJungleLog(_) => StrippedJungleLog::DISPLAY_NAME,
@@ -1002,6 +1044,7 @@ impl Block {
 			Block::StrippedDarkOakLog(_) => StrippedDarkOakLog::DISPLAY_NAME,
 			Block::StrippedOakLog(_) => StrippedOakLog::DISPLAY_NAME,
 			Block::StrippedMangroveLog(_) => StrippedMangroveLog::DISPLAY_NAME,
+			Block::StrippedBambooBlock(_) => StrippedBambooBlock::DISPLAY_NAME,
 			Block::OakWood(_) => OakWood::DISPLAY_NAME,
 			Block::SpruceWood(_) => SpruceWood::DISPLAY_NAME,
 			Block::BirchWood(_) => BirchWood::DISPLAY_NAME,
@@ -1100,6 +1143,7 @@ impl Block {
 			Block::Bricks(_) => Bricks::DISPLAY_NAME,
 			Block::Tnt(_) => Tnt::DISPLAY_NAME,
 			Block::Bookshelf(_) => Bookshelf::DISPLAY_NAME,
+			Block::ChiseledBookshelf(_) => ChiseledBookshelf::DISPLAY_NAME,
 			Block::MossyCobblestone(_) => MossyCobblestone::DISPLAY_NAME,
 			Block::Obsidian(_) => Obsidian::DISPLAY_NAME,
 			Block::Torch(_) => Torch::DISPLAY_NAME,
@@ -1124,6 +1168,7 @@ impl Block {
 			Block::JungleSign(_) => JungleSign::DISPLAY_NAME,
 			Block::DarkOakSign(_) => DarkOakSign::DISPLAY_NAME,
 			Block::MangroveSign(_) => MangroveSign::DISPLAY_NAME,
+			Block::BambooSign(_) => BambooSign::DISPLAY_NAME,
 			Block::OakDoor(_) => OakDoor::DISPLAY_NAME,
 			Block::Ladder(_) => Ladder::DISPLAY_NAME,
 			Block::Rail(_) => Rail::DISPLAY_NAME,
@@ -1135,6 +1180,27 @@ impl Block {
 			Block::JungleWallSign(_) => JungleWallSign::DISPLAY_NAME,
 			Block::DarkOakWallSign(_) => DarkOakWallSign::DISPLAY_NAME,
 			Block::MangroveWallSign(_) => MangroveWallSign::DISPLAY_NAME,
+			Block::BambooWallSign(_) => BambooWallSign::DISPLAY_NAME,
+			Block::OakHangingSign(_) => OakHangingSign::DISPLAY_NAME,
+			Block::SpruceHangingSign(_) => SpruceHangingSign::DISPLAY_NAME,
+			Block::BirchHangingSign(_) => BirchHangingSign::DISPLAY_NAME,
+			Block::AcaciaHangingSign(_) => AcaciaHangingSign::DISPLAY_NAME,
+			Block::JungleHangingSign(_) => JungleHangingSign::DISPLAY_NAME,
+			Block::DarkOakHangingSign(_) => DarkOakHangingSign::DISPLAY_NAME,
+			Block::CrimsonHangingSign(_) => CrimsonHangingSign::DISPLAY_NAME,
+			Block::WarpedHangingSign(_) => WarpedHangingSign::DISPLAY_NAME,
+			Block::MangroveHangingSign(_) => MangroveHangingSign::DISPLAY_NAME,
+			Block::BambooHangingSign(_) => BambooHangingSign::DISPLAY_NAME,
+			Block::OakWallHangingSign(_) => OakWallHangingSign::DISPLAY_NAME,
+			Block::SpruceWallHangingSign(_) => SpruceWallHangingSign::DISPLAY_NAME,
+			Block::BirchWallHangingSign(_) => BirchWallHangingSign::DISPLAY_NAME,
+			Block::AcaciaWallHangingSign(_) => AcaciaWallHangingSign::DISPLAY_NAME,
+			Block::JungleWallHangingSign(_) => JungleWallHangingSign::DISPLAY_NAME,
+			Block::DarkOakWallHangingSign(_) => DarkOakWallHangingSign::DISPLAY_NAME,
+			Block::MangroveWallHangingSign(_) => MangroveWallHangingSign::DISPLAY_NAME,
+			Block::CrimsonWallHangingSign(_) => CrimsonWallHangingSign::DISPLAY_NAME,
+			Block::WarpedWallHangingSign(_) => WarpedWallHangingSign::DISPLAY_NAME,
+			Block::BambooWallHangingSign(_) => BambooWallHangingSign::DISPLAY_NAME,
 			Block::Lever(_) => Lever::DISPLAY_NAME,
 			Block::StonePressurePlate(_) => StonePressurePlate::DISPLAY_NAME,
 			Block::IronDoor(_) => IronDoor::DISPLAY_NAME,
@@ -1145,6 +1211,7 @@ impl Block {
 			Block::AcaciaPressurePlate(_) => AcaciaPressurePlate::DISPLAY_NAME,
 			Block::DarkOakPressurePlate(_) => DarkOakPressurePlate::DISPLAY_NAME,
 			Block::MangrovePressurePlate(_) => MangrovePressurePlate::DISPLAY_NAME,
+			Block::BambooPressurePlate(_) => BambooPressurePlate::DISPLAY_NAME,
 			Block::RedstoneOre(_) => RedstoneOre::DISPLAY_NAME,
 			Block::DeepslateRedstoneOre(_) => DeepslateRedstoneOre::DISPLAY_NAME,
 			Block::RedstoneTorch(_) => RedstoneTorch::DISPLAY_NAME,
@@ -1195,6 +1262,7 @@ impl Block {
 			Block::AcaciaTrapdoor(_) => AcaciaTrapdoor::DISPLAY_NAME,
 			Block::DarkOakTrapdoor(_) => DarkOakTrapdoor::DISPLAY_NAME,
 			Block::MangroveTrapdoor(_) => MangroveTrapdoor::DISPLAY_NAME,
+			Block::BambooTrapdoor(_) => BambooTrapdoor::DISPLAY_NAME,
 			Block::StoneBricks(_) => StoneBricks::DISPLAY_NAME,
 			Block::MossyStoneBricks(_) => MossyStoneBricks::DISPLAY_NAME,
 			Block::CrackedStoneBricks(_) => CrackedStoneBricks::DISPLAY_NAME,
@@ -1291,6 +1359,7 @@ impl Block {
 			Block::AcaciaButton(_) => AcaciaButton::DISPLAY_NAME,
 			Block::DarkOakButton(_) => DarkOakButton::DISPLAY_NAME,
 			Block::MangroveButton(_) => MangroveButton::DISPLAY_NAME,
+			Block::BambooButton(_) => BambooButton::DISPLAY_NAME,
 			Block::SkeletonSkull(_) => SkeletonSkull::DISPLAY_NAME,
 			Block::SkeletonWallSkull(_) => SkeletonWallSkull::DISPLAY_NAME,
 			Block::WitherSkeletonSkull(_) => WitherSkeletonSkull::DISPLAY_NAME,
@@ -1303,6 +1372,8 @@ impl Block {
 			Block::CreeperWallHead(_) => CreeperWallHead::DISPLAY_NAME,
 			Block::DragonHead(_) => DragonHead::DISPLAY_NAME,
 			Block::DragonWallHead(_) => DragonWallHead::DISPLAY_NAME,
+			Block::PiglinHead(_) => PiglinHead::DISPLAY_NAME,
+			Block::PiglinWallHead(_) => PiglinWallHead::DISPLAY_NAME,
 			Block::Anvil(_) => Anvil::DISPLAY_NAME,
 			Block::ChippedAnvil(_) => ChippedAnvil::DISPLAY_NAME,
 			Block::DamagedAnvil(_) => DamagedAnvil::DISPLAY_NAME,
@@ -1355,6 +1426,8 @@ impl Block {
 			Block::AcaciaStairs(_) => AcaciaStairs::DISPLAY_NAME,
 			Block::DarkOakStairs(_) => DarkOakStairs::DISPLAY_NAME,
 			Block::MangroveStairs(_) => MangroveStairs::DISPLAY_NAME,
+			Block::BambooStairs(_) => BambooStairs::DISPLAY_NAME,
+			Block::BambooMosaicStairs(_) => BambooMosaicStairs::DISPLAY_NAME,
 			Block::SlimeBlock(_) => SlimeBlock::DISPLAY_NAME,
 			Block::Barrier(_) => Barrier::DISPLAY_NAME,
 			Block::Light(_) => Light::DISPLAY_NAME,
@@ -1438,6 +1511,8 @@ impl Block {
 			Block::AcaciaSlab(_) => AcaciaSlab::DISPLAY_NAME,
 			Block::DarkOakSlab(_) => DarkOakSlab::DISPLAY_NAME,
 			Block::MangroveSlab(_) => MangroveSlab::DISPLAY_NAME,
+			Block::BambooSlab(_) => BambooSlab::DISPLAY_NAME,
+			Block::BambooMosaicSlab(_) => BambooMosaicSlab::DISPLAY_NAME,
 			Block::StoneSlab(_) => StoneSlab::DISPLAY_NAME,
 			Block::SmoothStoneSlab(_) => SmoothStoneSlab::DISPLAY_NAME,
 			Block::SandstoneSlab(_) => SandstoneSlab::DISPLAY_NAME,
@@ -1462,18 +1537,21 @@ impl Block {
 			Block::AcaciaFenceGate(_) => AcaciaFenceGate::DISPLAY_NAME,
 			Block::DarkOakFenceGate(_) => DarkOakFenceGate::DISPLAY_NAME,
 			Block::MangroveFenceGate(_) => MangroveFenceGate::DISPLAY_NAME,
+			Block::BambooFenceGate(_) => BambooFenceGate::DISPLAY_NAME,
 			Block::SpruceFence(_) => SpruceFence::DISPLAY_NAME,
 			Block::BirchFence(_) => BirchFence::DISPLAY_NAME,
 			Block::JungleFence(_) => JungleFence::DISPLAY_NAME,
 			Block::AcaciaFence(_) => AcaciaFence::DISPLAY_NAME,
 			Block::DarkOakFence(_) => DarkOakFence::DISPLAY_NAME,
 			Block::MangroveFence(_) => MangroveFence::DISPLAY_NAME,
+			Block::BambooFence(_) => BambooFence::DISPLAY_NAME,
 			Block::SpruceDoor(_) => SpruceDoor::DISPLAY_NAME,
 			Block::BirchDoor(_) => BirchDoor::DISPLAY_NAME,
 			Block::JungleDoor(_) => JungleDoor::DISPLAY_NAME,
 			Block::AcaciaDoor(_) => AcaciaDoor::DISPLAY_NAME,
 			Block::DarkOakDoor(_) => DarkOakDoor::DISPLAY_NAME,
 			Block::MangroveDoor(_) => MangroveDoor::DISPLAY_NAME,
+			Block::BambooDoor(_) => BambooDoor::DISPLAY_NAME,
 			Block::EndRod(_) => EndRod::DISPLAY_NAME,
 			Block::ChorusPlant(_) => ChorusPlant::DISPLAY_NAME,
 			Block::ChorusFlower(_) => ChorusFlower::DISPLAY_NAME,
@@ -1903,6 +1981,8 @@ impl Block {
 			Block::AcaciaPlanks(_) => AcaciaPlanks::TRANSPARENT,
 			Block::DarkOakPlanks(_) => DarkOakPlanks::TRANSPARENT,
 			Block::MangrovePlanks(_) => MangrovePlanks::TRANSPARENT,
+			Block::BambooPlanks(_) => BambooPlanks::TRANSPARENT,
+			Block::BambooMosaic(_) => BambooMosaic::TRANSPARENT,
 			Block::OakSapling(_) => OakSapling::TRANSPARENT,
 			Block::SpruceSapling(_) => SpruceSapling::TRANSPARENT,
 			Block::BirchSapling(_) => BirchSapling::TRANSPARENT,
@@ -1932,6 +2012,7 @@ impl Block {
 			Block::MangroveLog(_) => MangroveLog::TRANSPARENT,
 			Block::MangroveRoots(_) => MangroveRoots::TRANSPARENT,
 			Block::MuddyMangroveRoots(_) => MuddyMangroveRoots::TRANSPARENT,
+			Block::BambooBlock(_) => BambooBlock::TRANSPARENT,
 			Block::StrippedSpruceLog(_) => StrippedSpruceLog::TRANSPARENT,
 			Block::StrippedBirchLog(_) => StrippedBirchLog::TRANSPARENT,
 			Block::StrippedJungleLog(_) => StrippedJungleLog::TRANSPARENT,
@@ -1939,6 +2020,7 @@ impl Block {
 			Block::StrippedDarkOakLog(_) => StrippedDarkOakLog::TRANSPARENT,
 			Block::StrippedOakLog(_) => StrippedOakLog::TRANSPARENT,
 			Block::StrippedMangroveLog(_) => StrippedMangroveLog::TRANSPARENT,
+			Block::StrippedBambooBlock(_) => StrippedBambooBlock::TRANSPARENT,
 			Block::OakWood(_) => OakWood::TRANSPARENT,
 			Block::SpruceWood(_) => SpruceWood::TRANSPARENT,
 			Block::BirchWood(_) => BirchWood::TRANSPARENT,
@@ -2037,6 +2119,7 @@ impl Block {
 			Block::Bricks(_) => Bricks::TRANSPARENT,
 			Block::Tnt(_) => Tnt::TRANSPARENT,
 			Block::Bookshelf(_) => Bookshelf::TRANSPARENT,
+			Block::ChiseledBookshelf(_) => ChiseledBookshelf::TRANSPARENT,
 			Block::MossyCobblestone(_) => MossyCobblestone::TRANSPARENT,
 			Block::Obsidian(_) => Obsidian::TRANSPARENT,
 			Block::Torch(_) => Torch::TRANSPARENT,
@@ -2061,6 +2144,7 @@ impl Block {
 			Block::JungleSign(_) => JungleSign::TRANSPARENT,
 			Block::DarkOakSign(_) => DarkOakSign::TRANSPARENT,
 			Block::MangroveSign(_) => MangroveSign::TRANSPARENT,
+			Block::BambooSign(_) => BambooSign::TRANSPARENT,
 			Block::OakDoor(_) => OakDoor::TRANSPARENT,
 			Block::Ladder(_) => Ladder::TRANSPARENT,
 			Block::Rail(_) => Rail::TRANSPARENT,
@@ -2072,6 +2156,27 @@ impl Block {
 			Block::JungleWallSign(_) => JungleWallSign::TRANSPARENT,
 			Block::DarkOakWallSign(_) => DarkOakWallSign::TRANSPARENT,
 			Block::MangroveWallSign(_) => MangroveWallSign::TRANSPARENT,
+			Block::BambooWallSign(_) => BambooWallSign::TRANSPARENT,
+			Block::OakHangingSign(_) => OakHangingSign::TRANSPARENT,
+			Block::SpruceHangingSign(_) => SpruceHangingSign::TRANSPARENT,
+			Block::BirchHangingSign(_) => BirchHangingSign::TRANSPARENT,
+			Block::AcaciaHangingSign(_) => AcaciaHangingSign::TRANSPARENT,
+			Block::JungleHangingSign(_) => JungleHangingSign::TRANSPARENT,
+			Block::DarkOakHangingSign(_) => DarkOakHangingSign::TRANSPARENT,
+			Block::CrimsonHangingSign(_) => CrimsonHangingSign::TRANSPARENT,
+			Block::WarpedHangingSign(_) => WarpedHangingSign::TRANSPARENT,
+			Block::MangroveHangingSign(_) => MangroveHangingSign::TRANSPARENT,
+			Block::BambooHangingSign(_) => BambooHangingSign::TRANSPARENT,
+			Block::OakWallHangingSign(_) => OakWallHangingSign::TRANSPARENT,
+			Block::SpruceWallHangingSign(_) => SpruceWallHangingSign::TRANSPARENT,
+			Block::BirchWallHangingSign(_) => BirchWallHangingSign::TRANSPARENT,
+			Block::AcaciaWallHangingSign(_) => AcaciaWallHangingSign::TRANSPARENT,
+			Block::JungleWallHangingSign(_) => JungleWallHangingSign::TRANSPARENT,
+			Block::DarkOakWallHangingSign(_) => DarkOakWallHangingSign::TRANSPARENT,
+			Block::MangroveWallHangingSign(_) => MangroveWallHangingSign::TRANSPARENT,
+			Block::CrimsonWallHangingSign(_) => CrimsonWallHangingSign::TRANSPARENT,
+			Block::WarpedWallHangingSign(_) => WarpedWallHangingSign::TRANSPARENT,
+			Block::BambooWallHangingSign(_) => BambooWallHangingSign::TRANSPARENT,
 			Block::Lever(_) => Lever::TRANSPARENT,
 			Block::StonePressurePlate(_) => StonePressurePlate::TRANSPARENT,
 			Block::IronDoor(_) => IronDoor::TRANSPARENT,
@@ -2082,6 +2187,7 @@ impl Block {
 			Block::AcaciaPressurePlate(_) => AcaciaPressurePlate::TRANSPARENT,
 			Block::DarkOakPressurePlate(_) => DarkOakPressurePlate::TRANSPARENT,
 			Block::MangrovePressurePlate(_) => MangrovePressurePlate::TRANSPARENT,
+			Block::BambooPressurePlate(_) => BambooPressurePlate::TRANSPARENT,
 			Block::RedstoneOre(_) => RedstoneOre::TRANSPARENT,
 			Block::DeepslateRedstoneOre(_) => DeepslateRedstoneOre::TRANSPARENT,
 			Block::RedstoneTorch(_) => RedstoneTorch::TRANSPARENT,
@@ -2132,6 +2238,7 @@ impl Block {
 			Block::AcaciaTrapdoor(_) => AcaciaTrapdoor::TRANSPARENT,
 			Block::DarkOakTrapdoor(_) => DarkOakTrapdoor::TRANSPARENT,
 			Block::MangroveTrapdoor(_) => MangroveTrapdoor::TRANSPARENT,
+			Block::BambooTrapdoor(_) => BambooTrapdoor::TRANSPARENT,
 			Block::StoneBricks(_) => StoneBricks::TRANSPARENT,
 			Block::MossyStoneBricks(_) => MossyStoneBricks::TRANSPARENT,
 			Block::CrackedStoneBricks(_) => CrackedStoneBricks::TRANSPARENT,
@@ -2228,6 +2335,7 @@ impl Block {
 			Block::AcaciaButton(_) => AcaciaButton::TRANSPARENT,
 			Block::DarkOakButton(_) => DarkOakButton::TRANSPARENT,
 			Block::MangroveButton(_) => MangroveButton::TRANSPARENT,
+			Block::BambooButton(_) => BambooButton::TRANSPARENT,
 			Block::SkeletonSkull(_) => SkeletonSkull::TRANSPARENT,
 			Block::SkeletonWallSkull(_) => SkeletonWallSkull::TRANSPARENT,
 			Block::WitherSkeletonSkull(_) => WitherSkeletonSkull::TRANSPARENT,
@@ -2240,6 +2348,8 @@ impl Block {
 			Block::CreeperWallHead(_) => CreeperWallHead::TRANSPARENT,
 			Block::DragonHead(_) => DragonHead::TRANSPARENT,
 			Block::DragonWallHead(_) => DragonWallHead::TRANSPARENT,
+			Block::PiglinHead(_) => PiglinHead::TRANSPARENT,
+			Block::PiglinWallHead(_) => PiglinWallHead::TRANSPARENT,
 			Block::Anvil(_) => Anvil::TRANSPARENT,
 			Block::ChippedAnvil(_) => ChippedAnvil::TRANSPARENT,
 			Block::DamagedAnvil(_) => DamagedAnvil::TRANSPARENT,
@@ -2292,6 +2402,8 @@ impl Block {
 			Block::AcaciaStairs(_) => AcaciaStairs::TRANSPARENT,
 			Block::DarkOakStairs(_) => DarkOakStairs::TRANSPARENT,
 			Block::MangroveStairs(_) => MangroveStairs::TRANSPARENT,
+			Block::BambooStairs(_) => BambooStairs::TRANSPARENT,
+			Block::BambooMosaicStairs(_) => BambooMosaicStairs::TRANSPARENT,
 			Block::SlimeBlock(_) => SlimeBlock::TRANSPARENT,
 			Block::Barrier(_) => Barrier::TRANSPARENT,
 			Block::Light(_) => Light::TRANSPARENT,
@@ -2375,6 +2487,8 @@ impl Block {
 			Block::AcaciaSlab(_) => AcaciaSlab::TRANSPARENT,
 			Block::DarkOakSlab(_) => DarkOakSlab::TRANSPARENT,
 			Block::MangroveSlab(_) => MangroveSlab::TRANSPARENT,
+			Block::BambooSlab(_) => BambooSlab::TRANSPARENT,
+			Block::BambooMosaicSlab(_) => BambooMosaicSlab::TRANSPARENT,
 			Block::StoneSlab(_) => StoneSlab::TRANSPARENT,
 			Block::SmoothStoneSlab(_) => SmoothStoneSlab::TRANSPARENT,
 			Block::SandstoneSlab(_) => SandstoneSlab::TRANSPARENT,
@@ -2399,18 +2513,21 @@ impl Block {
 			Block::AcaciaFenceGate(_) => AcaciaFenceGate::TRANSPARENT,
 			Block::DarkOakFenceGate(_) => DarkOakFenceGate::TRANSPARENT,
 			Block::MangroveFenceGate(_) => MangroveFenceGate::TRANSPARENT,
+			Block::BambooFenceGate(_) => BambooFenceGate::TRANSPARENT,
 			Block::SpruceFence(_) => SpruceFence::TRANSPARENT,
 			Block::BirchFence(_) => BirchFence::TRANSPARENT,
 			Block::JungleFence(_) => JungleFence::TRANSPARENT,
 			Block::AcaciaFence(_) => AcaciaFence::TRANSPARENT,
 			Block::DarkOakFence(_) => DarkOakFence::TRANSPARENT,
 			Block::MangroveFence(_) => MangroveFence::TRANSPARENT,
+			Block::BambooFence(_) => BambooFence::TRANSPARENT,
 			Block::SpruceDoor(_) => SpruceDoor::TRANSPARENT,
 			Block::BirchDoor(_) => BirchDoor::TRANSPARENT,
 			Block::JungleDoor(_) => JungleDoor::TRANSPARENT,
 			Block::AcaciaDoor(_) => AcaciaDoor::TRANSPARENT,
 			Block::DarkOakDoor(_) => DarkOakDoor::TRANSPARENT,
 			Block::MangroveDoor(_) => MangroveDoor::TRANSPARENT,
+			Block::BambooDoor(_) => BambooDoor::TRANSPARENT,
 			Block::EndRod(_) => EndRod::TRANSPARENT,
 			Block::ChorusPlant(_) => ChorusPlant::TRANSPARENT,
 			Block::ChorusFlower(_) => ChorusFlower::TRANSPARENT,
@@ -2840,6 +2957,8 @@ impl Block {
 			Block::AcaciaPlanks(_) => AcaciaPlanks::EMIT_LIGHT,
 			Block::DarkOakPlanks(_) => DarkOakPlanks::EMIT_LIGHT,
 			Block::MangrovePlanks(_) => MangrovePlanks::EMIT_LIGHT,
+			Block::BambooPlanks(_) => BambooPlanks::EMIT_LIGHT,
+			Block::BambooMosaic(_) => BambooMosaic::EMIT_LIGHT,
 			Block::OakSapling(_) => OakSapling::EMIT_LIGHT,
 			Block::SpruceSapling(_) => SpruceSapling::EMIT_LIGHT,
 			Block::BirchSapling(_) => BirchSapling::EMIT_LIGHT,
@@ -2869,6 +2988,7 @@ impl Block {
 			Block::MangroveLog(_) => MangroveLog::EMIT_LIGHT,
 			Block::MangroveRoots(_) => MangroveRoots::EMIT_LIGHT,
 			Block::MuddyMangroveRoots(_) => MuddyMangroveRoots::EMIT_LIGHT,
+			Block::BambooBlock(_) => BambooBlock::EMIT_LIGHT,
 			Block::StrippedSpruceLog(_) => StrippedSpruceLog::EMIT_LIGHT,
 			Block::StrippedBirchLog(_) => StrippedBirchLog::EMIT_LIGHT,
 			Block::StrippedJungleLog(_) => StrippedJungleLog::EMIT_LIGHT,
@@ -2876,6 +2996,7 @@ impl Block {
 			Block::StrippedDarkOakLog(_) => StrippedDarkOakLog::EMIT_LIGHT,
 			Block::StrippedOakLog(_) => StrippedOakLog::EMIT_LIGHT,
 			Block::StrippedMangroveLog(_) => StrippedMangroveLog::EMIT_LIGHT,
+			Block::StrippedBambooBlock(_) => StrippedBambooBlock::EMIT_LIGHT,
 			Block::OakWood(_) => OakWood::EMIT_LIGHT,
 			Block::SpruceWood(_) => SpruceWood::EMIT_LIGHT,
 			Block::BirchWood(_) => BirchWood::EMIT_LIGHT,
@@ -2974,6 +3095,7 @@ impl Block {
 			Block::Bricks(_) => Bricks::EMIT_LIGHT,
 			Block::Tnt(_) => Tnt::EMIT_LIGHT,
 			Block::Bookshelf(_) => Bookshelf::EMIT_LIGHT,
+			Block::ChiseledBookshelf(_) => ChiseledBookshelf::EMIT_LIGHT,
 			Block::MossyCobblestone(_) => MossyCobblestone::EMIT_LIGHT,
 			Block::Obsidian(_) => Obsidian::EMIT_LIGHT,
 			Block::Torch(_) => Torch::EMIT_LIGHT,
@@ -2998,6 +3120,7 @@ impl Block {
 			Block::JungleSign(_) => JungleSign::EMIT_LIGHT,
 			Block::DarkOakSign(_) => DarkOakSign::EMIT_LIGHT,
 			Block::MangroveSign(_) => MangroveSign::EMIT_LIGHT,
+			Block::BambooSign(_) => BambooSign::EMIT_LIGHT,
 			Block::OakDoor(_) => OakDoor::EMIT_LIGHT,
 			Block::Ladder(_) => Ladder::EMIT_LIGHT,
 			Block::Rail(_) => Rail::EMIT_LIGHT,
@@ -3009,6 +3132,27 @@ impl Block {
 			Block::JungleWallSign(_) => JungleWallSign::EMIT_LIGHT,
 			Block::DarkOakWallSign(_) => DarkOakWallSign::EMIT_LIGHT,
 			Block::MangroveWallSign(_) => MangroveWallSign::EMIT_LIGHT,
+			Block::BambooWallSign(_) => BambooWallSign::EMIT_LIGHT,
+			Block::OakHangingSign(_) => OakHangingSign::EMIT_LIGHT,
+			Block::SpruceHangingSign(_) => SpruceHangingSign::EMIT_LIGHT,
+			Block::BirchHangingSign(_) => BirchHangingSign::EMIT_LIGHT,
+			Block::AcaciaHangingSign(_) => AcaciaHangingSign::EMIT_LIGHT,
+			Block::JungleHangingSign(_) => JungleHangingSign::EMIT_LIGHT,
+			Block::DarkOakHangingSign(_) => DarkOakHangingSign::EMIT_LIGHT,
+			Block::CrimsonHangingSign(_) => CrimsonHangingSign::EMIT_LIGHT,
+			Block::WarpedHangingSign(_) => WarpedHangingSign::EMIT_LIGHT,
+			Block::MangroveHangingSign(_) => MangroveHangingSign::EMIT_LIGHT,
+			Block::BambooHangingSign(_) => BambooHangingSign::EMIT_LIGHT,
+			Block::OakWallHangingSign(_) => OakWallHangingSign::EMIT_LIGHT,
+			Block::SpruceWallHangingSign(_) => SpruceWallHangingSign::EMIT_LIGHT,
+			Block::BirchWallHangingSign(_) => BirchWallHangingSign::EMIT_LIGHT,
+			Block::AcaciaWallHangingSign(_) => AcaciaWallHangingSign::EMIT_LIGHT,
+			Block::JungleWallHangingSign(_) => JungleWallHangingSign::EMIT_LIGHT,
+			Block::DarkOakWallHangingSign(_) => DarkOakWallHangingSign::EMIT_LIGHT,
+			Block::MangroveWallHangingSign(_) => MangroveWallHangingSign::EMIT_LIGHT,
+			Block::CrimsonWallHangingSign(_) => CrimsonWallHangingSign::EMIT_LIGHT,
+			Block::WarpedWallHangingSign(_) => WarpedWallHangingSign::EMIT_LIGHT,
+			Block::BambooWallHangingSign(_) => BambooWallHangingSign::EMIT_LIGHT,
 			Block::Lever(_) => Lever::EMIT_LIGHT,
 			Block::StonePressurePlate(_) => StonePressurePlate::EMIT_LIGHT,
 			Block::IronDoor(_) => IronDoor::EMIT_LIGHT,
@@ -3019,6 +3163,7 @@ impl Block {
 			Block::AcaciaPressurePlate(_) => AcaciaPressurePlate::EMIT_LIGHT,
 			Block::DarkOakPressurePlate(_) => DarkOakPressurePlate::EMIT_LIGHT,
 			Block::MangrovePressurePlate(_) => MangrovePressurePlate::EMIT_LIGHT,
+			Block::BambooPressurePlate(_) => BambooPressurePlate::EMIT_LIGHT,
 			Block::RedstoneOre(_) => RedstoneOre::EMIT_LIGHT,
 			Block::DeepslateRedstoneOre(_) => DeepslateRedstoneOre::EMIT_LIGHT,
 			Block::RedstoneTorch(_) => RedstoneTorch::EMIT_LIGHT,
@@ -3069,6 +3214,7 @@ impl Block {
 			Block::AcaciaTrapdoor(_) => AcaciaTrapdoor::EMIT_LIGHT,
 			Block::DarkOakTrapdoor(_) => DarkOakTrapdoor::EMIT_LIGHT,
 			Block::MangroveTrapdoor(_) => MangroveTrapdoor::EMIT_LIGHT,
+			Block::BambooTrapdoor(_) => BambooTrapdoor::EMIT_LIGHT,
 			Block::StoneBricks(_) => StoneBricks::EMIT_LIGHT,
 			Block::MossyStoneBricks(_) => MossyStoneBricks::EMIT_LIGHT,
 			Block::CrackedStoneBricks(_) => CrackedStoneBricks::EMIT_LIGHT,
@@ -3165,6 +3311,7 @@ impl Block {
 			Block::AcaciaButton(_) => AcaciaButton::EMIT_LIGHT,
 			Block::DarkOakButton(_) => DarkOakButton::EMIT_LIGHT,
 			Block::MangroveButton(_) => MangroveButton::EMIT_LIGHT,
+			Block::BambooButton(_) => BambooButton::EMIT_LIGHT,
 			Block::SkeletonSkull(_) => SkeletonSkull::EMIT_LIGHT,
 			Block::SkeletonWallSkull(_) => SkeletonWallSkull::EMIT_LIGHT,
 			Block::WitherSkeletonSkull(_) => WitherSkeletonSkull::EMIT_LIGHT,
@@ -3177,6 +3324,8 @@ impl Block {
 			Block::CreeperWallHead(_) => CreeperWallHead::EMIT_LIGHT,
 			Block::DragonHead(_) => DragonHead::EMIT_LIGHT,
 			Block::DragonWallHead(_) => DragonWallHead::EMIT_LIGHT,
+			Block::PiglinHead(_) => PiglinHead::EMIT_LIGHT,
+			Block::PiglinWallHead(_) => PiglinWallHead::EMIT_LIGHT,
 			Block::Anvil(_) => Anvil::EMIT_LIGHT,
 			Block::ChippedAnvil(_) => ChippedAnvil::EMIT_LIGHT,
 			Block::DamagedAnvil(_) => DamagedAnvil::EMIT_LIGHT,
@@ -3229,6 +3378,8 @@ impl Block {
 			Block::AcaciaStairs(_) => AcaciaStairs::EMIT_LIGHT,
 			Block::DarkOakStairs(_) => DarkOakStairs::EMIT_LIGHT,
 			Block::MangroveStairs(_) => MangroveStairs::EMIT_LIGHT,
+			Block::BambooStairs(_) => BambooStairs::EMIT_LIGHT,
+			Block::BambooMosaicStairs(_) => BambooMosaicStairs::EMIT_LIGHT,
 			Block::SlimeBlock(_) => SlimeBlock::EMIT_LIGHT,
 			Block::Barrier(_) => Barrier::EMIT_LIGHT,
 			Block::Light(_) => Light::EMIT_LIGHT,
@@ -3312,6 +3463,8 @@ impl Block {
 			Block::AcaciaSlab(_) => AcaciaSlab::EMIT_LIGHT,
 			Block::DarkOakSlab(_) => DarkOakSlab::EMIT_LIGHT,
 			Block::MangroveSlab(_) => MangroveSlab::EMIT_LIGHT,
+			Block::BambooSlab(_) => BambooSlab::EMIT_LIGHT,
+			Block::BambooMosaicSlab(_) => BambooMosaicSlab::EMIT_LIGHT,
 			Block::StoneSlab(_) => StoneSlab::EMIT_LIGHT,
 			Block::SmoothStoneSlab(_) => SmoothStoneSlab::EMIT_LIGHT,
 			Block::SandstoneSlab(_) => SandstoneSlab::EMIT_LIGHT,
@@ -3336,18 +3489,21 @@ impl Block {
 			Block::AcaciaFenceGate(_) => AcaciaFenceGate::EMIT_LIGHT,
 			Block::DarkOakFenceGate(_) => DarkOakFenceGate::EMIT_LIGHT,
 			Block::MangroveFenceGate(_) => MangroveFenceGate::EMIT_LIGHT,
+			Block::BambooFenceGate(_) => BambooFenceGate::EMIT_LIGHT,
 			Block::SpruceFence(_) => SpruceFence::EMIT_LIGHT,
 			Block::BirchFence(_) => BirchFence::EMIT_LIGHT,
 			Block::JungleFence(_) => JungleFence::EMIT_LIGHT,
 			Block::AcaciaFence(_) => AcaciaFence::EMIT_LIGHT,
 			Block::DarkOakFence(_) => DarkOakFence::EMIT_LIGHT,
 			Block::MangroveFence(_) => MangroveFence::EMIT_LIGHT,
+			Block::BambooFence(_) => BambooFence::EMIT_LIGHT,
 			Block::SpruceDoor(_) => SpruceDoor::EMIT_LIGHT,
 			Block::BirchDoor(_) => BirchDoor::EMIT_LIGHT,
 			Block::JungleDoor(_) => JungleDoor::EMIT_LIGHT,
 			Block::AcaciaDoor(_) => AcaciaDoor::EMIT_LIGHT,
 			Block::DarkOakDoor(_) => DarkOakDoor::EMIT_LIGHT,
 			Block::MangroveDoor(_) => MangroveDoor::EMIT_LIGHT,
+			Block::BambooDoor(_) => BambooDoor::EMIT_LIGHT,
 			Block::EndRod(_) => EndRod::EMIT_LIGHT,
 			Block::ChorusPlant(_) => ChorusPlant::EMIT_LIGHT,
 			Block::ChorusFlower(_) => ChorusFlower::EMIT_LIGHT,
@@ -3777,6 +3933,8 @@ impl Block {
 			Block::AcaciaPlanks(_) => AcaciaPlanks::FILTER_LIGHT,
 			Block::DarkOakPlanks(_) => DarkOakPlanks::FILTER_LIGHT,
 			Block::MangrovePlanks(_) => MangrovePlanks::FILTER_LIGHT,
+			Block::BambooPlanks(_) => BambooPlanks::FILTER_LIGHT,
+			Block::BambooMosaic(_) => BambooMosaic::FILTER_LIGHT,
 			Block::OakSapling(_) => OakSapling::FILTER_LIGHT,
 			Block::SpruceSapling(_) => SpruceSapling::FILTER_LIGHT,
 			Block::BirchSapling(_) => BirchSapling::FILTER_LIGHT,
@@ -3806,6 +3964,7 @@ impl Block {
 			Block::MangroveLog(_) => MangroveLog::FILTER_LIGHT,
 			Block::MangroveRoots(_) => MangroveRoots::FILTER_LIGHT,
 			Block::MuddyMangroveRoots(_) => MuddyMangroveRoots::FILTER_LIGHT,
+			Block::BambooBlock(_) => BambooBlock::FILTER_LIGHT,
 			Block::StrippedSpruceLog(_) => StrippedSpruceLog::FILTER_LIGHT,
 			Block::StrippedBirchLog(_) => StrippedBirchLog::FILTER_LIGHT,
 			Block::StrippedJungleLog(_) => StrippedJungleLog::FILTER_LIGHT,
@@ -3813,6 +3972,7 @@ impl Block {
 			Block::StrippedDarkOakLog(_) => StrippedDarkOakLog::FILTER_LIGHT,
 			Block::StrippedOakLog(_) => StrippedOakLog::FILTER_LIGHT,
 			Block::StrippedMangroveLog(_) => StrippedMangroveLog::FILTER_LIGHT,
+			Block::StrippedBambooBlock(_) => StrippedBambooBlock::FILTER_LIGHT,
 			Block::OakWood(_) => OakWood::FILTER_LIGHT,
 			Block::SpruceWood(_) => SpruceWood::FILTER_LIGHT,
 			Block::BirchWood(_) => BirchWood::FILTER_LIGHT,
@@ -3911,6 +4071,7 @@ impl Block {
 			Block::Bricks(_) => Bricks::FILTER_LIGHT,
 			Block::Tnt(_) => Tnt::FILTER_LIGHT,
 			Block::Bookshelf(_) => Bookshelf::FILTER_LIGHT,
+			Block::ChiseledBookshelf(_) => ChiseledBookshelf::FILTER_LIGHT,
 			Block::MossyCobblestone(_) => MossyCobblestone::FILTER_LIGHT,
 			Block::Obsidian(_) => Obsidian::FILTER_LIGHT,
 			Block::Torch(_) => Torch::FILTER_LIGHT,
@@ -3935,6 +4096,7 @@ impl Block {
 			Block::JungleSign(_) => JungleSign::FILTER_LIGHT,
 			Block::DarkOakSign(_) => DarkOakSign::FILTER_LIGHT,
 			Block::MangroveSign(_) => MangroveSign::FILTER_LIGHT,
+			Block::BambooSign(_) => BambooSign::FILTER_LIGHT,
 			Block::OakDoor(_) => OakDoor::FILTER_LIGHT,
 			Block::Ladder(_) => Ladder::FILTER_LIGHT,
 			Block::Rail(_) => Rail::FILTER_LIGHT,
@@ -3946,6 +4108,27 @@ impl Block {
 			Block::JungleWallSign(_) => JungleWallSign::FILTER_LIGHT,
 			Block::DarkOakWallSign(_) => DarkOakWallSign::FILTER_LIGHT,
 			Block::MangroveWallSign(_) => MangroveWallSign::FILTER_LIGHT,
+			Block::BambooWallSign(_) => BambooWallSign::FILTER_LIGHT,
+			Block::OakHangingSign(_) => OakHangingSign::FILTER_LIGHT,
+			Block::SpruceHangingSign(_) => SpruceHangingSign::FILTER_LIGHT,
+			Block::BirchHangingSign(_) => BirchHangingSign::FILTER_LIGHT,
+			Block::AcaciaHangingSign(_) => AcaciaHangingSign::FILTER_LIGHT,
+			Block::JungleHangingSign(_) => JungleHangingSign::FILTER_LIGHT,
+			Block::DarkOakHangingSign(_) => DarkOakHangingSign::FILTER_LIGHT,
+			Block::CrimsonHangingSign(_) => CrimsonHangingSign::FILTER_LIGHT,
+			Block::WarpedHangingSign(_) => WarpedHangingSign::FILTER_LIGHT,
+			Block::MangroveHangingSign(_) => MangroveHangingSign::FILTER_LIGHT,
+			Block::BambooHangingSign(_) => BambooHangingSign::FILTER_LIGHT,
+			Block::OakWallHangingSign(_) => OakWallHangingSign::FILTER_LIGHT,
+			Block::SpruceWallHangingSign(_) => SpruceWallHangingSign::FILTER_LIGHT,
+			Block::BirchWallHangingSign(_) => BirchWallHangingSign::FILTER_LIGHT,
+			Block::AcaciaWallHangingSign(_) => AcaciaWallHangingSign::FILTER_LIGHT,
+			Block::JungleWallHangingSign(_) => JungleWallHangingSign::FILTER_LIGHT,
+			Block::DarkOakWallHangingSign(_) => DarkOakWallHangingSign::FILTER_LIGHT,
+			Block::MangroveWallHangingSign(_) => MangroveWallHangingSign::FILTER_LIGHT,
+			Block::CrimsonWallHangingSign(_) => CrimsonWallHangingSign::FILTER_LIGHT,
+			Block::WarpedWallHangingSign(_) => WarpedWallHangingSign::FILTER_LIGHT,
+			Block::BambooWallHangingSign(_) => BambooWallHangingSign::FILTER_LIGHT,
 			Block::Lever(_) => Lever::FILTER_LIGHT,
 			Block::StonePressurePlate(_) => StonePressurePlate::FILTER_LIGHT,
 			Block::IronDoor(_) => IronDoor::FILTER_LIGHT,
@@ -3956,6 +4139,7 @@ impl Block {
 			Block::AcaciaPressurePlate(_) => AcaciaPressurePlate::FILTER_LIGHT,
 			Block::DarkOakPressurePlate(_) => DarkOakPressurePlate::FILTER_LIGHT,
 			Block::MangrovePressurePlate(_) => MangrovePressurePlate::FILTER_LIGHT,
+			Block::BambooPressurePlate(_) => BambooPressurePlate::FILTER_LIGHT,
 			Block::RedstoneOre(_) => RedstoneOre::FILTER_LIGHT,
 			Block::DeepslateRedstoneOre(_) => DeepslateRedstoneOre::FILTER_LIGHT,
 			Block::RedstoneTorch(_) => RedstoneTorch::FILTER_LIGHT,
@@ -4006,6 +4190,7 @@ impl Block {
 			Block::AcaciaTrapdoor(_) => AcaciaTrapdoor::FILTER_LIGHT,
 			Block::DarkOakTrapdoor(_) => DarkOakTrapdoor::FILTER_LIGHT,
 			Block::MangroveTrapdoor(_) => MangroveTrapdoor::FILTER_LIGHT,
+			Block::BambooTrapdoor(_) => BambooTrapdoor::FILTER_LIGHT,
 			Block::StoneBricks(_) => StoneBricks::FILTER_LIGHT,
 			Block::MossyStoneBricks(_) => MossyStoneBricks::FILTER_LIGHT,
 			Block::CrackedStoneBricks(_) => CrackedStoneBricks::FILTER_LIGHT,
@@ -4102,6 +4287,7 @@ impl Block {
 			Block::AcaciaButton(_) => AcaciaButton::FILTER_LIGHT,
 			Block::DarkOakButton(_) => DarkOakButton::FILTER_LIGHT,
 			Block::MangroveButton(_) => MangroveButton::FILTER_LIGHT,
+			Block::BambooButton(_) => BambooButton::FILTER_LIGHT,
 			Block::SkeletonSkull(_) => SkeletonSkull::FILTER_LIGHT,
 			Block::SkeletonWallSkull(_) => SkeletonWallSkull::FILTER_LIGHT,
 			Block::WitherSkeletonSkull(_) => WitherSkeletonSkull::FILTER_LIGHT,
@@ -4114,6 +4300,8 @@ impl Block {
 			Block::CreeperWallHead(_) => CreeperWallHead::FILTER_LIGHT,
 			Block::DragonHead(_) => DragonHead::FILTER_LIGHT,
 			Block::DragonWallHead(_) => DragonWallHead::FILTER_LIGHT,
+			Block::PiglinHead(_) => PiglinHead::FILTER_LIGHT,
+			Block::PiglinWallHead(_) => PiglinWallHead::FILTER_LIGHT,
 			Block::Anvil(_) => Anvil::FILTER_LIGHT,
 			Block::ChippedAnvil(_) => ChippedAnvil::FILTER_LIGHT,
 			Block::DamagedAnvil(_) => DamagedAnvil::FILTER_LIGHT,
@@ -4166,6 +4354,8 @@ impl Block {
 			Block::AcaciaStairs(_) => AcaciaStairs::FILTER_LIGHT,
 			Block::DarkOakStairs(_) => DarkOakStairs::FILTER_LIGHT,
 			Block::MangroveStairs(_) => MangroveStairs::FILTER_LIGHT,
+			Block::BambooStairs(_) => BambooStairs::FILTER_LIGHT,
+			Block::BambooMosaicStairs(_) => BambooMosaicStairs::FILTER_LIGHT,
 			Block::SlimeBlock(_) => SlimeBlock::FILTER_LIGHT,
 			Block::Barrier(_) => Barrier::FILTER_LIGHT,
 			Block::Light(_) => Light::FILTER_LIGHT,
@@ -4249,6 +4439,8 @@ impl Block {
 			Block::AcaciaSlab(_) => AcaciaSlab::FILTER_LIGHT,
 			Block::DarkOakSlab(_) => DarkOakSlab::FILTER_LIGHT,
 			Block::MangroveSlab(_) => MangroveSlab::FILTER_LIGHT,
+			Block::BambooSlab(_) => BambooSlab::FILTER_LIGHT,
+			Block::BambooMosaicSlab(_) => BambooMosaicSlab::FILTER_LIGHT,
 			Block::StoneSlab(_) => StoneSlab::FILTER_LIGHT,
 			Block::SmoothStoneSlab(_) => SmoothStoneSlab::FILTER_LIGHT,
 			Block::SandstoneSlab(_) => SandstoneSlab::FILTER_LIGHT,
@@ -4273,18 +4465,21 @@ impl Block {
 			Block::AcaciaFenceGate(_) => AcaciaFenceGate::FILTER_LIGHT,
 			Block::DarkOakFenceGate(_) => DarkOakFenceGate::FILTER_LIGHT,
 			Block::MangroveFenceGate(_) => MangroveFenceGate::FILTER_LIGHT,
+			Block::BambooFenceGate(_) => BambooFenceGate::FILTER_LIGHT,
 			Block::SpruceFence(_) => SpruceFence::FILTER_LIGHT,
 			Block::BirchFence(_) => BirchFence::FILTER_LIGHT,
 			Block::JungleFence(_) => JungleFence::FILTER_LIGHT,
 			Block::AcaciaFence(_) => AcaciaFence::FILTER_LIGHT,
 			Block::DarkOakFence(_) => DarkOakFence::FILTER_LIGHT,
 			Block::MangroveFence(_) => MangroveFence::FILTER_LIGHT,
+			Block::BambooFence(_) => BambooFence::FILTER_LIGHT,
 			Block::SpruceDoor(_) => SpruceDoor::FILTER_LIGHT,
 			Block::BirchDoor(_) => BirchDoor::FILTER_LIGHT,
 			Block::JungleDoor(_) => JungleDoor::FILTER_LIGHT,
 			Block::AcaciaDoor(_) => AcaciaDoor::FILTER_LIGHT,
 			Block::DarkOakDoor(_) => DarkOakDoor::FILTER_LIGHT,
 			Block::MangroveDoor(_) => MangroveDoor::FILTER_LIGHT,
+			Block::BambooDoor(_) => BambooDoor::FILTER_LIGHT,
 			Block::EndRod(_) => EndRod::FILTER_LIGHT,
 			Block::ChorusPlant(_) => ChorusPlant::FILTER_LIGHT,
 			Block::ChorusFlower(_) => ChorusFlower::FILTER_LIGHT,
@@ -4731,6 +4926,8 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:acacia_planks" => Block::AcaciaPlanks(AcaciaPlanks {}),
 		"minecraft:dark_oak_planks" => Block::DarkOakPlanks(DarkOakPlanks {}),
 		"minecraft:mangrove_planks" => Block::MangrovePlanks(MangrovePlanks {}),
+		"minecraft:bamboo_planks" => Block::BambooPlanks(BambooPlanks {}),
+		"minecraft:bamboo_mosaic" => Block::BambooMosaic(BambooMosaic {}),
 		"minecraft:oak_sapling" => {
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
@@ -4871,6 +5068,13 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
+		"minecraft:bamboo_block" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::BambooBlock(BambooBlock {
+				r#axis: map.get("axis").unwrap().parse().unwrap(),
+			})
+		},
 		"minecraft:stripped_spruce_log" => {
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
@@ -4917,6 +5121,13 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
 			Block::StrippedMangroveLog(StrippedMangroveLog {
+				r#axis: map.get("axis").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:stripped_bamboo_block" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::StrippedBambooBlock(StrippedBambooBlock {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
@@ -5374,6 +5585,19 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:bookshelf" => Block::Bookshelf(Bookshelf {}),
+		"minecraft:chiseled_bookshelf" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::ChiseledBookshelf(ChiseledBookshelf {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#slot_0_occupied: map.get("slot_0_occupied").unwrap().parse().unwrap(),
+				r#slot_1_occupied: map.get("slot_1_occupied").unwrap().parse().unwrap(),
+				r#slot_2_occupied: map.get("slot_2_occupied").unwrap().parse().unwrap(),
+				r#slot_3_occupied: map.get("slot_3_occupied").unwrap().parse().unwrap(),
+				r#slot_4_occupied: map.get("slot_4_occupied").unwrap().parse().unwrap(),
+				r#slot_5_occupied: map.get("slot_5_occupied").unwrap().parse().unwrap(),
+			})
+		},
 		"minecraft:mossy_cobblestone" => Block::MossyCobblestone(MossyCobblestone {}),
 		"minecraft:obsidian" => Block::Obsidian(Obsidian {}),
 		"minecraft:torch" => Block::Torch(Torch {}),
@@ -5510,6 +5734,14 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
+		"minecraft:bamboo_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::BambooSign(BambooSign {
+				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
 		"minecraft:oak_door" => {
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
@@ -5603,6 +5835,184 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
+		"minecraft:bamboo_wall_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::BambooWallSign(BambooWallSign {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:oak_hanging_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::OakHangingSign(OakHangingSign {
+				r#attached: map.get("attached").unwrap().parse().unwrap(),
+				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:spruce_hanging_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::SpruceHangingSign(SpruceHangingSign {
+				r#attached: map.get("attached").unwrap().parse().unwrap(),
+				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:birch_hanging_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::BirchHangingSign(BirchHangingSign {
+				r#attached: map.get("attached").unwrap().parse().unwrap(),
+				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:acacia_hanging_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::AcaciaHangingSign(AcaciaHangingSign {
+				r#attached: map.get("attached").unwrap().parse().unwrap(),
+				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:jungle_hanging_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::JungleHangingSign(JungleHangingSign {
+				r#attached: map.get("attached").unwrap().parse().unwrap(),
+				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:dark_oak_hanging_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::DarkOakHangingSign(DarkOakHangingSign {
+				r#attached: map.get("attached").unwrap().parse().unwrap(),
+				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:crimson_hanging_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::CrimsonHangingSign(CrimsonHangingSign {
+				r#attached: map.get("attached").unwrap().parse().unwrap(),
+				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:warped_hanging_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::WarpedHangingSign(WarpedHangingSign {
+				r#attached: map.get("attached").unwrap().parse().unwrap(),
+				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:mangrove_hanging_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::MangroveHangingSign(MangroveHangingSign {
+				r#attached: map.get("attached").unwrap().parse().unwrap(),
+				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:bamboo_hanging_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::BambooHangingSign(BambooHangingSign {
+				r#attached: map.get("attached").unwrap().parse().unwrap(),
+				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:oak_wall_hanging_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::OakWallHangingSign(OakWallHangingSign {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:spruce_wall_hanging_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::SpruceWallHangingSign(SpruceWallHangingSign {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:birch_wall_hanging_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::BirchWallHangingSign(BirchWallHangingSign {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:acacia_wall_hanging_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::AcaciaWallHangingSign(AcaciaWallHangingSign {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:jungle_wall_hanging_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::JungleWallHangingSign(JungleWallHangingSign {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:dark_oak_wall_hanging_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::DarkOakWallHangingSign(DarkOakWallHangingSign {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:mangrove_wall_hanging_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::MangroveWallHangingSign(MangroveWallHangingSign {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:crimson_wall_hanging_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::CrimsonWallHangingSign(CrimsonWallHangingSign {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:warped_wall_hanging_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::WarpedWallHangingSign(WarpedWallHangingSign {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:bamboo_wall_hanging_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::BambooWallHangingSign(BambooWallHangingSign {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
 		"minecraft:lever" => {
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
@@ -5676,6 +6086,13 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
 			Block::MangrovePressurePlate(MangrovePressurePlate {
+				r#powered: map.get("powered").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:bamboo_pressure_plate" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::BambooPressurePlate(BambooPressurePlate {
 				r#powered: map.get("powered").unwrap().parse().unwrap(),
 			})
 		},
@@ -5910,6 +6327,17 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
 			Block::MangroveTrapdoor(MangroveTrapdoor {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#half: map.get("half").unwrap().parse().unwrap(),
+				r#open: map.get("open").unwrap().parse().unwrap(),
+				r#powered: map.get("powered").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:bamboo_trapdoor" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::BambooTrapdoor(BambooTrapdoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
 				r#open: map.get("open").unwrap().parse().unwrap(),
@@ -6386,6 +6814,15 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 				r#powered: map.get("powered").unwrap().parse().unwrap(),
 			})
 		},
+		"minecraft:bamboo_button" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::BambooButton(BambooButton {
+				r#face: map.get("face").unwrap().parse().unwrap(),
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#powered: map.get("powered").unwrap().parse().unwrap(),
+			})
+		},
 		"minecraft:skeleton_skull" => {
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
@@ -6467,6 +6904,20 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
 			Block::DragonWallHead(DragonWallHead {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:piglin_head" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::PiglinHead(PiglinHead {
+				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:piglin_wall_head" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::PiglinWallHead(PiglinWallHead {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 			})
 		},
@@ -6793,6 +7244,26 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
 			Block::MangroveStairs(MangroveStairs {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#half: map.get("half").unwrap().parse().unwrap(),
+				r#shape: map.get("shape").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:bamboo_stairs" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::BambooStairs(BambooStairs {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#half: map.get("half").unwrap().parse().unwrap(),
+				r#shape: map.get("shape").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:bamboo_mosaic_stairs" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::BambooMosaicStairs(BambooMosaicStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
 				r#shape: map.get("shape").unwrap().parse().unwrap(),
@@ -7239,6 +7710,22 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
+		"minecraft:bamboo_slab" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::BambooSlab(BambooSlab {
+				r#type: map.get("type").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:bamboo_mosaic_slab" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::BambooMosaicSlab(BambooMosaicSlab {
+				r#type: map.get("type").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
 		"minecraft:stone_slab" => {
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
@@ -7415,6 +7902,16 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 				r#powered: map.get("powered").unwrap().parse().unwrap(),
 			})
 		},
+		"minecraft:bamboo_fence_gate" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::BambooFenceGate(BambooFenceGate {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#in_wall: map.get("in_wall").unwrap().parse().unwrap(),
+				r#open: map.get("open").unwrap().parse().unwrap(),
+				r#powered: map.get("powered").unwrap().parse().unwrap(),
+			})
+		},
 		"minecraft:spruce_fence" => {
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
@@ -7481,6 +7978,17 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 				r#west: map.get("west").unwrap().parse().unwrap(),
 			})
 		},
+		"minecraft:bamboo_fence" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::BambooFence(BambooFence {
+				r#east: map.get("east").unwrap().parse().unwrap(),
+				r#north: map.get("north").unwrap().parse().unwrap(),
+				r#south: map.get("south").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+				r#west: map.get("west").unwrap().parse().unwrap(),
+			})
+		},
 		"minecraft:spruce_door" => {
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
@@ -7540,6 +8048,17 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
 			Block::MangroveDoor(MangroveDoor {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#half: map.get("half").unwrap().parse().unwrap(),
+				r#hinge: map.get("hinge").unwrap().parse().unwrap(),
+				r#open: map.get("open").unwrap().parse().unwrap(),
+				r#powered: map.get("powered").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:bamboo_door" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::BambooDoor(BambooDoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
 				r#hinge: map.get("hinge").unwrap().parse().unwrap(),
@@ -9916,6 +10435,411 @@ pub mod property_enums {
 	use std::str::FromStr;
 	
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Axis {
+		x,
+		y,
+		z,
+	}
+	impl FromStr for Axis {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"x" => Ok(Axis::x),
+				"y" => Ok(Axis::y),
+				"z" => Ok(Axis::z),
+				_ => Err(format!("Invalid Axis value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Axis {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::x,
+				Self::y,
+				Self::z,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Shape2 {
+		north_south,
+		east_west,
+		ascending_east,
+		ascending_west,
+		ascending_north,
+		ascending_south,
+		south_east,
+		south_west,
+		north_west,
+		north_east,
+	}
+	impl FromStr for Shape2 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"north_south" => Ok(Shape2::north_south),
+				"east_west" => Ok(Shape2::east_west),
+				"ascending_east" => Ok(Shape2::ascending_east),
+				"ascending_west" => Ok(Shape2::ascending_west),
+				"ascending_north" => Ok(Shape2::ascending_north),
+				"ascending_south" => Ok(Shape2::ascending_south),
+				"south_east" => Ok(Shape2::south_east),
+				"south_west" => Ok(Shape2::south_west),
+				"north_west" => Ok(Shape2::north_west),
+				"north_east" => Ok(Shape2::north_east),
+				_ => Err(format!("Invalid Shape2 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Shape2 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::north_south,
+				Self::east_west,
+				Self::ascending_east,
+				Self::ascending_west,
+				Self::ascending_north,
+				Self::ascending_south,
+				Self::south_east,
+				Self::south_west,
+				Self::north_west,
+				Self::north_east,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Mode {
+		compare,
+		subtract,
+	}
+	impl FromStr for Mode {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"compare" => Ok(Mode::compare),
+				"subtract" => Ok(Mode::subtract),
+				_ => Err(format!("Invalid Mode value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Mode {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::compare,
+				Self::subtract,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Type {
+		normal,
+		sticky,
+	}
+	impl FromStr for Type {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"normal" => Ok(Type::normal),
+				"sticky" => Ok(Type::sticky),
+				_ => Err(format!("Invalid Type value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Type {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::normal,
+				Self::sticky,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum North {
+		up,
+		side,
+		none,
+	}
+	impl FromStr for North {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"up" => Ok(North::up),
+				"side" => Ok(North::side),
+				"none" => Ok(North::none),
+				_ => Err(format!("Invalid North value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for North {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::up,
+				Self::side,
+				Self::none,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Instrument {
+		harp,
+		basedrum,
+		snare,
+		hat,
+		bass,
+		flute,
+		bell,
+		guitar,
+		chime,
+		xylophone,
+		iron_xylophone,
+		cow_bell,
+		didgeridoo,
+		bit,
+		banjo,
+		pling,
+		zombie,
+		skeleton,
+		creeper,
+		dragon,
+		wither_skeleton,
+		piglin,
+		custom_head,
+	}
+	impl FromStr for Instrument {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"harp" => Ok(Instrument::harp),
+				"basedrum" => Ok(Instrument::basedrum),
+				"snare" => Ok(Instrument::snare),
+				"hat" => Ok(Instrument::hat),
+				"bass" => Ok(Instrument::bass),
+				"flute" => Ok(Instrument::flute),
+				"bell" => Ok(Instrument::bell),
+				"guitar" => Ok(Instrument::guitar),
+				"chime" => Ok(Instrument::chime),
+				"xylophone" => Ok(Instrument::xylophone),
+				"iron_xylophone" => Ok(Instrument::iron_xylophone),
+				"cow_bell" => Ok(Instrument::cow_bell),
+				"didgeridoo" => Ok(Instrument::didgeridoo),
+				"bit" => Ok(Instrument::bit),
+				"banjo" => Ok(Instrument::banjo),
+				"pling" => Ok(Instrument::pling),
+				"zombie" => Ok(Instrument::zombie),
+				"skeleton" => Ok(Instrument::skeleton),
+				"creeper" => Ok(Instrument::creeper),
+				"dragon" => Ok(Instrument::dragon),
+				"wither_skeleton" => Ok(Instrument::wither_skeleton),
+				"piglin" => Ok(Instrument::piglin),
+				"custom_head" => Ok(Instrument::custom_head),
+				_ => Err(format!("Invalid Instrument value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Instrument {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::harp,
+				Self::basedrum,
+				Self::snare,
+				Self::hat,
+				Self::bass,
+				Self::flute,
+				Self::bell,
+				Self::guitar,
+				Self::chime,
+				Self::xylophone,
+				Self::iron_xylophone,
+				Self::cow_bell,
+				Self::didgeridoo,
+				Self::bit,
+				Self::banjo,
+				Self::pling,
+				Self::zombie,
+				Self::skeleton,
+				Self::creeper,
+				Self::dragon,
+				Self::wither_skeleton,
+				Self::piglin,
+				Self::custom_head,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum VerticalDirection {
+		up,
+		down,
+	}
+	impl FromStr for VerticalDirection {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"up" => Ok(VerticalDirection::up),
+				"down" => Ok(VerticalDirection::down),
+				_ => Err(format!("Invalid VerticalDirection value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for VerticalDirection {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::up,
+				Self::down,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Facing2 {
+		down,
+		north,
+		south,
+		west,
+		east,
+	}
+	impl FromStr for Facing2 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"down" => Ok(Facing2::down),
+				"north" => Ok(Facing2::north),
+				"south" => Ok(Facing2::south),
+				"west" => Ok(Facing2::west),
+				"east" => Ok(Facing2::east),
+				_ => Err(format!("Invalid Facing2 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Facing2 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::down,
+				Self::north,
+				Self::south,
+				Self::west,
+				Self::east,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum West {
+		up,
+		side,
+		none,
+	}
+	impl FromStr for West {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"up" => Ok(West::up),
+				"side" => Ok(West::side),
+				"none" => Ok(West::none),
+				_ => Err(format!("Invalid West value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for West {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::up,
+				Self::side,
+				Self::none,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum North1 {
+		none,
+		low,
+		tall,
+	}
+	impl FromStr for North1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"none" => Ok(North1::none),
+				"low" => Ok(North1::low),
+				"tall" => Ok(North1::tall),
+				_ => Err(format!("Invalid North1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for North1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::none,
+				Self::low,
+				Self::tall,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Half {
+		upper,
+		lower,
+	}
+	impl FromStr for Half {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"upper" => Ok(Half::upper),
+				"lower" => Ok(Half::lower),
+				_ => Err(format!("Invalid Half value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Half {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::upper,
+				Self::lower,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 	pub enum Type1 {
 		single,
 		left,
@@ -9941,6 +10865,294 @@ pub mod property_enums {
 				Self::single,
 				Self::left,
 				Self::right,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Face {
+		floor,
+		wall,
+		ceiling,
+	}
+	impl FromStr for Face {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"floor" => Ok(Face::floor),
+				"wall" => Ok(Face::wall),
+				"ceiling" => Ok(Face::ceiling),
+				_ => Err(format!("Invalid Face value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Face {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::floor,
+				Self::wall,
+				Self::ceiling,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum South1 {
+		none,
+		low,
+		tall,
+	}
+	impl FromStr for South1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"none" => Ok(South1::none),
+				"low" => Ok(South1::low),
+				"tall" => Ok(South1::tall),
+				_ => Err(format!("Invalid South1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for South1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::none,
+				Self::low,
+				Self::tall,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Type2 {
+		top,
+		bottom,
+		double,
+	}
+	impl FromStr for Type2 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"top" => Ok(Type2::top),
+				"bottom" => Ok(Type2::bottom),
+				"double" => Ok(Type2::double),
+				_ => Err(format!("Invalid Type2 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Type2 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::top,
+				Self::bottom,
+				Self::double,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Shape {
+		north_south,
+		east_west,
+		ascending_east,
+		ascending_west,
+		ascending_north,
+		ascending_south,
+	}
+	impl FromStr for Shape {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"north_south" => Ok(Shape::north_south),
+				"east_west" => Ok(Shape::east_west),
+				"ascending_east" => Ok(Shape::ascending_east),
+				"ascending_west" => Ok(Shape::ascending_west),
+				"ascending_north" => Ok(Shape::ascending_north),
+				"ascending_south" => Ok(Shape::ascending_south),
+				_ => Err(format!("Invalid Shape value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Shape {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::north_south,
+				Self::east_west,
+				Self::ascending_east,
+				Self::ascending_west,
+				Self::ascending_north,
+				Self::ascending_south,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Facing {
+		north,
+		east,
+		south,
+		west,
+		up,
+		down,
+	}
+	impl FromStr for Facing {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"north" => Ok(Facing::north),
+				"east" => Ok(Facing::east),
+				"south" => Ok(Facing::south),
+				"west" => Ok(Facing::west),
+				"up" => Ok(Facing::up),
+				"down" => Ok(Facing::down),
+				_ => Err(format!("Invalid Facing value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Facing {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::north,
+				Self::east,
+				Self::south,
+				Self::west,
+				Self::up,
+				Self::down,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Facing1 {
+		north,
+		south,
+		west,
+		east,
+	}
+	impl FromStr for Facing1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"north" => Ok(Facing1::north),
+				"south" => Ok(Facing1::south),
+				"west" => Ok(Facing1::west),
+				"east" => Ok(Facing1::east),
+				_ => Err(format!("Invalid Facing1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Facing1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::north,
+				Self::south,
+				Self::west,
+				Self::east,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Part {
+		head,
+		foot,
+	}
+	impl FromStr for Part {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"head" => Ok(Part::head),
+				"foot" => Ok(Part::foot),
+				_ => Err(format!("Invalid Part value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Part {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::head,
+				Self::foot,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Half1 {
+		top,
+		bottom,
+	}
+	impl FromStr for Half1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"top" => Ok(Half1::top),
+				"bottom" => Ok(Half1::bottom),
+				_ => Err(format!("Invalid Half1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Half1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::top,
+				Self::bottom,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Mode1 {
+		save,
+		load,
+		corner,
+		data,
+	}
+	impl FromStr for Mode1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"save" => Ok(Mode1::save),
+				"load" => Ok(Mode1::load),
+				"corner" => Ok(Mode1::corner),
+				"data" => Ok(Mode1::data),
+				_ => Err(format!("Invalid Mode1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Mode1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::save,
+				Self::load,
+				Self::corner,
+				Self::data,
 			].into_iter()
 		}
 	}
@@ -10003,334 +11215,37 @@ pub mod property_enums {
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Attachment {
-		floor,
-		ceiling,
-		single_wall,
-		double_wall,
+	pub enum Thickness {
+		tip_merge,
+		tip,
+		frustum,
+		middle,
+		base,
 	}
-	impl FromStr for Attachment {
+	impl FromStr for Thickness {
 		type Err = String;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
 			match s {
-				"floor" => Ok(Attachment::floor),
-				"ceiling" => Ok(Attachment::ceiling),
-				"single_wall" => Ok(Attachment::single_wall),
-				"double_wall" => Ok(Attachment::double_wall),
-				_ => Err(format!("Invalid Attachment value: {}", s)),
+				"tip_merge" => Ok(Thickness::tip_merge),
+				"tip" => Ok(Thickness::tip),
+				"frustum" => Ok(Thickness::frustum),
+				"middle" => Ok(Thickness::middle),
+				"base" => Ok(Thickness::base),
+				_ => Err(format!("Invalid Thickness value: {}", s)),
 			}
 		}
 	}
-	impl crate::Values for Attachment {
+	impl crate::Values for Thickness {
 		type ValueIterator = std::vec::IntoIter<Self>;
 
 		fn possible_values() -> Self::ValueIterator {
 			vec![
-				Self::floor,
-				Self::ceiling,
-				Self::single_wall,
-				Self::double_wall,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Leaves {
-		none,
-		small,
-		large,
-	}
-	impl FromStr for Leaves {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"none" => Ok(Leaves::none),
-				"small" => Ok(Leaves::small),
-				"large" => Ok(Leaves::large),
-				_ => Err(format!("Invalid Leaves value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Leaves {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::none,
-				Self::small,
-				Self::large,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum North {
-		up,
-		side,
-		none,
-	}
-	impl FromStr for North {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"up" => Ok(North::up),
-				"side" => Ok(North::side),
-				"none" => Ok(North::none),
-				_ => Err(format!("Invalid North value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for North {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::up,
-				Self::side,
-				Self::none,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Hinge {
-		left,
-		right,
-	}
-	impl FromStr for Hinge {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"left" => Ok(Hinge::left),
-				"right" => Ok(Hinge::right),
-				_ => Err(format!("Invalid Hinge value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Hinge {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::left,
-				Self::right,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum North1 {
-		none,
-		low,
-		tall,
-	}
-	impl FromStr for North1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"none" => Ok(North1::none),
-				"low" => Ok(North1::low),
-				"tall" => Ok(North1::tall),
-				_ => Err(format!("Invalid North1 value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for North1 {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::none,
-				Self::low,
-				Self::tall,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum South1 {
-		none,
-		low,
-		tall,
-	}
-	impl FromStr for South1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"none" => Ok(South1::none),
-				"low" => Ok(South1::low),
-				"tall" => Ok(South1::tall),
-				_ => Err(format!("Invalid South1 value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for South1 {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::none,
-				Self::low,
-				Self::tall,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum VerticalDirection {
-		up,
-		down,
-	}
-	impl FromStr for VerticalDirection {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"up" => Ok(VerticalDirection::up),
-				"down" => Ok(VerticalDirection::down),
-				_ => Err(format!("Invalid VerticalDirection value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for VerticalDirection {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::up,
-				Self::down,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Mode1 {
-		save,
-		load,
-		corner,
-		data,
-	}
-	impl FromStr for Mode1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"save" => Ok(Mode1::save),
-				"load" => Ok(Mode1::load),
-				"corner" => Ok(Mode1::corner),
-				"data" => Ok(Mode1::data),
-				_ => Err(format!("Invalid Mode1 value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Mode1 {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::save,
-				Self::load,
-				Self::corner,
-				Self::data,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Facing {
-		north,
-		east,
-		south,
-		west,
-		up,
-		down,
-	}
-	impl FromStr for Facing {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"north" => Ok(Facing::north),
-				"east" => Ok(Facing::east),
-				"south" => Ok(Facing::south),
-				"west" => Ok(Facing::west),
-				"up" => Ok(Facing::up),
-				"down" => Ok(Facing::down),
-				_ => Err(format!("Invalid Facing value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Facing {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::north,
-				Self::east,
-				Self::south,
-				Self::west,
-				Self::up,
-				Self::down,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Half1 {
-		top,
-		bottom,
-	}
-	impl FromStr for Half1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"top" => Ok(Half1::top),
-				"bottom" => Ok(Half1::bottom),
-				_ => Err(format!("Invalid Half1 value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Half1 {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::top,
-				Self::bottom,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Type {
-		normal,
-		sticky,
-	}
-	impl FromStr for Type {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"normal" => Ok(Type::normal),
-				"sticky" => Ok(Type::sticky),
-				_ => Err(format!("Invalid Type value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Type {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::normal,
-				Self::sticky,
+				Self::tip_merge,
+				Self::tip,
+				Self::frustum,
+				Self::middle,
+				Self::base,
 			].into_iter()
 		}
 	}
@@ -10372,6 +11287,36 @@ pub mod property_enums {
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum SculkSensorPhase {
+		inactive,
+		active,
+		cooldown,
+	}
+	impl FromStr for SculkSensorPhase {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"inactive" => Ok(SculkSensorPhase::inactive),
+				"active" => Ok(SculkSensorPhase::active),
+				"cooldown" => Ok(SculkSensorPhase::cooldown),
+				_ => Err(format!("Invalid SculkSensorPhase value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for SculkSensorPhase {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::inactive,
+				Self::active,
+				Self::cooldown,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 	pub enum Axis1 {
 		x,
 		z,
@@ -10399,243 +11344,24 @@ pub mod property_enums {
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum East1 {
-		none,
-		low,
-		tall,
-	}
-	impl FromStr for East1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"none" => Ok(East1::none),
-				"low" => Ok(East1::low),
-				"tall" => Ok(East1::tall),
-				_ => Err(format!("Invalid East1 value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for East1 {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::none,
-				Self::low,
-				Self::tall,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Shape2 {
-		north_south,
-		east_west,
-		ascending_east,
-		ascending_west,
-		ascending_north,
-		ascending_south,
-		south_east,
-		south_west,
-		north_west,
-		north_east,
-	}
-	impl FromStr for Shape2 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"north_south" => Ok(Shape2::north_south),
-				"east_west" => Ok(Shape2::east_west),
-				"ascending_east" => Ok(Shape2::ascending_east),
-				"ascending_west" => Ok(Shape2::ascending_west),
-				"ascending_north" => Ok(Shape2::ascending_north),
-				"ascending_south" => Ok(Shape2::ascending_south),
-				"south_east" => Ok(Shape2::south_east),
-				"south_west" => Ok(Shape2::south_west),
-				"north_west" => Ok(Shape2::north_west),
-				"north_east" => Ok(Shape2::north_east),
-				_ => Err(format!("Invalid Shape2 value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Shape2 {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::north_south,
-				Self::east_west,
-				Self::ascending_east,
-				Self::ascending_west,
-				Self::ascending_north,
-				Self::ascending_south,
-				Self::south_east,
-				Self::south_west,
-				Self::north_west,
-				Self::north_east,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Facing2 {
-		down,
-		north,
-		south,
-		west,
-		east,
-	}
-	impl FromStr for Facing2 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"down" => Ok(Facing2::down),
-				"north" => Ok(Facing2::north),
-				"south" => Ok(Facing2::south),
-				"west" => Ok(Facing2::west),
-				"east" => Ok(Facing2::east),
-				_ => Err(format!("Invalid Facing2 value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Facing2 {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::down,
-				Self::north,
-				Self::south,
-				Self::west,
-				Self::east,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Facing1 {
-		north,
-		south,
-		west,
-		east,
-	}
-	impl FromStr for Facing1 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"north" => Ok(Facing1::north),
-				"south" => Ok(Facing1::south),
-				"west" => Ok(Facing1::west),
-				"east" => Ok(Facing1::east),
-				_ => Err(format!("Invalid Facing1 value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Facing1 {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::north,
-				Self::south,
-				Self::west,
-				Self::east,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Instrument {
-		harp,
-		basedrum,
-		snare,
-		hat,
-		bass,
-		flute,
-		bell,
-		guitar,
-		chime,
-		xylophone,
-		iron_xylophone,
-		cow_bell,
-		didgeridoo,
-		bit,
-		banjo,
-		pling,
-	}
-	impl FromStr for Instrument {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"harp" => Ok(Instrument::harp),
-				"basedrum" => Ok(Instrument::basedrum),
-				"snare" => Ok(Instrument::snare),
-				"hat" => Ok(Instrument::hat),
-				"bass" => Ok(Instrument::bass),
-				"flute" => Ok(Instrument::flute),
-				"bell" => Ok(Instrument::bell),
-				"guitar" => Ok(Instrument::guitar),
-				"chime" => Ok(Instrument::chime),
-				"xylophone" => Ok(Instrument::xylophone),
-				"iron_xylophone" => Ok(Instrument::iron_xylophone),
-				"cow_bell" => Ok(Instrument::cow_bell),
-				"didgeridoo" => Ok(Instrument::didgeridoo),
-				"bit" => Ok(Instrument::bit),
-				"banjo" => Ok(Instrument::banjo),
-				"pling" => Ok(Instrument::pling),
-				_ => Err(format!("Invalid Instrument value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Instrument {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::harp,
-				Self::basedrum,
-				Self::snare,
-				Self::hat,
-				Self::bass,
-				Self::flute,
-				Self::bell,
-				Self::guitar,
-				Self::chime,
-				Self::xylophone,
-				Self::iron_xylophone,
-				Self::cow_bell,
-				Self::didgeridoo,
-				Self::bit,
-				Self::banjo,
-				Self::pling,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum West {
+	pub enum East {
 		up,
 		side,
 		none,
 	}
-	impl FromStr for West {
+	impl FromStr for East {
 		type Err = String;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
 			match s {
-				"up" => Ok(West::up),
-				"side" => Ok(West::side),
-				"none" => Ok(West::none),
-				_ => Err(format!("Invalid West value: {}", s)),
+				"up" => Ok(East::up),
+				"side" => Ok(East::side),
+				"none" => Ok(East::none),
+				_ => Err(format!("Invalid East value: {}", s)),
 			}
 		}
 	}
-	impl crate::Values for West {
+	impl crate::Values for East {
 		type ValueIterator = std::vec::IntoIter<Self>;
 
 		fn possible_values() -> Self::ValueIterator {
@@ -10648,154 +11374,28 @@ pub mod property_enums {
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum West1 {
-		none,
-		low,
-		tall,
+	pub enum Hinge {
+		left,
+		right,
 	}
-	impl FromStr for West1 {
+	impl FromStr for Hinge {
 		type Err = String;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
 			match s {
-				"none" => Ok(West1::none),
-				"low" => Ok(West1::low),
-				"tall" => Ok(West1::tall),
-				_ => Err(format!("Invalid West1 value: {}", s)),
+				"left" => Ok(Hinge::left),
+				"right" => Ok(Hinge::right),
+				_ => Err(format!("Invalid Hinge value: {}", s)),
 			}
 		}
 	}
-	impl crate::Values for West1 {
+	impl crate::Values for Hinge {
 		type ValueIterator = std::vec::IntoIter<Self>;
 
 		fn possible_values() -> Self::ValueIterator {
 			vec![
-				Self::none,
-				Self::low,
-				Self::tall,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Half {
-		upper,
-		lower,
-	}
-	impl FromStr for Half {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"upper" => Ok(Half::upper),
-				"lower" => Ok(Half::lower),
-				_ => Err(format!("Invalid Half value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Half {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::upper,
-				Self::lower,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum South {
-		up,
-		side,
-		none,
-	}
-	impl FromStr for South {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"up" => Ok(South::up),
-				"side" => Ok(South::side),
-				"none" => Ok(South::none),
-				_ => Err(format!("Invalid South value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for South {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::up,
-				Self::side,
-				Self::none,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Thickness {
-		tip_merge,
-		tip,
-		frustum,
-		middle,
-		base,
-	}
-	impl FromStr for Thickness {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"tip_merge" => Ok(Thickness::tip_merge),
-				"tip" => Ok(Thickness::tip),
-				"frustum" => Ok(Thickness::frustum),
-				"middle" => Ok(Thickness::middle),
-				"base" => Ok(Thickness::base),
-				_ => Err(format!("Invalid Thickness value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Thickness {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::tip_merge,
-				Self::tip,
-				Self::frustum,
-				Self::middle,
-				Self::base,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Axis {
-		x,
-		y,
-		z,
-	}
-	impl FromStr for Axis {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"x" => Ok(Axis::x),
-				"y" => Ok(Axis::y),
-				"z" => Ok(Axis::z),
-				_ => Err(format!("Invalid Axis value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Axis {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::x,
-				Self::y,
-				Self::z,
+				Self::left,
+				Self::right,
 			].into_iter()
 		}
 	}
@@ -10834,90 +11434,147 @@ pub mod property_enums {
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Mode {
-		compare,
-		subtract,
+	pub enum West1 {
+		none,
+		low,
+		tall,
 	}
-	impl FromStr for Mode {
+	impl FromStr for West1 {
 		type Err = String;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
 			match s {
-				"compare" => Ok(Mode::compare),
-				"subtract" => Ok(Mode::subtract),
-				_ => Err(format!("Invalid Mode value: {}", s)),
+				"none" => Ok(West1::none),
+				"low" => Ok(West1::low),
+				"tall" => Ok(West1::tall),
+				_ => Err(format!("Invalid West1 value: {}", s)),
 			}
 		}
 	}
-	impl crate::Values for Mode {
+	impl crate::Values for West1 {
 		type ValueIterator = std::vec::IntoIter<Self>;
 
 		fn possible_values() -> Self::ValueIterator {
 			vec![
-				Self::compare,
-				Self::subtract,
+				Self::none,
+				Self::low,
+				Self::tall,
 			].into_iter()
 		}
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Shape {
-		north_south,
-		east_west,
-		ascending_east,
-		ascending_west,
-		ascending_north,
-		ascending_south,
+	pub enum Attachment {
+		floor,
+		ceiling,
+		single_wall,
+		double_wall,
 	}
-	impl FromStr for Shape {
+	impl FromStr for Attachment {
 		type Err = String;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
 			match s {
-				"north_south" => Ok(Shape::north_south),
-				"east_west" => Ok(Shape::east_west),
-				"ascending_east" => Ok(Shape::ascending_east),
-				"ascending_west" => Ok(Shape::ascending_west),
-				"ascending_north" => Ok(Shape::ascending_north),
-				"ascending_south" => Ok(Shape::ascending_south),
-				_ => Err(format!("Invalid Shape value: {}", s)),
+				"floor" => Ok(Attachment::floor),
+				"ceiling" => Ok(Attachment::ceiling),
+				"single_wall" => Ok(Attachment::single_wall),
+				"double_wall" => Ok(Attachment::double_wall),
+				_ => Err(format!("Invalid Attachment value: {}", s)),
 			}
 		}
 	}
-	impl crate::Values for Shape {
+	impl crate::Values for Attachment {
 		type ValueIterator = std::vec::IntoIter<Self>;
 
 		fn possible_values() -> Self::ValueIterator {
 			vec![
-				Self::north_south,
-				Self::east_west,
-				Self::ascending_east,
-				Self::ascending_west,
-				Self::ascending_north,
-				Self::ascending_south,
+				Self::floor,
+				Self::ceiling,
+				Self::single_wall,
+				Self::double_wall,
 			].into_iter()
 		}
 	}
 
 	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum East {
+	pub enum East1 {
+		none,
+		low,
+		tall,
+	}
+	impl FromStr for East1 {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"none" => Ok(East1::none),
+				"low" => Ok(East1::low),
+				"tall" => Ok(East1::tall),
+				_ => Err(format!("Invalid East1 value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for East1 {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::none,
+				Self::low,
+				Self::tall,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum Leaves {
+		none,
+		small,
+		large,
+	}
+	impl FromStr for Leaves {
+		type Err = String;
+
+		fn from_str(s: &str) -> Result<Self, Self::Err> {
+			match s {
+				"none" => Ok(Leaves::none),
+				"small" => Ok(Leaves::small),
+				"large" => Ok(Leaves::large),
+				_ => Err(format!("Invalid Leaves value: {}", s)),
+			}
+		}
+	}
+	impl crate::Values for Leaves {
+		type ValueIterator = std::vec::IntoIter<Self>;
+
+		fn possible_values() -> Self::ValueIterator {
+			vec![
+				Self::none,
+				Self::small,
+				Self::large,
+			].into_iter()
+		}
+	}
+
+	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+	pub enum South {
 		up,
 		side,
 		none,
 	}
-	impl FromStr for East {
+	impl FromStr for South {
 		type Err = String;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
 			match s {
-				"up" => Ok(East::up),
-				"side" => Ok(East::side),
-				"none" => Ok(East::none),
-				_ => Err(format!("Invalid East value: {}", s)),
+				"up" => Ok(South::up),
+				"side" => Ok(South::side),
+				"none" => Ok(South::none),
+				_ => Err(format!("Invalid South value: {}", s)),
 			}
 		}
 	}
-	impl crate::Values for East {
+	impl crate::Values for South {
 		type ValueIterator = std::vec::IntoIter<Self>;
 
 		fn possible_values() -> Self::ValueIterator {
@@ -10925,123 +11582,6 @@ pub mod property_enums {
 				Self::up,
 				Self::side,
 				Self::none,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Face {
-		floor,
-		wall,
-		ceiling,
-	}
-	impl FromStr for Face {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"floor" => Ok(Face::floor),
-				"wall" => Ok(Face::wall),
-				"ceiling" => Ok(Face::ceiling),
-				_ => Err(format!("Invalid Face value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Face {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::floor,
-				Self::wall,
-				Self::ceiling,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum SculkSensorPhase {
-		inactive,
-		active,
-		cooldown,
-	}
-	impl FromStr for SculkSensorPhase {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"inactive" => Ok(SculkSensorPhase::inactive),
-				"active" => Ok(SculkSensorPhase::active),
-				"cooldown" => Ok(SculkSensorPhase::cooldown),
-				_ => Err(format!("Invalid SculkSensorPhase value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for SculkSensorPhase {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::inactive,
-				Self::active,
-				Self::cooldown,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Part {
-		head,
-		foot,
-	}
-	impl FromStr for Part {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"head" => Ok(Part::head),
-				"foot" => Ok(Part::foot),
-				_ => Err(format!("Invalid Part value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Part {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::head,
-				Self::foot,
-			].into_iter()
-		}
-	}
-
-	#[derive(Debug, Hash, PartialEq, Eq, Clone)]
-	pub enum Type2 {
-		top,
-		bottom,
-		double,
-	}
-	impl FromStr for Type2 {
-		type Err = String;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			match s {
-				"top" => Ok(Type2::top),
-				"bottom" => Ok(Type2::bottom),
-				"double" => Ok(Type2::double),
-				_ => Err(format!("Invalid Type2 value: {}", s)),
-			}
-		}
-	}
-	impl crate::Values for Type2 {
-		type ValueIterator = std::vec::IntoIter<Self>;
-
-		fn possible_values() -> Self::ValueIterator {
-			vec![
-				Self::top,
-				Self::bottom,
-				Self::double,
 			].into_iter()
 		}
 	}
@@ -11263,6 +11803,28 @@ pub mod blocks_props {
 
 	impl BlockProperties for MangrovePlanks {
 		const DISPLAY_NAME: &'static str = "Mangrove Planks";
+		const HARDNESS: f32 = 2.0;
+		const RESISTANCE: f32 = 3.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 15;
+	}
+
+	impl BlockProperties for BambooPlanks {
+		const DISPLAY_NAME: &'static str = "Bamboo Planks";
+		const HARDNESS: f32 = 2.0;
+		const RESISTANCE: f32 = 3.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 15;
+	}
+
+	impl BlockProperties for BambooMosaic {
+		const DISPLAY_NAME: &'static str = "Bamboo Mosaic";
 		const HARDNESS: f32 = 2.0;
 		const RESISTANCE: f32 = 3.0;
 		const STACK_SIZE: u8 = 64;
@@ -11591,6 +12153,17 @@ pub mod blocks_props {
 		const FILTER_LIGHT: u8 = 15;
 	}
 
+	impl BlockProperties for BambooBlock {
+		const DISPLAY_NAME: &'static str = "Block of Bamboo";
+		const HARDNESS: f32 = 2.0;
+		const RESISTANCE: f32 = 2.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 15;
+	}
+
 	impl BlockProperties for StrippedSpruceLog {
 		const DISPLAY_NAME: &'static str = "Stripped Spruce Log";
 		const HARDNESS: f32 = 2.0;
@@ -11659,6 +12232,17 @@ pub mod blocks_props {
 
 	impl BlockProperties for StrippedMangroveLog {
 		const DISPLAY_NAME: &'static str = "Stripped Mangrove Log";
+		const HARDNESS: f32 = 2.0;
+		const RESISTANCE: f32 = 2.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 15;
+	}
+
+	impl BlockProperties for StrippedBambooBlock {
+		const DISPLAY_NAME: &'static str = "Block of Stripped Bamboo";
 		const HARDNESS: f32 = 2.0;
 		const RESISTANCE: f32 = 2.0;
 		const STACK_SIZE: u8 = 64;
@@ -12746,6 +13330,17 @@ pub mod blocks_props {
 		const FILTER_LIGHT: u8 = 15;
 	}
 
+	impl BlockProperties for ChiseledBookshelf {
+		const DISPLAY_NAME: &'static str = "Chiseled Bookshelf";
+		const HARDNESS: f32 = 1.5;
+		const RESISTANCE: f32 = 1.5;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 15;
+	}
+
 	impl BlockProperties for MossyCobblestone {
 		const DISPLAY_NAME: &'static str = "Mossy Cobblestone";
 		const HARDNESS: f32 = 2.0;
@@ -12813,7 +13408,7 @@ pub mod blocks_props {
 	}
 
 	impl BlockProperties for Spawner {
-		const DISPLAY_NAME: &'static str = "Spawner";
+		const DISPLAY_NAME: &'static str = "Monster Spawner";
 		const HARDNESS: f32 = 5.0;
 		const RESISTANCE: f32 = 5.0;
 		const STACK_SIZE: u8 = 64;
@@ -13010,6 +13605,17 @@ pub mod blocks_props {
 		const FILTER_LIGHT: u8 = 0;
 	}
 
+	impl BlockProperties for BambooSign {
+		const DISPLAY_NAME: &'static str = "Bamboo Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
 	impl BlockProperties for OakDoor {
 		const DISPLAY_NAME: &'static str = "Oak Door";
 		const HARDNESS: f32 = 3.0;
@@ -13131,6 +13737,237 @@ pub mod blocks_props {
 		const FILTER_LIGHT: u8 = 0;
 	}
 
+	impl BlockProperties for BambooWallSign {
+		const DISPLAY_NAME: &'static str = "Bamboo Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for OakHangingSign {
+		const DISPLAY_NAME: &'static str = "Oak Hanging Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for SpruceHangingSign {
+		const DISPLAY_NAME: &'static str = "Spruce Hanging Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for BirchHangingSign {
+		const DISPLAY_NAME: &'static str = "Birch Hanging Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for AcaciaHangingSign {
+		const DISPLAY_NAME: &'static str = "Acacia Hanging Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for JungleHangingSign {
+		const DISPLAY_NAME: &'static str = "Jungle Hanging Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for DarkOakHangingSign {
+		const DISPLAY_NAME: &'static str = "Dark Oak Hanging Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for CrimsonHangingSign {
+		const DISPLAY_NAME: &'static str = "Crimson Hanging Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for WarpedHangingSign {
+		const DISPLAY_NAME: &'static str = "Warped Hanging Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for MangroveHangingSign {
+		const DISPLAY_NAME: &'static str = "Mangrove Hanging Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for BambooHangingSign {
+		const DISPLAY_NAME: &'static str = "Bamboo Hanging Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for OakWallHangingSign {
+		const DISPLAY_NAME: &'static str = "Oak Hanging Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for SpruceWallHangingSign {
+		const DISPLAY_NAME: &'static str = "Spruce Hanging Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for BirchWallHangingSign {
+		const DISPLAY_NAME: &'static str = "Birch Hanging Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for AcaciaWallHangingSign {
+		const DISPLAY_NAME: &'static str = "Acacia Hanging Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for JungleWallHangingSign {
+		const DISPLAY_NAME: &'static str = "Jungle Hanging Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for DarkOakWallHangingSign {
+		const DISPLAY_NAME: &'static str = "Dark Oak Hanging Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for MangroveWallHangingSign {
+		const DISPLAY_NAME: &'static str = "Mangrove Hanging Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for CrimsonWallHangingSign {
+		const DISPLAY_NAME: &'static str = "Crimson Hanging Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for WarpedWallHangingSign {
+		const DISPLAY_NAME: &'static str = "Warped Hanging Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for BambooWallHangingSign {
+		const DISPLAY_NAME: &'static str = "Bamboo Hanging Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
 	impl BlockProperties for Lever {
 		const DISPLAY_NAME: &'static str = "Lever";
 		const HARDNESS: f32 = 0.5;
@@ -13232,6 +14069,17 @@ pub mod blocks_props {
 
 	impl BlockProperties for MangrovePressurePlate {
 		const DISPLAY_NAME: &'static str = "Mangrove Pressure Plate";
+		const HARDNESS: f32 = 0.5;
+		const RESISTANCE: f32 = 0.5;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for BambooPressurePlate {
+		const DISPLAY_NAME: &'static str = "Bamboo Pressure Plate";
 		const HARDNESS: f32 = 0.5;
 		const RESISTANCE: f32 = 0.5;
 		const STACK_SIZE: u8 = 64;
@@ -13782,6 +14630,17 @@ pub mod blocks_props {
 
 	impl BlockProperties for MangroveTrapdoor {
 		const DISPLAY_NAME: &'static str = "Mangrove Trapdoor";
+		const HARDNESS: f32 = 3.0;
+		const RESISTANCE: f32 = 3.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for BambooTrapdoor {
+		const DISPLAY_NAME: &'static str = "Bamboo Trapdoor";
 		const HARDNESS: f32 = 3.0;
 		const RESISTANCE: f32 = 3.0;
 		const STACK_SIZE: u8 = 64;
@@ -14847,6 +15706,17 @@ pub mod blocks_props {
 		const FILTER_LIGHT: u8 = 0;
 	}
 
+	impl BlockProperties for BambooButton {
+		const DISPLAY_NAME: &'static str = "Bamboo Button";
+		const HARDNESS: f32 = 0.5;
+		const RESISTANCE: f32 = 0.5;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
 	impl BlockProperties for SkeletonSkull {
 		const DISPLAY_NAME: &'static str = "Skeleton Skull";
 		const HARDNESS: f32 = 1.0;
@@ -14970,6 +15840,28 @@ pub mod blocks_props {
 
 	impl BlockProperties for DragonWallHead {
 		const DISPLAY_NAME: &'static str = "Dragon Head";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for PiglinHead {
+		const DISPLAY_NAME: &'static str = "Piglin Head";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for PiglinWallHead {
+		const DISPLAY_NAME: &'static str = "Piglin Head";
 		const HARDNESS: f32 = 1.0;
 		const RESISTANCE: f32 = 1.0;
 		const STACK_SIZE: u8 = 64;
@@ -15542,6 +16434,28 @@ pub mod blocks_props {
 
 	impl BlockProperties for MangroveStairs {
 		const DISPLAY_NAME: &'static str = "Mangrove Stairs";
+		const HARDNESS: f32 = 2.0;
+		const RESISTANCE: f32 = 3.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for BambooStairs {
+		const DISPLAY_NAME: &'static str = "Bamboo Stairs";
+		const HARDNESS: f32 = 2.0;
+		const RESISTANCE: f32 = 3.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for BambooMosaicStairs {
+		const DISPLAY_NAME: &'static str = "Bamboo Mosaic Stairs";
 		const HARDNESS: f32 = 2.0;
 		const RESISTANCE: f32 = 3.0;
 		const STACK_SIZE: u8 = 64;
@@ -16464,6 +17378,28 @@ pub mod blocks_props {
 		const FILTER_LIGHT: u8 = 0;
 	}
 
+	impl BlockProperties for BambooSlab {
+		const DISPLAY_NAME: &'static str = "Bamboo Slab";
+		const HARDNESS: f32 = 2.0;
+		const RESISTANCE: f32 = 3.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for BambooMosaicSlab {
+		const DISPLAY_NAME: &'static str = "Bamboo Mosaic Slab";
+		const HARDNESS: f32 = 2.0;
+		const RESISTANCE: f32 = 3.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
 	impl BlockProperties for StoneSlab {
 		const DISPLAY_NAME: &'static str = "Stone Slab";
 		const HARDNESS: f32 = 2.0;
@@ -16728,6 +17664,17 @@ pub mod blocks_props {
 		const FILTER_LIGHT: u8 = 0;
 	}
 
+	impl BlockProperties for BambooFenceGate {
+		const DISPLAY_NAME: &'static str = "Bamboo Fence Gate";
+		const HARDNESS: f32 = 2.0;
+		const RESISTANCE: f32 = 3.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
 	impl BlockProperties for SpruceFence {
 		const DISPLAY_NAME: &'static str = "Spruce Fence";
 		const HARDNESS: f32 = 2.0;
@@ -16794,6 +17741,17 @@ pub mod blocks_props {
 		const FILTER_LIGHT: u8 = 0;
 	}
 
+	impl BlockProperties for BambooFence {
+		const DISPLAY_NAME: &'static str = "Bamboo Fence";
+		const HARDNESS: f32 = 2.0;
+		const RESISTANCE: f32 = 3.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
 	impl BlockProperties for SpruceDoor {
 		const DISPLAY_NAME: &'static str = "Spruce Door";
 		const HARDNESS: f32 = 3.0;
@@ -16851,6 +17809,17 @@ pub mod blocks_props {
 
 	impl BlockProperties for MangroveDoor {
 		const DISPLAY_NAME: &'static str = "Mangrove Door";
+		const HARDNESS: f32 = 3.0;
+		const RESISTANCE: f32 = 3.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for BambooDoor {
+		const DISPLAY_NAME: &'static str = "Bamboo Door";
 		const HARDNESS: f32 = 3.0;
 		const RESISTANCE: f32 = 3.0;
 		const STACK_SIZE: u8 = 64;
@@ -21381,6 +22350,12 @@ pub struct DarkOakPlanks;
 pub struct MangrovePlanks;
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct BambooPlanks;
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct BambooMosaic;
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OakSapling {
 	pub r#stage: ConstrainedInt::<0, 1>,
 }
@@ -21507,6 +22482,11 @@ pub struct MuddyMangroveRoots {
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct BambooBlock {
+	pub r#axis: property_enums::Axis,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StrippedSpruceLog {
 	pub r#axis: property_enums::Axis,
 }
@@ -21538,6 +22518,11 @@ pub struct StrippedOakLog {
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StrippedMangroveLog {
+	pub r#axis: property_enums::Axis,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct StrippedBambooBlock {
 	pub r#axis: property_enums::Axis,
 }
 
@@ -21996,6 +22981,17 @@ pub struct Tnt {
 pub struct Bookshelf;
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct ChiseledBookshelf {
+	pub r#facing: property_enums::Facing1,
+	pub r#slot_0_occupied: bool,
+	pub r#slot_1_occupied: bool,
+	pub r#slot_2_occupied: bool,
+	pub r#slot_3_occupied: bool,
+	pub r#slot_4_occupied: bool,
+	pub r#slot_5_occupied: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MossyCobblestone;
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
@@ -22120,6 +23116,12 @@ pub struct MangroveSign {
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct BambooSign {
+	pub r#rotation: ConstrainedInt::<0, 15>,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct OakDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
@@ -22191,6 +23193,142 @@ pub struct MangroveWallSign {
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct BambooWallSign {
+	pub r#facing: property_enums::Facing1,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct OakHangingSign {
+	pub r#attached: bool,
+	pub r#rotation: ConstrainedInt::<0, 15>,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct SpruceHangingSign {
+	pub r#attached: bool,
+	pub r#rotation: ConstrainedInt::<0, 15>,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct BirchHangingSign {
+	pub r#attached: bool,
+	pub r#rotation: ConstrainedInt::<0, 15>,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct AcaciaHangingSign {
+	pub r#attached: bool,
+	pub r#rotation: ConstrainedInt::<0, 15>,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct JungleHangingSign {
+	pub r#attached: bool,
+	pub r#rotation: ConstrainedInt::<0, 15>,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct DarkOakHangingSign {
+	pub r#attached: bool,
+	pub r#rotation: ConstrainedInt::<0, 15>,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct CrimsonHangingSign {
+	pub r#attached: bool,
+	pub r#rotation: ConstrainedInt::<0, 15>,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct WarpedHangingSign {
+	pub r#attached: bool,
+	pub r#rotation: ConstrainedInt::<0, 15>,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct MangroveHangingSign {
+	pub r#attached: bool,
+	pub r#rotation: ConstrainedInt::<0, 15>,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct BambooHangingSign {
+	pub r#attached: bool,
+	pub r#rotation: ConstrainedInt::<0, 15>,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct OakWallHangingSign {
+	pub r#facing: property_enums::Facing1,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct SpruceWallHangingSign {
+	pub r#facing: property_enums::Facing1,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct BirchWallHangingSign {
+	pub r#facing: property_enums::Facing1,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct AcaciaWallHangingSign {
+	pub r#facing: property_enums::Facing1,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct JungleWallHangingSign {
+	pub r#facing: property_enums::Facing1,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct DarkOakWallHangingSign {
+	pub r#facing: property_enums::Facing1,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct MangroveWallHangingSign {
+	pub r#facing: property_enums::Facing1,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct CrimsonWallHangingSign {
+	pub r#facing: property_enums::Facing1,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct WarpedWallHangingSign {
+	pub r#facing: property_enums::Facing1,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct BambooWallHangingSign {
+	pub r#facing: property_enums::Facing1,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Lever {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
@@ -22243,6 +23381,11 @@ pub struct DarkOakPressurePlate {
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MangrovePressurePlate {
+	pub r#powered: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct BambooPressurePlate {
 	pub r#powered: bool,
 }
 
@@ -22477,6 +23620,15 @@ pub struct DarkOakTrapdoor {
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MangroveTrapdoor {
+	pub r#facing: property_enums::Facing1,
+	pub r#half: property_enums::Half1,
+	pub r#open: bool,
+	pub r#powered: bool,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct BambooTrapdoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
 	pub r#open: bool,
@@ -22966,6 +24118,13 @@ pub struct MangroveButton {
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct BambooButton {
+	pub r#face: property_enums::Face,
+	pub r#facing: property_enums::Facing1,
+	pub r#powered: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SkeletonSkull {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 }
@@ -23022,6 +24181,16 @@ pub struct DragonHead {
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DragonWallHead {
+	pub r#facing: property_enums::Facing1,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct PiglinHead {
+	pub r#rotation: ConstrainedInt::<0, 15>,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct PiglinWallHead {
 	pub r#facing: property_enums::Facing1,
 }
 
@@ -23324,6 +24493,22 @@ pub struct DarkOakStairs {
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MangroveStairs {
+	pub r#facing: property_enums::Facing1,
+	pub r#half: property_enums::Half1,
+	pub r#shape: property_enums::Shape1,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct BambooStairs {
+	pub r#facing: property_enums::Facing1,
+	pub r#half: property_enums::Half1,
+	pub r#shape: property_enums::Shape1,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct BambooMosaicStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
 	pub r#shape: property_enums::Shape1,
@@ -23717,6 +24902,18 @@ pub struct MangroveSlab {
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct BambooSlab {
+	pub r#type: property_enums::Type2,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct BambooMosaicSlab {
+	pub r#type: property_enums::Type2,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StoneSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
@@ -23861,6 +25058,14 @@ pub struct MangroveFenceGate {
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct BambooFenceGate {
+	pub r#facing: property_enums::Facing1,
+	pub r#in_wall: bool,
+	pub r#open: bool,
+	pub r#powered: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SpruceFence {
 	pub r#east: bool,
 	pub r#north: bool,
@@ -23915,6 +25120,15 @@ pub struct MangroveFence {
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct BambooFence {
+	pub r#east: bool,
+	pub r#north: bool,
+	pub r#south: bool,
+	pub r#waterlogged: bool,
+	pub r#west: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct SpruceDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
@@ -23961,6 +25175,15 @@ pub struct DarkOakDoor {
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MangroveDoor {
+	pub r#facing: property_enums::Facing1,
+	pub r#half: property_enums::Half,
+	pub r#hinge: property_enums::Hinge,
+	pub r#open: bool,
+	pub r#powered: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct BambooDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
 	pub r#hinge: property_enums::Hinge,
@@ -26106,6 +27329,8 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 	map.insert(Block::AcaciaPlanks ( AcaciaPlanks {} ), map.len());
 	map.insert(Block::DarkOakPlanks ( DarkOakPlanks {} ), map.len());
 	map.insert(Block::MangrovePlanks ( MangrovePlanks {} ), map.len());
+	map.insert(Block::BambooPlanks ( BambooPlanks {} ), map.len());
+	map.insert(Block::BambooMosaic ( BambooMosaic {} ), map.len());
 	for r#stage in ConstrainedInt::<0, 1>::possible_values() {
 		map.insert(Block::OakSapling ( OakSapling {r#stage: r#stage.clone(), } ), map.len());
 	}
@@ -26178,6 +27403,9 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 		map.insert(Block::MuddyMangroveRoots ( MuddyMangroveRoots {r#axis: r#axis.clone(), } ), map.len());
 	}
 	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::BambooBlock ( BambooBlock {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
 		map.insert(Block::StrippedSpruceLog ( StrippedSpruceLog {r#axis: r#axis.clone(), } ), map.len());
 	}
 	for r#axis in property_enums::Axis::possible_values() {
@@ -26197,6 +27425,9 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 	}
 	for r#axis in property_enums::Axis::possible_values() {
 		map.insert(Block::StrippedMangroveLog ( StrippedMangroveLog {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::StrippedBambooBlock ( StrippedBambooBlock {r#axis: r#axis.clone(), } ), map.len());
 	}
 	for r#axis in property_enums::Axis::possible_values() {
 		map.insert(Block::OakWood ( OakWood {r#axis: r#axis.clone(), } ), map.len());
@@ -26518,6 +27749,21 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 		map.insert(Block::Tnt ( Tnt {r#unstable: r#unstable.clone(), } ), map.len());
 	}
 	map.insert(Block::Bookshelf ( Bookshelf {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#slot_0_occupied in bool::possible_values() {
+			for r#slot_1_occupied in bool::possible_values() {
+				for r#slot_2_occupied in bool::possible_values() {
+					for r#slot_3_occupied in bool::possible_values() {
+						for r#slot_4_occupied in bool::possible_values() {
+							for r#slot_5_occupied in bool::possible_values() {
+								map.insert(Block::ChiseledBookshelf ( ChiseledBookshelf {r#facing: r#facing.clone(), r#slot_0_occupied: r#slot_0_occupied.clone(), r#slot_1_occupied: r#slot_1_occupied.clone(), r#slot_2_occupied: r#slot_2_occupied.clone(), r#slot_3_occupied: r#slot_3_occupied.clone(), r#slot_4_occupied: r#slot_4_occupied.clone(), r#slot_5_occupied: r#slot_5_occupied.clone(), } ), map.len());
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 	map.insert(Block::MossyCobblestone ( MossyCobblestone {} ), map.len());
 	map.insert(Block::Obsidian ( Obsidian {} ), map.len());
 	map.insert(Block::Torch ( Torch {} ), map.len());
@@ -26616,6 +27862,11 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 			map.insert(Block::MangroveSign ( MangroveSign {r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
 		}
 	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::BambooSign ( BambooSign {r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
 	for r#facing in property_enums::Facing1::possible_values() {
 		for r#half in property_enums::Half::possible_values() {
 			for r#hinge in property_enums::Hinge::possible_values() {
@@ -26681,6 +27932,131 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 			map.insert(Block::MangroveWallSign ( MangroveWallSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
 		}
 	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::BambooWallSign ( BambooWallSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#attached in bool::possible_values() {
+		for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::OakHangingSign ( OakHangingSign {r#attached: r#attached.clone(), r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#attached in bool::possible_values() {
+		for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::SpruceHangingSign ( SpruceHangingSign {r#attached: r#attached.clone(), r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#attached in bool::possible_values() {
+		for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::BirchHangingSign ( BirchHangingSign {r#attached: r#attached.clone(), r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#attached in bool::possible_values() {
+		for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::AcaciaHangingSign ( AcaciaHangingSign {r#attached: r#attached.clone(), r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#attached in bool::possible_values() {
+		for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::JungleHangingSign ( JungleHangingSign {r#attached: r#attached.clone(), r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#attached in bool::possible_values() {
+		for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::DarkOakHangingSign ( DarkOakHangingSign {r#attached: r#attached.clone(), r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#attached in bool::possible_values() {
+		for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::CrimsonHangingSign ( CrimsonHangingSign {r#attached: r#attached.clone(), r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#attached in bool::possible_values() {
+		for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::WarpedHangingSign ( WarpedHangingSign {r#attached: r#attached.clone(), r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#attached in bool::possible_values() {
+		for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::MangroveHangingSign ( MangroveHangingSign {r#attached: r#attached.clone(), r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#attached in bool::possible_values() {
+		for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::BambooHangingSign ( BambooHangingSign {r#attached: r#attached.clone(), r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::OakWallHangingSign ( OakWallHangingSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::SpruceWallHangingSign ( SpruceWallHangingSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::BirchWallHangingSign ( BirchWallHangingSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::AcaciaWallHangingSign ( AcaciaWallHangingSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::JungleWallHangingSign ( JungleWallHangingSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::DarkOakWallHangingSign ( DarkOakWallHangingSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::MangroveWallHangingSign ( MangroveWallHangingSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::CrimsonWallHangingSign ( CrimsonWallHangingSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::WarpedWallHangingSign ( WarpedWallHangingSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::BambooWallHangingSign ( BambooWallHangingSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
 	for r#face in property_enums::Face::possible_values() {
 		for r#facing in property_enums::Facing1::possible_values() {
 			for r#powered in bool::possible_values() {
@@ -26722,6 +28098,9 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 	}
 	for r#powered in bool::possible_values() {
 		map.insert(Block::MangrovePressurePlate ( MangrovePressurePlate {r#powered: r#powered.clone(), } ), map.len());
+	}
+	for r#powered in bool::possible_values() {
+		map.insert(Block::BambooPressurePlate ( BambooPressurePlate {r#powered: r#powered.clone(), } ), map.len());
 	}
 	for r#lit in bool::possible_values() {
 		map.insert(Block::RedstoneOre ( RedstoneOre {r#lit: r#lit.clone(), } ), map.len());
@@ -26894,6 +28273,17 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 				for r#powered in bool::possible_values() {
 					for r#waterlogged in bool::possible_values() {
 						map.insert(Block::MangroveTrapdoor ( MangroveTrapdoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						map.insert(Block::BambooTrapdoor ( BambooTrapdoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
 					}
 				}
 			}
@@ -27291,6 +28681,13 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 			}
 		}
 	}
+	for r#face in property_enums::Face::possible_values() {
+		for r#facing in property_enums::Facing1::possible_values() {
+			for r#powered in bool::possible_values() {
+				map.insert(Block::BambooButton ( BambooButton {r#face: r#face.clone(), r#facing: r#facing.clone(), r#powered: r#powered.clone(), } ), map.len());
+			}
+		}
+	}
 	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
 		map.insert(Block::SkeletonSkull ( SkeletonSkull {r#rotation: r#rotation.clone(), } ), map.len());
 	}
@@ -27326,6 +28723,12 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 	}
 	for r#facing in property_enums::Facing1::possible_values() {
 		map.insert(Block::DragonWallHead ( DragonWallHead {r#facing: r#facing.clone(), } ), map.len());
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		map.insert(Block::PiglinHead ( PiglinHead {r#rotation: r#rotation.clone(), } ), map.len());
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		map.insert(Block::PiglinWallHead ( PiglinWallHead {r#facing: r#facing.clone(), } ), map.len());
 	}
 	for r#facing in property_enums::Facing1::possible_values() {
 		map.insert(Block::Anvil ( Anvil {r#facing: r#facing.clone(), } ), map.len());
@@ -27613,6 +29016,24 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 			}
 		}
 	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::BambooStairs ( BambooStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::BambooMosaicStairs ( BambooMosaicStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
 	map.insert(Block::SlimeBlock ( SlimeBlock {} ), map.len());
 	map.insert(Block::Barrier ( Barrier {} ), map.len());
 	for r#level in ConstrainedInt::<0, 15>::possible_values() {
@@ -27862,6 +29283,16 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 	}
 	for r#type in property_enums::Type2::possible_values() {
 		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::BambooSlab ( BambooSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::BambooMosaicSlab ( BambooMosaicSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
 			map.insert(Block::StoneSlab ( StoneSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
 		}
 	}
@@ -27988,6 +29419,15 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 			}
 		}
 	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#in_wall in bool::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					map.insert(Block::BambooFenceGate ( BambooFenceGate {r#facing: r#facing.clone(), r#in_wall: r#in_wall.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+				}
+			}
+		}
+	}
 	for r#east in bool::possible_values() {
 		for r#north in bool::possible_values() {
 			for r#south in bool::possible_values() {
@@ -28054,6 +29494,17 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 			}
 		}
 	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::BambooFence ( BambooFence {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
 	for r#facing in property_enums::Facing1::possible_values() {
 		for r#half in property_enums::Half::possible_values() {
 			for r#hinge in property_enums::Hinge::possible_values() {
@@ -28115,6 +29566,17 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 				for r#open in bool::possible_values() {
 					for r#powered in bool::possible_values() {
 						map.insert(Block::MangroveDoor ( MangroveDoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#hinge: r#hinge.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half::possible_values() {
+			for r#hinge in property_enums::Hinge::possible_values() {
+				for r#open in bool::possible_values() {
+					for r#powered in bool::possible_values() {
+						map.insert(Block::BambooDoor ( BambooDoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#hinge: r#hinge.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
 					}
 				}
 			}

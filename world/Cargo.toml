@@ -6,7 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-quartz_nbt = "0.2.6"
 protocol = {path = "../protocol", version = "*"}
 protocol_core = {path = "../protocol/protocol_core", version = "*"}
 serde = { version = "1.0.130", features = ["derive"] }
@@ -16,7 +15,6 @@ byteorder = "1.4.3"
 hematite-nbt = "0.5.2"
 dashmap = "5.4.0"
 tokio = "1.21.2"
-rand = "0.8.5"
 
 [profile.release]
 opt-level = 3

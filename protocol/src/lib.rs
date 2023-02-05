@@ -33,17 +33,17 @@ pub mod server_bound;
 
 #[derive(Debug, Error)]
 pub enum ProtocolError {
-    #[error("Client disconnected")]
+    #[error("client disconnected")]
     ClientDisconnect,
-    #[error("Client forcibly disconnected")]
+    #[error("client forcibly disconnected")]
     ClientForceDisconnect,
-    #[error("io error read: {0}")]
+    #[error("io error read {0}")]
     ReadError(io::Error),
-    #[error("io error write: {0}")]
+    #[error("io error write {0}")]
     WriteError(io::Error),
-    #[error("Failed to deserialize packet {0}")]
+    #[error("failed to deserialize packet {0}")]
     DeserializeError(#[from] DeserializeError),
-    #[error("Failed to decompress packet")]
+    #[error("failed to decompress packet")]
     DecompressError(DecompressError),
 }
 
@@ -59,6 +59,7 @@ pub enum ConnectionState {
 #[derive(Debug)]
 pub struct Protocol {
     pub connection_state: RwLock<ConnectionState>,
+    pub joined_world: RwLock<bool>,
     writer: Mutex<ProtocolWriter>,
     reader: Mutex<ProtocolReader>,
     compression_enabled: bool,
@@ -122,10 +123,11 @@ impl Protocol {
                 reader,
                 cipher: None,
             }),
+            joined_world: RwLock::new(false),
             connection_state: RwLock::new(ConnectionState::HandShaking),
         }
     }
-    pub async fn read_and_serialize(&self) -> Result<ServerBoundPacket, ProtocolError> {
+    pub async fn read_and_deserialize(&self) -> Result<ServerBoundPacket, ProtocolError> {
         let packet_data = self.read_packet().await?;
         let packet =
             ServerBoundPacket::deserialize(packet_data.as_slice(), &self.connection_state).await?;

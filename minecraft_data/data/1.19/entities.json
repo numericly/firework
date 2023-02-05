@@ -112,6 +112,16 @@
   {
     "id": 11,
     "internalId": 11,
+    "name": "camel",
+    "displayName": "Camel",
+    "width": 1.7,
+    "height": 2.375,
+    "type": "player",
+    "category": "Passive mobs"
+  },
+  {
+    "id": 12,
+    "internalId": 12,
     "name": "cave_spider",
     "displayName": "Cave Spider",
     "width": 0.7,
@@ -120,8 +130,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 12,
-    "internalId": 12,
+    "id": 13,
+    "internalId": 13,
     "name": "chicken",
     "displayName": "Chicken",
     "width": 0.4,
@@ -130,8 +140,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 13,
-    "internalId": 13,
+    "id": 14,
+    "internalId": 14,
     "name": "cod",
     "displayName": "Cod",
     "width": 0.5,
@@ -140,8 +150,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 14,
-    "internalId": 14,
+    "id": 15,
+    "internalId": 15,
     "name": "cow",
     "displayName": "Cow",
     "width": 0.9,
@@ -150,8 +160,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 15,
-    "internalId": 15,
+    "id": 16,
+    "internalId": 16,
     "name": "creeper",
     "displayName": "Creeper",
     "width": 0.6,
@@ -160,8 +170,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 16,
-    "internalId": 16,
+    "id": 17,
+    "internalId": 17,
     "name": "dolphin",
     "displayName": "Dolphin",
     "width": 0.9,
@@ -170,8 +180,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 17,
-    "internalId": 17,
+    "id": 18,
+    "internalId": 18,
     "name": "donkey",
     "displayName": "Donkey",
     "width": 1.3964844,
@@ -180,8 +190,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 18,
-    "internalId": 18,
+    "id": 19,
+    "internalId": 19,
     "name": "dragon_fireball",
     "displayName": "Dragon Fireball",
     "width": 1.0,
@@ -190,8 +200,8 @@
     "category": "Projectiles"
   },
   {
-    "id": 19,
-    "internalId": 19,
+    "id": 20,
+    "internalId": 20,
     "name": "drowned",
     "displayName": "Drowned",
     "width": 0.6,
@@ -200,8 +210,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 20,
-    "internalId": 20,
+    "id": 21,
+    "internalId": 21,
     "name": "elder_guardian",
     "displayName": "Elder Guardian",
     "width": 1.9975,
@@ -210,8 +220,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 21,
-    "internalId": 21,
+    "id": 22,
+    "internalId": 22,
     "name": "end_crystal",
     "displayName": "End Crystal",
     "width": 2.0,
@@ -220,8 +230,8 @@
     "category": "Immobile"
   },
   {
-    "id": 22,
-    "internalId": 22,
+    "id": 23,
+    "internalId": 23,
     "name": "ender_dragon",
     "displayName": "Ender Dragon",
     "width": 16.0,
@@ -230,8 +240,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 23,
-    "internalId": 23,
+    "id": 24,
+    "internalId": 24,
     "name": "enderman",
     "displayName": "Enderman",
     "width": 0.6,
@@ -240,8 +250,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 24,
-    "internalId": 24,
+    "id": 25,
+    "internalId": 25,
     "name": "endermite",
     "displayName": "Endermite",
     "width": 0.4,
@@ -250,8 +260,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 25,
-    "internalId": 25,
+    "id": 26,
+    "internalId": 26,
     "name": "evoker",
     "displayName": "Evoker",
     "width": 0.6,
@@ -260,8 +270,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 26,
-    "internalId": 26,
+    "id": 27,
+    "internalId": 27,
     "name": "evoker_fangs",
     "displayName": "Evoker Fangs",
     "width": 0.5,
@@ -270,8 +280,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 27,
-    "internalId": 27,
+    "id": 28,
+    "internalId": 28,
     "name": "experience_orb",
     "displayName": "Experience Orb",
     "width": 0.5,
@@ -280,8 +290,8 @@
     "category": "UNKNOWN"
   },
   {
-    "id": 28,
-    "internalId": 28,
+    "id": 29,
+    "internalId": 29,
     "name": "eye_of_ender",
     "displayName": "Eye of Ender",
     "width": 0.25,
@@ -290,8 +300,8 @@
     "category": "UNKNOWN"
   },
   {
-    "id": 29,
-    "internalId": 29,
+    "id": 30,
+    "internalId": 30,
     "name": "falling_block",
     "displayName": "Falling Block",
     "width": 0.98,
@@ -300,8 +310,8 @@
     "category": "UNKNOWN"
   },
   {
-    "id": 30,
-    "internalId": 30,
+    "id": 31,
+    "internalId": 31,
     "name": "firework_rocket",
     "displayName": "Firework Rocket",
     "width": 0.25,
@@ -310,8 +320,8 @@
     "category": "Projectiles"
   },
   {
-    "id": 31,
-    "internalId": 31,
+    "id": 32,
+    "internalId": 32,
     "name": "fox",
     "displayName": "Fox",
     "width": 0.6,
@@ -320,8 +330,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 32,
-    "internalId": 32,
+    "id": 33,
+    "internalId": 33,
     "name": "frog",
     "displayName": "Frog",
     "width": 0.5,
@@ -330,8 +340,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 33,
-    "internalId": 33,
+    "id": 34,
+    "internalId": 34,
     "name": "ghast",
     "displayName": "Ghast",
     "width": 4.0,
@@ -340,8 +350,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 34,
-    "internalId": 34,
+    "id": 35,
+    "internalId": 35,
     "name": "giant",
     "displayName": "Giant",
     "width": 3.6,
@@ -350,8 +360,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 35,
-    "internalId": 35,
+    "id": 36,
+    "internalId": 36,
     "name": "glow_item_frame",
     "displayName": "Glow Item Frame",
     "width": 0.5,
@@ -360,8 +370,8 @@
     "category": "Immobile"
   },
   {
-    "id": 36,
-    "internalId": 36,
+    "id": 37,
+    "internalId": 37,
     "name": "glow_squid",
     "displayName": "Glow Squid",
     "width": 0.8,
@@ -370,8 +380,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 37,
-    "internalId": 37,
+    "id": 38,
+    "internalId": 38,
     "name": "goat",
     "displayName": "Goat",
     "width": 0.9,
@@ -380,8 +390,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 38,
-    "internalId": 38,
+    "id": 39,
+    "internalId": 39,
     "name": "guardian",
     "displayName": "Guardian",
     "width": 0.85,
@@ -390,8 +400,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 39,
-    "internalId": 39,
+    "id": 40,
+    "internalId": 40,
     "name": "hoglin",
     "displayName": "Hoglin",
     "width": 1.3964844,
@@ -400,8 +410,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 40,
-    "internalId": 40,
+    "id": 41,
+    "internalId": 41,
     "name": "horse",
     "displayName": "Horse",
     "width": 1.3964844,
@@ -410,8 +420,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 41,
-    "internalId": 41,
+    "id": 42,
+    "internalId": 42,
     "name": "husk",
     "displayName": "Husk",
     "width": 0.6,
@@ -420,8 +430,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 42,
-    "internalId": 42,
+    "id": 43,
+    "internalId": 43,
     "name": "illusioner",
     "displayName": "Illusioner",
     "width": 0.6,
@@ -430,8 +440,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 43,
-    "internalId": 43,
+    "id": 44,
+    "internalId": 44,
     "name": "iron_golem",
     "displayName": "Iron Golem",
     "width": 1.4,
@@ -440,8 +450,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 44,
-    "internalId": 44,
+    "id": 45,
+    "internalId": 45,
     "name": "item",
     "displayName": "Item",
     "width": 0.25,
@@ -450,8 +460,8 @@
     "category": "UNKNOWN"
   },
   {
-    "id": 45,
-    "internalId": 45,
+    "id": 46,
+    "internalId": 46,
     "name": "item_frame",
     "displayName": "Item Frame",
     "width": 0.5,
@@ -460,8 +470,8 @@
     "category": "Immobile"
   },
   {
-    "id": 46,
-    "internalId": 46,
+    "id": 47,
+    "internalId": 47,
     "name": "fireball",
     "displayName": "Fireball",
     "width": 1.0,
@@ -470,8 +480,8 @@
     "category": "Projectiles"
   },
   {
-    "id": 47,
-    "internalId": 47,
+    "id": 48,
+    "internalId": 48,
     "name": "leash_knot",
     "displayName": "Leash Knot",
     "width": 0.375,
@@ -480,8 +490,8 @@
     "category": "Immobile"
   },
   {
-    "id": 48,
-    "internalId": 48,
+    "id": 49,
+    "internalId": 49,
     "name": "lightning_bolt",
     "displayName": "Lightning Bolt",
     "width": 0.0,
@@ -490,8 +500,8 @@
     "category": "UNKNOWN"
   },
   {
-    "id": 49,
-    "internalId": 49,
+    "id": 50,
+    "internalId": 50,
     "name": "llama",
     "displayName": "Llama",
     "width": 0.9,
@@ -500,8 +510,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 50,
-    "internalId": 50,
+    "id": 51,
+    "internalId": 51,
     "name": "llama_spit",
     "displayName": "Llama Spit",
     "width": 0.25,
@@ -510,8 +520,8 @@
     "category": "Projectiles"
   },
   {
-    "id": 51,
-    "internalId": 51,
+    "id": 52,
+    "internalId": 52,
     "name": "magma_cube",
     "displayName": "Magma Cube",
     "width": 2.04,
@@ -520,8 +530,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 52,
-    "internalId": 52,
+    "id": 53,
+    "internalId": 53,
     "name": "marker",
     "displayName": "Marker",
     "width": 0.0,
@@ -530,8 +540,8 @@
     "category": "UNKNOWN"
   },
   {
-    "id": 53,
-    "internalId": 53,
+    "id": 54,
+    "internalId": 54,
     "name": "minecart",
     "displayName": "Minecart",
     "width": 0.98,
@@ -540,8 +550,8 @@
     "category": "Vehicles"
   },
   {
-    "id": 54,
-    "internalId": 54,
+    "id": 55,
+    "internalId": 55,
     "name": "chest_minecart",
     "displayName": "Minecart with Chest",
     "width": 0.98,
@@ -550,8 +560,8 @@
     "category": "Vehicles"
   },
   {
-    "id": 55,
-    "internalId": 55,
+    "id": 56,
+    "internalId": 56,
     "name": "command_block_minecart",
     "displayName": "Minecart with Command Block",
     "width": 0.98,
@@ -560,8 +570,8 @@
     "category": "Vehicles"
   },
   {
-    "id": 56,
-    "internalId": 56,
+    "id": 57,
+    "internalId": 57,
     "name": "furnace_minecart",
     "displayName": "Minecart with Furnace",
     "width": 0.98,
@@ -570,8 +580,8 @@
     "category": "Vehicles"
   },
   {
-    "id": 57,
-    "internalId": 57,
+    "id": 58,
+    "internalId": 58,
     "name": "hopper_minecart",
     "displayName": "Minecart with Hopper",
     "width": 0.98,
@@ -580,20 +590,10 @@
     "category": "Vehicles"
   },
   {
-    "id": 58,
-    "internalId": 58,
-    "name": "spawner_minecart",
-    "displayName": "Minecart with Spawner",
-    "width": 0.98,
-    "height": 0.7,
-    "type": "other",
-    "category": "Vehicles"
-  },
-  {
     "id": 59,
     "internalId": 59,
-    "name": "tnt_minecart",
-    "displayName": "Minecart with TNT",
+    "name": "spawner_minecart",
+    "displayName": "Minecart with Monster Spawner",
     "width": 0.98,
     "height": 0.7,
     "type": "other",
@@ -602,6 +602,16 @@
   {
     "id": 60,
     "internalId": 60,
+    "name": "tnt_minecart",
+    "displayName": "Minecart with TNT",
+    "width": 0.98,
+    "height": 0.7,
+    "type": "other",
+    "category": "Vehicles"
+  },
+  {
+    "id": 61,
+    "internalId": 61,
     "name": "mule",
     "displayName": "Mule",
     "width": 1.3964844,
@@ -610,8 +620,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 61,
-    "internalId": 61,
+    "id": 62,
+    "internalId": 62,
     "name": "mooshroom",
     "displayName": "Mooshroom",
     "width": 0.9,
@@ -620,8 +630,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 62,
-    "internalId": 62,
+    "id": 63,
+    "internalId": 63,
     "name": "ocelot",
     "displayName": "Ocelot",
     "width": 0.6,
@@ -630,8 +640,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 63,
-    "internalId": 63,
+    "id": 64,
+    "internalId": 64,
     "name": "painting",
     "displayName": "Painting",
     "width": 0.5,
@@ -640,8 +650,8 @@
     "category": "Immobile"
   },
   {
-    "id": 64,
-    "internalId": 64,
+    "id": 65,
+    "internalId": 65,
     "name": "panda",
     "displayName": "Panda",
     "width": 1.3,
@@ -650,8 +660,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 65,
-    "internalId": 65,
+    "id": 66,
+    "internalId": 66,
     "name": "parrot",
     "displayName": "Parrot",
     "width": 0.5,
@@ -660,8 +670,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 66,
-    "internalId": 66,
+    "id": 67,
+    "internalId": 67,
     "name": "phantom",
     "displayName": "Phantom",
     "width": 0.9,
@@ -670,8 +680,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 67,
-    "internalId": 67,
+    "id": 68,
+    "internalId": 68,
     "name": "pig",
     "displayName": "Pig",
     "width": 0.9,
@@ -680,8 +690,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 68,
-    "internalId": 68,
+    "id": 69,
+    "internalId": 69,
     "name": "piglin",
     "displayName": "Piglin",
     "width": 0.6,
@@ -690,8 +700,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 69,
-    "internalId": 69,
+    "id": 70,
+    "internalId": 70,
     "name": "piglin_brute",
     "displayName": "Piglin Brute",
     "width": 0.6,
@@ -700,8 +710,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 70,
-    "internalId": 70,
+    "id": 71,
+    "internalId": 71,
     "name": "pillager",
     "displayName": "Pillager",
     "width": 0.6,
@@ -710,8 +720,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 71,
-    "internalId": 71,
+    "id": 72,
+    "internalId": 72,
     "name": "polar_bear",
     "displayName": "Polar Bear",
     "width": 1.4,
@@ -720,8 +730,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 72,
-    "internalId": 72,
+    "id": 73,
+    "internalId": 73,
     "name": "tnt",
     "displayName": "Primed TNT",
     "width": 0.98,
@@ -730,8 +740,8 @@
     "category": "UNKNOWN"
   },
   {
-    "id": 73,
-    "internalId": 73,
+    "id": 74,
+    "internalId": 74,
     "name": "pufferfish",
     "displayName": "Pufferfish",
     "width": 0.7,
@@ -740,8 +750,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 74,
-    "internalId": 74,
+    "id": 75,
+    "internalId": 75,
     "name": "rabbit",
     "displayName": "Rabbit",
     "width": 0.4,
@@ -750,8 +760,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 75,
-    "internalId": 75,
+    "id": 76,
+    "internalId": 76,
     "name": "ravager",
     "displayName": "Ravager",
     "width": 1.95,
@@ -760,8 +770,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 76,
-    "internalId": 76,
+    "id": 77,
+    "internalId": 77,
     "name": "salmon",
     "displayName": "Salmon",
     "width": 0.7,
@@ -770,8 +780,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 77,
-    "internalId": 77,
+    "id": 78,
+    "internalId": 78,
     "name": "sheep",
     "displayName": "Sheep",
     "width": 0.9,
@@ -780,8 +790,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 78,
-    "internalId": 78,
+    "id": 79,
+    "internalId": 79,
     "name": "shulker",
     "displayName": "Shulker",
     "width": 1.0,
@@ -790,8 +800,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 79,
-    "internalId": 79,
+    "id": 80,
+    "internalId": 80,
     "name": "shulker_bullet",
     "displayName": "Shulker Bullet",
     "width": 0.3125,
@@ -800,8 +810,8 @@
     "category": "Projectiles"
   },
   {
-    "id": 80,
-    "internalId": 80,
+    "id": 81,
+    "internalId": 81,
     "name": "silverfish",
     "displayName": "Silverfish",
     "width": 0.4,
@@ -810,8 +820,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 81,
-    "internalId": 81,
+    "id": 82,
+    "internalId": 82,
     "name": "skeleton",
     "displayName": "Skeleton",
     "width": 0.6,
@@ -820,8 +830,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 82,
-    "internalId": 82,
+    "id": 83,
+    "internalId": 83,
     "name": "skeleton_horse",
     "displayName": "Skeleton Horse",
     "width": 1.3964844,
@@ -830,8 +840,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 83,
-    "internalId": 83,
+    "id": 84,
+    "internalId": 84,
     "name": "slime",
     "displayName": "Slime",
     "width": 2.04,
@@ -840,8 +850,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 84,
-    "internalId": 84,
+    "id": 85,
+    "internalId": 85,
     "name": "small_fireball",
     "displayName": "Small Fireball",
     "width": 0.3125,
@@ -850,8 +860,8 @@
     "category": "Projectiles"
   },
   {
-    "id": 85,
-    "internalId": 85,
+    "id": 86,
+    "internalId": 86,
     "name": "snow_golem",
     "displayName": "Snow Golem",
     "width": 0.7,
@@ -860,8 +870,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 86,
-    "internalId": 86,
+    "id": 87,
+    "internalId": 87,
     "name": "snowball",
     "displayName": "Snowball",
     "width": 0.25,
@@ -870,8 +880,8 @@
     "category": "Projectiles"
   },
   {
-    "id": 87,
-    "internalId": 87,
+    "id": 88,
+    "internalId": 88,
     "name": "spectral_arrow",
     "displayName": "Spectral Arrow",
     "width": 0.5,
@@ -880,8 +890,8 @@
     "category": "Projectiles"
   },
   {
-    "id": 88,
-    "internalId": 88,
+    "id": 89,
+    "internalId": 89,
     "name": "spider",
     "displayName": "Spider",
     "width": 1.4,
@@ -890,8 +900,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 89,
-    "internalId": 89,
+    "id": 90,
+    "internalId": 90,
     "name": "squid",
     "displayName": "Squid",
     "width": 0.8,
@@ -900,8 +910,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 90,
-    "internalId": 90,
+    "id": 91,
+    "internalId": 91,
     "name": "stray",
     "displayName": "Stray",
     "width": 0.6,
@@ -910,8 +920,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 91,
-    "internalId": 91,
+    "id": 92,
+    "internalId": 92,
     "name": "strider",
     "displayName": "Strider",
     "width": 0.9,
@@ -920,8 +930,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 92,
-    "internalId": 92,
+    "id": 93,
+    "internalId": 93,
     "name": "tadpole",
     "displayName": "Tadpole",
     "width": 0.4,
@@ -930,8 +940,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 93,
-    "internalId": 93,
+    "id": 94,
+    "internalId": 94,
     "name": "egg",
     "displayName": "Thrown Egg",
     "width": 0.25,
@@ -940,8 +950,8 @@
     "category": "Projectiles"
   },
   {
-    "id": 94,
-    "internalId": 94,
+    "id": 95,
+    "internalId": 95,
     "name": "ender_pearl",
     "displayName": "Thrown Ender Pearl",
     "width": 0.25,
@@ -950,8 +960,8 @@
     "category": "Projectiles"
   },
   {
-    "id": 95,
-    "internalId": 95,
+    "id": 96,
+    "internalId": 96,
     "name": "experience_bottle",
     "displayName": "Thrown Bottle o' Enchanting",
     "width": 0.25,
@@ -960,8 +970,8 @@
     "category": "Projectiles"
   },
   {
-    "id": 96,
-    "internalId": 96,
+    "id": 97,
+    "internalId": 97,
     "name": "potion",
     "displayName": "Potion",
     "width": 0.25,
@@ -970,8 +980,8 @@
     "category": "Projectiles"
   },
   {
-    "id": 97,
-    "internalId": 97,
+    "id": 98,
+    "internalId": 98,
     "name": "trident",
     "displayName": "Trident",
     "width": 0.5,
@@ -980,8 +990,8 @@
     "category": "Projectiles"
   },
   {
-    "id": 98,
-    "internalId": 98,
+    "id": 99,
+    "internalId": 99,
     "name": "trader_llama",
     "displayName": "Trader Llama",
     "width": 0.9,
@@ -990,8 +1000,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 99,
-    "internalId": 99,
+    "id": 100,
+    "internalId": 100,
     "name": "tropical_fish",
     "displayName": "Tropical Fish",
     "width": 0.5,
@@ -1000,8 +1010,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 100,
-    "internalId": 100,
+    "id": 101,
+    "internalId": 101,
     "name": "turtle",
     "displayName": "Turtle",
     "width": 1.2,
@@ -1010,8 +1020,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 101,
-    "internalId": 101,
+    "id": 102,
+    "internalId": 102,
     "name": "vex",
     "displayName": "Vex",
     "width": 0.4,
@@ -1020,8 +1030,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 102,
-    "internalId": 102,
+    "id": 103,
+    "internalId": 103,
     "name": "villager",
     "displayName": "Villager",
     "width": 0.6,
@@ -1030,8 +1040,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 103,
-    "internalId": 103,
+    "id": 104,
+    "internalId": 104,
     "name": "vindicator",
     "displayName": "Vindicator",
     "width": 0.6,
@@ -1040,8 +1050,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 104,
-    "internalId": 104,
+    "id": 105,
+    "internalId": 105,
     "name": "wandering_trader",
     "displayName": "Wandering Trader",
     "width": 0.6,
@@ -1050,8 +1060,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 105,
-    "internalId": 105,
+    "id": 106,
+    "internalId": 106,
     "name": "warden",
     "displayName": "Warden",
     "width": 0.9,
@@ -1060,8 +1070,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 106,
-    "internalId": 106,
+    "id": 107,
+    "internalId": 107,
     "name": "witch",
     "displayName": "Witch",
     "width": 0.6,
@@ -1070,8 +1080,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 107,
-    "internalId": 107,
+    "id": 108,
+    "internalId": 108,
     "name": "wither",
     "displayName": "Wither",
     "width": 0.9,
@@ -1080,8 +1090,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 108,
-    "internalId": 108,
+    "id": 109,
+    "internalId": 109,
     "name": "wither_skeleton",
     "displayName": "Wither Skeleton",
     "width": 0.7,
@@ -1090,8 +1100,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 109,
-    "internalId": 109,
+    "id": 110,
+    "internalId": 110,
     "name": "wither_skull",
     "displayName": "Wither Skull",
     "width": 0.3125,
@@ -1100,8 +1110,8 @@
     "category": "Projectiles"
   },
   {
-    "id": 110,
-    "internalId": 110,
+    "id": 111,
+    "internalId": 111,
     "name": "wolf",
     "displayName": "Wolf",
     "width": 0.6,
@@ -1110,8 +1120,8 @@
     "category": "Passive mobs"
   },
   {
-    "id": 111,
-    "internalId": 111,
+    "id": 112,
+    "internalId": 112,
     "name": "zoglin",
     "displayName": "Zoglin",
     "width": 1.3964844,
@@ -1120,8 +1130,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 112,
-    "internalId": 112,
+    "id": 113,
+    "internalId": 113,
     "name": "zombie",
     "displayName": "Zombie",
     "width": 0.6,
@@ -1130,8 +1140,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 113,
-    "internalId": 113,
+    "id": 114,
+    "internalId": 114,
     "name": "zombie_horse",
     "displayName": "Zombie Horse",
     "width": 1.3964844,
@@ -1140,8 +1150,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 114,
-    "internalId": 114,
+    "id": 115,
+    "internalId": 115,
     "name": "zombie_villager",
     "displayName": "Zombie Villager",
     "width": 0.6,
@@ -1150,8 +1160,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 115,
-    "internalId": 115,
+    "id": 116,
+    "internalId": 116,
     "name": "zombified_piglin",
     "displayName": "Zombified Piglin",
     "width": 0.6,
@@ -1160,8 +1170,8 @@
     "category": "Hostile mobs"
   },
   {
-    "id": 116,
-    "internalId": 116,
+    "id": 117,
+    "internalId": 117,
     "name": "player",
     "displayName": "Player",
     "width": 0.6,
@@ -1170,8 +1180,8 @@
     "category": "UNKNOWN"
   },
   {
-    "id": 117,
-    "internalId": 117,
+    "id": 118,
+    "internalId": 118,
     "name": "fishing_bobber",
     "displayName": "Fishing Bobber",
     "width": 0.25,

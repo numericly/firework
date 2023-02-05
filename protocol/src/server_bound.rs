@@ -54,9 +54,9 @@ macro_rules! define_server_bound_protocol {
 
 use crate::{
     data_types::{
-        Arm, BlockFace, ChatMode, DisplaySkinParts, MainHand, PlayerAbilityFlags,
-        PlayerActionStatus, PlayerCommandAction, RecipeBookType, ResourcePackLoadStatus,
-        SignatureData, VerifyTokenOrSignature,
+        Arm, BlockFace, ChatMode, DisplaySkinParts, InventoryOperationMode, MainHand,
+        PlayerAbilityFlags, PlayerActionStatus, PlayerCommandAction, RecipeBookType, SignatureData,
+        Slot, SlotUpdate,
     },
     ConnectionState,
 };
@@ -87,23 +87,27 @@ define_server_bound_protocol! {
     },
     LoginStart, 0x00, Login => {
         name: String,
-        signature_data: Option<SignatureData>,
         uuid: Option<u128>
     },
     EncryptionResponse, 0x01, Login => {
         shared_secret: Vec<u8>,
-        token_or_signature: VerifyTokenOrSignature
+        verify_token: Vec<u8>,
+    },
+    LoginPluginResponse, 0x02, Login => {
+        message_id: VarInt,
+        successful: bool,
+        data: UnsizedVec<u8>
     },
     ConfirmTeleport, 0x00, Play => {
         teleport_id: VarInt
     },
+    ChatCommand, 0x04, Play => {
+        command: String // cryptography is mean
+    },
     ChatMessage, 0x05, Play => {
         message: String // cryptography is mean
     },
-    CloseContainer, 0x0C, Play => {
-        window_id: u8
-    },
-    ClientInformation, 0x08, Play => {
+    ClientInformation, 0x07, Play => {
         locale: String,
         view_distance: u8,
         chat_mode: ChatMode,
@@ -111,20 +115,32 @@ define_server_bound_protocol! {
         displayed_skin_parts: DisplaySkinParts,
         main_hand: MainHand
     },
-    PluginMessageServerBound, 0x0D, Play => {
+    ClickContainer, 0x0A, Play => {
+        window_id: u8,
+        state_id: VarInt,
+        slot: i16,
+        button: i8,
+        mode: InventoryOperationMode,
+        slots: Vec<SlotUpdate>,
+        // cursor: Option<Slot>
+    },
+    CloseContainer, 0x0B, Play => {
+        window_id: u8
+    },
+    PluginMessageServerBound, 0x0C, Play => {
         channel: String,
         data: UnsizedVec<u8>
     },
-    ServerBoundKeepAlive, 0x12, Play => {
+    ServerBoundKeepAlive, 0x11, Play => {
         id: i64
     },
-    SetPlayerPosition, 0x14, Play => {
+    SetPlayerPosition, 0x13, Play => {
         x: f64,
         y: f64,
         z: f64,
         on_ground: bool
     },
-    SetPlayerPositionAndRotation, 0x15, Play => {
+    SetPlayerPositionAndRotation, 0x14, Play => {
         x: f64,
         y: f64,
         z: f64,
@@ -132,36 +148,39 @@ define_server_bound_protocol! {
         pitch: f32,
         on_ground: bool
     },
-    SetPlayerRotation, 0x16, Play => {
+    SetPlayerRotation, 0x15, Play => {
         yaw: f32,
         pitch: f32,
         on_ground: bool
     },
-    SetPlayerOnGround, 0x17, Play => {
+    SetPlayerOnGround, 0x16, Play => {
         on_ground: bool
     },
-    PlayerAbilitiesServerBound, 0x1C, Play => {
+    PlayerAbilitiesServerBound, 0x1B, Play => {
         flags: PlayerAbilityFlags
     },
-    PlayerAction, 0x1D, Play => {
+    PlayerAction, 0x1C, Play => {
         status: PlayerActionStatus,
         location: Position,
         face: BlockFace,
         sequence: VarInt
 
     },
-    PlayerCommand, 0x1E, Play => {
+    PlayerCommand, 0x1D, Play => {
         entity_id: VarInt,
         action: PlayerCommandAction,
         action_parameter: VarInt,
+    },
+    PlayerSession, 0x20, Play => {
+        session_id: u128,
+        expires_at: u64,
+        public_key: Vec<u8>,
+        key_signature: Vec<u8>
     },
     ChangeRecipeBookSettings, 0x21, Play => {
         book_type: RecipeBookType,
         book_open: bool,
         filter_active: bool
-    },
-    ResourcePackStatus, 0x24, Play => {
-        result: ResourcePackLoadStatus
     },
     SetHeldItemServerBound, 0x28, Play => {
         slot: u16

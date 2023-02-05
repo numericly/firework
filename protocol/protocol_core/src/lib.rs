@@ -4,19 +4,22 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum DeserializeError {
-    #[error("Invalid packet ID 0x{id:2x?} for state {state}")]
+    #[error("invalid packet ID 0x{id:02x?} for state {state}")]
     InvalidPacketID { id: i32, state: u8 },
 
-    #[error("Could not deserialize VarInt because it is greater than 5 bytes")]
+    #[error("could not deserialize VarInt because it is greater than 5 bytes")]
     VarIntTooLong,
 
-    #[error("Could not parse string: {0}")]
+    #[error("had some error while deserializing an NBT blob: {0}")]
+    NbtBlobError(#[from] nbt::Error),
+
+    #[error("could not parse string {0}")]
     StringParseError(#[from] std::string::FromUtf8Error),
 
-    #[error("Unknown variant {0} for {1}")]
+    #[error("unknown variant {0} for {1}")]
     InvalidVariantIndex(i32, &'static str),
 
-    #[error("An IO error occurred: {0}")]
+    #[error("an IO error occurred {0}")]
     IoError(#[from] io::Error),
 }
 
@@ -99,6 +102,7 @@ mod deserializer {
 
     use crate::{DeserializeError, DeserializeField, Position, SerializeField, UnsizedVec, VarInt};
     use byteorder::ReadBytesExt;
+    use nbt::Blob;
     use std::io::Read;
 
     impl DeserializeField for Position {
@@ -266,6 +270,12 @@ mod deserializer {
         fn deserialize<R: Read>(mut reader: R) -> Result<Self, DeserializeError> {
             let value = reader.read_u8()?;
             Ok(if value == 1 { true } else { false })
+        }
+    }
+
+    impl DeserializeField for Blob {
+        fn deserialize<R: Read>(mut reader: R) -> Result<Self, DeserializeError> {
+            Ok(Blob::from_reader(&mut reader)?)
         }
     }
 }
