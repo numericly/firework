@@ -229,7 +229,10 @@ pub fn build_blocks() {
     {
         block_rs += "\npub mod property_enums {\n\t";
         block_rs += "use std::str::FromStr;\n\t";
-        for (name, values) in enums {
+        let mut enum_elements = enums.into_iter().collect::<Vec<_>>();
+        enum_elements.sort_by(|a, b| a.0.cmp(&b.0));
+
+        for (name, values) in enum_elements {
             if debug {
                 block_rs += "\n\t#[derive(Debug, Hash, PartialEq, Eq, Clone)]";
             }
