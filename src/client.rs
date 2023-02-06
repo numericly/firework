@@ -11,12 +11,13 @@ use minecraft_data::{
 use nbt::Blob;
 use protocol::{
     client_bound::{
-        ChangeDifficulty, ClientBoundKeepAlive, Commands, InitializeWorldBorder, LoginPlay,
-        PlayDisconnect, PlayerAbilities, PlayerInfo, RemoveEntities, RemoveInfoPlayer,
-        ResourcePack, SetCenterChunk, SetContainerContent, SetContainerSlot, SetDefaultSpawn,
-        SetEntityMetadata, SetEntityVelocity, SetHeldItem, SetRecipes, SetTags, SpawnPlayer,
-        SynchronizePlayerPosition, SystemChatMessage, TeleportEntity, UpdateEntityHeadRotation,
-        UpdateEntityPosition, UpdateEntityPositionAndRotation, UpdateEntityRotation,
+        ChangeDifficulty, ClientBoundKeepAlive, Commands, CustomSound, IdMapHolder,
+        InitializeWorldBorder, LoginPlay, PlayDisconnect, PlayerAbilities, PlayerInfo,
+        RemoveEntities, RemoveInfoPlayer, ResourcePack, SetCenterChunk, SetContainerContent,
+        SetContainerSlot, SetDefaultSpawn, SetEntityMetadata, SetEntityVelocity, SetHeldItem,
+        SetRecipes, SetTags, SoundEffect, SoundSource, SpawnPlayer, SynchronizePlayerPosition,
+        SystemChatMessage, TeleportEntity, UpdateEntityHeadRotation, UpdateEntityPosition,
+        UpdateEntityPositionAndRotation, UpdateEntityRotation,
     },
     data_types::{
         AddPlayer, CommandNode, FloatProps, ItemNbt, ItemNbtDisplay, NodeType, Parser,
@@ -730,7 +731,7 @@ impl Client {
 
                             // i just hosted it on my dropbox, you can host it on your own server or something if you want
                             let packet = ResourcePack::new(
-                                "https://www.dropbox.com/s/vf22tuww7mcv4fe/music_pack.zip?dl=1"
+                                "https://cdn.discordapp.com/attachments/921939326517002241/1072220230836826202/MusicPack.zip"
                                     .to_string(),
                                 None,
                             )
@@ -1067,6 +1068,23 @@ impl Client {
         content: SetContainerContent,
     ) -> Result<(), ConnectionError> {
         self.connection.write_packet(content).await?;
+        // Lmao this is test code
+        self.connection
+            .write_packet(SoundEffect {
+                sound: IdMapHolder::Direct(CustomSound {
+                    resource_location: "minecraft:music.glide_map_1".to_string(),
+                    range: None,
+                }),
+                sound_source: SoundSource::Player,
+                x: 0,
+                y: 374,
+                z: 0,
+                volume: 1.,
+                pitch: 1.,
+                seed: 0,
+            })
+            .await?;
+
         Ok(())
     }
 }

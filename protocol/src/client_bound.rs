@@ -37,8 +37,10 @@ macro_rules! define_client_bound_protocol {
 
 use authentication::ProfileProperty;
 use minecraft_data::tags::VarIntList;
+use minecraft_data::Palette;
 use protocol_core::{BitSet, UnsizedVec, VarInt};
 use protocol_core::{Position, SerializeField};
+use protocol_derive::SerializeField;
 use sha1::{Digest, Sha1};
 use std::collections::HashMap;
 
@@ -248,6 +250,16 @@ define_client_bound_protocol! {
         velocity_y: i16,
         velocity_z: i16
     },
+    SoundEffect, 0x5E, Play => {
+        sound: IdMapHolder<CustomSound, VanillaSound>,
+        sound_source: SoundSource,
+        x: i32,
+        y: i32,
+        z: i32,
+        volume: f32,
+        pitch: f32,
+        seed: i64
+    },
     SystemChatMessage, 0x60, Play => {
         message: String,
         action_bar: bool
@@ -293,4 +305,54 @@ impl ResourcePack {
             prompt,
         })
     }
+}
+
+#[derive(Debug, PartialEq)]
+pub enum IdMapHolder<T, U> {
+    Direct(T),
+    Reference(U),
+}
+
+impl<T: SerializeField, U: Palette> SerializeField for IdMapHolder<T, U> {
+    fn serialize<W: std::io::Write>(&self, mut writer: W) {
+        match self {
+            IdMapHolder::Reference(data) => {
+                VarInt::from(data.get() + 1).serialize(writer);
+            }
+            IdMapHolder::Direct(data) => {
+                VarInt::from(0).serialize(&mut writer);
+                data.serialize(writer);
+            }
+        }
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub enum VanillaSound {}
+
+impl Palette for VanillaSound {
+    fn get(&self) -> i32 {
+        unimplemented!()
+    }
+}
+
+#[derive(SerializeField, Debug, PartialEq)]
+pub struct CustomSound {
+    pub resource_location: String,
+    pub range: Option<f32>,
+}
+
+#[derive(Debug, PartialEq, SerializeField)]
+#[protocol(typ = "u8")]
+pub enum SoundSource {
+    Master,
+    Music,
+    Record,
+    Weather,
+    Block,
+    Hostile,
+    Neutral,
+    Player,
+    Ambient,
+    Voice,
 }

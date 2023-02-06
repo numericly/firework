@@ -36,8 +36,7 @@ impl ServerProxy for MiniGameProxy {
         Self { lobby_server }
     }
     async fn handle_connection(&self, limbo_player: LimboPlayer) -> Result<(), ConnectionError> {
-        let transfer_data = self
-            .lobby_server
+        self.lobby_server
             .clone()
             .handle_connection(limbo_player)
             .await?;
