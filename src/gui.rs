@@ -22,7 +22,12 @@ pub struct GameQueueMenuGui {}
 pub trait GuiPackets {
     fn draw(&self) -> SetContainerContent;
     fn open(&self) -> OpenScreen;
-    fn handle_click<T: ServerHandler>(&self, slot: i16, client: &Client, server: &Server<T>) {
+    fn handle_click<T: ServerHandler<U>, U>(
+        &self,
+        slot: i16,
+        client: &Client,
+        server: &Server<T, U>,
+    ) {
         println!("Clicked on slot: {:?}", slot);
     }
 }
@@ -34,11 +39,11 @@ pub enum Gui {
 }
 
 impl Gui {
-    pub async fn handle_click<T: ServerHandler>(
+    pub async fn handle_click<T: ServerHandler<U>, U>(
         &self,
         slot: i16,
         client: &Client,
-        server: &Server<T>,
+        server: &Server<T, U>,
     ) -> Result<(), ConnectionError> {
         // this is stupid looking code but I'm not sure of any better ways to do this
         match self {
@@ -187,7 +192,12 @@ impl GuiPackets for GameQueueMenuGui {
         }
     }
 
-    fn handle_click<T: ServerHandler>(&self, slot: i16, client: &Client, server: &Server<T>) {
+    fn handle_click<T: ServerHandler<U>, U>(
+        &self,
+        slot: i16,
+        client: &Client,
+        server: &Server<T, U>,
+    ) {
         match slot {
             2 => {
                 println!("definitely joining glide game");

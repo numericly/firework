@@ -172,9 +172,9 @@ impl Client {
     pub async fn read_packet(&self) -> Result<ServerBoundPacket, ConnectionError> {
         Ok(self.connection.read_and_deserialize().await?)
     }
-    pub async fn load_world<T: ServerHandler>(
+    pub async fn load_world<T: ServerHandler<U>, U>(
         &self,
-        server: &Server<T>,
+        server: &Server<T, U>,
     ) -> Result<(), ConnectionError> {
         {
             let player = self.player.read().await;
@@ -513,10 +513,10 @@ impl Client {
 
         Ok(())
     }
-    pub async fn handle_command<T: ServerHandler>(
+    pub async fn handle_command<T: ServerHandler<U>, U>(
         &self,
         command: ClientCommand,
-        server: &Server<T>,
+        server: &Server<T, U>,
     ) -> Result<(), ConnectionError> {
         match command {
             ClientCommand::MoveEntity {
@@ -573,13 +573,14 @@ impl Client {
         }
         Ok(())
     }
-    pub async fn handle_packet<T>(
+    pub async fn handle_packet<T, U>(
         &self,
         packet: ServerBoundPacket,
-        server: &Server<T>,
+        server: &Server<T, U>,
     ) -> Result<(), ConnectionError>
     where
-        T: ServerHandler + Send + Sync + 'static,
+        T: ServerHandler<U> + Send + Sync + 'static,
+        U: Send + Sync + 'static,
     {
         // println!("Received packet: {:?}", packet);
         match packet {

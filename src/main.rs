@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use authentication::Profile;
+use cipher::typenum::Min;
 use client::Player;
 use server::{ConnectionError, LimboPlayer, Server, ServerHandler, ServerManager, ServerProxy};
 use std::{sync::Arc, time::Duration};
@@ -12,28 +13,35 @@ mod entities;
 mod gui;
 mod server;
 
-struct LobbyServerHandler {}
+struct LobbyServerHandler {
+    server_manager: Arc<ServerManager<MiniGameProxy>>,
+}
 
-// #[async_trait]
-impl ServerHandler for LobbyServerHandler {
-    fn new() -> Self {
-        Self {}
+#[async_trait]
+impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
+    fn new(server_manager: Arc<ServerManager<MiniGameProxy>>) -> Self {
+        Self { server_manager }
     }
     fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError> {
+        self.server_manager.proxy();
         Ok(Player::new(uuid, profile))
     }
 }
 
 struct MiniGameProxy {
-    lobby_server: Arc<Server<LobbyServerHandler>>,
+    server_manager: Arc<ServerManager<MiniGameProxy>>,
+    lobby_server: Arc<Server<LobbyServerHandler, MiniGameProxy>>,
 }
 
 #[async_trait]
 impl ServerProxy for MiniGameProxy {
     type TransferData = ();
-    fn new() -> Self {
-        let lobby_server = Arc::new(Server::new(World::new("./world/region")));
-        Self { lobby_server }
+    fn new(server_manager: Arc<ServerManager<Self>>) -> Self {
+        let lobby_server = Server::new(World::new("./world/region"), server_manager.clone());
+        Self {
+            lobby_server,
+            server_manager,
+        }
     }
     async fn handle_connection(&self, limbo_player: LimboPlayer) -> Result<(), ConnectionError> {
         self.lobby_server
@@ -64,7 +72,7 @@ async fn main() {
 
     const PORT: u16 = 25566;
 
-    let _server = ServerManager::<MiniGameProxy>::run(PORT);
+    let _server = ServerManager::<MiniGameProxy>::run(PORT).await;
 
     sleep(Duration::from_secs(10000000000)).await;
 }

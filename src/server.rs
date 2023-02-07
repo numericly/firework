@@ -8,11 +8,12 @@ use protocol::server_bound::{Ping, ServerBoundPacket};
 use protocol::{ConnectionState, Protocol, ProtocolError};
 use protocol_core::VarInt;
 use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
+use std::cell::UnsafeCell;
 use std::sync::Arc;
 use std::time::Duration;
 use thiserror::Error;
 use tokio::net::TcpListener;
-use tokio::sync::{broadcast, Mutex};
+use tokio::sync::{broadcast, Mutex, RwLock};
 use tokio::task::JoinHandle;
 use tokio::time::sleep;
 use tokio::{select, task};
@@ -169,39 +170,54 @@ pub struct LimboPlayer {
     pub entity_id: i32,
 }
 
-pub struct ServerManager<T, const PLAYER_RESERVED_ENTITY_IDS: i32 = 1_000_000> {
+pub struct ServerManager<T: Sized, const PLAYER_RESERVED_ENTITY_IDS: i32 = 1_000_000> {
     encryption: Arc<Encryption>,
-    proxy: T,
+    proxy: UnsafeCell<Option<T>>,
     player_entity_ids: DashSet<i32>,
     lowest_free_entity_id: Mutex<i32>,
 }
 
+unsafe impl<T: Sized, const PLAYER_RESERVED_ENTITY_IDS: i32> Send
+    for ServerManager<T, PLAYER_RESERVED_ENTITY_IDS>
+where
+    T: ?Sized + Send,
+{
+}
+unsafe impl<T: Sized> Sync for ServerManager<T> where T: ?Sized + Send {}
+
 #[async_trait]
 pub trait ServerProxy {
     type TransferData;
-    fn new() -> Self;
+    fn new(server_manager: Arc<ServerManager<Self>>) -> Self
+    where
+        Self: Sized;
     async fn handle_connection(&self, limbo_player: LimboPlayer) -> Result<(), ConnectionError>;
     fn motd(&self) -> Result<String, ConnectionError>;
 }
 
 impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerManager<T> {
-    pub fn run(port: u16) {
+    pub async fn run(port: u16) {
         let encryption = Arc::new(Encryption::new());
-        let proxy = T::new();
 
         let server = Arc::new(ServerManager {
             encryption,
-            proxy,
+            proxy: UnsafeCell::new(None),
             lowest_free_entity_id: Mutex::new(0),
             player_entity_ids: DashSet::new(),
         });
+
+        let proxy = T::new(server.clone());
+
+        unsafe {
+            server.proxy.get().write(Some(proxy));
+        }
 
         let cloned_server = server.clone();
 
         tokio::task::spawn(async move {
             let listener = TcpListener::bind(format!("127.0.0.1:{}", port))
                 .await
-                .expect("Failed to bind ser to port");
+                .expect("Failed to bind server to port");
             println!("Server started listening on port: {}", port);
             loop {
                 let (stream, _socket_address) = listener.accept().await.unwrap();
@@ -232,7 +248,7 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                 read_packet_or_err!(StatusRequest, connection, ConnectionState::Status);
 
                 // Fix me
-                let motd = self.proxy.motd().unwrap();
+                let motd = self.proxy().motd()?;
 
                 let server_status = ServerStatus {
                     motd: motd.to_string(),
@@ -343,7 +359,7 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                     profile,
                 };
 
-                let disconnect_status = self.proxy.handle_connection(limbo_player).await;
+                let disconnect_status = self.proxy().handle_connection(limbo_player).await;
 
                 self.remove_entity_id(entity_id).await;
 
@@ -375,20 +391,26 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
         }
         self.player_entity_ids.remove(&id);
     }
+    pub fn proxy(&self) -> &T {
+        unsafe { self.proxy.get().as_ref().unwrap().as_ref().unwrap() }
+    }
 }
 
-pub struct Server<T> {
+pub struct Server<T, U> {
     pub world: Arc<World>,
     pub entities: Arc<DashMap<i32, Entities>>,
     pub player_list: Arc<DashMap<u128, Client>>,
     lowest_free_id: Mutex<i32>,
 
     pub handler: T,
+    pub proxy: Arc<ServerManager<U>>,
 }
 
 #[async_trait]
-pub trait ServerHandler {
-    fn new() -> Self;
+pub trait ServerHandler<T> {
+    fn new(server_manager: Arc<ServerManager<T>>) -> Self
+    where
+        Self: Sized;
     fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError>;
     async fn client_command(
         &self,
@@ -442,15 +464,22 @@ pub trait ServerHandler {
     }
 }
 
-impl<Handler: ServerHandler + Send + Sync + 'static> Server<Handler> {
-    pub fn new(world: World) -> Self {
-        Self {
+impl<Handler: ServerHandler<Proxy>, Proxy> Server<Handler, Proxy>
+where
+    Proxy: Send + Sync + 'static,
+    Handler: Send + Sync + 'static,
+{
+    pub fn new(world: World, proxy: Arc<ServerManager<Proxy>>) -> Arc<Self> {
+        let handler = Handler::new(proxy.clone());
+        let server = Arc::new(Self {
             world: Arc::new(world),
             player_list: Arc::new(DashMap::new()),
             entities: Arc::new(DashMap::new()),
             lowest_free_id: Mutex::new(0),
-            handler: Handler::new(),
-        }
+            handler,
+            proxy,
+        });
+        server
     }
     pub async fn handle_connection(
         self: Arc<Self>,
