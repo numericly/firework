@@ -85,7 +85,7 @@ define_client_bound_protocol! {
     LoginPluginRequest, 0x04, Login => {
         message_id: VarInt,
         channel: String,
-        data: Vec<u8>
+        data: UnsizedVec<u8>
     },
     SpawnPlayer, 0x02, Play => {
         entity_id: VarInt,
@@ -114,6 +114,10 @@ define_client_bound_protocol! {
         state_id: VarInt,
         slot: i16,
         item: Option<Slot>
+    },
+    PluginMessage, 0x15, Play => {
+        channel: String,
+        data: UnsizedVec<u8>
     },
     PlayDisconnect, 0x17, Play => {
         reason: String
@@ -224,6 +228,17 @@ define_client_bound_protocol! {
         hash: String,
         forced: bool,
         prompt: Option<String> // TODO: Chat
+    },
+    Respawn, 0x3D, Play => {
+        dimension_type: String,
+        dimension_name: String,
+        hashed_seed: i64,
+        gamemode: u8,
+        previous_gamemode: i8,
+        is_debug: bool,
+        is_flat: bool,
+        copy_metadata: bool,
+        death_location: Option<DeathLocation>
     },
     UpdateEntityHeadRotation, 0x3E, Play => {
         entity_id: VarInt,

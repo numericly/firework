@@ -15,6 +15,7 @@ byteorder = "1.4.3"
 hematite-nbt = "0.5.2"
 dashmap = "5.4.0"
 tokio = "1.21.2"
+thiserror = "1.0.38"
 
 [profile.release]
 opt-level = 3

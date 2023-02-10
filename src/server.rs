@@ -4,11 +4,13 @@ use dashmap::{DashMap, DashSet};
 use protocol::client_bound::{
     EncryptionRequest, LoginDisconnect, LoginSuccess, Pong, ServerStatus, SetCompression,
 };
-use protocol::server_bound::{Ping, ServerBoundPacket};
-use protocol::{ConnectionState, Protocol, ProtocolError};
+use protocol::server_bound::{ClientInformation, Ping, ServerBoundPacket};
+use protocol::{read_specific_packet, ConnectionState, Protocol, ProtocolError};
 use protocol_core::VarInt;
 use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
-use std::cell::UnsafeCell;
+use std::collections::HashSet;
+use std::marker::PhantomData;
+use std::num::ParseIntError;
 use std::sync::Arc;
 use std::time::Duration;
 use thiserror::Error;
@@ -19,43 +21,6 @@ use tokio::time::sleep;
 use tokio::{select, task};
 use tokio_util::sync::CancellationToken;
 use world::World;
-
-macro_rules! read_packet_or_err {
-    ($packet:ident, $stream:expr, $connection_state:expr) => {
-        match $stream.read_and_deserialize().await {
-            Ok(protocol::server_bound::ServerBoundPacket::$packet(param)) => param,
-            Ok(packet) => {
-                let error = crate::server::ConnectionError::UnexpectedPacket {
-                    expected: stringify!($packet),
-                    got: format!("{:?}", packet),
-                    state: stringify!($connection_state),
-                };
-                match $connection_state {
-                    ConnectionState::Login => {
-                        let disconnect = protocol::client_bound::LoginDisconnect {
-                            reason: format!(r#"{{"text": "{}"}}"#, error),
-                        };
-                        $stream.write_packet(disconnect).await.unwrap();
-                        return Err(error);
-                    }
-                    ConnectionState::Play => {
-                        let disconnect = protocol::client_bound::PlayDisconnect {
-                            reason: format!(r#"{{"text": "{}"}}"#, error),
-                        };
-                        $stream.write_packet(disconnect).await.unwrap();
-                        return Err(error);
-                    }
-                    _ => return Err(error),
-                }
-            }
-            Err(err) => {
-                return Err(crate::server::ConnectionError::ProtocolError(err));
-            }
-        }
-    };
-}
-
-pub(crate) use read_packet_or_err;
 
 use crate::client::{Client, ClientCommand, Player};
 use crate::entities::{EntityDataFlags, EntityMetadata, Pose};
@@ -68,14 +33,12 @@ pub enum ConnectionError {
     UnexpectedNextState(ConnectionState),
     #[error("invalid shared secret length, expected 16, got {0}")]
     InvalidSharedSecretLength(usize),
-    #[error("unexpected packet, expected {expected}, got {got} in state {state}")]
-    UnexpectedPacket {
-        got: String,
-        expected: &'static str,
-        state: &'static str,
-    },
     #[error("authentication error {0}")]
     AuthenticationError(#[from] AuthenticationError),
+    #[error("rsa error {0}")]
+    RsaError(#[from] rsa::errors::Error),
+    #[error("uuid parse error {0}")]
+    UuidParseError(#[from] ParseIntError),
     #[error("recv error {0}")]
     RecvError(#[from] broadcast::error::RecvError),
     #[error("client is already connected")]
@@ -93,12 +56,14 @@ pub enum ConnectionError {
     ClientDisconnected { reason: String },
     #[error("client cancelled")]
     ClientCancelled,
+    #[error("world error {0}")]
+    WorldError(#[from] world::WorldError),
 }
 
 #[derive(Clone, Debug)]
 pub enum Entities {}
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Vec3 {
     pub x: f64,
     pub y: f64,
@@ -111,7 +76,7 @@ impl Vec3 {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Rotation {
     pub yaw: f32,
     pub pitch: f32,
@@ -163,36 +128,32 @@ impl Encryption {
     }
 }
 
-pub struct LimboPlayer {
+#[derive(Debug)]
+pub struct ClientData {
     pub profile: Profile,
     pub uuid: u128,
-    pub connection: Arc<Protocol>,
     pub entity_id: i32,
+    pub has_connected: RwLock<bool>,
+    pub loaded_chunks: Mutex<HashSet<(i32, i32)>>,
+    pub settings: RwLock<Option<ClientInformation>>,
+    pub brand: RwLock<Option<String>>,
 }
 
 pub struct ServerManager<T: Sized, const PLAYER_RESERVED_ENTITY_IDS: i32 = 1_000_000> {
     encryption: Arc<Encryption>,
-    proxy: UnsafeCell<Option<T>>,
+    proxy: Arc<T>,
     player_entity_ids: DashSet<i32>,
     lowest_free_entity_id: Mutex<i32>,
 }
 
-unsafe impl<T: Sized, const PLAYER_RESERVED_ENTITY_IDS: i32> Send
-    for ServerManager<T, PLAYER_RESERVED_ENTITY_IDS>
-where
-    T: ?Sized + Send,
-{
-}
-unsafe impl<T: Sized> Sync for ServerManager<T> where T: ?Sized + Send {}
-
 #[async_trait]
 pub trait ServerProxy {
-    type TransferData;
-    fn new(server_manager: Arc<ServerManager<Self>>) -> Self
+    type TransferData: Clone + Send + Sync + 'static;
+    async fn new() -> Self
     where
         Self: Sized;
-    async fn handle_connection(&self, limbo_player: LimboPlayer) -> Result<(), ConnectionError>;
-    fn motd(&self) -> Result<String, ConnectionError>;
+    async fn handle_connection(self: Arc<Self>, connection: Protocol, client_data: ClientData);
+    async fn motd(&self) -> Result<String, ConnectionError>;
 }
 
 impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerManager<T> {
@@ -201,16 +162,10 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
 
         let server = Arc::new(ServerManager {
             encryption,
-            proxy: UnsafeCell::new(None),
+            proxy: Arc::new(T::new().await),
             lowest_free_entity_id: Mutex::new(0),
             player_entity_ids: DashSet::new(),
         });
-
-        let proxy = T::new(server.clone());
-
-        unsafe {
-            server.proxy.get().write(Some(proxy));
-        }
 
         let cloned_server = server.clone();
 
@@ -220,16 +175,16 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                 .expect("Failed to bind server to port");
             println!("Server started listening on port: {}", port);
             loop {
-                let (stream, _socket_address) = listener.accept().await.unwrap();
+                let stream = listener.accept().await;
 
-                let connection = Protocol::new(stream);
-                let server = cloned_server.clone();
-                tokio::task::spawn(async move {
-                    let res = server.handle_connection(connection).await;
-                    if let Err(e) = res {
-                        println!("{}", e);
-                    }
-                });
+                if let Ok((stream, _socket_addr)) = stream {
+                    let connection = Protocol::new(stream);
+                    let server = cloned_server.clone();
+                    #[allow(unused_must_use)]
+                    tokio::task::spawn(async move {
+                        server.handle_connection(connection).await;
+                    });
+                }
             }
         });
     }
@@ -237,7 +192,7 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
         self: Arc<Self>,
         mut connection: Protocol,
     ) -> Result<(), ConnectionError> {
-        let handshake = read_packet_or_err!(Handshake, connection, ConnectionState::HandShaking);
+        let handshake = read_specific_packet!(&connection, Handshake).await?;
 
         match handshake.next_state {
             // Handle server ping
@@ -245,10 +200,10 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                 {
                     *connection.connection_state.write().await = ConnectionState::Status;
                 }
-                read_packet_or_err!(StatusRequest, connection, ConnectionState::Status);
+                read_specific_packet!(&connection, StatusRequest).await?;
 
                 // Fix me
-                let motd = self.proxy().motd()?;
+                let motd = self.proxy.motd().await?;
 
                 let server_status = ServerStatus {
                     motd: motd.to_string(),
@@ -256,8 +211,7 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
 
                 connection.write_packet(server_status).await?;
 
-                let Ping { payload, .. } =
-                    read_packet_or_err!(Ping, connection, ConnectionState::Status);
+                let Ping { payload, .. } = read_specific_packet!(&connection, Ping).await?;
 
                 let pong = Pong { payload };
                 connection.write_packet(pong).await?;
@@ -270,8 +224,7 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                     connection: &mut Protocol,
                     encryption: Arc<Encryption>,
                 ) -> Result<(u128, Profile), ConnectionError> {
-                    let login_start =
-                        read_packet_or_err!(LoginStart, connection, ConnectionState::Login);
+                    let login_start = read_specific_packet!(connection, LoginStart).await?;
 
                     let client_username = login_start.name;
 
@@ -280,18 +233,15 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                         public_key: encryption.encoded_pub.clone(),
                         verify_token: Vec::new(),
                     };
-                    connection.write_packet(encryption_request).await.unwrap();
+                    connection.write_packet(encryption_request).await?;
 
                     let encryption_response =
-                        read_packet_or_err!(EncryptionResponse, connection, ConnectionState::Login);
+                        read_specific_packet!(connection, EncryptionResponse).await?;
 
-                    let shared_secret = encryption
-                        .priv_key
-                        .decrypt(
-                            rsa::PaddingScheme::PKCS1v15Encrypt,
-                            encryption_response.shared_secret.as_slice(),
-                        )
-                        .unwrap();
+                    let shared_secret = encryption.priv_key.decrypt(
+                        rsa::PaddingScheme::PKCS1v15Encrypt,
+                        encryption_response.shared_secret.as_slice(),
+                    )?;
 
                     if shared_secret.len() != 16usize {
                         return Err(ConnectionError::InvalidSharedSecretLength(
@@ -311,7 +261,7 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                             let disconnect = LoginDisconnect {
                                 reason: format!(r#"{{"text": "{}"}}"#, err),
                             };
-                            connection.write_packet(disconnect).await.unwrap();
+                            connection.write_packet(disconnect).await;
                             return Err(ConnectionError::AuthenticationError(err));
                         }
                     };
@@ -324,11 +274,11 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                         threshold: VarInt(0),
                     };
 
-                    connection.write_packet(set_compression).await.unwrap();
+                    connection.write_packet(set_compression).await?;
 
                     connection.enable_compression();
 
-                    let uuid = u128::from_str_radix(&profile.id, 16).unwrap();
+                    let uuid = u128::from_str_radix(&profile.id, 16)?;
 
                     let login_success = LoginSuccess {
                         uuid: uuid.clone(),
@@ -336,7 +286,7 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                         properties: profile.properties.clone(),
                     };
 
-                    connection.write_packet(login_success).await.unwrap();
+                    connection.write_packet(login_success).await?;
 
                     Ok((uuid, profile))
                 }
@@ -348,22 +298,25 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                 let (uuid, profile) =
                     handle_login(&mut connection, self.encryption.clone()).await?;
 
-                let connection = Arc::new(connection);
-
                 let entity_id = self.get_entity_id().await;
 
-                let limbo_player = LimboPlayer {
-                    connection: connection.clone(),
+                let client_data = ClientData {
+                    loaded_chunks: Mutex::new(HashSet::new()),
+                    has_connected: RwLock::new(false),
                     entity_id: entity_id.clone(),
                     uuid,
                     profile,
+                    settings: RwLock::new(None),
+                    brand: RwLock::new(None),
                 };
 
-                let disconnect_status = self.proxy().handle_connection(limbo_player).await;
+                self.proxy
+                    .clone()
+                    .handle_connection(connection, client_data)
+                    .await;
 
                 self.remove_entity_id(entity_id).await;
-
-                disconnect_status
+                Ok(())
             }
             // If the client tried to change state to the current state or play state which is not allowed
             state => Err(ConnectionError::UnexpectedNextState(state)),
@@ -391,44 +344,64 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
         }
         self.player_entity_ids.remove(&id);
     }
-    pub fn proxy(&self) -> &T {
-        unsafe { self.proxy.get().as_ref().unwrap().as_ref().unwrap() }
-    }
 }
 
-pub struct Server<T, U> {
+pub struct Server<Handler, Proxy: ServerProxy>
+where
+    Proxy: ServerProxy + Send + Sync + 'static,
+{
     pub world: Arc<World>,
     pub entities: Arc<DashMap<i32, Entities>>,
-    pub player_list: Arc<DashMap<u128, Client>>,
-    lowest_free_id: Mutex<i32>,
+    pub player_list: Arc<DashMap<u128, Client<Proxy>>>,
+    pub difficulty: RwLock<u8>,
+    pub difficulty_locked: RwLock<bool>,
+    pub handler: Handler,
+    pub brand: &'static str,
+    _lowest_free_id: Mutex<i32>,
 
-    pub handler: T,
-    pub proxy: Arc<ServerManager<U>>,
+    proxy: PhantomData<Proxy>,
 }
 
 #[async_trait]
-pub trait ServerHandler<T> {
-    fn new(server_manager: Arc<ServerManager<T>>) -> Self
-    where
-        Self: Sized;
-    fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError>;
-    async fn client_command(
+#[allow(unused_variables)]
+pub trait ServerHandler<Proxy>
+where
+    Self: Sized + Send + Sync + 'static,
+    Proxy: ServerProxy + Send + Sync + 'static,
+{
+    fn new() -> Self;
+    async fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError>;
+    async fn on_client_connected(
         &self,
-        client: &Client,
-        command: ClientCommand,
-    ) -> Result<Option<ClientCommand>, ConnectionError> {
+        server: &Server<Self, Proxy>,
+        proxy: &Proxy,
+        client: &Client<Proxy>,
+    ) -> Result<(), ConnectionError> {
+        Ok(())
+    }
+    async fn on_client_command(
+        &self,
+        server: &Server<Self, Proxy>,
+        proxy: &Proxy,
+        client: &Client<Proxy>,
+        command: ClientCommand<Proxy::TransferData>,
+    ) -> Result<Option<ClientCommand<Proxy::TransferData>>, ConnectionError> {
         Ok(Some(command))
     }
-    async fn client_packet(
+    async fn on_client_packet(
         &self,
-        client: &Client,
+        server: &Server<Self, Proxy>,
+        proxy: &Proxy,
+        client: &Client<Proxy>,
         packet: ServerBoundPacket,
     ) -> Result<Option<ServerBoundPacket>, ConnectionError> {
         Ok(Some(packet))
     }
     async fn on_chat(
         &self,
-        client: &Client,
+        server: &Server<Self, Proxy>,
+        proxy: &Proxy,
+        client: &Client<Proxy>,
         chat: String,
     ) -> Result<Option<String>, ConnectionError> {
         let name = &client.player.read().await.profile.name;
@@ -436,69 +409,82 @@ pub trait ServerHandler<T> {
     }
     async fn on_player_move(
         &self,
-        client: &Client,
+        server: &Server<Self, Proxy>,
+        proxy: &Proxy,
+        client: &Client<Proxy>,
         pos: Vec3,
     ) -> Result<Option<Vec3>, ConnectionError> {
         Ok(Some(pos))
     }
     async fn on_player_look(
         &self,
-        client: &Client,
+        server: &Server<Self, Proxy>,
+        proxy: &Proxy,
+        client: &Client<Proxy>,
         rotation: Rotation,
     ) -> Result<Option<Rotation>, ConnectionError> {
         Ok(Some(rotation))
     }
     async fn on_player_sneak(
         &self,
-        client: &Client,
+        server: &Server<Self, Proxy>,
+        proxy: &Proxy,
+        client: &Client<Proxy>,
         sneaking: bool,
     ) -> Result<Option<bool>, ConnectionError> {
         Ok(Some(sneaking))
     }
     async fn on_player_sprint(
         &self,
-        client: &Client,
+        server: &Server<Self, Proxy>,
+        proxy: &Proxy,
+        client: &Client<Proxy>,
         sprinting: bool,
     ) -> Result<Option<bool>, ConnectionError> {
         Ok(Some(sprinting))
     }
 }
 
-impl<Handler: ServerHandler<Proxy>, Proxy> Server<Handler, Proxy>
+impl<Handler: ServerHandler<Proxy>, Proxy: ServerProxy> Server<Handler, Proxy>
 where
     Proxy: Send + Sync + 'static,
     Handler: Send + Sync + 'static,
+    Proxy::TransferData: Clone,
 {
-    pub fn new(world: World, proxy: Arc<ServerManager<Proxy>>) -> Arc<Self> {
-        let handler = Handler::new(proxy.clone());
-        let server = Arc::new(Self {
+    pub async fn new(world: World, brand: &'static str) -> Arc<Self> {
+        Arc::new(Self {
+            difficulty: RwLock::new(0),
+            difficulty_locked: RwLock::new(false),
             world: Arc::new(world),
             player_list: Arc::new(DashMap::new()),
             entities: Arc::new(DashMap::new()),
-            lowest_free_id: Mutex::new(0),
-            handler,
-            proxy,
-        });
-        server
+            _lowest_free_id: Mutex::new(0),
+            handler: Handler::new(),
+            proxy: PhantomData {},
+            brand,
+        })
     }
     pub async fn handle_connection(
         self: Arc<Self>,
-        limbo_player: LimboPlayer,
-    ) -> Result<Option<()>, ConnectionError> {
+        proxy: Arc<Proxy>,
+        connection: Arc<Protocol>,
+        client_data: Arc<ClientData>,
+    ) -> Result<Proxy::TransferData, ConnectionError> {
         let player = self
             .handler
-            .load_player(limbo_player.profile, limbo_player.uuid)?;
+            .load_player(client_data.profile.clone(), client_data.uuid)
+            .await?;
 
-        let (to_client_sender, to_client_receiver) = broadcast::channel::<ClientCommand>(10);
+        let (to_client_sender, to_client_receiver) =
+            broadcast::channel::<ClientCommand<Proxy::TransferData>>(10);
 
         // generate client
         let uuid = player.uuid.clone();
         let client = {
             let client = Client::new(
-                limbo_player.connection,
+                connection.clone(),
+                client_data.clone(),
                 player,
-                limbo_player.entity_id,
-                uuid.clone(),
                 to_client_sender,
             );
 
@@ -509,16 +495,18 @@ where
                 });
                 client
                     .handle_command(
+                        &self,
+                        &proxy,
                         ClientCommand::Disconnect {
                             reason: r#"{"text": "You are already logged in"}"#.to_string(),
                         },
-                        &self,
                     )
                     .await;
                 return Err(ConnectionError::ClientAlreadyConnected);
             }
 
-            self.player_list.insert(client.uuid.clone(), client);
+            self.player_list
+                .insert(client.client_data.uuid.clone(), client);
 
             let client = self
                 .player_list
@@ -537,7 +525,7 @@ where
 
         let status = self
             .clone()
-            .handle_player(&client, uuid, to_client_receiver)
+            .handle_player(proxy, &client, uuid, to_client_receiver)
             .await;
 
         self.broadcast_chat(format!(
@@ -554,18 +542,29 @@ where
     }
     pub async fn handle_player(
         self: Arc<Self>,
-        client: &Client,
+        proxy: Arc<Proxy>,
+        client: &Client<Proxy>,
         uuid: u128,
-        mut to_client_receiver: broadcast::Receiver<ClientCommand>,
-    ) -> Result<Option<()>, ConnectionError> {
-        client.load_world(&self).await?;
+        mut to_client_receiver: broadcast::Receiver<ClientCommand<Proxy::TransferData>>,
+    ) -> Result<Proxy::TransferData, ConnectionError> {
+        if *client.client_data.has_connected.write().await {
+            client.transfer_world(&self).await?;
+        } else {
+            client.load_world(&self).await?;
+        }
+        *client.client_data.has_connected.write().await = true;
+
+        self.handler
+            .on_client_connected(&self, &proxy, client)
+            .await?;
 
         let token = CancellationToken::new();
 
         let command_listener_server = self.clone();
+        let command_listener_proxy = proxy.clone();
         let command_listener_token = token.clone();
 
-        let command_listener_handle: JoinHandle<Result<Option<()>, ConnectionError>> =
+        let command_listener_handle: JoinHandle<Result<Proxy::TransferData, ConnectionError>> =
             task::spawn(async move {
                 let client = command_listener_server
                     .player_list
@@ -579,12 +578,23 @@ where
 
                             if let Some(command) = command_listener_server
                                 .handler
-                                .client_command(client.value(), command)
+                                .on_client_command(
+                                    &command_listener_server,
+                                    &command_listener_proxy,
+                                    client.value(),
+                                    command
+                                )
                                 .await?
                             {
-                                client
-                                    .handle_command(command, &command_listener_server)
-                                    .await?;
+                                if let Some(data) = client
+                                    .handle_command(
+                                        &command_listener_server,
+                                        &command_listener_proxy,
+                                        command
+                                    )
+                                    .await? {
+                                    return Ok(data);
+                                }
                             }
                         }
                         _ = command_listener_token.cancelled() => {
@@ -595,9 +605,10 @@ where
             });
 
         let event_listener_server = self.clone();
+        let event_listener_proxy = proxy.clone();
         let event_listener_token = token.clone();
 
-        let event_listener_handle: JoinHandle<Result<Option<()>, ConnectionError>> =
+        let event_listener_handle: JoinHandle<Result<Proxy::TransferData, ConnectionError>> =
             task::spawn(async move {
                 let client = event_listener_server
                     .player_list
@@ -610,11 +621,19 @@ where
                             let event = event?;
                             if let Some(event) = event_listener_server
                                 .handler
-                                .client_packet(client.value(), event)
+                                .on_client_packet(
+                                    &event_listener_server,
+                                    &event_listener_proxy,
+                                    client.value(), event
+                                )
                                 .await?
                             {
                                 client
-                                    .handle_packet(event, &event_listener_server)
+                                    .handle_packet(
+                                        &event_listener_server,
+                                        &event_listener_proxy,
+                                        event
+                                    )
                                     .await?;
                             }
                         }
@@ -628,26 +647,28 @@ where
         let timeout_handler_server = self.clone();
         let timeout_handler_token = token.clone();
 
-        let timeout_handler_handle: JoinHandle<Result<Option<()>, ConnectionError>> =
-            task::spawn(async move {
-                let client = timeout_handler_server
-                    .player_list
-                    .get(&uuid)
-                    .ok_or(ConnectionError::ClientAlreadyConnected)?;
+        #[allow(unused_must_use)]
+        let timeout_handler_handle: JoinHandle<
+            Result<Proxy::TransferData, ConnectionError>,
+        > = task::spawn(async move {
+            let client = timeout_handler_server
+                .player_list
+                .get(&uuid)
+                .ok_or(ConnectionError::ClientAlreadyConnected)?;
 
-                client.to_client.send(ClientCommand::Ping);
+            client.to_client.send(ClientCommand::Ping);
 
-                loop {
-                    select! {
-                        _ = sleep(Duration::from_secs(15)) => {
-                            client.to_client.send(ClientCommand::Ping);
-                        }
-                        _ = timeout_handler_token.cancelled() => {
-                            return Err(ConnectionError::ClientCancelled)
-                        }
-                    };
-                }
-            });
+            loop {
+                select! {
+                    _ = sleep(Duration::from_secs(15)) => {
+                        client.to_client.send(ClientCommand::Ping);
+                    }
+                    _ = timeout_handler_token.cancelled() => {
+                        return Err(ConnectionError::ClientCancelled)
+                    }
+                };
+            }
+        });
 
         // WARNING BAD CODE
         #[allow(unused_must_use)]
@@ -687,10 +708,12 @@ where
     }
     pub async fn handle_chat(
         &self,
-        client: &Client,
+        server: &Server<Handler, Proxy>,
+        proxy: &Proxy,
+        client: &Client<Proxy>,
         message: String,
     ) -> Result<(), ConnectionError> {
-        let message = self.handler.on_chat(client, message).await?;
+        let message = self.handler.on_chat(server, proxy, client, message).await?;
         if let Some(message) = message {
             self.broadcast_chat(message).await;
         }
@@ -698,14 +721,19 @@ where
     }
     pub async fn handle_position_update(
         &self,
-        client: &Client,
+        server: &Server<Handler, Proxy>,
+        proxy: &Proxy,
+        client: &Client<Proxy>,
         on_ground: bool,
         position: Option<Vec3>,
         rotation: Option<Rotation>,
     ) -> Result<(), ConnectionError> {
         let previous_pos = client.player.read().await.position.clone();
         let pos = if let Some(pos) = position {
-            let pos = self.handler.on_player_move(client, pos).await?;
+            let pos = self
+                .handler
+                .on_player_move(server, proxy, client, pos)
+                .await?;
             if let Some(pos) = &pos {
                 client.player.write().await.position = pos.clone();
             };
@@ -715,7 +743,10 @@ where
         };
         let previous_rot = client.player.read().await.rotation.clone();
         let rot = if let Some(rot) = rotation {
-            let rot = self.handler.on_player_look(client, rot).await?;
+            let rot = self
+                .handler
+                .on_player_look(server, proxy, client, rot)
+                .await?;
             if let Some(rot) = &rot {
                 client.player.write().await.rotation = rot.clone();
             };
@@ -725,7 +756,7 @@ where
         };
 
         self.broadcast_entity_move(
-            client.entity_id,
+            client.client_data.entity_id,
             pos,
             previous_pos,
             rot,
@@ -738,10 +769,16 @@ where
     }
     pub async fn handle_sneaking(
         &self,
-        client: &Client,
+        server: &Server<Handler, Proxy>,
+        proxy: &Proxy,
+        client: &Client<Proxy>,
         sneaking: bool,
     ) -> Result<(), ConnectionError> {
-        if let Some(sneaking) = self.handler.on_player_sneak(client, sneaking).await? {
+        if let Some(sneaking) = self
+            .handler
+            .on_player_sneak(server, proxy, client, sneaking)
+            .await?
+        {
             client.player.write().await.sneaking = sneaking;
             let metadata = vec![
                 EntityMetadata::EntityPose(if sneaking {
@@ -751,26 +788,33 @@ where
                 }),
                 EntityMetadata::EntityFlags(EntityDataFlags::new().with_is_crouching(sneaking)),
             ];
-            self.broadcast_entity_metadata_update(client.entity_id, metadata)
+            self.broadcast_entity_metadata_update(client.client_data.entity_id, metadata)
                 .await;
         }
         Ok(())
     }
     pub async fn handle_sprinting(
         &self,
-        client: &Client,
+        server: &Server<Handler, Proxy>,
+        proxy: &Proxy,
+        client: &Client<Proxy>,
         sprinting: bool,
     ) -> Result<(), ConnectionError> {
-        if let Some(sprinting) = self.handler.on_player_sprint(client, sprinting).await? {
+        if let Some(sprinting) = self
+            .handler
+            .on_player_sprint(server, proxy, client, sprinting)
+            .await?
+        {
             client.player.write().await.sprinting = sprinting;
             let metadata = vec![EntityMetadata::EntityFlags(
                 EntityDataFlags::new().with_is_sprinting(sprinting),
             )];
-            self.broadcast_entity_metadata_update(client.entity_id, metadata)
+            self.broadcast_entity_metadata_update(client.client_data.entity_id, metadata)
                 .await;
         }
         Ok(())
     }
+    #[allow(unused_must_use)]
     pub async fn broadcast_chat(&self, message: String) {
         // TODO: join futures
         for client in self.player_list.iter() {
@@ -779,6 +823,7 @@ where
             });
         }
     }
+    #[allow(unused_must_use)]
     pub async fn broadcast_entity_move(
         &self,
         entity_id: i32,
@@ -789,7 +834,7 @@ where
         on_ground: bool,
     ) {
         for client in self.player_list.iter() {
-            if entity_id == client.entity_id {
+            if entity_id == client.client_data.entity_id {
                 continue;
             }
             client.to_client.send(ClientCommand::MoveEntity {
@@ -802,13 +847,14 @@ where
             });
         }
     }
+    #[allow(unused_must_use)]
     pub async fn broadcast_entity_metadata_update(
         &self,
         entity_id: i32,
         metadata: Vec<EntityMetadata>,
     ) {
         for client in self.player_list.iter() {
-            if entity_id == client.entity_id {
+            if entity_id == client.client_data.entity_id {
                 continue;
             }
             client.to_client.send(ClientCommand::UpdateEntityMetadata {
@@ -817,32 +863,33 @@ where
             });
         }
     }
-    pub async fn broadcast_player_leave(&self, client: &Client) {
+    #[allow(unused_must_use)]
+    pub async fn broadcast_player_leave(&self, client: &Client<Proxy>) {
         for other_client in self.player_list.iter() {
-            if other_client.entity_id == client.entity_id {
+            if other_client.client_data.entity_id == client.client_data.entity_id {
                 continue;
             }
             other_client.to_client.send(ClientCommand::RemovePlayer {
-                entity_id: client.entity_id,
-                uuid: client.uuid,
+                entity_id: client.client_data.entity_id,
+                uuid: client.client_data.uuid,
             });
         }
     }
-    pub async fn broadcast_player_join(&self, client: &Client) {
+    #[allow(unused_must_use)]
+    pub async fn broadcast_player_join(&self, client: &Client<Proxy>) {
         for other_client in self.player_list.iter() {
-            if other_client.entity_id == client.entity_id {
+            if other_client.client_data.entity_id == client.client_data.entity_id {
                 continue;
             }
             let add_player = {
                 let player = client.player.read().await;
                 ClientCommand::AddPlayer {
-                    entity_id: client.entity_id,
-                    uuid: client.uuid,
+                    client_data: client.client_data.clone(),
                     position: player.position.clone(),
                     rotation: player.rotation.clone(),
                     name: player.profile.name.clone(),
                     properties: player.profile.properties.clone(),
-                    gamemode: player.gamemode,
+                    gamemode: player.gamemode.clone() as u8,
                 }
             };
             other_client.to_client.send(add_player);

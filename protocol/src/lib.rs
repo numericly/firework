@@ -45,6 +45,12 @@ pub enum ProtocolError {
     DeserializeError(#[from] DeserializeError),
     #[error("failed to decompress packet")]
     DecompressError(DecompressError),
+    #[error("unexpected packet, expected {expected}, got {got} in state {state:?}")]
+    UnexpectedPacket {
+        got: String,
+        expected: &'static str,
+        state: ConnectionState,
+    },
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, DeserializeField)]
@@ -228,4 +234,24 @@ async fn read_packet_length(reader: &mut ProtocolReader) -> Result<usize, Protoc
     }
 
     Ok(value as usize)
+}
+
+#[macro_export]
+macro_rules! read_specific_packet {
+    ($protocol:expr, $packet:ident) => {
+        async {
+            let protocol: &Protocol = $protocol;
+            let packet = protocol.read_and_deserialize().await?;
+
+            if let ServerBoundPacket::$packet(packet) = packet {
+                Ok(packet)
+            } else {
+                return Err(ProtocolError::UnexpectedPacket {
+                    expected: stringify!($packet),
+                    got: format!("{:?}", packet),
+                    state: *protocol.connection_state.read().await,
+                });
+            }
+        }
+    };
 }

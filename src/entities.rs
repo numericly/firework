@@ -1,4 +1,5 @@
 use modular_bitfield::bitfield;
+use protocol::data_types::DisplaySkinParts;
 use protocol_core::SerializeField;
 use protocol_derive::SerializeField;
 
@@ -45,13 +46,13 @@ macro_rules! define_entity_metadata {
 define_entity_metadata_types! {
     EntityDataFlags => 0i32,
     Pose => 19i32,
-    DisplayedSkinPartsFlags => 0i32
+    DisplaySkinParts => 0i32
 }
 
 define_entity_metadata! {
     EntityFlags, 0 => EntityDataFlags,
     EntityPose, 6 => Pose,
-    PlayerDisplayedSkinParts, 17 => DisplayedSkinPartsFlags
+    PlayerDisplayedSkinParts, 17 => DisplaySkinParts
 }
 
 pub const END_INDEX: u8 = 0xFF;
@@ -75,18 +76,6 @@ impl SerializeField for EntityDataFlags {
     }
 }
 
-#[bitfield(bits = 7)]
-#[derive(Debug, Clone)]
-pub struct DisplayedSkinPartsFlags {
-    pub cape: bool,
-    pub jacket: bool,
-    pub left_sleeve: bool,
-    pub right_sleeve: bool,
-    pub left_pants: bool,
-    pub right_pants: bool,
-    pub hat: bool,
-}
-
 #[derive(Debug, PartialEq, SerializeField, Clone)]
 #[protocol(typ = "protocol_core::VarInt")]
 pub enum Pose {
@@ -105,12 +94,6 @@ pub enum Pose {
     Sniffing,
     Emerging,
     Digging,
-}
-
-impl SerializeField for DisplayedSkinPartsFlags {
-    fn serialize<T: std::io::Write>(&self, mut writer: T) {
-        self.bytes.serialize(&mut writer);
-    }
 }
 
 #[test]

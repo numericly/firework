@@ -8,9 +8,19 @@ use std::fmt::Debug;
 use std::fs::File;
 use std::hash::Hash;
 use std::io::Read;
-use std::sync::{Arc, Mutex, RwLock};
+use std::sync::Arc;
+use thiserror::Error;
+use tokio::sync::{Mutex, RwLock};
 
 pub mod chunk;
+
+#[derive(Debug, Error)]
+pub enum WorldError {
+    #[error("IO error: {0}")]
+    IoError(#[from] std::io::Error),
+    #[error("NBT error: {0}")]
+    NbtError(#[from] nbt::Error),
+}
 
 pub enum Difficulty {
     Peaceful = 0,
@@ -21,9 +31,8 @@ pub enum Difficulty {
 
 pub struct World {
     pub path: &'static str,
+    pub flat: bool,
     regions: DashMap<(i32, i32), Arc<Region>>,
-    pub difficulty: RwLock<u8>,
-    pub difficulty_locked: RwLock<bool>,
 }
 
 #[derive(Debug)]
@@ -56,19 +65,22 @@ pub trait ToPacket<T: SerializePacket> {
 }
 
 impl World {
-    pub fn new(path: &'static str) -> World {
+    pub fn new(path: &'static str, flat: bool) -> World {
         World {
             path,
-            difficulty: RwLock::new(1),
-            difficulty_locked: RwLock::new(false),
+            flat,
             regions: DashMap::new(),
         }
     }
-    pub async fn get_chunk(&self, x: i32, z: i32) -> Result<Option<Arc<RwLock<Chunk>>>, String> {
+    pub async fn get_chunk(
+        &self,
+        x: i32,
+        z: i32,
+    ) -> Result<Option<Arc<RwLock<Chunk>>>, WorldError> {
         let region = self.get_region(x >> 5, z >> 5)?;
 
         if let Some(region) = region {
-            Ok(region.get_chunk(x, z)?)
+            Ok(region.get_chunk(x, z).await?)
         } else {
             Ok(None)
         }
@@ -77,10 +89,10 @@ impl World {
         &self,
         x: i32,
         z: i32,
-    ) -> Result<Option<Arc<RwLock<Chunk>>>, String> {
+    ) -> Result<Option<Arc<RwLock<Chunk>>>, WorldError> {
         self.get_chunk(x >> 4, z >> 4).await
     }
-    pub fn get_region(&self, x: i32, z: i32) -> Result<Option<Arc<Region>>, String> {
+    pub fn get_region(&self, x: i32, z: i32) -> Result<Option<Arc<Region>>, WorldError> {
         Ok(match self.regions.get(&(x, z)) {
             Some(region) => Some(region.clone()),
             None => {
@@ -88,7 +100,7 @@ impl World {
                     Ok(file) => file,
                     Err(err) => match err.kind() {
                         std::io::ErrorKind::NotFound => return Ok(None),
-                        _ => return Err(format!("Error opening region file: {}", err)),
+                        _ => return Err(err.into()),
                     },
                 };
                 let region = Arc::new(Region::deserialize(file)?);
@@ -101,7 +113,7 @@ impl World {
 }
 
 impl Region {
-    pub fn deserialize(mut reader: File) -> Result<Region, String> {
+    pub fn deserialize(mut reader: File) -> Result<Region, WorldError> {
         #[derive(Debug)]
         struct ChunkInfo {
             size: u8,
@@ -148,7 +160,7 @@ impl Region {
                 if let Err(err) = reader.read_exact(&mut unused_data) {
                     match err.kind() {
                         std::io::ErrorKind::UnexpectedEof => break,
-                        _ => return Err(format!("Error reading unused data: {}", err)),
+                        _ => return Err(err.into()),
                     }
                 }
                 pos += 1;
@@ -161,10 +173,14 @@ impl Region {
         })
     }
     /// Gets and caches a chunk from the region at the given position.
-    pub fn get_chunk(&self, x: i32, z: i32) -> Result<Option<Arc<RwLock<Chunk>>>, String> {
+    pub async fn get_chunk(
+        &self,
+        x: i32,
+        z: i32,
+    ) -> Result<Option<Arc<RwLock<Chunk>>>, WorldError> {
         let index = x.rem_euclid(32) as usize + (z.rem_euclid(32) as usize * 32);
 
-        let sections = self.sections.lock().unwrap();
+        let sections = self.sections.lock().await;
 
         match &sections[index] {
             RegionChunk::None => Ok(None),
@@ -176,7 +192,7 @@ impl Region {
                 let chunk_data = Chunk::from_zlib_reader(reader.as_slice())?;
                 let chunk = Arc::new(RwLock::new(chunk_data));
                 let cloned = chunk.clone();
-                self.sections.lock().unwrap()[index] = RegionChunk::Chunk(chunk);
+                self.sections.lock().await[index] = RegionChunk::Chunk(chunk);
                 Ok(Some(cloned))
             }
             RegionChunk::Chunk(chunk) => Ok(Some(chunk.clone())),

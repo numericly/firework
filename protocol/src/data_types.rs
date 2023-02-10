@@ -526,3 +526,9 @@ mod test {
         panic!();
     }
 }
+
+impl SerializeField for DisplaySkinParts {
+    fn serialize<W: std::io::Write>(&self, mut writer: W) {
+        self.bytes.serialize(&mut writer);
+    }
+}

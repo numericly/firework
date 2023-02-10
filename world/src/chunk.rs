@@ -4,10 +4,12 @@ use minecraft_data::{
     Palette,
 };
 use nbt::{from_zlib_reader, Blob};
-use protocol::{client_bound::ChunkUpdateAndLightUpdate, data_types::Slot};
+use protocol::client_bound::ChunkUpdateAndLightUpdate;
 use protocol_core::{BitSet, SerializeField, VarInt};
-use serde::{Deserialize, Deserializer};
+use serde::Deserialize;
 use std::{cmp, fmt::Debug, hash::Hash};
+
+use crate::WorldError;
 
 #[derive(Deserialize, Debug)]
 struct RawChunkData {
@@ -40,10 +42,6 @@ struct RawChunkSection {
     // #[serde(rename = "BlockLight")]
     #[serde(skip)]
     pub block_light: Option<Vec<i8>>,
-}
-
-fn lighting() -> Option<Vec<i8>> {
-    Some(Vec::new())
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -133,9 +131,9 @@ trait Write {
 }
 
 impl Chunk {
-    pub fn from_zlib_reader(reader: &[u8]) -> Result<Chunk, String> {
+    pub fn from_zlib_reader(reader: &[u8]) -> Result<Chunk, WorldError> {
         // let start = std::time::Instant::now();
-        let raw_chunk: RawChunkData = from_zlib_reader(reader).map_err(|e| e.to_string())?;
+        let raw_chunk: RawChunkData = from_zlib_reader(reader)?;
         // println!("Deserialization took {:?}", start.elapsed());
 
         let mut section_offset = i8::MAX;

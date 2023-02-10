@@ -70,7 +70,7 @@ fn criterion_benchmark(c: &mut Criterion) {
         }
     }
 
-    let world = World::new("./world/region/");
+    let world = World::new("./world/region/", false);
 
     println!("Size of block {}", std::mem::size_of::<Block>());
 
@@ -115,13 +115,13 @@ fn criterion_benchmark(c: &mut Criterion) {
 
     let region = world.get_region(0, 0).unwrap().unwrap();
 
-    let lock = region.sections.lock();
-    if let RegionChunk::ChunkBytes(bytes) = &lock.unwrap()[32] {
-        let reader = bytes[5..].to_vec();
-        let chunk_data: Chunk = from_zlib_reader(reader.as_slice()).unwrap();
-        let blocks: &PalettedContainer<Block, 4096> =
-            chunk_data.sections[1].block_states.as_ref().unwrap();
-    };
+    // let lock = region.sections.lock();
+    // if let RegionChunk::ChunkBytes(bytes) = &lock.await[32] {
+    //     let reader = bytes[5..].to_vec();
+    //     let chunk_data: Chunk = from_zlib_reader(reader.as_slice()).unwrap();
+    //     let blocks: &PalettedContainer<Block, 4096> =
+    //         chunk_data.sections[1].block_states.as_ref().unwrap();
+    // };
 
     // c.bench_function("deserialize chunk", |a| {
     //     a.iter(|| {

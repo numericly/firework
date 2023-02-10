@@ -45,8 +45,8 @@ harness = false
 opt-level = 1
 
 # Small binary
-# [profile.release]
+[profile.release]
 # codegen-units = 1
-# lto = true
-# strip = true  # Automatically strip symbols from the binary.
+lto = true
+strip = true  # Automatically strip symbols from the binary.
 # opt-level = "z"  # Optimize for size.

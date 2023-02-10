@@ -10,24 +10,29 @@ use protocol_core::VarInt;
 
 use crate::{
     client::Client,
-    server::{ConnectionError, Server, ServerHandler},
+    server::{ConnectionError, Server, ServerHandler, ServerProxy},
 };
 
 // these structs are blank for now, but if you want to add data to them, you can
 #[derive(Debug)]
 pub struct TestGui {}
 #[derive(Debug)]
-pub struct GameQueueMenuGui {}
+pub struct GameQueueMenuGui {
+    //  hi xavier
+}
 
 pub trait GuiPackets {
     fn draw(&self) -> SetContainerContent;
     fn open(&self) -> OpenScreen;
-    fn handle_click<T: ServerHandler<U>, U>(
+    fn handle_click<Handler, Proxy>(
         &self,
         slot: i16,
-        client: &Client,
-        server: &Server<T, U>,
-    ) {
+        client: &Client<Proxy>,
+        server: &Server<Handler, Proxy>,
+    ) where
+        Handler: ServerHandler<Proxy> + Send + Sync + 'static,
+        Proxy: ServerProxy + Send + Sync + 'static,
+    {
         println!("Clicked on slot: {:?}", slot);
     }
 }
@@ -39,12 +44,16 @@ pub enum Gui {
 }
 
 impl Gui {
-    pub async fn handle_click<T: ServerHandler<U>, U>(
+    pub async fn handle_click<Handler, Proxy>(
         &self,
         slot: i16,
-        client: &Client,
-        server: &Server<T, U>,
-    ) -> Result<(), ConnectionError> {
+        client: &Client<Proxy>,
+        server: &Server<Handler, Proxy>,
+    ) -> Result<(), ConnectionError>
+    where
+        Handler: ServerHandler<Proxy> + Send + Sync + 'static,
+        Proxy: ServerProxy + Send + Sync + 'static,
+    {
         // this is stupid looking code but I'm not sure of any better ways to do this
         match self {
             Gui::TestGui(gui) => {
@@ -60,6 +69,7 @@ impl Gui {
     }
 }
 
+#[allow()]
 enum WindowType {
     Generic9x1,
     Generic9x2,
@@ -192,12 +202,15 @@ impl GuiPackets for GameQueueMenuGui {
         }
     }
 
-    fn handle_click<T: ServerHandler<U>, U>(
+    fn handle_click<Handler, Proxy>(
         &self,
         slot: i16,
-        client: &Client,
-        server: &Server<T, U>,
-    ) {
+        client: &Client<Proxy>,
+        server: &Server<Handler, Proxy>,
+    ) where
+        Handler: ServerHandler<Proxy> + Send + Sync + 'static,
+        Proxy: ServerProxy + Send + Sync + 'static,
+    {
         match slot {
             2 => {
                 println!("definitely joining glide game");
