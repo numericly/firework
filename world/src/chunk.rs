@@ -36,11 +36,11 @@ struct RawChunkSection {
     y: i8,
     block_states: Option<CompactedPalettedContainer<Block, 4096>>,
     biomes: Option<CompactedPalettedContainer<Biome, 64>>,
-    // #[serde(rename = "SkyLight")]
-    #[serde(skip)]
+    #[serde(rename = "SkyLight")]
+    // #[serde(skip)]
     pub sky_light: Option<Vec<i8>>,
-    // #[serde(rename = "BlockLight")]
-    #[serde(skip)]
+    #[serde(rename = "BlockLight")]
+    // #[serde(skip)]
     pub block_light: Option<Vec<i8>>,
 }
 
@@ -124,6 +124,7 @@ pub struct ChunkSection {
     sky_light: Option<Vec<i8>>,
     block_light: Option<Vec<i8>>,
     non_air_blocks: u16,
+    y: i8,
 }
 
 trait Write {
@@ -183,6 +184,7 @@ impl Chunk {
                 block_states,
                 biomes,
                 non_air_blocks,
+                y,
             });
         }
 
@@ -199,50 +201,32 @@ impl Chunk {
     pub fn into_packet(&self) -> ChunkUpdateAndLightUpdate {
         let mut packet_data = Vec::new();
         self.write(&mut packet_data);
-        let mut sky_light_refs = Vec::new();
-        let mut block_light_refs = Vec::new();
-        for i in 0..22 {
-            sky_light_refs.push(&self.sections[i].sky_light);
-            block_light_refs.push(&self.sections[i].block_light);
-        }
-        //create bitmasks
+
+        // in these masks, the least significant bit corresponds to the section underneath the bottom of the world
+        // the most significant bit corresponds to the section above the max build height
         let mut sky_light_mask = BitSet::new();
         let mut block_light_mask = BitSet::new();
-        //height + 2
-        for i in 0..22 {
-            sky_light_mask.push(sky_light_refs[i].is_some());
-            block_light_mask.push(block_light_refs[i].is_some());
-        }
         let mut empty_sky_light_mask = BitSet::new();
         let mut empty_block_light_mask = BitSet::new();
-        for i in 0..22 {
-            empty_sky_light_mask.push(
-                sky_light_refs[i].is_some()
-                    && sky_light_refs[i].as_ref().unwrap().iter().all(|&x| x == 0),
-            );
-            empty_block_light_mask.push(
-                block_light_refs[i].is_some()
-                    && block_light_refs[i]
-                        .as_ref()
-                        .unwrap()
-                        .iter()
-                        .all(|&x| x == 0),
-            );
-        }
-        // TODO: implement support for zeroed out chunks instead of sending empty light arrays
-        //calculate outgoing lighting data
-        let mut sky_light: Vec<Vec<i8>> = Vec::new();
-        let mut block_light: Vec<Vec<i8>> = Vec::new();
-        for i in 0..sky_light_refs.len() {
-            if sky_light_mask.get(i) && !empty_sky_light_mask.get(i) {
-                sky_light.push(sky_light_refs[i].as_ref().unwrap().clone());
+
+        let mut sky_light = Vec::new();
+        let mut block_light = Vec::new();
+
+        for section in &self.sections {
+            if section.sky_light.is_some() {
+                sky_light_mask.set((section.y + 5) as usize, true);
+                sky_light.push(section.sky_light.clone().unwrap());
+            } else if section.sky_light == Some(vec![0; 2048]) {
+                empty_sky_light_mask.set((section.y + 5) as usize, true);
+            }
+            if section.block_light.is_some() {
+                block_light_mask.set((section.y + 5) as usize, true);
+                block_light.push(section.block_light.clone().unwrap());
+            } else if section.block_light == Some(vec![0; 2048]) {
+                empty_block_light_mask.set((section.y + 5) as usize, true);
             }
         }
-        for i in 0..block_light_refs.len() {
-            if block_light_mask.get(i) && !empty_block_light_mask.get(i) {
-                block_light.push(block_light_refs[i].as_ref().unwrap().clone());
-            }
-        }
+
         ChunkUpdateAndLightUpdate {
             x: self.x,
             z: self.z,

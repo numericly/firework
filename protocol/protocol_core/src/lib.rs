@@ -50,11 +50,11 @@ pub struct Position {
 #[repr(transparent)]
 pub struct UnsizedVec<T: DeserializeField + SerializeField>(pub Vec<T>);
 
-#[derive(Debug, PartialEq)]
+#[derive(PartialEq)]
 
 pub struct BitSet(
     pub Vec<u64>, // data
-    pub usize,    // number of bits
+    usize,        // number of bits
 );
 
 impl BitSet {
@@ -73,19 +73,90 @@ impl BitSet {
     }
     ///Get the bit at the given index
     pub fn get(&self, index: usize) -> bool {
-        let byte_index = index / 64;
-        let bit_index = index % 64;
-        if self.0.len() <= byte_index {
-            false
-        } else {
-            self.0[byte_index] & (1 << bit_index) != 0
-        }
+        return (self.0[index / 64] >> (index % 64)) & 1 == 1;
     }
     ///Push a bit to the end of the BitSet
     pub fn push(&mut self, value: bool) {
         self.set(self.1, value);
         self.1 += 1;
     }
+    pub fn resize(&mut self, new_size: usize, value: bool) {
+        if new_size > self.1 {
+            for _ in self.1..new_size {
+                self.push(value);
+            }
+        } else {
+            self.1 = new_size;
+        }
+    }
+    pub fn ones(&self) -> usize {
+        let mut count = 0;
+        for i in 0..self.1 {
+            if self.get(i) {
+                count += 1;
+            }
+        }
+        count
+    }
+    pub fn zeros(&self) -> usize {
+        self.1 - self.ones()
+    }
+}
+
+impl std::fmt::Debug for BitSet {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for i in 0..self.1 {
+            write!(f, "{}", self.get(i) as u8)?;
+            if i % 64 == 63 {
+                write!(f, " ")?;
+            } else if i % 8 == 7 {
+                write!(f, "_")?;
+            }
+        }
+        Ok(())
+    }
+}
+
+#[test]
+fn test_bitset_basic() {
+    let mut bitset = BitSet::new();
+    bitset.push(false);
+    bitset.push(false);
+    bitset.push(true);
+
+    println!("length: {}", bitset.1);
+    print!("data: ");
+    for i in 0..bitset.0.len() {
+        print!("{:b} ", bitset.0[i]);
+    }
+    assert_eq!(bitset.get(2), true);
+}
+
+#[test]
+fn test_bitset_floating_set() {
+    let mut bitset = BitSet::new();
+    bitset.set(50, true);
+    assert_eq!(bitset.get(50), true);
+}
+
+#[test]
+fn test_bitset_nonexistent_get() {
+    let mut bitset = BitSet::new();
+    assert_eq!(bitset.get(50), false);
+}
+
+#[test]
+fn test_bitset_length() {
+    let mut bitset = BitSet::new();
+    for _ in 0..64 {
+        bitset.push(true);
+    }
+    println!("length: {}", bitset.1);
+    print!("data: ");
+    for i in 0..bitset.0.len() {
+        print!("{:b} ", bitset.0[i]);
+    }
+    assert_eq!(bitset.1, 64);
 }
 
 pub trait DeserializeField {

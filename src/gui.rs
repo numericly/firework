@@ -69,7 +69,6 @@ impl Gui {
     }
 }
 
-#[allow()]
 enum WindowType {
     Generic9x1,
     Generic9x2,
