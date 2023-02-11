@@ -357,7 +357,7 @@ where
     pub difficulty: RwLock<u8>,
     pub difficulty_locked: RwLock<bool>,
     pub handler: Handler,
-    pub brand: &'static str,
+    pub brand: String,
     _lowest_free_id: Mutex<i32>,
 
     proxy: PhantomData<Proxy>,
@@ -452,7 +452,7 @@ where
     Handler: Send + Sync + 'static,
     Proxy::TransferData: Clone,
 {
-    pub async fn new(world: World, brand: &'static str) -> Arc<Self> {
+    pub async fn new(world: World, brand: String) -> Arc<Self> {
         Arc::new(Self {
             difficulty: RwLock::new(0),
             difficulty_locked: RwLock::new(false),
