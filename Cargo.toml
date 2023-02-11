@@ -42,11 +42,11 @@ name = "my_benchmark"
 harness = false
 
 [profile.dev]
-opt-level = 1
+opt-level = 0
 
 # Small binary
 [profile.release]
 # codegen-units = 1
-lto = true
+# lto = true
 strip = true  # Automatically strip symbols from the binary.
 # opt-level = "z"  # Optimize for size.

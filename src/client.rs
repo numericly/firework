@@ -483,6 +483,22 @@ where
             }
         }
 
+        let position_sync = {
+            let player = self.player.read().await;
+            SynchronizePlayerPosition {
+                x: player.position.x,
+                y: player.position.y,
+                z: player.position.z,
+                yaw: player.rotation.yaw,
+                pitch: player.rotation.pitch,
+                flags: PlayerPositionFlags::new(),
+                teleport_id: VarInt(0),
+                dismount_vehicle: false,
+            }
+        };
+
+        self.connection.write_packet(position_sync).await?;
+
         if let Some(information) = self.client_data.settings.read().await.as_ref() {
             self.update_entity_metadata(
                 self.client_data.entity_id,
@@ -845,6 +861,58 @@ where
             }
             _ => (),
         };
+        Ok(())
+    }
+    pub async fn move_chunk<Handler>(
+        &self,
+        server: &Server<Handler, Proxy>,
+        chunk_x: i32,
+        chunk_z: i32,
+    ) -> Result<(), ConnectionError>
+    where
+        Handler: ServerHandler<Proxy> + Send + Sync + 'static,
+        Proxy: ServerProxy + Send + Sync + 'static,
+    {
+        let mut player_loaded_chunks = self.client_data.loaded_chunks.lock().await;
+
+        for chunk in player_loaded_chunks.clone().iter() {
+            if chunk.0 + 7 < chunk_x
+                || chunk.0 - 7 > chunk_x
+                || chunk.1 + 7 < chunk_z
+                || chunk.1 - 7 > chunk_z
+            {
+                self.unload_chunk(chunk.0, chunk.1).await?;
+                player_loaded_chunks.remove(chunk);
+            }
+        }
+
+        for x in -7..=7 {
+            for z in -7..=7 {
+                if player_loaded_chunks.contains(&(x + chunk_x, z + chunk_z)) {
+                    continue;
+                }
+                let packet = {
+                    let chunk_data = server.world.get_chunk(x + chunk_x, z + chunk_z).await?;
+                    if let Some(chunk_lock) = chunk_data {
+                        let chunk = chunk_lock.read().await;
+                        Some(chunk.into_packet())
+                    } else {
+                        None
+                    }
+                };
+                if let Some(packet) = packet {
+                    self.connection.write_packet(packet).await?;
+                }
+                player_loaded_chunks.insert((x + chunk_x, z + chunk_z));
+            }
+        }
+
+        let set_center_chunk = SetCenterChunk {
+            x: VarInt(chunk_x),
+            z: VarInt(chunk_z),
+        };
+
+        self.send_packet(set_center_chunk).await?;
         Ok(())
     }
     async fn ping(&self) -> Result<(), ConnectionError> {

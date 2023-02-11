@@ -8,7 +8,7 @@ use protocol::{
 };
 use protocol_core::VarInt;
 use server::{
-    ClientData, ConnectionError, Server, ServerHandler, ServerManager, ServerProxy, Vec3,
+    ClientData, ConnectionError, Rotation, Server, ServerHandler, ServerManager, ServerProxy, Vec3,
 };
 use std::{sync::Arc, time::Duration};
 use tokio::{sync::RwLock, time::sleep};
@@ -30,7 +30,8 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
     async fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError> {
         let mut player = Player {
             gamemode: GameMode::Adventure,
-            position: Vec3::new(0.0, 48.0, 0.0),
+            position: Vec3::new(0.0, 46.0, 0.0),
+            rotation: Rotation::new(-90., 0.),
             profile,
             uuid,
             ..Player::default()
@@ -135,12 +136,14 @@ impl ServerProxy for MiniGameProxy {
             .handle_connection(self.clone(), connection.clone(), client_data.clone())
             .await;
 
-        if let Ok(TransferData::Glide) = result {
+        if let Ok(TransferData::Glide) = &result {
             self.glide_server
                 .clone()
                 .handle_connection(self.clone(), connection.clone(), client_data.clone())
                 .await;
         };
+
+        println!("result: {:?}, player: {}", result, client_data.profile.name);
 
         *self.connected_players.write().await -= 1;
     }
@@ -164,7 +167,7 @@ impl ServerProxy for MiniGameProxy {
 async fn main() {
     std::env::set_var("RUST_BACKTRACE", "1");
 
-    const PORT: u16 = 25566;
+    const PORT: u16 = 25565;
 
     let _server = ServerManager::<MiniGameProxy>::run(PORT).await;
 

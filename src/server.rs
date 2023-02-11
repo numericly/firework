@@ -170,7 +170,7 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
         let cloned_server = server.clone();
 
         tokio::task::spawn(async move {
-            let listener = TcpListener::bind(format!("127.0.0.1:{}", port))
+            let listener = TcpListener::bind(format!("0.0.0.0:{}", port))
                 .await
                 .expect("Failed to bind server to port");
             println!("Server started listening on port: {}", port);
@@ -751,6 +751,15 @@ where
                 .await?;
             if let Some(pos) = &pos {
                 client.player.write().await.position = pos.clone();
+                let previous_chunk_x = previous_pos.x as i32 >> 4;
+                let previous_chunk_z = previous_pos.z as i32 >> 4;
+
+                let chunk_x = pos.x as i32 >> 4;
+                let chunk_z = pos.z as i32 >> 4;
+
+                if previous_chunk_x != chunk_x || previous_chunk_z != chunk_z {
+                    client.move_chunk(self, chunk_x, chunk_z).await?;
+                }
             };
             pos
         } else {
