@@ -359,7 +359,7 @@ mod serializer {
     use std::{collections::HashMap, io::Write};
 
     use byteorder::{BigEndian, WriteBytesExt};
-    use minecraft_data::tags::VarIntList;
+    use firework_data::tags::VarIntList;
     use nbt::Blob;
 
     use crate::{BitSet, Position, SerializeField, UnsizedVec, VarInt};

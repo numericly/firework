@@ -1,12 +1,13 @@
 use async_trait::async_trait;
-use authentication::{authenticate, AuthenticationError, Profile};
 use dashmap::{DashMap, DashSet};
-use protocol::client_bound::{
+use firework_authentication::{authenticate, AuthenticationError, Profile};
+use firework_protocol::client_bound::{
     EncryptionRequest, LoginDisconnect, LoginSuccess, Pong, ServerStatus, SetCompression,
 };
-use protocol::server_bound::{ClientInformation, Ping, ServerBoundPacket};
-use protocol::{read_specific_packet, ConnectionState, Protocol, ProtocolError};
-use protocol_core::VarInt;
+use firework_protocol::server_bound::{ClientInformation, Ping, ServerBoundPacket};
+use firework_protocol::{read_specific_packet, ConnectionState, Protocol, ProtocolError};
+use firework_protocol_core::VarInt;
+use firework_world::World;
 use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
 use std::collections::HashSet;
 use std::marker::PhantomData;
@@ -20,7 +21,6 @@ use tokio::task::JoinHandle;
 use tokio::time::sleep;
 use tokio::{select, task};
 use tokio_util::sync::CancellationToken;
-use world::World;
 
 use crate::client::{Client, ClientCommand, Player};
 use crate::entities::{EntityDataFlags, EntityMetadata, Pose};
@@ -57,7 +57,7 @@ pub enum ConnectionError {
     #[error("client cancelled")]
     ClientCancelled,
     #[error("world error {0}")]
-    WorldError(#[from] world::WorldError),
+    WorldError(#[from] firework_world::WorldError),
 }
 
 #[derive(Clone, Debug)]

@@ -1,8 +1,10 @@
-use authentication::ProfileProperty;
+use firework_authentication::ProfileProperty;
+use firework_protocol_core::{
+    DeserializeError, DeserializeField, Position, SerializeField, VarInt,
+};
+use firework_protocol_derive::{DeserializeField, SerializeField};
 use modular_bitfield::bitfield;
 use nbt::{de, ser};
-use protocol_core::{DeserializeError, DeserializeField, Position, SerializeField, VarInt};
-use protocol_derive::{DeserializeField, SerializeField};
 use std::io::{Read, Write};
 
 #[derive(Debug, PartialEq)]
@@ -78,7 +80,7 @@ pub struct SignatureData {
 }
 
 #[derive(Debug, PartialEq, DeserializeField)]
-#[protocol(typ = "protocol_core::VarInt")]
+#[protocol(typ = "firework_protocol_core::VarInt")]
 pub enum PlayerActionStatus {
     StartDigging,
     CancelDigging,
@@ -90,7 +92,7 @@ pub enum PlayerActionStatus {
 }
 
 #[derive(Debug, PartialEq, DeserializeField)]
-#[protocol(typ = "protocol_core::VarInt")]
+#[protocol(typ = "firework_protocol_core::VarInt")]
 pub enum BlockFace {
     Bottom,
     Top,
@@ -101,7 +103,7 @@ pub enum BlockFace {
 }
 
 #[derive(Debug, PartialEq, DeserializeField)]
-#[protocol(typ = "protocol_core::VarInt")]
+#[protocol(typ = "firework_protocol_core::VarInt")]
 pub enum ResourcePackLoadStatus {
     Success,
     Declined,
@@ -110,7 +112,7 @@ pub enum ResourcePackLoadStatus {
 }
 
 #[derive(Debug, PartialEq, DeserializeField)]
-#[protocol(typ = "protocol_core::VarInt")]
+#[protocol(typ = "firework_protocol_core::VarInt")]
 pub enum ChatMode {
     Enabled,
     CommandsOnly,
@@ -118,21 +120,21 @@ pub enum ChatMode {
 }
 
 #[derive(Debug, PartialEq, DeserializeField)]
-#[protocol(typ = "protocol_core::VarInt")]
+#[protocol(typ = "firework_protocol_core::VarInt")]
 pub enum MainHand {
     Left,
     Right,
 }
 
 #[derive(Debug, PartialEq, DeserializeField, Clone)]
-#[protocol(typ = "protocol_core::VarInt")]
+#[protocol(typ = "firework_protocol_core::VarInt")]
 pub enum Arm {
     Main,
     Off,
 }
 
 #[derive(Debug, PartialEq, DeserializeField)]
-#[protocol(typ = "protocol_core::VarInt")]
+#[protocol(typ = "firework_protocol_core::VarInt")]
 pub enum PlayerCommandAction {
     StartSneaking,
     StopSneaking,
@@ -146,7 +148,7 @@ pub enum PlayerCommandAction {
 }
 
 #[derive(Debug, PartialEq, DeserializeField)]
-#[protocol(typ = "protocol_core::VarInt")]
+#[protocol(typ = "firework_protocol_core::VarInt")]
 pub enum RecipeBookType {
     Crafting,
     Furnace,
@@ -302,14 +304,14 @@ pub enum NodeType {
 }
 
 #[derive(Debug, PartialEq, SerializeField)]
-#[protocol(typ = "protocol_core::VarInt")]
+#[protocol(typ = "firework_protocol_core::VarInt")]
 pub enum Parser {
     Bool,
     Float(FloatProps),
 }
 
 #[derive(Debug, PartialEq, DeserializeField)]
-#[protocol(typ = "protocol_core::VarInt")]
+#[protocol(typ = "firework_protocol_core::VarInt")]
 
 pub enum InventoryOperationMode {
     Click,

@@ -1,7 +1,7 @@
 use crate::chunk::Chunk;
 use byteorder::{BigEndian, ReadBytesExt};
 use dashmap::DashMap;
-use protocol::client_bound::SerializePacket;
+use firework_protocol::client_bound::SerializePacket;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::fs::File;

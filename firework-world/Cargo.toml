@@ -1,5 +1,5 @@
 [package]
-name = "world"
+name = "firework_world"
 version = "0.1.0"
 edition = "2021"
 
@@ -13,9 +13,9 @@ hematite-nbt = "0.5.2"
 dashmap = "5.4.0"
 tokio = "1.21.2"
 thiserror = "1.0.38"
-protocol = {path = "../firework-protocol"}
-protocol_core = {path = "../firework-protocol/core"}
-minecraft_data = {path = "../firework-data"}
+firework_protocol = {path = "../firework-protocol"}
+firework_protocol_core = {path = "../firework-protocol/core"}
+firework_data = {path = "../firework-data"}
 
 [profile.release]
 opt-level = 3

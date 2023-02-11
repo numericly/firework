@@ -1,5 +1,5 @@
 [package]
-name = "authentication"
+name = "firework_authentication"
 version = "0.1.0"
 edition = "2021"
 
@@ -12,5 +12,5 @@ serde = {version = "1.0.144", features = ["derive"]}
 num-bigint = "0.4.3"
 sha1 = "0.10.4"
 thiserror = "1.0.37"
-protocol_derive = { path = "../firework-protocol/derive" }
-protocol_core = { path = "../firework-protocol/core" }
+firework_protocol_derive = { path = "../firework-protocol/derive" }
+firework_protocol_core = { path = "../firework-protocol/core" }

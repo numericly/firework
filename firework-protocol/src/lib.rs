@@ -5,12 +5,12 @@ use crate::{
 use aes::cipher::{inout::InOutBuf, BlockDecryptMut, BlockEncryptMut};
 use aes::{cipher::KeyIvInit, Aes128};
 use cfb8::{self, Decryptor, Encryptor};
+use firework_protocol_core::{DeserializeError, DeserializeField, SerializeField, VarInt};
+use firework_protocol_derive::DeserializeField;
 use miniz_oxide::{
     deflate::compress_to_vec_zlib,
     inflate::{decompress_to_vec_zlib, DecompressError},
 };
-use protocol_core::{DeserializeError, DeserializeField, SerializeField, VarInt};
-use protocol_derive::DeserializeField;
 use std::{
     fmt::Debug,
     io::{self, Cursor, ErrorKind},

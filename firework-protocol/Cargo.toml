@@ -1,5 +1,5 @@
 [package]
-name = "protocol"
+name = "firework_protocol"
 version = "0.1.0"
 edition = "2021"
 
@@ -13,14 +13,11 @@ cfb8 = "0.8.1"
 modular-bitfield = "0.11.2"
 thiserror = "1.0.37"
 byteorder = "1.4.3"
-minecraft_data = { path = "../firework-data" }
-protocol_derive = { path = "./derive" }
-protocol_core = { path = "./core" }
-authentication = { path = "../firework-authentication" }
 hematite-nbt = "0.5.2"
 serde = { version = "1.0.144", features = ["derive"] }
 reqwest = "0.11.14"
 sha1 = "0.10.5"
-
-[profile.dev]
-opt-level = 2
+firework_data = { path = "../firework-data" }
+firework_protocol_derive = { path = "./derive" }
+firework_protocol_core = { path = "./core" }
+firework_authentication = { path = "../firework-authentication" }

@@ -1,12 +1,9 @@
-use std::sync::Arc;
-
-use minecraft_data::items::{DiamondShovel, Elytra, IronSword, Item};
-use nbt::Blob;
-use protocol::{
+use firework_data::items::{DiamondShovel, Elytra, IronSword, Item};
+use firework_protocol::{
     client_bound::{OpenScreen, SetContainerContent},
     data_types::{ItemNbt, ItemNbtDisplay, Slot},
 };
-use protocol_core::VarInt;
+use firework_protocol_core::VarInt;
 
 use crate::{
     client::Client,
@@ -69,6 +66,7 @@ impl Gui {
     }
 }
 
+#[allow(dead_code)]
 enum WindowType {
     Generic9x1,
     Generic9x2,

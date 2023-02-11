@@ -1,18 +1,18 @@
 use async_trait::async_trait;
-use authentication::Profile;
 use client::{Client, ClientCommand, GameMode, InventorySlot, Player};
-use minecraft_data::items::{Compass, Elytra, Item, Items};
-use protocol::{
+use firework_authentication::Profile;
+use firework_data::items::{Compass, Elytra, Item};
+use firework_protocol::{
     data_types::{ItemNbt, Slot},
     Protocol,
 };
-use protocol_core::VarInt;
+use firework_protocol_core::VarInt;
+use firework_world::World;
 use server::{
     ClientData, ConnectionError, Rotation, Server, ServerHandler, ServerManager, ServerProxy, Vec3,
 };
 use std::{sync::Arc, time::Duration};
 use tokio::{sync::RwLock, time::sleep};
-use world::World;
 
 mod client;
 // mod commands;
@@ -20,6 +20,7 @@ mod entities;
 mod gui;
 mod server;
 
+#[allow(dead_code)]
 enum ColorCodes {
     Obfuscated,
     Bold,

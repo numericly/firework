@@ -3,13 +3,13 @@ use crate::{
     gui::{GameQueueMenuGui, Gui, Gui::*, GuiPackets},
     server::{ClientData, ConnectionError, Rotation, Server, ServerHandler, ServerProxy, Vec3},
 };
-use authentication::Profile;
 use dashmap::DashMap;
-use minecraft_data::{
+use firework_authentication::Profile;
+use firework_data::{
     items::{Compass, GrayDye, Item, LimeDye, RedDye},
     tags::{REGISTRY, TAGS},
 };
-use protocol::{
+use firework_protocol::{
     client_bound::{
         ChangeDifficulty, ClientBoundKeepAlive, ClientBoundPacketID, CloseContainer, Commands,
         CustomSound, IdMapHolder, LoginPlay, PlayDisconnect, PlayerAbilities, PlayerInfo,
@@ -26,10 +26,10 @@ use protocol::{
         UpdateGameMode, UpdateLatency, UpdateListed,
     },
     read_specific_packet,
-    server_bound::{ChatMessage, CloseContainerServerBound, PlayerCommand, ServerBoundPacket},
+    server_bound::{ChatMessage, PlayerCommand, ServerBoundPacket},
     ConnectionState, Protocol, ProtocolError,
 };
-use protocol_core::{DeserializeField, Position, SerializeField, UnsizedVec, VarInt};
+use firework_protocol_core::{DeserializeField, Position, SerializeField, UnsizedVec, VarInt};
 use rand::Rng;
 use std::{fmt::Debug, sync::Arc};
 use tokio::sync::{broadcast, Mutex, RwLock};

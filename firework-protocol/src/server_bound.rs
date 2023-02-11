@@ -60,7 +60,7 @@ use crate::{
     },
     ConnectionState,
 };
-use protocol_core::{DeserializeError, DeserializeField, Position, UnsizedVec, VarInt};
+use firework_protocol_core::{DeserializeError, DeserializeField, Position, UnsizedVec, VarInt};
 use std::io::Read;
 
 pub trait ServerBoundPacketID {

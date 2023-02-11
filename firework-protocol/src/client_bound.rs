@@ -35,12 +35,12 @@ macro_rules! define_client_bound_protocol {
     };
 }
 
-use authentication::ProfileProperty;
-use minecraft_data::tags::VarIntList;
-use minecraft_data::Palette;
-use protocol_core::{BitSet, UnsizedVec, VarInt};
-use protocol_core::{Position, SerializeField};
-use protocol_derive::SerializeField;
+use firework_authentication::ProfileProperty;
+use firework_data::tags::VarIntList;
+use firework_data::Palette;
+use firework_protocol_core::{BitSet, UnsizedVec, VarInt};
+use firework_protocol_core::{Position, SerializeField};
+use firework_protocol_derive::SerializeField;
 use sha1::{Digest, Sha1};
 use std::collections::HashMap;
 

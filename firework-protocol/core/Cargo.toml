@@ -1,5 +1,5 @@
 [package]
-name = "protocol_core"
+name = "firework_protocol_core"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,5 +8,5 @@ edition = "2021"
 [dependencies]
 thiserror = "1.0.37"
 byteorder = "1.4.3"
-minecraft_data = { version = "*", path = "../../firework-data" }
 hematite-nbt = "0.5.2"
+firework_data = { version = "*", path = "../../firework-data" }

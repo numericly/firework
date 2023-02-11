@@ -1,7 +1,7 @@
+use firework_protocol::data_types::DisplaySkinParts;
+use firework_protocol_core::SerializeField;
+use firework_protocol_derive::SerializeField;
 use modular_bitfield::bitfield;
-use protocol::data_types::DisplaySkinParts;
-use protocol_core::SerializeField;
-use protocol_derive::SerializeField;
 
 macro_rules! define_entity_metadata_types {
     (
@@ -32,9 +32,9 @@ macro_rules! define_entity_metadata {
                 match self {
                     $(
                         EntityMetadata::$name(value) => {
-                            <u8 as protocol_core::SerializeField>::serialize(&$id, &mut writer);
-                            <protocol_core::VarInt as protocol_core::SerializeField>::serialize(&protocol_core::VarInt(__map_type!($type_idx)), &mut writer);
-                            <$type_idx as protocol_core::SerializeField>::serialize(value, &mut writer);
+                            <u8 as firework_protocol_core::SerializeField>::serialize(&$id, &mut writer);
+                            <firework_protocol_core::VarInt as firework_protocol_core::SerializeField>::serialize(&firework_protocol_core::VarInt(__map_type!($type_idx)), &mut writer);
+                            <$type_idx as firework_protocol_core::SerializeField>::serialize(value, &mut writer);
                         }
                     ),*
                 }
@@ -62,7 +62,7 @@ pub const END_INDEX: u8 = 0xFF;
 pub struct EntityDataFlags {
     pub is_on_fire: bool,
     pub is_crouching: bool,
-    _riding: bool,
+    deprecated_riding: bool,
     pub is_sprinting: bool,
     pub is_swimming: bool,
     pub is_invisible: bool,
@@ -76,8 +76,9 @@ impl SerializeField for EntityDataFlags {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Debug, PartialEq, SerializeField, Clone)]
-#[protocol(typ = "protocol_core::VarInt")]
+#[protocol(typ = "firework_protocol_core::VarInt")]
 pub enum Pose {
     Standing,
     FallFlying,

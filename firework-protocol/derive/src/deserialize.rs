@@ -50,7 +50,7 @@ fn gen_impl_enum(input: DeriveInput) -> TokenStream2 {
                     #index => 
                         #name::#variant_ident {
                             #(
-                                #field_idents: protocol_core::DeserializeField::deserialize(&mut reader)?,
+                                #field_idents: firework_protocol_core::DeserializeField::deserialize(&mut reader)?,
                             )*
                         },
                 }
@@ -60,7 +60,7 @@ fn gen_impl_enum(input: DeriveInput) -> TokenStream2 {
                 let mut args_stream = TokenStream2::new();
 
                 for _ in 0..fields_count {
-                    args_stream.extend(quote! {protocol_core::DeserializeField::deserialize(&mut reader)?, });
+                    args_stream.extend(quote! {firework_protocol_core::DeserializeField::deserialize(&mut reader)?, });
                 }
 
                 quote! {
@@ -71,12 +71,12 @@ fn gen_impl_enum(input: DeriveInput) -> TokenStream2 {
     }
 
     quote! {
-        impl protocol_core::DeserializeField for #name {
-            fn deserialize<R: std::io::Read>(mut reader: R) -> Result<Self, protocol_core::DeserializeError>  {
-                let variant_index: i32 = <i32 as TryFrom<#typ>>::try_from(protocol_core::DeserializeField::deserialize(&mut reader)?).unwrap();
+        impl firework_protocol_core::DeserializeField for #name {
+            fn deserialize<R: std::io::Read>(mut reader: R) -> Result<Self, firework_protocol_core::DeserializeError>  {
+                let variant_index: i32 = <i32 as TryFrom<#typ>>::try_from(firework_protocol_core::DeserializeField::deserialize(&mut reader)?).unwrap();
                 Ok(match variant_index {
                     #match_arms
-                    variant => return Err(protocol_core::DeserializeError::InvalidVariantIndex(variant, stringify!(#name))),
+                    variant => return Err(firework_protocol_core::DeserializeError::InvalidVariantIndex(variant, stringify!(#name))),
                 })
             }
         }
@@ -99,11 +99,11 @@ fn handle_named_struct(fields: FieldsNamed, name: &Ident) -> TokenStream2 {
     let field_idents = fields.named.iter().map(|it| &it.ident);
 
     quote! {
-        impl protocol_core::DeserializeField for #name {
-            fn deserialize<R: std::io::Read>(mut reader: R) -> Result<Self, protocol_core::DeserializeError>  {
+        impl firework_protocol_core::DeserializeField for #name {
+            fn deserialize<R: std::io::Read>(mut reader: R) -> Result<Self, firework_protocol_core::DeserializeError>  {
                 Ok(Self {
                     #(
-                        #field_idents: protocol_core::DeserializeField::deserialize(&mut reader)?,
+                        #field_idents: firework_protocol_core::DeserializeField::deserialize(&mut reader)?,
                     )*
                 })
             }
@@ -116,12 +116,12 @@ fn handle_unnamed_struct(fields: FieldsUnnamed, name: &Ident) -> TokenStream2 {
     let mut args_stream = TokenStream2::new();
 
     for _ in 0..fields_count {
-        args_stream.extend(quote! {protocol_core::DeserializeField::deserialize(&mut reader)?, });
+        args_stream.extend(quote! {firework_protocol_core::DeserializeField::deserialize(&mut reader)?, });
     }
 
     quote! {
-        impl protocol_core::DeserializeField for #name {
-            fn deserialize<R: std::io::Read>(mut reader: R) -> Result<Self, protocol_core::DeserializeError>  {
+        impl firework_protocol_core::DeserializeField for #name {
+            fn deserialize<R: std::io::Read>(mut reader: R) -> Result<Self, firework_protocol_core::DeserializeError>  {
                 Ok(Self(#args_stream))
             }
         }

@@ -1,11 +1,11 @@
-use minecraft_data::{
+use firework_data::{
     biomes::Biome,
     blocks::{Air, Block},
     Palette,
 };
+use firework_protocol::client_bound::ChunkUpdateAndLightUpdate;
+use firework_protocol_core::{BitSet, SerializeField, VarInt};
 use nbt::{from_zlib_reader, Blob};
-use protocol::client_bound::ChunkUpdateAndLightUpdate;
-use protocol_core::{BitSet, SerializeField, VarInt};
 use serde::Deserialize;
 use std::{cmp, fmt::Debug, hash::Hash};
 
@@ -392,7 +392,7 @@ impl<T: Palette + Debug, const CONTAINER_SIZE: usize, const MINIMUM_BITS: usize>
 
 pub mod test {
     #[allow(unused_imports)]
-    use minecraft_data::blocks::{Dirt, Granite, Stone, StoneBricks};
+    use firework_data::blocks::{Dirt, Granite, Stone, StoneBricks};
 
     #[allow(unused_imports)]
     use super::*;
