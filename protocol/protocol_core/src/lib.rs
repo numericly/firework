@@ -52,46 +52,50 @@ pub struct UnsizedVec<T: DeserializeField + SerializeField>(pub Vec<T>);
 
 #[derive(PartialEq)]
 
-pub struct BitSet(
-    pub Vec<u64>, // data
-    usize,        // number of bits
-);
+pub struct BitSet {
+    pub data: Vec<u64>,
+    /// Number of bits in the BitSet
+    size: usize,
+}
 
 impl BitSet {
     ///Create a new BitSet
     pub fn new() -> BitSet {
-        BitSet(Vec::new(), 0)
+        BitSet {
+            data: Vec::new(),
+            size: 0,
+        }
     }
     ///Set the bit at the given index
     pub fn set(&mut self, index: usize, value: bool) {
         let byte_index = index / 64;
         let bit_index = index % 64;
-        if self.0.len() <= byte_index {
-            self.0.resize(byte_index + 1, 0);
+        if self.data.len() <= byte_index {
+            self.data.resize(byte_index + 1, 0);
         }
-        self.0[byte_index] |= (value as u64) << bit_index;
+        self.data[byte_index] |= (value as u64) << bit_index;
     }
     ///Get the bit at the given index
     pub fn get(&self, index: usize) -> bool {
-        return (self.0[index / 64] >> (index % 64)) & 1 == 1;
+        return (self.data[index / 64] >> (index % 64)) & 1 == 1;
     }
     ///Push a bit to the end of the BitSet
     pub fn push(&mut self, value: bool) {
-        self.set(self.1, value);
-        self.1 += 1;
+        self.set(self.size, value);
+        self.size += 1;
     }
     pub fn resize(&mut self, new_size: usize, value: bool) {
-        if new_size > self.1 {
-            for _ in self.1..new_size {
+        if new_size > self.size {
+            for _ in self.size..new_size {
                 self.push(value);
             }
         } else {
-            self.1 = new_size;
+            self.size = new_size;
         }
     }
     pub fn ones(&self) -> usize {
         let mut count = 0;
-        for i in 0..self.1 {
+        for i in 0..self.size {
             if self.get(i) {
                 count += 1;
             }
@@ -99,13 +103,13 @@ impl BitSet {
         count
     }
     pub fn zeros(&self) -> usize {
-        self.1 - self.ones()
+        self.size - self.ones()
     }
 }
 
 impl std::fmt::Debug for BitSet {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for i in 0..self.1 {
+        for i in 0..self.size {
             write!(f, "{}", self.get(i) as u8)?;
             if i % 64 == 63 {
                 write!(f, " ")?;
@@ -551,7 +555,7 @@ mod serializer {
 
     impl SerializeField for BitSet {
         fn serialize<W: Write>(&self, mut writer: W) {
-            self.0.serialize(&mut writer);
+            self.data.serialize(&mut writer);
         }
     }
 }
