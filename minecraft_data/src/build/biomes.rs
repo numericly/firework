@@ -17,7 +17,7 @@ pub struct Biome {
 }
 
 pub fn build_biomes() {
-    let file = fs::read_to_string("./data/1.19/biomes.json").expect("Unable to open biomes file");
+    let file = fs::read_to_string("./data/1.19.3/biomes.json").expect("Unable to open biomes file");
     let biomes: Vec<Biome> = serde_json::from_str(file.as_str()).unwrap();
 
     let mut biomes_rs = String::new();

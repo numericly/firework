@@ -178,6 +178,7 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                 let stream = listener.accept().await;
 
                 if let Ok((stream, _socket_addr)) = stream {
+                    println!("New connection from: {:?}", stream.peer_addr().unwrap());
                     let connection = Protocol::new(stream);
                     let server = cloned_server.clone();
                     #[allow(unused_must_use)]

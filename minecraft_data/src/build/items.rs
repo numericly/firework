@@ -17,7 +17,7 @@ struct Item {
 }
 
 pub fn build_items() {
-    let items = fs::read_to_string("./data/1.19/items.json").expect("Unable to open items file");
+    let items = fs::read_to_string("./data/1.19.3/items.json").expect("Unable to open items file");
     let items: Vec<Item> = serde_json::from_str(items.as_str()).unwrap();
     println!("cargo:error={:#?}", items);
     let mut items_rs = TokenStream2::new();
