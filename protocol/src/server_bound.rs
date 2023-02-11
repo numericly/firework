@@ -124,7 +124,7 @@ define_server_bound_protocol! {
         slots: Vec<SlotUpdate>,
         // cursor: Option<Slot>
     },
-    CloseContainer, 0x0B, Play => {
+    CloseContainerServerBound, 0x0B, Play => {
         window_id: u8
     },
     PluginMessageServerBound, 0x0C, Play => {
