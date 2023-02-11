@@ -112,7 +112,7 @@ impl ServerProxy for MiniGameProxy {
     type TransferData = TransferData;
     async fn new() -> Self {
         let lobby_server =
-            Server::new(World::new("./world/region", false), "rust minecraft server").await;
+            Server::new(World::new("./world/lobby", false), "rust minecraft server").await;
         let glide_server = Server::new(
             World::new("./world/glide/canyon", true),
             "§arust minecraft glide§r",
