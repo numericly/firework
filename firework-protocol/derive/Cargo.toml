@@ -14,5 +14,5 @@ proc_macro = true
 quote = "*"
 syn = { version = "*", features = ["extra-traits"] }
 proc-macro2 = "*"
-protocol_core = { path = "../protocol_core" }
+protocol_core = { path = "../core" }
 darling = "0.14.2"

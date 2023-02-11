@@ -8,5 +8,5 @@ edition = "2021"
 [dependencies]
 thiserror = "1.0.37"
 byteorder = "1.4.3"
-minecraft_data = { version = "*", path = "../../minecraft_data" }
+minecraft_data = { version = "*", path = "../../firework-data" }
 hematite-nbt = "0.5.2"

@@ -8,15 +8,15 @@ edition = "2021"
 [dependencies]
 aes = "0.8.1"
 tokio = { version = "1.12.0", features = ["full"] }
-miniz_oxide = "0.6.2"
+miniz_oxide = "0.7.1"
 cfb8 = "0.8.1"
 modular-bitfield = "0.11.2"
 thiserror = "1.0.37"
 byteorder = "1.4.3"
-minecraft_data = { version = "*", path = "../minecraft_data" }
-protocol_derive = { version = "*", path = "./protocol_derive" }
-protocol_core = { version = "*", path = "./protocol_core" }
-authentication = { version = "*", path = "../authentication" }
+minecraft_data = { path = "../firework-data" }
+protocol_derive = { path = "./derive" }
+protocol_core = { path = "./core" }
+authentication = { path = "../firework-authentication" }
 hematite-nbt = "0.5.2"
 serde = { version = "1.0.144", features = ["derive"] }
 reqwest = "0.11.14"
