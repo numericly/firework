@@ -1,7 +1,12 @@
 use async_trait::async_trait;
 use authentication::Profile;
-use client::{Client, ClientCommand, Player};
-use protocol::Protocol;
+use client::{Client, ClientCommand, GameMode, InventorySlot, Player};
+use minecraft_data::items::{Compass, Elytra, Item, Items};
+use protocol::{
+    data_types::{ItemNbt, Slot},
+    Protocol,
+};
+use protocol_core::VarInt;
 use server::{
     ClientData, ConnectionError, Server, ServerHandler, ServerManager, ServerProxy, Vec3,
 };
@@ -23,12 +28,24 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
         Self {}
     }
     async fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError> {
-        let player = Player {
+        let mut player = Player {
+            gamemode: GameMode::Adventure,
             position: Vec3::new(0.0, 48.0, 0.0),
             profile,
             uuid,
             ..Player::default()
         };
+
+        player.inventory.set_slot(
+            InventorySlot::Hotbar { slot: 0 },
+            Some(Slot {
+                item_id: VarInt(Compass::ID as i32),
+                item_count: 1,
+                nbt: ItemNbt {
+                    ..Default::default()
+                },
+            }),
+        );
         Ok(player)
     }
     async fn on_chat(
@@ -40,7 +57,7 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
     ) -> Result<Option<String>, ConnectionError> {
         let name = &client.player.read().await.profile.name;
         client.to_client.send(ClientCommand::Transfer {
-            data: TransferData::Lobby,
+            data: TransferData::Glide,
         });
         Ok(Some(format!(r#"{{ "text": "<{}> {}"}}"#, name, chat)))
     }
@@ -54,13 +71,26 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
         Self {}
     }
     async fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError> {
-        let player = Player {
+        let mut player = Player {
             position: Vec3::new(0.0, 168.0, 0.0),
+            gamemode: GameMode::Adventure,
             flying_allowed: true,
             profile,
             uuid,
             ..Player::default()
         };
+
+        player.inventory.set_slot(
+            InventorySlot::Chestplate,
+            Some(Slot {
+                item_id: VarInt(Elytra::ID as i32),
+                item_count: 1,
+                nbt: ItemNbt {
+                    ..Default::default()
+                },
+            }),
+        );
+
         Ok(player)
     }
 }
@@ -73,7 +103,7 @@ struct MiniGameProxy {
 
 #[derive(Debug, Clone)]
 enum TransferData {
-    Lobby,
+    Glide,
 }
 
 #[async_trait]
@@ -105,12 +135,12 @@ impl ServerProxy for MiniGameProxy {
             .handle_connection(self.clone(), connection.clone(), client_data.clone())
             .await;
 
-        println!("Result: {:?}", result);
-
-        self.glide_server
-            .clone()
-            .handle_connection(self.clone(), connection.clone(), client_data.clone())
-            .await;
+        if let Ok(TransferData::Glide) = result {
+            self.glide_server
+                .clone()
+                .handle_connection(self.clone(), connection.clone(), client_data.clone())
+                .await;
+        };
 
         *self.connected_players.write().await -= 1;
     }

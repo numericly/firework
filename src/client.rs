@@ -3,20 +3,22 @@ use crate::{
     gui::{GameQueueMenuGui, Gui, Gui::*, GuiPackets},
     server::{ClientData, ConnectionError, Rotation, Server, ServerHandler, ServerProxy, Vec3},
 };
-use authentication::{Profile, ProfileProperty};
+use authentication::Profile;
+use dashmap::DashMap;
 use minecraft_data::{
     items::{Compass, GrayDye, Item, LimeDye, RedDye},
     tags::{REGISTRY, TAGS},
 };
 use protocol::{
     client_bound::{
-        ChangeDifficulty, ClientBoundKeepAlive, ClientBoundPacketID, Commands, CustomSound,
-        IdMapHolder, LoginPlay, PlayDisconnect, PlayerAbilities, PlayerInfo, PluginMessage,
-        RemoveEntities, RemoveInfoPlayer, ResourcePack, Respawn, SerializePacket, SetCenterChunk,
-        SetContainerContent, SetContainerSlot, SetDefaultSpawn, SetEntityMetadata, SetHeldItem,
-        SetRecipes, SetTags, SoundEffect, SoundSource, SpawnPlayer, SynchronizePlayerPosition,
-        SystemChatMessage, TeleportEntity, UnloadChunk, UpdateEntityHeadRotation,
-        UpdateEntityPosition, UpdateEntityPositionAndRotation, UpdateEntityRotation,
+        ChangeDifficulty, ClientBoundKeepAlive, ClientBoundPacketID, CloseContainer, Commands,
+        CustomSound, IdMapHolder, LoginPlay, PlayDisconnect, PlayerAbilities, PlayerInfo,
+        PluginMessage, RemoveEntities, RemoveInfoPlayer, ResourcePack, Respawn, SerializePacket,
+        SetCenterChunk, SetContainerContent, SetContainerSlot, SetDefaultSpawn, SetEntityMetadata,
+        SetHeldItem, SetRecipes, SetTags, SoundEffect, SoundSource, SpawnPlayer,
+        SynchronizePlayerPosition, SystemChatMessage, TeleportEntity, UnloadChunk,
+        UpdateEntityHeadRotation, UpdateEntityPosition, UpdateEntityPositionAndRotation,
+        UpdateEntityRotation,
     },
     data_types::{
         AddPlayer, CommandNode, FloatProps, ItemNbt, ItemNbtDisplay, NodeType, Parser,
@@ -24,7 +26,7 @@ use protocol::{
         UpdateGameMode, UpdateLatency, UpdateListed,
     },
     read_specific_packet,
-    server_bound::{ChatMessage, PlayerCommand, ServerBoundPacket},
+    server_bound::{ChatMessage, CloseContainerServerBound, PlayerCommand, ServerBoundPacket},
     ConnectionState, Protocol, ProtocolError,
 };
 use protocol_core::{DeserializeField, Position, SerializeField, UnsizedVec, VarInt};
@@ -65,8 +67,6 @@ where
     },
     AddPlayer {
         client_data: Arc<ClientData>,
-        name: String,
-        properties: Vec<ProfileProperty>,
         gamemode: u8,
         position: Vec3,
         rotation: Rotation,
@@ -100,6 +100,7 @@ pub struct Player {
     pub flying: bool,
     pub flying_allowed: bool,
     pub inventory: Inventory,
+    pub open_gui: Option<Gui>,
 }
 
 #[derive(Debug)]
@@ -194,7 +195,6 @@ where
     pub to_client: broadcast::Sender<ClientCommand<Proxy::TransferData>>,
     connection: Arc<Protocol>,
     ping_acknowledged: Mutex<bool>,
-    open_gui: Mutex<Option<Gui>>,
 }
 
 impl<Proxy> Client<Proxy>
@@ -213,8 +213,10 @@ where
             to_client,
             player: RwLock::new(player),
             ping_acknowledged: Mutex::new(true),
-            open_gui: Mutex::new(None),
         }
+    }
+    pub async fn connection_state(&self) -> ConnectionState {
+        *self.connection.connection_state.read().await
     }
     pub async fn read_packet(&self) -> Result<ServerBoundPacket, ConnectionError> {
         Ok(self.connection.read_and_deserialize().await?)
@@ -241,20 +243,9 @@ where
 
         self.send_packet(respawn).await?;
 
-        let server_brand = {
-            let mut buf = Vec::new();
-            server.brand.to_string().serialize(&mut buf);
-            PluginMessage {
-                channel: "minecraft:brand".to_string(),
-                data: UnsizedVec(buf),
-            }
-        };
-
-        self.send_packet(server_brand).await?;
-
-        {
+        let respawn = {
             let player = self.player.read().await;
-            let respawn = Respawn {
+            Respawn {
                 dimension_type: "minecraft:overworld".to_string(),
                 dimension_name: "minecraft:overworld".to_string(),
                 hashed_seed: 0,
@@ -264,94 +255,16 @@ where
                 is_flat: server.world.flat,
                 copy_metadata: true,
                 death_location: None,
-            };
-            self.send_packet(respawn).await?;
-        }
-
-        let set_difficulty = ChangeDifficulty {
-            difficulty: *server.difficulty.read().await,
-            locked: *server.difficulty_locked.read().await,
-        };
-        self.send_packet(set_difficulty).await?;
-
-        {
-            let player = self.player.read().await;
-            let position_sync = SynchronizePlayerPosition {
-                x: player.position.x,
-                y: player.position.y,
-                z: player.position.z,
-                yaw: player.rotation.yaw,
-                pitch: player.rotation.pitch,
-                flags: PlayerPositionFlags::new(),
-                teleport_id: VarInt(0),
-                dismount_vehicle: false,
-            };
-
-            self.send_packet(position_sync).await?;
-        }
-
-        let player_abilities = {
-            let player = self.player.read().await;
-            PlayerAbilities {
-                flags: PlayerAbilityFlags::new()
-                    .with_flying(player.flying)
-                    .with_allow_flying(player.flying_allowed),
-                flying_speed: 0.05,
-                walking_speed: 0.1,
             }
         };
-
-        self.send_packet(player_abilities).await?;
-
-        // Make this work
-        // let initialize_world_border = InitializeWorldBorder {
-        //     x: 0.0,
-        //     z: 0.0,
-        //     old_diameter: 0.0,
-        //     new_diameter: 1000000.0,
-        //     speed: VarInt(0),
-        //     portal_teleport_boundary: VarInt(29999984),
-        //     warning_blocks: VarInt(5),
-        //     warning_time: VarInt(15),
-        // };
-
-        // self.send_packet(initialize_world_border).await?;
-
-        let set_default_spawn = SetDefaultSpawn {
-            position: Position { x: 0, y: 47, z: 0 },
-            yaw: 90.0,
-        };
-
-        self.send_packet(set_default_spawn).await?;
-
-        let set_held_item = SetHeldItem {
-            slot: self.player.read().await.selected_slot,
-        };
-
-        self.send_packet(set_held_item).await?;
-
-        // Unload loaded chunks
+        self.send_packet(respawn).await?;
 
         for (x, z) in self.client_data.loaded_chunks.lock().await.drain() {
-            let unload_chunk = UnloadChunk { x, z };
-            self.send_packet(unload_chunk).await?;
-        }
-
-        for x in -7..=7 {
-            for z in -7..=7 {
-                let packet;
-                {
-                    let chunk_lock = server.world.get_chunk(x, z).await.unwrap().unwrap();
-                    let chunk = chunk_lock.read().await;
-                    packet = chunk.into_packet();
-                }
-                self.client_data.loaded_chunks.lock().await.insert((x, z));
-                self.send_packet(packet).await?;
-            }
+            self.unload_chunk(x, z).await?;
         }
         Ok(())
     }
-    pub async fn load_world<Handler>(
+    pub async fn change_to_play<Handler>(
         &self,
         server: &Server<Handler, Proxy>,
     ) -> Result<(), ConnectionError>
@@ -388,6 +301,31 @@ where
 
         *self.connection.connection_state.write().await = ConnectionState::Play;
 
+        let update_tags = SetTags { tags: &TAGS };
+
+        self.connection.write_packet(update_tags).await?;
+
+        let client_settings =
+            read_specific_packet!(self.connection.as_ref(), ClientInformation).await?;
+
+        *self.client_data.settings.write().await = Some(client_settings);
+
+        let client_brand_packet =
+            read_specific_packet!(self.connection.as_ref(), PluginMessageServerBound).await?;
+
+        let client_brand = String::deserialize(&mut client_brand_packet.data.0.as_slice())
+            .map_err(|deserialize_error| ProtocolError::from(deserialize_error))?;
+
+        *self.client_data.brand.write().await = Some(client_brand);
+        Ok(())
+    }
+    pub async fn load_world<Handler>(
+        &self,
+        server: &Server<Handler, Proxy>,
+    ) -> Result<(), ConnectionError>
+    where
+        Handler: ServerHandler<Proxy> + Send + Sync + 'static,
+    {
         let server_brand = {
             let mut buf = Vec::new();
             server.brand.to_string().serialize(&mut buf);
@@ -429,10 +367,6 @@ where
         };
 
         self.connection.write_packet(update_recipes).await?;
-
-        let update_tags = SetTags { tags: &TAGS };
-
-        self.connection.write_packet(update_tags).await?;
 
         // OP permission level packet here
 
@@ -496,33 +430,7 @@ where
 
         self.connection.write_packet(position_sync).await?;
 
-        let player_info = {
-            let mut player_list = Vec::new();
-
-            for client in server.player_list.iter() {
-                let player = client.player.read().await;
-                player_list.push((
-                    client.client_data.uuid,
-                    AddPlayer {
-                        name: player.profile.name.clone(),
-                        properties: player.profile.properties.clone(),
-                    },
-                    UpdateGameMode {
-                        gamemode: VarInt::from(player.gamemode.clone() as i32),
-                    },
-                    UpdateListed { listed: true },
-                    UpdateLatency {
-                        latency: VarInt::from(0),
-                    },
-                ));
-            }
-
-            PlayerInfo {
-                action: PlayerInfoAction::AddAllPlayers(player_list),
-            }
-        };
-
-        self.connection.write_packet(player_info).await?;
+        self.add_all_players(server.player_list.clone()).await?;
 
         // Initialize world border packet
 
@@ -548,19 +456,6 @@ where
 
         // Advancements packet
 
-        let client_settings =
-            read_specific_packet!(self.connection.as_ref(), ClientInformation).await?;
-
-        *self.client_data.settings.write().await = Some(client_settings);
-
-        let client_brand_packet =
-            read_specific_packet!(self.connection.as_ref(), PluginMessageServerBound).await?;
-
-        let client_brand = String::deserialize(&mut client_brand_packet.data.0.as_slice())
-            .map_err(|deserialize_error| ProtocolError::from(deserialize_error))?;
-
-        *self.client_data.brand.write().await = Some(client_brand);
-
         let set_center_chunk = {
             let player = self.player.read().await;
             SetCenterChunk {
@@ -585,38 +480,6 @@ where
                     self.connection.write_packet(packet).await?;
                 }
                 self.client_data.loaded_chunks.lock().await.insert((x, z));
-            }
-        }
-
-        for client in server.player_list.iter() {
-            if client.client_data.uuid == self.client_data.uuid {
-                continue;
-            }
-            let spawn_player = {
-                let player = client.player.read().await;
-                let (yaw, pitch) = player.rotation.serialize();
-
-                SpawnPlayer {
-                    entity_id: VarInt(client.client_data.entity_id),
-                    uuid: client.client_data.uuid,
-                    x: player.position.x,
-                    y: player.position.y,
-                    z: player.position.z,
-                    yaw,
-                    pitch,
-                }
-            };
-
-            self.connection.write_packet(spawn_player).await?;
-
-            if let Some(information) = client.client_data.settings.read().await.as_ref() {
-                self.update_entity_metadata(
-                    client.client_data.entity_id,
-                    vec![EntityMetadata::PlayerDisplayedSkinParts(
-                        information.displayed_skin_parts.clone(),
-                    )],
-                )
-                .await?;
             }
         }
 
@@ -678,13 +541,11 @@ where
             }
             ClientCommand::AddPlayer {
                 client_data,
-                name,
-                properties,
                 gamemode,
                 position,
                 rotation,
             } => {
-                self.add_player(client_data, name, properties, gamemode, position, rotation)
+                self.add_player(client_data, gamemode, position, rotation)
                     .await?;
             }
             ClientCommand::Disconnect { reason } => {
@@ -692,6 +553,31 @@ where
                 return Err(ConnectionError::ClientDisconnected { reason });
             }
             ClientCommand::Transfer { data } => {
+                self.remove_all_players(
+                    server
+                        .player_list
+                        .iter()
+                        .filter(|client| client.client_data.uuid != self.client_data.uuid)
+                        .map(|client| (client.client_data.uuid, client.client_data.entity_id))
+                        .collect(),
+                )
+                .await?;
+
+                let container_content = SetContainerContent {
+                    window_id: 0,
+                    state_id: VarInt(0),
+                    items: Inventory::default().slots.to_vec(),
+                    held_item: None,
+                };
+
+                self.connection.write_packet(container_content).await?;
+
+                if let Some(gui) = &self.player.read().await.open_gui {
+                    let close_container = CloseContainer { window_id: 42 };
+                    drop(gui);
+                    self.send_packet(close_container).await?;
+                };
+
                 return Ok(Some(data));
             }
         }
@@ -723,7 +609,7 @@ where
                 self.connection.write_packet(gui.open()).await?;
 
                 self.connection.write_packet(gui.draw()).await?;
-                *self.open_gui.lock().await = Some(GameQueueMenuGui(gui));
+                self.player.write().await.open_gui = Some(GameQueueMenuGui(gui));
 
                 server.handle_chat(server, proxy, self, message).await?
             }
@@ -790,10 +676,9 @@ where
                     .await?;
             }
             ServerBoundPacket::ClickContainer(click) => {
-                let mut gui_lock = self.open_gui.lock().await;
-                let gui = gui_lock.as_mut();
+                let mut player = self.player.write().await;
 
-                if let Some(gui) = gui {
+                if let Some(gui) = player.open_gui.as_mut() {
                     gui.handle_click(click.slot, &self, server).await?;
                 }
             }
@@ -827,7 +712,8 @@ where
                             self.connection.write_packet(gui.open()).await?;
 
                             self.connection.write_packet(gui.draw()).await?;
-                            *self.open_gui.lock().await = Some(GameQueueMenuGui(gui));
+
+                            self.player.write().await.open_gui = Some(GameQueueMenuGui(gui));
                         }
                         RedDye::ID => {
                             // while the resource pack is loading, use a placeholder inert item
@@ -1137,11 +1023,90 @@ where
         self.connection.write_packet(remove_entities).await?;
         Ok(())
     }
+    async fn remove_all_players(&self, players: Vec<(u128, i32)>) -> Result<(), ConnectionError> {
+        let remove_entities = RemoveEntities {
+            entity_ids: players
+                .iter()
+                .map(|(_, entity_id)| VarInt(*entity_id))
+                .collect(),
+        };
+        self.connection.write_packet(remove_entities).await?;
+
+        let player_info = RemoveInfoPlayer {
+            players: players.iter().map(|(uuid, _)| *uuid).collect(),
+        };
+        self.connection.write_packet(player_info).await?;
+        Ok(())
+    }
+    async fn add_all_players(
+        &self,
+        player_list: Arc<DashMap<u128, Client<Proxy>>>,
+    ) -> Result<(), ConnectionError> {
+        let player_info = {
+            let mut add_players = Vec::new();
+
+            for client in player_list.iter() {
+                let player = client.player.read().await;
+                add_players.push((
+                    client.client_data.uuid,
+                    AddPlayer {
+                        name: player.profile.name.clone(),
+                        properties: player.profile.properties.clone(),
+                    },
+                    UpdateGameMode {
+                        gamemode: VarInt::from(player.gamemode.clone() as i32),
+                    },
+                    UpdateListed { listed: true },
+                    UpdateLatency {
+                        latency: VarInt::from(0),
+                    },
+                ));
+            }
+
+            PlayerInfo {
+                action: PlayerInfoAction::AddAllPlayers(add_players),
+            }
+        };
+
+        self.connection.write_packet(player_info).await?;
+
+        for client in player_list.iter() {
+            if client.client_data.uuid == self.client_data.uuid {
+                continue;
+            }
+            let spawn_player = {
+                let player = client.player.read().await;
+                let (yaw, pitch) = player.rotation.serialize();
+
+                SpawnPlayer {
+                    entity_id: VarInt(client.client_data.entity_id),
+                    uuid: client.client_data.uuid,
+                    x: player.position.x,
+                    y: player.position.y,
+                    z: player.position.z,
+                    yaw,
+                    pitch,
+                }
+            };
+
+            self.connection.write_packet(spawn_player).await?;
+
+            if let Some(information) = client.client_data.settings.read().await.as_ref() {
+                self.update_entity_metadata(
+                    client.client_data.entity_id,
+                    vec![EntityMetadata::PlayerDisplayedSkinParts(
+                        information.displayed_skin_parts.clone(),
+                    )],
+                )
+                .await?;
+            }
+        }
+
+        Ok(())
+    }
     async fn add_player(
         &self,
         client_data: Arc<ClientData>,
-        name: String,
-        properties: Vec<ProfileProperty>,
         gamemode: u8,
         position: Vec3,
         rotation: Rotation,
@@ -1149,7 +1114,10 @@ where
         let player_info = PlayerInfo {
             action: PlayerInfoAction::AddSinglePlayer(
                 client_data.uuid,
-                AddPlayer { name, properties },
+                AddPlayer {
+                    name: client_data.profile.name.clone(),
+                    properties: client_data.profile.properties.clone(),
+                },
                 UpdateGameMode {
                     gamemode: VarInt::from(gamemode as i32),
                 },
@@ -1214,8 +1182,7 @@ where
 
         Ok(())
     }
-    pub async fn unload_chunk(&self, chunk_pos: (i32, i32)) -> Result<(), ConnectionError> {
-        let (x, z) = chunk_pos;
+    pub async fn unload_chunk(&self, x: i32, z: i32) -> Result<(), ConnectionError> {
         let unload_chunk = UnloadChunk { x, z };
         self.connection.write_packet(unload_chunk).await?;
         Ok(())

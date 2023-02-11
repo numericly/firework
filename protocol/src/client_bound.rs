@@ -103,6 +103,9 @@ define_client_bound_protocol! {
     Commands, 0x0E, Play => {
         root: CommandNode
     },
+    CloseContainer, 0x0F, Play => {
+        window_id: u8
+    },
     SetContainerContent, 0x10, Play => {
         window_id: u8,
         state_id: VarInt,

@@ -464,6 +464,20 @@ where
             brand,
         })
     }
+    pub async fn run(self: Arc<Self>, proxy: Arc<Proxy>) -> Result<(), ConnectionError> {
+        tokio::task::spawn(async move {
+            let mut interval = tokio::time::interval(Duration::from_millis(50));
+            loop {
+                interval.tick().await;
+
+                self.handle_tick(proxy.clone()).await;
+            }
+        });
+        Ok(())
+    }
+    pub async fn handle_tick(&self, proxy: Arc<Proxy>) -> Result<(), ConnectionError> {
+        Ok(())
+    }
     pub async fn handle_connection(
         self: Arc<Self>,
         proxy: Arc<Proxy>,
@@ -516,7 +530,6 @@ where
             client
         };
 
-        self.broadcast_player_join(&client).await;
         self.broadcast_chat(format!(
             r#"{{"text": "{} joined the game","color":"yellow"}}"#,
             client.player.read().await.profile.name
@@ -547,12 +560,14 @@ where
         uuid: u128,
         mut to_client_receiver: broadcast::Receiver<ClientCommand<Proxy::TransferData>>,
     ) -> Result<Proxy::TransferData, ConnectionError> {
-        if *client.client_data.has_connected.write().await {
-            client.transfer_world(&self).await?;
+        if client.connection_state().await != ConnectionState::Play {
+            client.change_to_play(&self).await?;
         } else {
-            client.load_world(&self).await?;
+            client.transfer_world(&self).await?;
         }
-        *client.client_data.has_connected.write().await = true;
+        client.load_world(&self).await?;
+
+        self.broadcast_player_join(&client).await;
 
         self.handler
             .on_client_connected(&self, &proxy, client)
@@ -887,8 +902,6 @@ where
                     client_data: client.client_data.clone(),
                     position: player.position.clone(),
                     rotation: player.rotation.clone(),
-                    name: player.profile.name.clone(),
-                    properties: player.profile.properties.clone(),
                     gamemode: player.gamemode.clone() as u8,
                 }
             };
