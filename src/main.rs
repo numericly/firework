@@ -195,22 +195,29 @@ impl ServerProxy for MiniGameProxy {
         let lobby_server = Server::new(
             World::new("./firework-world/lobby", false),
             format!(
-                "{0}F{1}i{2}r{3}e{4}w{5}ork {6}{7}Lobby{8}",
+                "{}F{}i{}r{}e{}w{}ork Lobby{}",
                 ColorCodes::DarkRed.chat_formatting(),
                 ColorCodes::LightRed.chat_formatting(),
                 ColorCodes::Gold.chat_formatting(),
                 ColorCodes::LightYellow.chat_formatting(),
                 ColorCodes::LightGreen.chat_formatting(),
                 ColorCodes::Aqua.chat_formatting(),
-                ColorCodes::White.chat_formatting(),
-                ColorCodes::Underline.chat_formatting(),
                 ColorCodes::Reset.chat_formatting(),
             ),
         )
         .await;
         let glide_server = Server::new(
             World::new("./firework-world/glide/canyon", true),
-            "§aFirework Glide MiniGame§r".to_string(),
+            format!(
+                "{}F{}i{}r{}e{}w{}ork Glide{}",
+                ColorCodes::DarkRed.chat_formatting(),
+                ColorCodes::LightRed.chat_formatting(),
+                ColorCodes::Gold.chat_formatting(),
+                ColorCodes::LightYellow.chat_formatting(),
+                ColorCodes::LightGreen.chat_formatting(),
+                ColorCodes::Aqua.chat_formatting(),
+                ColorCodes::Reset.chat_formatting(),
+            ),
         )
         .await;
         Self {

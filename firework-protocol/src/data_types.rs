@@ -7,6 +7,72 @@ use modular_bitfield::bitfield;
 use nbt::{de, ser};
 use std::io::{Read, Write};
 
+#[derive(PartialEq)]
+pub struct BitSet {
+    pub data: Vec<u64>,
+    /// Number of bits in the BitSet
+    size: usize,
+}
+
+impl BitSet {
+    ///Create a new BitSet
+    pub fn new() -> BitSet {
+        BitSet {
+            data: Vec::new(),
+            size: 0,
+        }
+    }
+    ///Set the bit at the given index
+    pub fn set(&mut self, index: usize, value: bool) {
+        let byte_index = index / 64;
+        let bit_index = index % 64;
+        if self.data.len() <= byte_index {
+            self.data.resize(byte_index + 1, 0);
+        }
+        self.data[byte_index] |= (value as u64) << bit_index;
+    }
+    ///Get the bit at the given index
+    pub fn get(&self, index: usize) -> bool {
+        self.data
+            .get(index / 64)
+            .map_or(false, |&val| (val >> (index % 64)) & 1 == 1)
+    }
+    ///Push a bit to the end of the BitSet
+    pub fn push(&mut self, value: bool) {
+        self.set(self.size, value);
+        self.size += 1;
+    }
+    pub fn resize(&mut self, new_size: usize, value: bool) {
+        if new_size > self.size {
+            for _ in self.size..new_size {
+                self.push(value);
+            }
+        } else {
+            self.size = new_size;
+        }
+    }
+}
+
+impl Debug for BitSet {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for i in 0..self.size {
+            write!(f, "{}", self.get(i) as u8)?;
+            if i % 64 == 63 {
+                write!(f, " ")?;
+            } else if i % 8 == 7 {
+                write!(f, "_")?;
+            }
+        }
+        Ok(())
+    }
+}
+
+impl SerializeField for BitSet {
+    fn serialize<W: Write>(&self, mut writer: W) {
+        self.data.serialize(&mut writer);
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct DeathLocation {
     pub dimension_name: String,

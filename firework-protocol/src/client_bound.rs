@@ -38,8 +38,8 @@ macro_rules! define_client_bound_protocol {
 use firework_authentication::ProfileProperty;
 use firework_data::tags::VarIntList;
 use firework_data::Palette;
-use firework_protocol_core::{BitSet, UnsizedVec, VarInt};
 use firework_protocol_core::{Position, SerializeField};
+use firework_protocol_core::{UnsizedVec, VarInt};
 use firework_protocol_derive::SerializeField;
 use sha1::{Digest, Sha1};
 use std::collections::HashMap;
@@ -47,8 +47,8 @@ use std::collections::HashMap;
 use nbt::Blob;
 
 use crate::data_types::{
-    CommandNode, DeathLocation, PlayerAbilityFlags, PlayerInfoAction, PlayerPositionFlags, Recipe,
-    Slot,
+    BitSet, CommandNode, DeathLocation, PlayerAbilityFlags, PlayerInfoAction, PlayerPositionFlags,
+    Recipe, Slot,
 };
 
 pub trait ClientBoundPacketID {

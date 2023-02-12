@@ -1,15 +1,14 @@
+use crate::WorldError;
 use firework_data::{
     biomes::Biome,
     blocks::{Air, Block},
     Palette,
 };
-use firework_protocol::client_bound::ChunkUpdateAndLightUpdate;
-use firework_protocol_core::{BitSet, SerializeField, VarInt};
+use firework_protocol::{client_bound::ChunkUpdateAndLightUpdate, data_types::BitSet};
+use firework_protocol_core::{SerializeField, VarInt};
 use nbt::{from_zlib_reader, Blob};
 use serde::Deserialize;
 use std::{cmp, fmt::Debug, hash::Hash};
-
-use crate::WorldError;
 
 #[derive(Deserialize, Debug)]
 struct RawChunkData {
@@ -383,8 +382,10 @@ impl<T: Palette + Debug, const CONTAINER_SIZE: usize, const MINIMUM_BITS: usize>
                 }
             }
             Data::Double(ref _data) => {
-                println!("Double paletted container {}", self.palette.len());
-                unimplemented!("Double byte paletted container")
+                unimplemented!(
+                    "Double byte paletted container, size: {}",
+                    self.palette.len()
+                )
             }
         }
     }

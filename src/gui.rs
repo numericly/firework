@@ -1,14 +1,13 @@
+use crate::{
+    client::Client,
+    server::{ConnectionError, Server, ServerHandler, ServerProxy},
+};
 use firework_data::items::{DiamondShovel, Elytra, IronSword, Item};
 use firework_protocol::{
     client_bound::{OpenScreen, SetContainerContent},
     data_types::{ItemNbt, ItemNbtDisplay, Slot},
 };
 use firework_protocol_core::VarInt;
-
-use crate::{
-    client::Client,
-    server::{ConnectionError, Server, ServerHandler, ServerProxy},
-};
 
 // these structs are blank for now, but if you want to add data to them, you can
 #[derive(Debug)]

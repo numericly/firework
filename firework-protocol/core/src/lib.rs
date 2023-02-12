@@ -1,6 +1,8 @@
+use std::fmt::Debug;
 use std::io::{self, Read, Write};
-
 use thiserror::Error;
+
+// This file is used to define serializers and deserializers for external types
 
 #[derive(Debug, Error)]
 pub enum DeserializeError {
@@ -50,117 +52,51 @@ pub struct Position {
 #[repr(transparent)]
 pub struct UnsizedVec<T: DeserializeField + SerializeField>(pub Vec<T>);
 
-#[derive(PartialEq)]
+mod test {
+    #[allow(unused_imports)]
+    use super::*;
 
-pub struct BitSet {
-    pub data: Vec<u64>,
-    /// Number of bits in the BitSet
-    size: usize,
-}
-
-impl BitSet {
-    ///Create a new BitSet
-    pub fn new() -> BitSet {
-        BitSet {
-            data: Vec::new(),
-            size: 0,
-        }
-    }
-    ///Set the bit at the given index
-    pub fn set(&mut self, index: usize, value: bool) {
-        let byte_index = index / 64;
-        let bit_index = index % 64;
-        if self.data.len() <= byte_index {
-            self.data.resize(byte_index + 1, 0);
-        }
-        self.data[byte_index] |= (value as u64) << bit_index;
-    }
-    ///Get the bit at the given index
-    pub fn get(&self, index: usize) -> bool {
-        return (self.data[index / 64] >> (index % 64)) & 1 == 1;
-    }
-    ///Push a bit to the end of the BitSet
-    pub fn push(&mut self, value: bool) {
-        self.set(self.size, value);
-        self.size += 1;
-    }
-    pub fn resize(&mut self, new_size: usize, value: bool) {
-        if new_size > self.size {
-            for _ in self.size..new_size {
-                self.push(value);
-            }
-        } else {
-            self.size = new_size;
-        }
-    }
-    pub fn ones(&self) -> usize {
-        let mut count = 0;
-        for i in 0..self.size {
-            if self.get(i) {
-                count += 1;
-            }
-        }
-        count
-    }
-    pub fn zeros(&self) -> usize {
-        self.size - self.ones()
-    }
-}
-
-impl std::fmt::Debug for BitSet {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for i in 0..self.size {
-            write!(f, "{}", self.get(i) as u8)?;
-            if i % 64 == 63 {
-                write!(f, " ")?;
-            } else if i % 8 == 7 {
-                write!(f, "_")?;
-            }
-        }
-        Ok(())
-    }
-}
-
-#[test]
-fn test_bitset_basic() {
-    let mut bitset = BitSet::new();
-    bitset.push(false);
-    bitset.push(false);
-    bitset.push(true);
-
-    println!("length: {}", bitset.1);
-    print!("data: ");
-    for i in 0..bitset.0.len() {
-        print!("{:b} ", bitset.0[i]);
-    }
-    assert_eq!(bitset.get(2), true);
-}
-
-#[test]
-fn test_bitset_floating_set() {
-    let mut bitset = BitSet::new();
-    bitset.set(50, true);
-    assert_eq!(bitset.get(50), true);
-}
-
-#[test]
-fn test_bitset_nonexistent_get() {
-    let mut bitset = BitSet::new();
-    assert_eq!(bitset.get(50), false);
-}
-
-#[test]
-fn test_bitset_length() {
-    let mut bitset = BitSet::new();
-    for _ in 0..64 {
+    #[test]
+    fn test_bitset_basic() {
+        let mut bitset = BitSet::new();
+        bitset.push(false);
+        bitset.push(false);
         bitset.push(true);
+
+        println!("length: {}", bitset.size);
+        print!("data: ");
+        for i in 0..bitset.data.len() {
+            print!("{:b} ", bitset.data[i]);
+        }
+        assert_eq!(bitset.get(2), true);
     }
-    println!("length: {}", bitset.1);
-    print!("data: ");
-    for i in 0..bitset.0.len() {
-        print!("{:b} ", bitset.0[i]);
+
+    #[test]
+    fn test_bitset_floating_set() {
+        let mut bitset = BitSet::new();
+        bitset.set(50, true);
+        assert_eq!(bitset.get(50), true);
     }
-    assert_eq!(bitset.1, 64);
+
+    #[test]
+    fn test_bitset_nonexistent_get() {
+        let mut bitset = BitSet::new();
+        assert_eq!(bitset.get(50), false);
+    }
+
+    #[test]
+    fn test_bitset_length() {
+        let mut bitset = BitSet::new();
+        for _ in 0..64 {
+            bitset.push(true);
+        }
+        println!("length: {}", bitset.size);
+        print!("data: ");
+        for i in 0..bitset.data.len() {
+            print!("{:b} ", bitset.data[i]);
+        }
+        assert_eq!(bitset.size, 64);
+    }
 }
 
 pub trait DeserializeField {
@@ -362,7 +298,7 @@ mod serializer {
     use firework_data::tags::VarIntList;
     use nbt::Blob;
 
-    use crate::{BitSet, Position, SerializeField, UnsizedVec, VarInt};
+    use crate::{Position, SerializeField, UnsizedVec, VarInt};
 
     impl SerializeField for Position {
         fn serialize<W: Write>(&self, writer: W) {
@@ -550,12 +486,6 @@ mod serializer {
     impl SerializeField for bool {
         fn serialize<W: Write>(&self, mut writer: W) {
             writer.write(&[*self as u8]).unwrap();
-        }
-    }
-
-    impl SerializeField for BitSet {
-        fn serialize<W: Write>(&self, mut writer: W) {
-            self.data.serialize(&mut writer);
         }
     }
 }

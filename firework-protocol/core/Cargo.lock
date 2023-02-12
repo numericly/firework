@@ -45,6 +45,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "firework_data"
+version = "0.1.0"
+dependencies = [
+ "convert_case",
+ "hematite-nbt",
+ "lazy_static",
+ "proc-macro2",
+ "quote",
+ "rust-format",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "firework_protocol_core"
+version = "0.1.0"
+dependencies = [
+ "byteorder",
+ "firework_data",
+ "hematite-nbt",
+ "thiserror",
+]
+
+[[package]]
 name = "flate2"
 version = "1.0.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -79,20 +103,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
-name = "minecraft_data"
-version = "0.1.0"
-dependencies = [
- "convert_case",
- "hematite-nbt",
- "lazy_static",
- "proc-macro2",
- "quote",
- "rust-format",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "miniz_oxide"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -108,16 +118,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5d727cae5b39d21da60fa540906919ad737832fe0b1c165da3a34d6548c849d6"
 dependencies = [
  "unicode-ident",
-]
-
-[[package]]
-name = "protocol_core"
-version = "0.1.0"
-dependencies = [
- "byteorder",
- "hematite-nbt",
- "minecraft_data",
- "thiserror",
 ]
 
 [[package]]

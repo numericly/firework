@@ -1,3 +1,5 @@
+use crate::client::{Client, ClientCommand, Player};
+use crate::entities::{EntityDataFlags, EntityMetadata, Pose};
 use async_trait::async_trait;
 use dashmap::{DashMap, DashSet};
 use firework_authentication::{authenticate, AuthenticationError, Profile};
@@ -21,9 +23,6 @@ use tokio::task::JoinHandle;
 use tokio::time::sleep;
 use tokio::{select, task};
 use tokio_util::sync::CancellationToken;
-
-use crate::client::{Client, ClientCommand, Player};
-use crate::entities::{EntityDataFlags, EntityMetadata, Pose};
 
 #[derive(Debug, Error)]
 pub enum ConnectionError {
@@ -216,6 +215,8 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
 
                 let pong = Pong { payload };
                 connection.write_packet(pong).await?;
+
+                println!("Sent ping");
 
                 Ok(())
             }
