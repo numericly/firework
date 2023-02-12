@@ -6,3 +6,30 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+tokio = { version ="1.21.0", features = ["full"] }
+rsa = "0.6.1"
+rand = "0.8.5"
+reqwest = "0.11.11"
+aes = "0.8.1"
+cfb8 = "0.8.1"
+rsa-der = "0.3.0"
+sha1 = "0.10.4"
+num-bigint = "0.4.3"
+serde_json = "1.0.85"
+serde = {version = "1.0.144", features = ["derive"]}
+dashmap = "5.4.0"
+miniz_oxide = "0.7.1"
+byteorder = "1.4.3"
+hematite-nbt = "0.5.2"
+cipher = "0.4.3"
+thiserror = "1.0.37"
+tokio-util = "0.7.4"
+async-trait = "0.1.58"
+modular-bitfield = "0.11.2"
+lazy_static = "1.4.0"
+firework_protocol = { path = "../firework-protocol" }
+firework_protocol_core = { path = "../firework-protocol/core" }
+firework_protocol_derive = {path = "../firework-protocol/derive" }
+firework_authentication = { path = "../firework-authentication" }
+firework_data = { path = "../firework-data" }
+firework_world = { path = "../firework-world" }

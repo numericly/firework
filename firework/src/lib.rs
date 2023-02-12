@@ -13,6 +13,7 @@ use firework_world::World;
 use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
 use std::collections::HashSet;
 use std::marker::PhantomData;
+use std::net::SocketAddr;
 use std::num::ParseIntError;
 use std::sync::Arc;
 use std::time::Duration;
@@ -23,6 +24,10 @@ use tokio::task::JoinHandle;
 use tokio::time::sleep;
 use tokio::{select, task};
 use tokio_util::sync::CancellationToken;
+
+pub mod client;
+pub mod entities;
+pub mod gui;
 
 #[derive(Debug, Error)]
 pub enum ConnectionError {
@@ -136,6 +141,7 @@ pub struct ClientData {
     pub loaded_chunks: Mutex<HashSet<(i32, i32)>>,
     pub settings: RwLock<Option<ClientInformation>>,
     pub brand: RwLock<Option<String>>,
+    pub socket_address: SocketAddr,
 }
 
 pub struct ServerManager<T: Sized, const PLAYER_RESERVED_ENTITY_IDS: i32 = 1_000_000> {
@@ -151,6 +157,7 @@ pub trait ServerProxy {
     async fn new() -> Self
     where
         Self: Sized;
+    async fn run(self: Arc<Self>);
     async fn handle_connection(self: Arc<Self>, connection: Protocol, client_data: ClientData);
     async fn motd(&self) -> Result<String, ConnectionError>;
 }
@@ -176,20 +183,22 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
             loop {
                 let stream = listener.accept().await;
 
-                if let Ok((stream, _socket_addr)) = stream {
-                    println!("New connection from: {:?}", stream.peer_addr().unwrap());
+                if let Ok((stream, socket_addr)) = stream {
                     let connection = Protocol::new(stream);
                     let server = cloned_server.clone();
                     #[allow(unused_must_use)]
                     tokio::task::spawn(async move {
-                        server.handle_connection(connection).await;
+                        server.handle_connection(socket_addr, connection).await;
                     });
                 }
             }
         });
+
+        server.proxy.clone().run().await;
     }
     async fn handle_connection(
         self: Arc<Self>,
+        ip_address: SocketAddr,
         mut connection: Protocol,
     ) -> Result<(), ConnectionError> {
         let handshake = read_specific_packet!(&connection, Handshake).await?;
@@ -215,8 +224,6 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
 
                 let pong = Pong { payload };
                 connection.write_packet(pong).await?;
-
-                println!("Sent ping");
 
                 Ok(())
             }
@@ -310,6 +317,7 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                     profile,
                     settings: RwLock::new(None),
                     brand: RwLock::new(None),
+                    socket_address: ip_address,
                 };
 
                 self.proxy
@@ -372,6 +380,8 @@ where
     Proxy: ServerProxy + Send + Sync + 'static,
 {
     fn new() -> Self;
+    async fn on_load(&self, server: &Server<Self, Proxy>, proxy: &Proxy) {}
+    async fn on_tick(&self, server: &Server<Self, Proxy>, proxy: &Proxy) {}
     async fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError>;
     async fn on_client_connected(
         &self,
@@ -466,19 +476,17 @@ where
             brand,
         })
     }
-    pub async fn run(self: Arc<Self>, proxy: Arc<Proxy>) -> Result<(), ConnectionError> {
-        tokio::task::spawn(async move {
-            let mut interval = tokio::time::interval(Duration::from_millis(50));
-            loop {
-                interval.tick().await;
+    pub async fn run(self: Arc<Self>, proxy: Arc<Proxy>) {
+        let mut interval = tokio::time::interval(Duration::from_millis(50));
+        self.handler.on_load(&self, &proxy).await;
+        loop {
+            interval.tick().await;
 
-                self.handle_tick(proxy.clone()).await;
-            }
-        });
-        Ok(())
+            self.handle_tick(proxy.clone()).await;
+        }
     }
-    pub async fn handle_tick(&self, proxy: Arc<Proxy>) -> Result<(), ConnectionError> {
-        Ok(())
+    pub async fn handle_tick(&self, proxy: Arc<Proxy>) {
+        self.handler.on_tick(&self, &proxy).await;
     }
     pub async fn handle_connection(
         self: Arc<Self>,

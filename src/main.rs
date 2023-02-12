@@ -1,27 +1,17 @@
 use async_trait::async_trait;
-use client::{Client, ClientCommand, GameMode, InventorySlot, Player};
-use firework_authentication::Profile;
-use firework_data::items::{Compass, Elytra, Item};
-use firework_protocol::{
-    data_types::{ItemNbt, Slot},
-    Protocol,
-};
-use firework_protocol_core::VarInt;
+use firework::{ClientData, ConnectionError, Server, ServerManager, ServerProxy};
+use firework_protocol::Protocol;
 use firework_world::World;
-use server::{
-    ClientData, ConnectionError, Rotation, Server, ServerHandler, ServerManager, ServerProxy, Vec3,
-};
-use std::{sync::Arc, time::Duration};
-use tokio::{sync::RwLock, time::sleep};
+use glide_server::GlideServerHandler;
+use lobby_server::LobbyServerHandler;
+use std::sync::Arc;
+use tokio::sync::RwLock;
 
-mod client;
-// mod commands;
-mod entities;
-mod gui;
-mod server;
+mod glide_server;
+mod lobby_server;
 
 #[allow(dead_code)]
-enum ColorCodes {
+pub enum ColorCodes {
     Obfuscated,
     Bold,
     Strikethrough,
@@ -101,82 +91,6 @@ impl ColorCodes {
     }
 }
 
-struct LobbyServerHandler {}
-
-#[async_trait]
-impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
-    fn new() -> Self {
-        Self {}
-    }
-    async fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError> {
-        let mut player = Player {
-            gamemode: GameMode::Adventure,
-            position: Vec3::new(0.0, 46.0, 0.0),
-            rotation: Rotation::new(-90., 0.),
-            profile,
-            uuid,
-            ..Player::default()
-        };
-
-        player.inventory.set_slot(
-            InventorySlot::Hotbar { slot: 0 },
-            Some(Slot {
-                item_id: VarInt(Compass::ID as i32),
-                item_count: 1,
-                nbt: ItemNbt {
-                    ..Default::default()
-                },
-            }),
-        );
-        Ok(player)
-    }
-    async fn on_chat(
-        &self,
-        server: &Server<Self, MiniGameProxy>,
-        proxy: &MiniGameProxy,
-        client: &Client<MiniGameProxy>,
-        chat: String,
-    ) -> Result<Option<String>, ConnectionError> {
-        let name = &client.player.read().await.profile.name;
-        client.to_client.send(ClientCommand::Transfer {
-            data: TransferData::Glide,
-        });
-        Ok(Some(format!(r#"{{ "text": "<{}> {}"}}"#, name, chat)))
-    }
-}
-
-struct GlideServerHandler {}
-
-#[async_trait]
-impl ServerHandler<MiniGameProxy> for GlideServerHandler {
-    fn new() -> Self {
-        Self {}
-    }
-    async fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError> {
-        let mut player = Player {
-            position: Vec3::new(0.0, 168.0, 0.0),
-            gamemode: GameMode::Adventure,
-            flying_allowed: true,
-            profile,
-            uuid,
-            ..Player::default()
-        };
-
-        player.inventory.set_slot(
-            InventorySlot::Chestplate,
-            Some(Slot {
-                item_id: VarInt(Elytra::ID as i32),
-                item_count: 1,
-                nbt: ItemNbt {
-                    ..Default::default()
-                },
-            }),
-        );
-
-        Ok(player)
-    }
-}
-
 struct MiniGameProxy {
     connected_players: RwLock<u32>,
     lobby_server: Arc<Server<LobbyServerHandler, MiniGameProxy>>,
@@ -225,6 +139,15 @@ impl ServerProxy for MiniGameProxy {
             glide_server,
             connected_players: RwLock::new(0),
         }
+    }
+    async fn run(self: Arc<Self>) {
+        let glide_server_proxy = self.clone();
+        let glide_server = self.glide_server.clone();
+        tokio::spawn(async move {
+            glide_server.run(glide_server_proxy).await;
+        });
+
+        self.lobby_server.clone().run(self.clone()).await;
     }
     async fn handle_connection(self: Arc<Self>, connection: Protocol, client_data: ClientData) {
         let client_data = Arc::new(client_data);
@@ -291,9 +214,5 @@ impl ServerProxy for MiniGameProxy {
 async fn main() {
     std::env::set_var("RUST_BACKTRACE", "1");
 
-    const PORT: u16 = 25565;
-
-    let _server = ServerManager::<MiniGameProxy>::run(PORT).await;
-
-    sleep(Duration::from_secs(10000000000)).await; // Lmao
+    ServerManager::<MiniGameProxy>::run(25565).await;
 }

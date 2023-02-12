@@ -33,6 +33,7 @@ firework_protocol_derive = {path = "./firework-protocol/derive" }
 firework_authentication = { path = "./firework-authentication" }
 firework_data = { path = "./firework-data" }
 firework_world = { path = "./firework-world" }
+firework = { path = "./firework" }
 
 # Small binary
 [profile.release]

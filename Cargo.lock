@@ -275,6 +275,39 @@ dependencies = [
 ]
 
 [[package]]
+name = "firework"
+version = "0.1.0"
+dependencies = [
+ "aes",
+ "async-trait",
+ "byteorder",
+ "cfb8",
+ "cipher",
+ "dashmap",
+ "firework_authentication",
+ "firework_data",
+ "firework_protocol",
+ "firework_protocol_core",
+ "firework_protocol_derive",
+ "firework_world",
+ "hematite-nbt",
+ "lazy_static",
+ "miniz_oxide 0.7.1",
+ "modular-bitfield",
+ "num-bigint",
+ "rand",
+ "reqwest",
+ "rsa",
+ "rsa-der",
+ "serde",
+ "serde_json",
+ "sha1",
+ "thiserror",
+ "tokio",
+ "tokio-util",
+]
+
+[[package]]
 name = "firework-server"
 version = "0.1.0"
 dependencies = [
@@ -284,6 +317,7 @@ dependencies = [
  "cfb8",
  "cipher",
  "dashmap",
+ "firework",
  "firework_authentication",
  "firework_data",
  "firework_protocol",

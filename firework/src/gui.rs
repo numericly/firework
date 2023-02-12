@@ -1,6 +1,6 @@
 use crate::{
     client::Client,
-    server::{ConnectionError, Server, ServerHandler, ServerProxy},
+    {ConnectionError, Server, ServerHandler, ServerProxy},
 };
 use firework_data::items::{DiamondShovel, Elytra, IronSword, Item};
 use firework_protocol::{

@@ -1,7 +1,7 @@
 use crate::{
     entities::{EntityMetadata, END_INDEX},
     gui::{GameQueueMenuGui, Gui, Gui::*, GuiPackets},
-    server::{ClientData, ConnectionError, Rotation, Server, ServerHandler, ServerProxy, Vec3},
+    {ClientData, ConnectionError, Rotation, Server, ServerHandler, ServerProxy, Vec3},
 };
 use dashmap::DashMap;
 use firework_authentication::Profile;
