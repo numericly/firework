@@ -15,8 +15,8 @@ use firework_protocol::{
         CustomSound, IdMapHolder, LoginPlay, Particle, PlayDisconnect, PlayerAbilities, PlayerInfo,
         PluginMessage, RemoveEntities, RemoveInfoPlayer, ResourcePack, Respawn, SerializePacket,
         SetCenterChunk, SetContainerContent, SetContainerSlot, SetDefaultSpawn, SetEntityMetadata,
-        SetHealth, SetHeldItem, SetRecipes, SetTags, SoundEffect, SoundSource, SpawnPlayer,
-        SynchronizePlayerPosition, SystemChatMessage, TeleportEntity, UnloadChunk,
+        SetEntityVelocity, SetHealth, SetHeldItem, SetRecipes, SetTags, SoundEffect, SoundSource,
+        SpawnPlayer, SynchronizePlayerPosition, SystemChatMessage, TeleportEntity, UnloadChunk,
         UpdateAttributes, UpdateEntityHeadRotation, UpdateEntityPosition,
         UpdateEntityPositionAndRotation, UpdateEntityRotation,
     },
@@ -31,7 +31,11 @@ use firework_protocol::{
 };
 use firework_protocol_core::{DeserializeField, Position, SerializeField, UnsizedVec, VarInt};
 use rand::Rng;
-use std::{fmt::Debug, sync::Arc};
+use std::{
+    fmt::Debug,
+    sync::Arc,
+    time::{Duration, Instant},
+};
 use tokio::sync::{broadcast, Mutex, RwLock};
 
 #[derive(Debug, Clone)]
@@ -87,6 +91,12 @@ pub enum GameMode {
     Spectator = 3,
 }
 
+#[derive(Debug, Clone)]
+pub struct PreviousPosition {
+    pub position: Vec3,
+    pub time: Instant,
+}
+
 #[derive(Debug, Default)]
 pub struct Player {
     pub uuid: u128,
@@ -96,7 +106,10 @@ pub struct Player {
     pub previous_gamemode: i8,
     pub reduced_debug_info: bool,
     pub selected_slot: u8,
+
     pub position: Vec3,
+    pub previous_position: Option<PreviousPosition>,
+
     pub on_ground: bool,
     pub rotation: Rotation,
     pub sneaking: bool,
@@ -361,18 +374,18 @@ where
         })
         .await?;
 
+        self.send_packet(SetHealth {
+            health: self.player.read().await.health as f32,
+            food: VarInt(20),
+            food_saturation: 5.0,
+        })
+        .await?;
+
         self.send_packet(UpdateAttributes {
             entity_id: VarInt::from(self.client_data.entity_id),
             attributes: vec![Attribute::MaxHealth {
                 value: self.player.read().await.max_health as f64,
             }],
-        })
-        .await?;
-
-        self.send_packet(SetHealth {
-            health: self.player.read().await.health as f32,
-            food: VarInt(20),
-            food_saturation: 5.0,
         })
         .await?;
 
@@ -548,6 +561,20 @@ where
                     dismount_vehicle: false,
                 })
                 .await?;
+
+                let previous_position = self.player.read().await.position.clone();
+
+                let previous_chunk_x = previous_position.x as i32 >> 4;
+                let previous_chunk_z = previous_position.z as i32 >> 4;
+
+                let chunk_x = position.x as i32 >> 4;
+                let chunk_z = position.z as i32 >> 4;
+
+                self.player.write().await.position = position;
+
+                if previous_chunk_x != chunk_x || previous_chunk_z != chunk_z {
+                    self.move_chunk(server, chunk_x, chunk_z).await?;
+                }
             }
             ClientCommand::MoveEntity {
                 entity_id,
@@ -912,6 +939,12 @@ where
             }
         }
 
+        self.send_packet(SetCenterChunk {
+            x: VarInt(chunk_x),
+            z: VarInt(chunk_z),
+        })
+        .await?;
+
         for x in -7..=7 {
             for z in -7..=7 {
                 if player_loaded_chunks.contains(&(x + chunk_x, z + chunk_z)) {
@@ -933,11 +966,6 @@ where
             }
         }
 
-        self.send_packet(SetCenterChunk {
-            x: VarInt(chunk_x),
-            z: VarInt(chunk_z),
-        })
-        .await?;
         Ok(())
     }
     async fn ping(&self) -> Result<(), ConnectionError> {
@@ -1305,6 +1333,38 @@ where
             offset_z,
             max_speed,
             particle_count,
+        })
+        .await?;
+        Ok(())
+    }
+    pub async fn get_velocity(&self) -> Vec3 {
+        let player = self.player.read().await;
+        let Some(previous_position) = &player.previous_position else {
+            return Vec3::new(0., 0., 0.);
+        };
+
+        let delta = player.position.clone() - previous_position.position.clone();
+        let multiplier = previous_position.time.elapsed().as_secs_f64()
+            / Duration::from_millis(50).as_secs_f64();
+
+        delta * Vec3::new(multiplier, multiplier, multiplier)
+    }
+    pub async fn set_velocity(&self, velocity: Vec3) -> Result<(), ConnectionError> {
+        self.send_packet(SetEntityVelocity {
+            entity_id: VarInt(self.client_data.entity_id),
+            velocity_x: (velocity.x * 8000.) as i16,
+            velocity_y: (velocity.y * 8000.) as i16,
+            velocity_z: (velocity.z * 8000.) as i16,
+        })
+        .await?;
+        Ok(())
+    }
+    pub async fn set_health(&self, health: f32) -> Result<(), ConnectionError> {
+        self.player.write().await.health = health.clone();
+        self.send_packet(SetHealth {
+            health,
+            food: VarInt(20),
+            food_saturation: 5.,
         })
         .await?;
         Ok(())

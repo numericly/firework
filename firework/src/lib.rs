@@ -1,6 +1,7 @@
 use crate::client::{Client, ClientCommand, Player};
 use crate::entities::{EntityDataFlags, EntityMetadata, Pose};
 use async_trait::async_trait;
+use client::PreviousPosition;
 use dashmap::{DashMap, DashSet};
 use firework_authentication::{authenticate, AuthenticationError, Profile};
 use firework_protocol::client_bound::{
@@ -11,12 +12,12 @@ use firework_protocol::{read_specific_packet, ConnectionState, Protocol, Protoco
 use firework_protocol_core::VarInt;
 use firework_world::World;
 use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
-use std::collections::HashSet;
-use std::marker::PhantomData;
-use std::net::SocketAddr;
-use std::num::ParseIntError;
 use std::sync::Arc;
 use std::time::Duration;
+use std::{collections::HashSet, time::Instant};
+use std::{marker::PhantomData, ops::Sub};
+use std::{net::SocketAddr, ops::Mul};
+use std::{num::ParseIntError, ops::Add};
 use thiserror::Error;
 use tokio::net::TcpListener;
 use tokio::sync::{broadcast, Mutex, RwLock};
@@ -64,6 +65,43 @@ pub enum ConnectionError {
     WorldError(#[from] firework_world::WorldError),
 }
 
+#[derive(Debug, Clone, Default)]
+pub struct BlockPos {
+    pub x: i32,
+    pub y: i32,
+    pub z: i32,
+}
+
+impl From<Vec3> for BlockPos {
+    fn from(vec: Vec3) -> BlockPos {
+        BlockPos {
+            x: vec.x as i32,
+            y: vec.y as i32,
+            z: vec.z as i32,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct AxisAlignedBB {
+    pub min: BlockPos,
+    pub max: BlockPos,
+}
+
+impl AxisAlignedBB {
+    pub fn new(min: BlockPos, max: BlockPos) -> AxisAlignedBB {
+        AxisAlignedBB { min, max }
+    }
+    pub fn within(&self, pos: BlockPos) -> bool {
+        pos.x >= self.min.x
+            && pos.x <= self.max.x
+            && pos.y >= self.min.y
+            && pos.y <= self.max.y
+            && pos.z >= self.min.z
+            && pos.z <= self.max.z
+    }
+}
+
 #[derive(Clone, Debug)]
 pub enum Entities {}
 
@@ -77,6 +115,42 @@ pub struct Vec3 {
 impl Vec3 {
     pub const fn new(x: f64, y: f64, z: f64) -> Vec3 {
         Vec3 { x, y, z }
+    }
+}
+
+impl Add for Vec3 {
+    type Output = Vec3;
+
+    fn add(self, rhs: Vec3) -> Vec3 {
+        Vec3 {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            z: self.z + rhs.z,
+        }
+    }
+}
+
+impl Sub for Vec3 {
+    type Output = Vec3;
+
+    fn sub(self, rhs: Vec3) -> Vec3 {
+        Vec3 {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            z: self.z - rhs.z,
+        }
+    }
+}
+
+impl Mul for Vec3 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Vec3) -> Vec3 {
+        Vec3 {
+            x: self.x * rhs.x,
+            y: self.y * rhs.y,
+            z: self.z * rhs.z,
+        }
     }
 }
 
@@ -427,6 +501,14 @@ where
         let name = &client.player.read().await.profile.name;
         Ok(Some(format!(r#"{{ "text": "<{}> {}"}}"#, name, chat)))
     }
+    async fn on_player_death(
+        &self,
+        server: &Server<Self, Proxy>,
+        proxy: &Proxy,
+        client: &Client<Proxy>,
+    ) -> Result<bool, ConnectionError> {
+        Ok(true)
+    }
     async fn on_chat_command(
         &self,
         server: &Server<Self, Proxy>,
@@ -453,6 +535,15 @@ where
         rotation: Rotation,
     ) -> Result<Option<Rotation>, ConnectionError> {
         Ok(Some(rotation))
+    }
+    async fn on_player_on_ground(
+        &self,
+        server: &Server<Self, Proxy>,
+        proxy: &Proxy,
+        client: &Client<Proxy>,
+        on_ground: bool,
+    ) -> Result<bool, ConnectionError> {
+        Ok(on_ground)
     }
     async fn on_player_sneak(
         &self,
@@ -750,6 +841,23 @@ where
             Err(ConnectionError::ClientCancelled)
         }
     }
+    pub async fn handle_death(
+        &self,
+        server: &Server<Handler, Proxy>,
+        proxy: &Proxy,
+        client: &Client<Proxy>,
+    ) -> Result<(), ConnectionError> {
+        if self.handler.on_player_death(server, proxy, client).await? {
+            // self.broadcast_player_death(&client).await;
+            // Set health 0
+            const SHOW_RESPAWN_SCREEN: bool = false;
+            if !SHOW_RESPAWN_SCREEN {
+                let max_health = client.player.read().await.max_health.clone();
+                client.set_health(max_health).await?;
+            }
+        }
+        Ok(())
+    }
     pub async fn handle_chat(
         &self,
         server: &Server<Handler, Proxy>,
@@ -772,6 +880,10 @@ where
         position: Option<Vec3>,
         rotation: Option<Rotation>,
     ) -> Result<(), ConnectionError> {
+        let on_ground = self
+            .handler
+            .on_player_on_ground(server, proxy, client, on_ground)
+            .await?;
         let previous_pos = client.player.read().await.position.clone();
         let pos = if let Some(pos) = position {
             let pos = self
@@ -779,6 +891,10 @@ where
                 .on_player_move(server, proxy, client, pos)
                 .await?;
             if let Some(pos) = &pos {
+                client.player.write().await.previous_position = Some(PreviousPosition {
+                    position: previous_pos.clone(),
+                    time: Instant::now(),
+                });
                 client.player.write().await.position = pos.clone();
                 let previous_chunk_x = previous_pos.x as i32 >> 4;
                 let previous_chunk_z = previous_pos.z as i32 >> 4;
