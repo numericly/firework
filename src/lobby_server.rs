@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use async_trait::async_trait;
 use firework::client::{Client, ClientCommand, GameMode, InventorySlot, Player};
 use firework::{ConnectionError, Rotation, Server, ServerHandler, Vec3};
@@ -5,6 +7,7 @@ use firework_authentication::Profile;
 use firework_data::items::{Compass, Item};
 use firework_protocol::data_types::{ItemNbt, Slot};
 use firework_protocol_core::VarInt;
+use tokio::time;
 
 use crate::{MiniGameProxy, TransferData};
 
@@ -45,15 +48,10 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
         chat: String,
     ) -> Result<Option<String>, ConnectionError> {
         let name = &client.player.read().await.profile.name;
-        // client.to_client.send(ClientCommand::Transfer {
-        //     data: TransferData::Glide,
-        // });
-        client.to_client.send(ClientCommand::SyncPosition {
-            position: Vec3::new(f64::MAX, f64::MAX, f64::MAX),
-            rotation: Rotation::new(-90., 0.),
+        client.to_client.send(ClientCommand::Transfer {
+            data: TransferData::Glide,
         });
-        // Ok(Some(format!(r#"{{ "text": "<{}> {}"}}"#, name, chat)))
-        Ok(None)
+        Ok(Some(format!(r#"{{ "text": "<{}> {}"}}"#, name, chat)))
     }
     async fn on_chat_command(
         &self,
@@ -62,15 +60,7 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
         client: &Client<MiniGameProxy>,
         command: String,
     ) -> Result<Option<String>, ConnectionError> {
-        let name = &client.player.read().await.profile.name;
-        // client.to_client.send(ClientCommand::Transfer {
-        //     data: TransferData::Glide,
-        // });
-        client.to_client.send(ClientCommand::SyncPosition {
-            position: Vec3::new(f64::MAX, f64::MAX, f64::MAX),
-            rotation: Rotation::new(-90., 0.),
-        });
-        // Ok(Some(format!(r#"{{ "text": "<{}> {}"}}"#, name, chat)))
+        println!("command: {}", command);
         Ok(None)
     }
 }
