@@ -73,6 +73,77 @@ impl SerializeField for BitSet {
     }
 }
 
+#[derive(Debug, PartialEq, SerializeField)]
+#[protocol(typ = "firework_protocol_core::VarInt")]
+pub enum Particle {
+    AmbientEntityEffect,
+    AngryVillager,
+    Block,
+    BlockMarker,
+    Bubble,
+    Cloud,
+    Crit,
+    DamageIndicator,
+    DragonBreath,
+    DrippingLava,
+    FallingLava,
+    LandingLava,
+    DrippingWater,
+    FallingWater,
+    Dust,
+    DustColorTransition,
+    Effect,
+    ElderGuardian,
+    EnchantedHit,
+    Enchant,
+    EndRod,
+    EntityEffect,
+    ExplosionEmitter,
+    Explosion,
+    SonicBoom,
+    FallingDust,
+    Firework,
+    Fishing,
+    Flame,
+    SculkSoul,
+    SculkCharge,
+    SculkChargePop,
+    SoulFireFlame,
+    Soul,
+    Flash,
+    HappyVillager,
+    Composter,
+    Heart,
+    InstantEffect,
+    Item,
+    Vibration,
+    ItemSlime,
+    ItemSnowball,
+    LargeSmoke,
+    Lava,
+    Mycelium,
+    Note,
+    Poof,
+    Portal,
+    Rain,
+    Smoke,
+    Sneeze,
+    Spit,
+    SquidInk,
+    SweepAttack,
+    TotemOfUndying,
+    Underwater,
+    Splash,
+    Witch,
+    BubblePop,
+    CurrentDown,
+    BubbleColumnUp,
+    Nautilus,
+    Dolphin,
+    CampfireCosySmoke,
+    CampFireSignalSmoke,
+}
+
 #[derive(Debug, PartialEq)]
 pub struct DeathLocation {
     pub dimension_name: String,
@@ -598,5 +669,22 @@ mod test {
 impl SerializeField for DisplaySkinParts {
     fn serialize<W: std::io::Write>(&self, mut writer: W) {
         self.bytes.serialize(&mut writer);
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Attribute {
+    MaxHealth { value: f64 },
+}
+
+impl SerializeField for Attribute {
+    fn serialize<W: std::io::Write>(&self, mut writer: W) {
+        match self {
+            Attribute::MaxHealth { value } => {
+                "generic.max_health".to_string().serialize(&mut writer);
+                value.serialize(&mut writer);
+                VarInt(0).serialize(&mut writer);
+            }
+        }
     }
 }

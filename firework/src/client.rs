@@ -12,18 +12,18 @@ use firework_data::{
 use firework_protocol::{
     client_bound::{
         ChangeDifficulty, ClientBoundKeepAlive, ClientBoundPacketID, CloseContainer, Commands,
-        CustomSound, IdMapHolder, LoginPlay, PlayDisconnect, PlayerAbilities, PlayerInfo,
+        CustomSound, IdMapHolder, LoginPlay, Particle, PlayDisconnect, PlayerAbilities, PlayerInfo,
         PluginMessage, RemoveEntities, RemoveInfoPlayer, ResourcePack, Respawn, SerializePacket,
         SetCenterChunk, SetContainerContent, SetContainerSlot, SetDefaultSpawn, SetEntityMetadata,
-        SetHeldItem, SetRecipes, SetTags, SoundEffect, SoundSource, SpawnPlayer,
+        SetHealth, SetHeldItem, SetRecipes, SetTags, SoundEffect, SoundSource, SpawnPlayer,
         SynchronizePlayerPosition, SystemChatMessage, TeleportEntity, UnloadChunk,
-        UpdateEntityHeadRotation, UpdateEntityPosition, UpdateEntityPositionAndRotation,
-        UpdateEntityRotation,
+        UpdateAttributes, UpdateEntityHeadRotation, UpdateEntityPosition,
+        UpdateEntityPositionAndRotation, UpdateEntityRotation,
     },
     data_types::{
-        AddPlayer, CommandNode, FloatProps, ItemNbt, ItemNbtDisplay, NodeType, Parser,
-        PlayerAbilityFlags, PlayerCommandAction, PlayerInfoAction, PlayerPositionFlags, Slot,
-        UpdateGameMode, UpdateLatency, UpdateListed,
+        self, AddPlayer, Attribute, CommandNode, FloatProps, ItemNbt, ItemNbtDisplay, NodeType,
+        Parser, PlayerAbilityFlags, PlayerCommandAction, PlayerInfoAction, PlayerPositionFlags,
+        Slot, UpdateGameMode, UpdateLatency, UpdateListed,
     },
     read_specific_packet,
     server_bound::{ChatMessage, PlayerCommand, ServerBoundPacket},
@@ -105,6 +105,8 @@ pub struct Player {
     pub flying_allowed: bool,
     pub inventory: Inventory,
     pub open_gui: Option<Gui>,
+    pub health: f32,
+    pub max_health: f32,
 }
 
 #[derive(Debug)]
@@ -233,7 +235,8 @@ where
         Handler: ServerHandler<Proxy> + Send + Sync + 'static,
     {
         // This packet is send to the client to tell it to show the loading world screen
-        let respawn = Respawn {
+
+        self.send_packet(Respawn {
             dimension_type: "minecraft:the_end".to_string(),
             dimension_name: "minecraft:the_end".to_string(),
             hashed_seed: 0,
@@ -243,11 +246,10 @@ where
             is_flat: false,
             copy_metadata: true,
             death_location: None,
-        };
+        })
+        .await?;
 
-        self.send_packet(respawn).await?;
-
-        let respawn = {
+        self.send_packet({
             let player = self.player.read().await;
             Respawn {
                 dimension_type: "minecraft:overworld".to_string(),
@@ -260,8 +262,8 @@ where
                 copy_metadata: true,
                 death_location: None,
             }
-        };
-        self.send_packet(respawn).await?;
+        })
+        .await?;
 
         for (x, z) in self.client_data.loaded_chunks.lock().await.drain() {
             self.unload_chunk(x, z).await?;
@@ -275,39 +277,40 @@ where
     where
         Handler: ServerHandler<Proxy> + Send + Sync + 'static,
     {
-        let world_login = {
-            let player = self.player.read().await;
-            LoginPlay {
-                entity_id: self.client_data.entity_id,
-                is_hardcore: false,
-                game_mode: player.gamemode.clone() as u8,
-                previous_game_mode: player.previous_gamemode,
-                dimensions: vec![
-                    "minecraft:overworld".to_string(),
-                    "minecraft:the_nether".to_string(),
-                    "minecraft:the_end".to_string(),
-                ],
-                registry_codec: UnsizedVec(REGISTRY.clone()),
-                dimension_type: "minecraft:overworld".to_string(),
-                dimension_name: "minecraft:overworld".to_string(),
-                hashed_seed: 0,
-                max_players: VarInt(10),
-                view_distance: VarInt(7),
-                simulation_distance: VarInt(5),
-                reduced_debug_info: player.reduced_debug_info,
-                enable_respawn_screen: true,
-                is_debug: false,
-                is_flat: false,
-                death_location: None,
-            }
-        };
-        self.connection.write_packet(world_login).await?;
+        self.connection
+            .write_packet({
+                let player = self.player.read().await;
+                LoginPlay {
+                    entity_id: self.client_data.entity_id,
+                    is_hardcore: false,
+                    game_mode: player.gamemode.clone() as u8,
+                    previous_game_mode: player.previous_gamemode,
+                    dimensions: vec![
+                        "minecraft:overworld".to_string(),
+                        "minecraft:the_nether".to_string(),
+                        "minecraft:the_end".to_string(),
+                    ],
+                    registry_codec: UnsizedVec(REGISTRY.clone()),
+                    dimension_type: "minecraft:overworld".to_string(),
+                    dimension_name: "minecraft:overworld".to_string(),
+                    hashed_seed: 0,
+                    max_players: VarInt(10),
+                    view_distance: VarInt(7),
+                    simulation_distance: VarInt(5),
+                    reduced_debug_info: player.reduced_debug_info,
+                    enable_respawn_screen: true,
+                    is_debug: false,
+                    is_flat: false,
+                    death_location: None,
+                }
+            })
+            .await?;
 
         *self.connection.connection_state.write().await = ConnectionState::Play;
 
-        let update_tags = SetTags { tags: &TAGS };
-
-        self.connection.write_packet(update_tags).await?;
+        self.connection
+            .write_packet(SetTags { tags: &TAGS })
+            .await?;
 
         let client_settings =
             read_specific_packet!(self.connection.as_ref(), ClientInformation).await?;
@@ -330,24 +333,23 @@ where
     where
         Handler: ServerHandler<Proxy> + Send + Sync + 'static,
     {
-        let server_brand = {
+        self.send_packet({
             let mut buf = Vec::new();
             server.brand.to_string().serialize(&mut buf);
             PluginMessage {
                 channel: "minecraft:brand".to_string(),
                 data: UnsizedVec(buf),
             }
-        };
+        })
+        .await?;
 
-        self.connection.write_packet(server_brand).await?;
-
-        let change_difficulty = ChangeDifficulty {
+        self.send_packet(ChangeDifficulty {
             difficulty: *server.difficulty.read().await,
             locked: *server.difficulty_locked.read().await,
-        };
-        self.connection.write_packet(change_difficulty).await?;
+        })
+        .await?;
 
-        let player_abilities = {
+        self.send_packet({
             let player = self.player.read().await;
             PlayerAbilities {
                 flags: PlayerAbilityFlags::new()
@@ -356,118 +358,127 @@ where
                 flying_speed: 0.05,
                 walking_speed: 0.1,
             }
-        };
+        })
+        .await?;
 
-        self.send_packet(player_abilities).await?;
+        self.send_packet(UpdateAttributes {
+            entity_id: VarInt::from(self.client_data.entity_id),
+            attributes: vec![Attribute::MaxHealth {
+                value: self.player.read().await.max_health as f64,
+            }],
+        })
+        .await?;
 
-        let set_held_item = SetHeldItem {
+        self.send_packet(SetHealth {
+            health: self.player.read().await.health as f32,
+            food: VarInt(20),
+            food_saturation: 5.0,
+        })
+        .await?;
+
+        self.send_packet(SetHeldItem {
             slot: self.player.read().await.selected_slot,
-        };
+        })
+        .await?;
 
-        self.send_packet(set_held_item).await?;
-
-        let update_recipes = SetRecipes {
-            recipes: Vec::new(),
-        };
-
-        self.connection.write_packet(update_recipes).await?;
+        self.connection
+            .write_packet(SetRecipes {
+                recipes: Vec::new(),
+            })
+            .await?;
 
         // OP permission level packet here
 
-        let node = CommandNode::new(
-            NodeType::Root,
-            None,
-            false,
-            vec![CommandNode::new(
-                NodeType::Literal {
-                    name: "test_command".to_string(),
-                },
-                None,
-                false,
-                vec![
-                    CommandNode::new(
-                        NodeType::Argument {
-                            name: "true_or_false".to_string(),
-                            parser: Parser::Bool,
-                            suggestions_type: None,
+        self.connection
+            .write_packet(Commands {
+                root: CommandNode::new(
+                    NodeType::Root,
+                    None,
+                    false,
+                    vec![CommandNode::new(
+                        NodeType::Literal {
+                            name: "test_command".to_string(),
                         },
                         None,
-                        true,
-                        vec![],
-                    ),
-                    CommandNode::new(
-                        NodeType::Argument {
-                            name: "0_to_1".to_string(),
-                            parser: Parser::Float(FloatProps {
-                                min: Some(0.0),
-                                max: Some(1.0),
-                            }),
-                            suggestions_type: None,
-                        },
-                        None,
-                        true,
-                        vec![],
-                    ),
-                ],
-            )],
-        );
-
-        let commands = Commands { root: node };
-
-        self.connection.write_packet(commands).await?;
+                        false,
+                        vec![
+                            CommandNode::new(
+                                NodeType::Argument {
+                                    name: "true_or_false".to_string(),
+                                    parser: Parser::Bool,
+                                    suggestions_type: None,
+                                },
+                                None,
+                                true,
+                                vec![],
+                            ),
+                            CommandNode::new(
+                                NodeType::Argument {
+                                    name: "0_to_1".to_string(),
+                                    parser: Parser::Float(FloatProps {
+                                        min: Some(0.0),
+                                        max: Some(1.0),
+                                    }),
+                                    suggestions_type: None,
+                                },
+                                None,
+                                true,
+                                vec![],
+                            ),
+                        ],
+                    )],
+                ),
+            })
+            .await?;
 
         // Unlock recipes packet
 
-        let position_sync = {
-            let player = self.player.read().await;
-            SynchronizePlayerPosition {
-                x: player.position.x,
-                y: player.position.y,
-                z: player.position.z,
-                yaw: player.rotation.yaw,
-                pitch: player.rotation.pitch,
-                flags: PlayerPositionFlags::new(),
-                teleport_id: VarInt(0),
-                dismount_vehicle: false,
-            }
-        };
-
-        self.connection.write_packet(position_sync).await?;
+        self.connection
+            .write_packet({
+                let player = self.player.read().await;
+                SynchronizePlayerPosition {
+                    x: player.position.x,
+                    y: player.position.y,
+                    z: player.position.z,
+                    yaw: player.rotation.yaw,
+                    pitch: player.rotation.pitch,
+                    flags: PlayerPositionFlags::new(),
+                    teleport_id: VarInt(0),
+                    dismount_vehicle: false,
+                }
+            })
+            .await?;
 
         self.add_all_players(server.player_list.clone()).await?;
 
         // Initialize world border packet
 
-        let set_default_spawn = SetDefaultSpawn {
-            position: Position { x: 0, y: 47, z: 0 },
-            yaw: 90.0,
-        };
+        self.connection
+            .write_packet(SetDefaultSpawn {
+                position: Position { x: 0, y: 47, z: 0 },
+                yaw: 90.0,
+            })
+            .await?;
 
-        self.connection.write_packet(set_default_spawn).await?;
-
-        let container_content = {
-            let player = self.player.read().await;
-
-            SetContainerContent {
+        self.connection
+            .write_packet(SetContainerContent {
                 window_id: 0,
                 state_id: VarInt(0),
-                items: player.inventory.slots.to_vec(),
+                items: self.player.read().await.inventory.slots.to_vec(),
                 held_item: None,
-            }
-        };
-
-        self.connection.write_packet(container_content).await?;
+            })
+            .await?;
 
         // Advancements packet
 
-        let set_center_chunk = {
+        self.send_packet({
             let player = self.player.read().await;
             SetCenterChunk {
                 x: VarInt((player.position.x as i32).rem_euclid(16)),
                 z: VarInt((player.position.z as i32).rem_euclid(16)),
             }
-        };
-        self.connection.write_packet(set_center_chunk).await?;
+        })
+        .await?;
 
         for x in -7..=7 {
             for z in -7..=7 {
@@ -481,13 +492,13 @@ where
                     }
                 };
                 if let Some(packet) = packet {
-                    self.connection.write_packet(packet).await?;
+                    self.send_packet(packet).await?;
                 }
                 self.client_data.loaded_chunks.lock().await.insert((x, z));
             }
         }
 
-        let position_sync = {
+        self.send_packet({
             let player = self.player.read().await;
             SynchronizePlayerPosition {
                 x: player.position.x,
@@ -499,9 +510,8 @@ where
                 teleport_id: VarInt(0),
                 dismount_vehicle: false,
             }
-        };
-
-        self.connection.write_packet(position_sync).await?;
+        })
+        .await?;
 
         if let Some(information) = self.client_data.settings.read().await.as_ref() {
             self.update_entity_metadata(
@@ -596,14 +606,13 @@ where
                 )
                 .await?;
 
-                let container_content = SetContainerContent {
+                self.send_packet(SetContainerContent {
                     window_id: 0,
                     state_id: VarInt(0),
                     items: Inventory::default().slots.to_vec(),
                     held_item: None,
-                };
-
-                self.connection.write_packet(container_content).await?;
+                })
+                .await?;
 
                 if let Some(gui) = &self.player.read().await.open_gui {
                     let close_container = CloseContainer { window_id: 42 };
@@ -639,9 +648,9 @@ where
             ServerBoundPacket::ChatMessage(ChatMessage { message }) => {
                 let gui = GameQueueMenuGui {};
 
-                self.connection.write_packet(gui.open()).await?;
+                self.send_packet(gui.open()).await?;
 
-                self.connection.write_packet(gui.draw()).await?;
+                self.send_packet(gui.draw()).await?;
                 self.player.write().await.open_gui = Some(GameQueueMenuGui(gui));
 
                 server.handle_chat(server, proxy, self, message).await?
@@ -742,9 +751,9 @@ where
                             // open game queue menu
                             let gui = GameQueueMenuGui {};
 
-                            self.connection.write_packet(gui.open()).await?;
+                            self.send_packet(gui.open()).await?;
 
-                            self.connection.write_packet(gui.draw()).await?;
+                            self.send_packet(gui.draw()).await?;
 
                             self.player.write().await.open_gui = Some(GameQueueMenuGui(gui));
                         }
@@ -789,7 +798,7 @@ where
                             if let Err(e) = packet {
                                 println!("Error sending resource pack: {:?}", e);
                             } else {
-                                self.connection.write_packet(packet.unwrap()).await?;
+                                self.send_packet(packet.unwrap()).await?;
                             }
                             let green_dye_slot = Slot {
                                 item_id: VarInt(LimeDye::ID as i32),
@@ -837,7 +846,7 @@ where
                                 forced: false,
                                 prompt: None,
                             };
-                            self.connection.write_packet(packet).await?;
+                            self.send_packet(packet).await?;
                             let red_dye_slot = Slot {
                                 item_id: VarInt(RedDye::ID as i32),
                                 item_count: 1,
@@ -918,18 +927,17 @@ where
                     }
                 };
                 if let Some(packet) = packet {
-                    self.connection.write_packet(packet).await?;
+                    self.send_packet(packet).await?;
                 }
                 player_loaded_chunks.insert((x + chunk_x, z + chunk_z));
             }
         }
 
-        let set_center_chunk = SetCenterChunk {
+        self.send_packet(SetCenterChunk {
             x: VarInt(chunk_x),
             z: VarInt(chunk_z),
-        };
-
-        self.send_packet(set_center_chunk).await?;
+        })
+        .await?;
         Ok(())
     }
     async fn ping(&self) -> Result<(), ConnectionError> {
@@ -941,21 +949,18 @@ where
                 *ping_acknowledged = false;
             }
         }
-        let ping = ClientBoundKeepAlive {
-            id: rand::thread_rng().gen(),
-        };
 
-        self.connection.write_packet(ping).await?;
+        let id = rand::thread_rng().gen();
+        self.send_packet(ClientBoundKeepAlive { id }).await?;
 
         Ok(())
     }
     async fn display_message(&self, message: &str) -> Result<(), ConnectionError> {
-        let chat_message = SystemChatMessage {
+        self.send_packet(SystemChatMessage {
             message: message.to_string(),
             action_bar: false,
-        };
-
-        self.connection.write_packet(chat_message).await?;
+        })
+        .await?;
 
         Ok(())
     }
@@ -981,7 +986,7 @@ where
                     || (delta_z < i16::MIN as f64 || delta_z > i16::MAX as f64)
                 {
                     let (yaw, pitch) = previous_rotation.serialize();
-                    let entity_teleport = TeleportEntity {
+                    self.send_packet(TeleportEntity {
                         entity_id: VarInt(entity_id),
                         x: pos.x,
                         y: pos.y,
@@ -989,19 +994,19 @@ where
                         yaw,
                         pitch,
                         on_ground,
-                    };
-                    self.connection.write_packet(entity_teleport).await?;
-                    let head_rotation = UpdateEntityHeadRotation {
+                    })
+                    .await?;
+                    self.send_packet(UpdateEntityHeadRotation {
                         entity_id: VarInt(entity_id),
                         yaw,
-                    };
-                    self.connection.write_packet(head_rotation).await?;
+                    })
+                    .await?;
                 } else {
                     let (yaw, pitch) = rot.serialize();
                     let (delta_x, delta_y, delta_z) =
                         (delta_x as i16, delta_y as i16, delta_z as i16);
 
-                    let entity_move_rotate = UpdateEntityPositionAndRotation {
+                    self.send_packet(UpdateEntityPositionAndRotation {
                         entity_id: VarInt(entity_id),
                         delta_x,
                         delta_y,
@@ -1009,13 +1014,13 @@ where
                         yaw,
                         pitch,
                         on_ground,
-                    };
-                    self.connection.write_packet(entity_move_rotate).await?;
-                    let head_rotation = UpdateEntityHeadRotation {
+                    })
+                    .await?;
+                    self.send_packet(UpdateEntityHeadRotation {
                         entity_id: VarInt(entity_id),
                         yaw,
-                    };
-                    self.connection.write_packet(head_rotation).await?;
+                    })
+                    .await?;
                 }
             }
             (Some(pos), None) => {
@@ -1030,7 +1035,7 @@ where
                     || (delta_z < i16::MIN as f64 || delta_z > i16::MAX as f64)
                 {
                     let (yaw, pitch) = previous_rotation.serialize();
-                    let entity_teleport = TeleportEntity {
+                    self.send_packet(TeleportEntity {
                         entity_id: VarInt(entity_id),
                         x: pos.x,
                         y: pos.y,
@@ -1038,41 +1043,41 @@ where
                         yaw,
                         pitch,
                         on_ground,
-                    };
-                    self.connection.write_packet(entity_teleport).await?;
-                    let head_rotation = UpdateEntityHeadRotation {
+                    })
+                    .await?;
+                    self.send_packet(UpdateEntityHeadRotation {
                         entity_id: VarInt(entity_id),
                         yaw,
-                    };
-                    self.connection.write_packet(head_rotation).await?;
+                    })
+                    .await?;
                 } else {
                     let (delta_x, delta_y, delta_z) =
                         (delta_x as i16, delta_y as i16, delta_z as i16);
-                    let entity_move = UpdateEntityPosition {
+                    self.send_packet(UpdateEntityPosition {
                         entity_id: VarInt(entity_id),
                         delta_x,
                         delta_y,
                         delta_z,
                         on_ground,
-                    };
-                    self.connection.write_packet(entity_move).await?;
+                    })
+                    .await?;
                 }
             }
             (None, Some(rot)) => {
                 let (yaw, pitch) = rot.serialize();
 
-                let entity_move_rotate = UpdateEntityRotation {
+                self.send_packet(UpdateEntityRotation {
                     entity_id: VarInt(entity_id),
                     yaw,
                     pitch,
                     on_ground,
-                };
-                self.connection.write_packet(entity_move_rotate).await?;
-                let head_rotation = UpdateEntityHeadRotation {
+                })
+                .await?;
+                self.send_packet(UpdateEntityHeadRotation {
                     entity_id: VarInt(entity_id),
                     yaw,
-                };
-                self.connection.write_packet(head_rotation).await?;
+                })
+                .await?;
             }
             _ => {
                 return Ok(());
@@ -1085,49 +1090,50 @@ where
         entity_id: i32,
         metadata: Vec<EntityMetadata>,
     ) -> Result<(), ConnectionError> {
-        let mut entity_metadata_inner = Vec::new();
-        for meta in metadata {
-            meta.serialize(&mut entity_metadata_inner);
-        }
-        entity_metadata_inner.push(END_INDEX);
-        let entity_metadata = SetEntityMetadata {
+        self.send_packet(SetEntityMetadata {
             entity_id: VarInt(entity_id),
-            metadata: UnsizedVec(entity_metadata_inner),
-        };
-        self.connection.write_packet(entity_metadata).await?;
+            metadata: UnsizedVec({
+                let mut entity_metadata_inner = Vec::new();
+                for meta in metadata {
+                    meta.serialize(&mut entity_metadata_inner);
+                }
+                entity_metadata_inner.push(END_INDEX);
+                entity_metadata_inner
+            }),
+        })
+        .await?;
         Ok(())
     }
     async fn remove_player(&self, uuid: u128, entity_id: i32) -> Result<(), ConnectionError> {
-        let player_info = RemoveInfoPlayer {
+        self.send_packet(RemoveInfoPlayer {
             players: vec![uuid],
-        };
-        self.connection.write_packet(player_info).await?;
-        let remove_entities = RemoveEntities {
+        })
+        .await?;
+        self.send_packet(RemoveEntities {
             entity_ids: vec![VarInt(entity_id)],
-        };
-        self.connection.write_packet(remove_entities).await?;
+        })
+        .await?;
         Ok(())
     }
     async fn remove_all_players(&self, players: Vec<(u128, i32)>) -> Result<(), ConnectionError> {
-        let remove_entities = RemoveEntities {
+        self.send_packet(RemoveEntities {
             entity_ids: players
                 .iter()
                 .map(|(_, entity_id)| VarInt(*entity_id))
                 .collect(),
-        };
-        self.connection.write_packet(remove_entities).await?;
-
-        let player_info = RemoveInfoPlayer {
+        })
+        .await?;
+        self.send_packet(RemoveInfoPlayer {
             players: players.iter().map(|(uuid, _)| *uuid).collect(),
-        };
-        self.connection.write_packet(player_info).await?;
+        })
+        .await?;
         Ok(())
     }
     async fn add_all_players(
         &self,
         player_list: Arc<DashMap<u128, Client<Proxy>>>,
     ) -> Result<(), ConnectionError> {
-        let player_info = {
+        self.send_packet({
             let mut add_players = Vec::new();
 
             for client in player_list.iter() {
@@ -1151,15 +1157,15 @@ where
             PlayerInfo {
                 action: PlayerInfoAction::AddAllPlayers(add_players),
             }
-        };
-
-        self.connection.write_packet(player_info).await?;
+        })
+        .await?;
 
         for client in player_list.iter() {
             if client.client_data.uuid == self.client_data.uuid {
                 continue;
             }
-            let spawn_player = {
+
+            self.send_packet({
                 let player = client.player.read().await;
                 let (yaw, pitch) = player.rotation.serialize();
 
@@ -1172,9 +1178,8 @@ where
                     yaw,
                     pitch,
                 }
-            };
-
-            self.connection.write_packet(spawn_player).await?;
+            })
+            .await?;
 
             if let Some(information) = client.client_data.settings.read().await.as_ref() {
                 self.update_entity_metadata(
@@ -1224,8 +1229,8 @@ where
             pitch,
         };
 
-        self.connection.write_packet(player_info).await?;
-        self.connection.write_packet(spawn_player).await?;
+        self.send_packet(player_info).await?;
+        self.send_packet(spawn_player).await?;
 
         if let Some(information) = client_data.settings.read().await.as_ref() {
             self.update_entity_metadata(
@@ -1239,15 +1244,14 @@ where
         Ok(())
     }
     pub(crate) async fn disconnect(&self, reason: String) -> Result<(), ConnectionError> {
-        let disconnect = PlayDisconnect { reason };
-        self.connection.write_packet(disconnect).await?;
+        self.send_packet(PlayDisconnect { reason }).await?;
         Ok(())
     }
     pub async fn set_container_content(
         &self,
         content: SetContainerContent,
     ) -> Result<(), ConnectionError> {
-        self.connection.write_packet(content).await?;
+        self.send_packet(content).await?;
         // Lmao this is test code
         self.connection
             .write_packet(SoundEffect {
@@ -1268,8 +1272,7 @@ where
         Ok(())
     }
     pub async fn unload_chunk(&self, x: i32, z: i32) -> Result<(), ConnectionError> {
-        let unload_chunk = UnloadChunk { x, z };
-        self.connection.write_packet(unload_chunk).await?;
+        self.send_packet(UnloadChunk { x, z }).await?;
         Ok(())
     }
     async fn send_packet<T: SerializePacket + ClientBoundPacketID + Debug>(
@@ -1277,6 +1280,33 @@ where
         packet: T,
     ) -> Result<(), ConnectionError> {
         self.connection.write_packet(packet).await?;
+        Ok(())
+    }
+    pub async fn send_particle(
+        &self,
+        particle: data_types::Particle,
+        long_distance: bool,
+        pos: Vec3,
+        offset_x: f32,
+        offset_y: f32,
+        offset_z: f32,
+        max_speed: f32,
+        particle_count: i32,
+    ) -> Result<(), ConnectionError> {
+        let (x, y, z) = (pos.x, pos.y, pos.z);
+        self.send_packet(Particle {
+            particle,
+            long_distance,
+            x,
+            y,
+            z,
+            offset_x,
+            offset_y,
+            offset_z,
+            max_speed,
+            particle_count,
+        })
+        .await?;
         Ok(())
     }
 }

@@ -5,7 +5,7 @@ use firework::{
 };
 use firework_authentication::Profile;
 use firework_data::items::{Elytra, Item};
-use firework_protocol::data_types::{ItemNbt, Slot};
+use firework_protocol::data_types::{self, ItemNbt, Slot};
 use firework_protocol_core::VarInt;
 
 use crate::MiniGameProxy;
@@ -17,12 +17,12 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
     fn new() -> Self {
         Self {}
     }
-    async fn on_tick(&self, server: &Server<Self, MiniGameProxy>, proxy: &MiniGameProxy) {
-        // println!("tick");
-    }
+    async fn on_tick(&self, server: &Server<Self, MiniGameProxy>, proxy: &MiniGameProxy) {}
     async fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError> {
         let mut player = Player {
             position: Vec3::new(0.5, 168.0, 0.5),
+            max_health: 6.0,
+            health: 6.0,
             gamemode: GameMode::Adventure,
             profile,
             uuid,

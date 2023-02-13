@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use async_trait::async_trait;
 use firework::client::{Client, ClientCommand, GameMode, InventorySlot, Player};
 use firework::{ConnectionError, Rotation, Server, ServerHandler, Vec3};
@@ -7,7 +5,6 @@ use firework_authentication::Profile;
 use firework_data::items::{Compass, Item};
 use firework_protocol::data_types::{ItemNbt, Slot};
 use firework_protocol_core::VarInt;
-use tokio::time;
 
 use crate::{MiniGameProxy, TransferData};
 
@@ -21,6 +18,8 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
     async fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError> {
         let mut player = Player {
             gamemode: GameMode::Adventure,
+            max_health: 20.0,
+            health: 19.99999999,
             position: Vec3::new(0.5, 46.0, 0.5),
             rotation: Rotation::new(-90., 0.),
             profile,

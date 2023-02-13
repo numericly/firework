@@ -47,8 +47,8 @@ use std::collections::HashMap;
 use nbt::Blob;
 
 use crate::data_types::{
-    BitSet, CommandNode, DeathLocation, PlayerAbilityFlags, PlayerInfoAction, PlayerPositionFlags,
-    Recipe, Slot,
+    self, Attribute, BitSet, CommandNode, DeathLocation, PlayerAbilityFlags, PlayerInfoAction,
+    PlayerPositionFlags, Recipe, Slot,
 };
 
 pub trait ClientBoundPacketID {
@@ -155,6 +155,18 @@ define_client_bound_protocol! {
         empty_block_light_mask: BitSet,
         sky_light: Vec<Vec<i8>>,
         block_light: Vec<Vec<i8>>
+    },
+    Particle, 0x22, Play => {
+        particle: data_types::Particle,
+        long_distance: bool,
+        x: f64,
+        y: f64,
+        z: f64,
+        offset_x: f32,
+        offset_y: f32,
+        offset_z: f32,
+        max_speed: f32,
+        particle_count: i32
     },
     LoginPlay, 0x24, Play => {
         entity_id: i32,
@@ -268,6 +280,11 @@ define_client_bound_protocol! {
         velocity_y: i16,
         velocity_z: i16
     },
+    SetHealth, 0x53, Play => {
+        health: f32,
+        food: VarInt,
+        food_saturation: f32
+    },
     SoundEffect, 0x5E, Play => {
         sound: IdMapHolder<CustomSound, VanillaSound>,
         sound_source: SoundSource,
@@ -290,6 +307,10 @@ define_client_bound_protocol! {
         yaw: i8,
         pitch: i8,
         on_ground: bool
+    },
+    UpdateAttributes, 0x66, Play => {
+        entity_id: VarInt,
+        attributes: Vec<Attribute>
     },
     SetRecipes, 0x69, Play => {
         recipes: Vec<Recipe>
