@@ -45,9 +45,32 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
         chat: String,
     ) -> Result<Option<String>, ConnectionError> {
         let name = &client.player.read().await.profile.name;
-        client.to_client.send(ClientCommand::Transfer {
-            data: TransferData::Glide,
+        // client.to_client.send(ClientCommand::Transfer {
+        //     data: TransferData::Glide,
+        // });
+        client.to_client.send(ClientCommand::SyncPosition {
+            position: Vec3::new(f64::MAX, f64::MAX, f64::MAX),
+            rotation: Rotation::new(-90., 0.),
         });
-        Ok(Some(format!(r#"{{ "text": "<{}> {}"}}"#, name, chat)))
+        // Ok(Some(format!(r#"{{ "text": "<{}> {}"}}"#, name, chat)))
+        Ok(None)
+    }
+    async fn on_chat_command(
+        &self,
+        server: &Server<Self, MiniGameProxy>,
+        proxy: &MiniGameProxy,
+        client: &Client<MiniGameProxy>,
+        command: String,
+    ) -> Result<Option<String>, ConnectionError> {
+        let name = &client.player.read().await.profile.name;
+        // client.to_client.send(ClientCommand::Transfer {
+        //     data: TransferData::Glide,
+        // });
+        client.to_client.send(ClientCommand::SyncPosition {
+            position: Vec3::new(f64::MAX, f64::MAX, f64::MAX),
+            rotation: Rotation::new(-90., 0.),
+        });
+        // Ok(Some(format!(r#"{{ "text": "<{}> {}"}}"#, name, chat)))
+        Ok(None)
     }
 }

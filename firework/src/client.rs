@@ -42,6 +42,10 @@ where
     Transfer {
         data: TransferData,
     },
+    SyncPosition {
+        position: Vec3,
+        rotation: Rotation,
+    },
     Disconnect {
         reason: String,
     },
@@ -522,6 +526,19 @@ where
         Proxy: ServerProxy + Send + Sync + 'static,
     {
         match command {
+            ClientCommand::SyncPosition { position, rotation } => {
+                self.send_packet(SynchronizePlayerPosition {
+                    x: position.x,
+                    y: position.y,
+                    z: position.z,
+                    yaw: rotation.yaw,
+                    pitch: rotation.pitch,
+                    flags: PlayerPositionFlags::new(),
+                    teleport_id: VarInt(0),
+                    dismount_vehicle: false,
+                })
+                .await?;
+            }
             ClientCommand::MoveEntity {
                 entity_id,
                 position,

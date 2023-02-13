@@ -391,6 +391,14 @@ where
     ) -> Result<(), ConnectionError> {
         Ok(())
     }
+    async fn on_client_post_world_load(
+        &self,
+        server: &Server<Self, Proxy>,
+        proxy: &Proxy,
+        client: &Client<Proxy>,
+    ) -> Result<(), ConnectionError> {
+        Ok(())
+    }
     async fn on_client_command(
         &self,
         server: &Server<Self, Proxy>,
@@ -418,6 +426,15 @@ where
     ) -> Result<Option<String>, ConnectionError> {
         let name = &client.player.read().await.profile.name;
         Ok(Some(format!(r#"{{ "text": "<{}> {}"}}"#, name, chat)))
+    }
+    async fn on_chat_command(
+        &self,
+        server: &Server<Self, Proxy>,
+        proxy: &Proxy,
+        client: &Client<Proxy>,
+        command: String,
+    ) -> Result<Option<String>, ConnectionError> {
+        Ok(Some(command))
     }
     async fn on_player_move(
         &self,
@@ -576,7 +593,9 @@ where
             client.transfer_world(&self).await?;
         }
         client.load_world(&self).await?;
-
+        self.handler
+            .on_client_post_world_load(&self, &proxy, client)
+            .await?;
         self.broadcast_player_join(&client).await;
 
         self.handler
