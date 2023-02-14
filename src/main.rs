@@ -155,17 +155,21 @@ impl ServerProxy for MiniGameProxy {
 
         *self.connected_players.write().await += 1;
 
-        let result = self
+        let result = match self
             .lobby_server
             .clone()
             .handle_connection(self.clone(), connection.clone(), client_data.clone())
-            .await;
-
-        if let Ok(TransferData::Glide) = &result {
-            self.glide_server
-                .clone()
-                .handle_connection(self.clone(), connection.clone(), client_data.clone())
-                .await;
+            .await
+        {
+            Ok(transfer_data) => match transfer_data {
+                TransferData::Glide => {
+                    self.glide_server
+                        .clone()
+                        .handle_connection(self.clone(), connection.clone(), client_data.clone())
+                        .await
+                }
+            },
+            Err(e) => Err(e),
         };
 
         println!("result: {:?}, player: {}", result, client_data.profile.name);

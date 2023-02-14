@@ -1,4 +1,7 @@
+use std::time::Instant;
+
 use async_trait::async_trait;
+use dashmap::{mapref::entry::Entry, DashMap};
 use firework::{
     client::{Client, ClientCommand, GameMode, InventorySlot, Player},
     AxisAlignedBB, BlockPos, ConnectionError, Rotation, Server, ServerHandler, Vec3,
@@ -19,6 +22,62 @@ const SPAWN_AREA: AxisAlignedBB = AxisAlignedBB {
     },
     max: BlockPos { x: 4, y: 168, z: 7 },
 };
+struct Boost {
+    area: AxisAlignedBB,
+    velocity: Vec3,
+}
+const CANYON_BOOSTS: [Boost; 3] = [
+    Boost {
+        area: AxisAlignedBB {
+            max: BlockPos {
+                x: -39,
+                y: 106,
+                z: 315,
+            },
+            min: BlockPos {
+                x: -43,
+                y: 101,
+                z: 306,
+            },
+        },
+        velocity: Vec3::new(0., 0.02, 0.35),
+    },
+    Boost {
+        area: AxisAlignedBB {
+            max: BlockPos {
+                x: -39,
+                y: 105,
+                z: 360,
+            },
+            min: BlockPos {
+                x: -43,
+                y: 100,
+                z: 351,
+            },
+        },
+        velocity: Vec3::new(0., 0.02, 0.35),
+    },
+    Boost {
+        area: AxisAlignedBB {
+            max: BlockPos {
+                x: 126,
+                y: 55,
+                z: 615,
+            },
+            min: BlockPos {
+                x: 122,
+                y: 50,
+                z: 606,
+            },
+        },
+        velocity: Vec3::new(0., 0.05, -0.4),
+    },
+];
+
+enum BoostStatus {
+    Active { percent: f32 },
+    Cooldown { start_time: Instant },
+}
 
 enum GameState {
     Waiting,
@@ -27,6 +86,8 @@ enum GameState {
 
 pub struct GlideServerHandler {
     game_state: RwLock<GameState>,
+    damage_grace_period: DashMap<u128, Instant>,
+    boost_status: DashMap<u128, BoostStatus>,
 }
 
 #[async_trait]
@@ -34,6 +95,8 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
     fn new() -> Self {
         Self {
             game_state: RwLock::new(GameState::Waiting),
+            damage_grace_period: DashMap::new(),
+            boost_status: DashMap::new(),
         }
     }
     async fn on_tick(&self, server: &Server<Self, MiniGameProxy>, proxy: &MiniGameProxy) {}
@@ -49,9 +112,6 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
             ..Player::default()
         };
 
-        Vec3::new(4.5, 168.0, 7.5);
-        Vec3::new(-3.5, 166.0, -2.5);
-
         player.inventory.set_slot(
             InventorySlot::Chestplate,
             Some(Slot {
@@ -65,6 +125,49 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
 
         Ok(player)
     }
+    async fn on_player_move(
+        &self,
+        server: &Server<Self, MiniGameProxy>,
+        proxy: &MiniGameProxy,
+        client: &Client<MiniGameProxy>,
+        position: Vec3,
+    ) -> Result<Option<Vec3>, ConnectionError> {
+        for boost in CANYON_BOOSTS.iter() {
+            if boost.area.within(BlockPos::from(position.clone())) {
+                if let Some(BoostStatus::Cooldown { start_time }) =
+                    self.boost_status.get(&client.client_data.uuid).as_deref()
+                {
+                    if start_time.elapsed().as_millis() < 1_000 {
+                        return Ok(Some(position));
+                    }
+                }
+
+                client
+                    .set_velocity(client.get_velocity().await + boost.velocity.clone())
+                    .await?;
+
+                match self.boost_status.entry(client.client_data.uuid) {
+                    Entry::Occupied(mut entry) => {
+                        let BoostStatus::Active { percent } = entry.get_mut() else {
+                            return Ok(Some(position));
+                        };
+                        if *percent >= 1. {
+                            entry.insert(BoostStatus::Cooldown {
+                                start_time: Instant::now(),
+                            });
+                        } else {
+                            *percent += 0.167;
+                        }
+                    }
+                    Entry::Vacant(entry) => {
+                        entry.insert(BoostStatus::Active { percent: 0. });
+                    }
+                }
+                return Ok(Some(position));
+            }
+        }
+        Ok(Some(position))
+    }
     async fn on_player_on_ground(
         &self,
         server: &Server<Self, MiniGameProxy>,
@@ -72,9 +175,24 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
         client: &Client<MiniGameProxy>,
         on_ground: bool,
     ) -> Result<bool, ConnectionError> {
-        // return Ok(on_ground);
+        return Ok(on_ground);
         let player_pos = client.player.read().await.position.clone();
-        if !SPAWN_AREA.within(BlockPos::from(player_pos)) && on_ground {
+
+        if SPAWN_AREA.within(BlockPos::from(player_pos)) {
+            return Ok(on_ground);
+        };
+
+        let grace = self.damage_grace_period.get(&client.client_data.uuid);
+
+        if let Some(grace) = &grace {
+            if grace.elapsed().as_millis() < 1_000 {
+                return Ok(on_ground);
+            }
+        }
+
+        drop(grace);
+
+        if on_ground {
             client
                 .set_velocity(client.get_velocity().await + Vec3::new(0., 0.5, 0.))
                 .await?;
@@ -84,6 +202,15 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
                 server.handle_death(server, proxy, client).await?;
             } else {
                 client.set_health(new_health).await?;
+            }
+            let entry = self.damage_grace_period.entry(client.client_data.uuid);
+            match entry {
+                dashmap::mapref::entry::Entry::Occupied(mut entry) => {
+                    entry.insert(Instant::now());
+                }
+                dashmap::mapref::entry::Entry::Vacant(entry) => {
+                    entry.insert(Instant::now());
+                }
             }
         }
 
