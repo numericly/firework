@@ -1,11 +1,14 @@
 use std::time::Instant;
 
+use std::sync::Arc;
+
 use async_trait::async_trait;
 use dashmap::{mapref::entry::Entry, DashMap};
 use firework::{
-    client::{Client, ClientCommand, GameMode, InventorySlot, Player},
-    AxisAlignedBB, BlockPos, ConnectionError, Rotation, Server, ServerHandler, Vec3,
+    client::{Client, GameMode, InventorySlot, Player},
+    AxisAlignedBB, BlockPos, ConnectionError, PlayerHandler, Rotation, Server, ServerHandler, Vec3,
 };
+
 use firework_authentication::Profile;
 use firework_data::items::{Elytra, Item};
 use firework_protocol::data_types::{ItemNbt, Slot};
@@ -15,12 +18,12 @@ use tokio::sync::RwLock;
 use crate::MiniGameProxy;
 
 const SPAWN_AREA: AxisAlignedBB = AxisAlignedBB {
+    max: BlockPos { x: 4, y: 169, z: 7 },
     min: BlockPos {
         x: -4,
         y: 166,
         z: -3,
     },
-    max: BlockPos { x: 4, y: 168, z: 7 },
 };
 struct Boost {
     area: AxisAlignedBB,
@@ -40,6 +43,7 @@ const CANYON_BOOSTS: [Boost; 3] = [
                 z: 306,
             },
         },
+
         velocity: Vec3::new(0., 0.02, 0.35),
     },
     Boost {
@@ -90,8 +94,20 @@ pub struct GlideServerHandler {
     boost_status: DashMap<u128, BoostStatus>,
 }
 
+pub struct GlidePlayerHandler {}
+
+impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
+    fn new(
+        server: Arc<Server<GlideServerHandler, MiniGameProxy>>,
+        proxy: Arc<MiniGameProxy>,
+    ) -> Self {
+        Self {}
+    }
+}
+
 #[async_trait]
 impl ServerHandler<MiniGameProxy> for GlideServerHandler {
+    type PlayerHandler = GlidePlayerHandler;
     fn new() -> Self {
         Self {
             game_state: RwLock::new(GameState::Waiting),
@@ -172,7 +188,7 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
         &self,
         server: &Server<Self, MiniGameProxy>,
         proxy: &MiniGameProxy,
-        client: &Client<MiniGameProxy>,
+        client: &Client<Self, MiniGameProxy>,
         on_ground: bool,
     ) -> Result<bool, ConnectionError> {
         return Ok(on_ground);
@@ -220,12 +236,9 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
         &self,
         server: &Server<Self, MiniGameProxy>,
         proxy: &MiniGameProxy,
-        client: &Client<MiniGameProxy>,
+        client: &Client<Self, MiniGameProxy>,
     ) -> Result<bool, ConnectionError> {
-        client.to_client.send(ClientCommand::SyncPosition {
-            position: Vec3::new(0.5, 168.0, 0.5),
-            rotation: Rotation { yaw: 0., pitch: 0. },
-        });
+        client.sync_position(Vec3::new(0.5, 168.0, 0.5), Rotation { yaw: 0., pitch: 0. });
         Ok(true)
     }
 }

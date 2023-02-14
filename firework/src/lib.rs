@@ -433,10 +433,11 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
 pub struct Server<Handler, Proxy: ServerProxy>
 where
     Proxy: ServerProxy + Send + Sync + 'static,
+    Handler: ServerHandler<Proxy> + Send + Sync + 'static,
 {
     pub world: Arc<World>,
     pub entities: Arc<DashMap<i32, Entities>>,
-    pub player_list: Arc<DashMap<u128, Client<Proxy>>>,
+    pub player_list: Arc<DashMap<u128, Client<Handler, Proxy>>>,
     pub difficulty: RwLock<u8>,
     pub difficulty_locked: RwLock<bool>,
     pub handler: Handler,
@@ -446,6 +447,14 @@ where
     proxy: PhantomData<Proxy>,
 }
 
+pub trait PlayerHandler<Handler, Proxy>
+where
+    Handler: ServerHandler<Proxy> + Send + Sync + 'static,
+    Proxy: ServerProxy + Send + Sync + 'static,
+{
+    fn new(server: Arc<Server<Handler, Proxy>>, proxy: Arc<Proxy>) -> Self;
+}
+
 #[async_trait]
 #[allow(unused_variables)]
 pub trait ServerHandler<Proxy>
@@ -453,6 +462,7 @@ where
     Self: Sized + Send + Sync + 'static,
     Proxy: ServerProxy + Send + Sync + 'static,
 {
+    type PlayerHandler: PlayerHandler<Self, Proxy> + Send + Sync + 'static;
     fn new() -> Self;
     async fn on_load(&self, server: &Server<Self, Proxy>, proxy: &Proxy) {}
     async fn on_tick(&self, server: &Server<Self, Proxy>, proxy: &Proxy) {}
@@ -461,7 +471,7 @@ where
         &self,
         server: &Server<Self, Proxy>,
         proxy: &Proxy,
-        client: &Client<Proxy>,
+        client: &Client<Self, Proxy>,
     ) -> Result<(), ConnectionError> {
         Ok(())
     }
@@ -469,7 +479,7 @@ where
         &self,
         server: &Server<Self, Proxy>,
         proxy: &Proxy,
-        client: &Client<Proxy>,
+        client: &Client<Self, Proxy>,
     ) -> Result<(), ConnectionError> {
         Ok(())
     }
@@ -477,7 +487,7 @@ where
         &self,
         server: &Server<Self, Proxy>,
         proxy: &Proxy,
-        client: &Client<Proxy>,
+        client: &Client<Self, Proxy>,
         command: ClientCommand<Proxy::TransferData>,
     ) -> Result<Option<ClientCommand<Proxy::TransferData>>, ConnectionError> {
         Ok(Some(command))
@@ -486,7 +496,7 @@ where
         &self,
         server: &Server<Self, Proxy>,
         proxy: &Proxy,
-        client: &Client<Proxy>,
+        client: &Client<Self, Proxy>,
         packet: ServerBoundPacket,
     ) -> Result<Option<ServerBoundPacket>, ConnectionError> {
         Ok(Some(packet))
@@ -495,7 +505,7 @@ where
         &self,
         server: &Server<Self, Proxy>,
         proxy: &Proxy,
-        client: &Client<Proxy>,
+        client: &Client<Self, Proxy>,
         chat: String,
     ) -> Result<Option<String>, ConnectionError> {
         let name = &client.player.read().await.profile.name;
@@ -505,7 +515,7 @@ where
         &self,
         server: &Server<Self, Proxy>,
         proxy: &Proxy,
-        client: &Client<Proxy>,
+        client: &Client<Self, Proxy>,
     ) -> Result<bool, ConnectionError> {
         Ok(true)
     }
@@ -513,7 +523,7 @@ where
         &self,
         server: &Server<Self, Proxy>,
         proxy: &Proxy,
-        client: &Client<Proxy>,
+        client: &Client<Self, Proxy>,
         command: String,
     ) -> Result<Option<String>, ConnectionError> {
         Ok(Some(command))
@@ -522,7 +532,7 @@ where
         &self,
         server: &Server<Self, Proxy>,
         proxy: &Proxy,
-        client: &Client<Proxy>,
+        client: &Client<Self, Proxy>,
         pos: Vec3,
     ) -> Result<Option<Vec3>, ConnectionError> {
         Ok(Some(pos))
@@ -531,7 +541,7 @@ where
         &self,
         server: &Server<Self, Proxy>,
         proxy: &Proxy,
-        client: &Client<Proxy>,
+        client: &Client<Self, Proxy>,
         rotation: Rotation,
     ) -> Result<Option<Rotation>, ConnectionError> {
         Ok(Some(rotation))
@@ -540,7 +550,7 @@ where
         &self,
         server: &Server<Self, Proxy>,
         proxy: &Proxy,
-        client: &Client<Proxy>,
+        client: &Client<Self, Proxy>,
         on_ground: bool,
     ) -> Result<bool, ConnectionError> {
         Ok(on_ground)
@@ -549,7 +559,7 @@ where
         &self,
         server: &Server<Self, Proxy>,
         proxy: &Proxy,
-        client: &Client<Proxy>,
+        client: &Client<Self, Proxy>,
         sneaking: bool,
     ) -> Result<Option<bool>, ConnectionError> {
         Ok(Some(sneaking))
@@ -558,7 +568,7 @@ where
         &self,
         server: &Server<Self, Proxy>,
         proxy: &Proxy,
-        client: &Client<Proxy>,
+        client: &Client<Self, Proxy>,
         sprinting: bool,
     ) -> Result<Option<bool>, ConnectionError> {
         Ok(Some(sprinting))
@@ -614,6 +624,8 @@ where
         let uuid = player.uuid.clone();
         let client = {
             let client = Client::new(
+                self.clone(),
+                proxy.clone(),
                 connection.clone(),
                 client_data.clone(),
                 player,
@@ -622,17 +634,12 @@ where
 
             #[allow(unused_must_use)]
             if let Some(other_client) = self.player_list.get(&uuid) {
-                other_client.to_client.send(ClientCommand::Disconnect {
-                    reason: r#"{"text": "You logged in from another location"}"#.to_string(),
-                });
+                other_client
+                    .disconnect(r#"{"text": "You logged in from another location"}"#.to_string());
                 client
-                    .handle_command(
-                        &self,
-                        &proxy,
-                        ClientCommand::Disconnect {
-                            reason: r#"{"text": "You are already logged in"}"#.to_string(),
-                        },
-                    )
+                    .handle_command(ClientCommand::Disconnect {
+                        reason: r#"{"text": "You are already logged in"}"#.to_string(),
+                    })
                     .await;
                 return Err(ConnectionError::ClientAlreadyConnected);
             }
@@ -674,16 +681,16 @@ where
     pub async fn handle_player(
         self: Arc<Self>,
         proxy: Arc<Proxy>,
-        client: &Client<Proxy>,
+        client: &Client<Handler, Proxy>,
         uuid: u128,
         mut to_client_receiver: broadcast::Receiver<ClientCommand<Proxy::TransferData>>,
     ) -> Result<Proxy::TransferData, ConnectionError> {
         if client.connection_state().await != ConnectionState::Play {
-            client.change_to_play(&self).await?;
+            client.change_to_play().await?;
         } else {
-            client.transfer_world(&self).await?;
+            client.transfer_world().await?;
         }
-        client.load_world(&self).await?;
+        client.load_world().await?;
         self.handler
             .on_client_post_world_load(&self, &proxy, client)
             .await?;
@@ -723,8 +730,6 @@ where
                             {
                                 if let Some(data) = client
                                     .handle_command(
-                                        &command_listener_server,
-                                        &command_listener_proxy,
                                         command
                                     )
                                     .await? {
@@ -765,8 +770,6 @@ where
                             {
                                 client
                                     .handle_packet(
-                                        &event_listener_server,
-                                        &event_listener_proxy,
                                         event
                                     )
                                     .await?;
@@ -791,12 +794,12 @@ where
                 .get(&uuid)
                 .ok_or(ConnectionError::ClientAlreadyConnected)?;
 
-            client.to_client.send(ClientCommand::Ping);
+            client.ping().await?;
 
             loop {
                 select! {
                     _ = sleep(Duration::from_secs(15)) => {
-                        client.to_client.send(ClientCommand::Ping);
+                        client.ping().await?;
                     }
                     _ = timeout_handler_token.cancelled() => {
                         return Err(ConnectionError::ClientCancelled)
@@ -845,7 +848,7 @@ where
         &self,
         server: &Server<Handler, Proxy>,
         proxy: &Proxy,
-        client: &Client<Proxy>,
+        client: &Client<Handler, Proxy>,
     ) -> Result<(), ConnectionError> {
         if self.handler.on_player_death(server, proxy, client).await? {
             // self.broadcast_player_death(&client).await;
@@ -853,19 +856,18 @@ where
             const SHOW_RESPAWN_SCREEN: bool = false;
             if !SHOW_RESPAWN_SCREEN {
                 let max_health = client.player.read().await.max_health.clone();
-                client.set_health(max_health).await?;
+                // client.set_health(max_health).await?;
             }
         }
         Ok(())
     }
     pub async fn handle_chat(
         &self,
-        server: &Server<Handler, Proxy>,
         proxy: &Proxy,
-        client: &Client<Proxy>,
+        client: &Client<Handler, Proxy>,
         message: String,
     ) -> Result<(), ConnectionError> {
-        let message = self.handler.on_chat(server, proxy, client, message).await?;
+        let message = self.handler.on_chat(self, proxy, client, message).await?;
         if let Some(message) = message {
             self.broadcast_chat(message).await;
         }
@@ -873,22 +875,21 @@ where
     }
     pub async fn handle_position_update(
         &self,
-        server: &Server<Handler, Proxy>,
         proxy: &Proxy,
-        client: &Client<Proxy>,
+        client: &Client<Handler, Proxy>,
         on_ground: bool,
         position: Option<Vec3>,
         rotation: Option<Rotation>,
     ) -> Result<(), ConnectionError> {
         let on_ground = self
             .handler
-            .on_player_on_ground(server, proxy, client, on_ground)
+            .on_player_on_ground(self, proxy, client, on_ground)
             .await?;
         let previous_pos = client.player.read().await.position.clone();
         let pos = if let Some(pos) = position {
             let pos = self
                 .handler
-                .on_player_move(server, proxy, client, pos)
+                .on_player_move(self, proxy, client, pos)
                 .await?;
             if let Some(pos) = &pos {
                 client.player.write().await.previous_position = Some(PreviousPosition {
@@ -903,7 +904,7 @@ where
                 let chunk_z = pos.z as i32 >> 4;
 
                 if previous_chunk_x != chunk_x || previous_chunk_z != chunk_z {
-                    client.move_chunk(self, chunk_x, chunk_z).await?;
+                    client.move_chunk(chunk_x, chunk_z).await?;
                 }
             };
             pos
@@ -914,7 +915,7 @@ where
         let rot = if let Some(rot) = rotation {
             let rot = self
                 .handler
-                .on_player_look(server, proxy, client, rot)
+                .on_player_look(self, proxy, client, rot)
                 .await?;
             if let Some(rot) = &rot {
                 client.player.write().await.rotation = rot.clone();
@@ -938,14 +939,13 @@ where
     }
     pub async fn handle_sneaking(
         &self,
-        server: &Server<Handler, Proxy>,
         proxy: &Proxy,
-        client: &Client<Proxy>,
+        client: &Client<Handler, Proxy>,
         sneaking: bool,
     ) -> Result<(), ConnectionError> {
         if let Some(sneaking) = self
             .handler
-            .on_player_sneak(server, proxy, client, sneaking)
+            .on_player_sneak(self, proxy, client, sneaking)
             .await?
         {
             client.player.write().await.sneaking = sneaking;
@@ -964,14 +964,13 @@ where
     }
     pub async fn handle_sprinting(
         &self,
-        server: &Server<Handler, Proxy>,
         proxy: &Proxy,
-        client: &Client<Proxy>,
+        client: &Client<Handler, Proxy>,
         sprinting: bool,
     ) -> Result<(), ConnectionError> {
         if let Some(sprinting) = self
             .handler
-            .on_player_sprint(server, proxy, client, sprinting)
+            .on_player_sprint(self, proxy, client, sprinting)
             .await?
         {
             client.player.write().await.sprinting = sprinting;
@@ -987,9 +986,7 @@ where
     pub async fn broadcast_chat(&self, message: String) {
         // TODO: join futures
         for client in self.player_list.iter() {
-            client.to_client.send(ClientCommand::ChatMessage {
-                message: message.clone(),
-            });
+            client.show_chat_message(message.clone());
         }
     }
     #[allow(unused_must_use)]
@@ -1006,14 +1003,14 @@ where
             if entity_id == client.client_data.entity_id {
                 continue;
             }
-            client.to_client.send(ClientCommand::MoveEntity {
+            client.__move_entity(
                 entity_id,
-                position: position.clone(),
-                previous_position: previous_position.clone(),
-                rotation: rotation.clone(),
-                previous_rotation: previous_rotation.clone(),
+                position.clone(),
+                previous_position.clone(),
+                rotation.clone(),
+                previous_rotation.clone(),
                 on_ground,
-            });
+            );
         }
     }
     #[allow(unused_must_use)]
@@ -1026,40 +1023,31 @@ where
             if entity_id == client.client_data.entity_id {
                 continue;
             }
-            client.to_client.send(ClientCommand::UpdateEntityMetadata {
-                entity_id,
-                metadata: metadata.clone(),
-            });
+            client.__update_entity_metadata(entity_id, metadata.clone());
         }
     }
     #[allow(unused_must_use)]
-    pub async fn broadcast_player_leave(&self, client: &Client<Proxy>) {
+    pub async fn broadcast_player_leave(&self, client: &Client<Handler, Proxy>) {
         for other_client in self.player_list.iter() {
             if other_client.client_data.entity_id == client.client_data.entity_id {
                 continue;
             }
-            other_client.to_client.send(ClientCommand::RemovePlayer {
-                entity_id: client.client_data.entity_id,
-                uuid: client.client_data.uuid,
-            });
+            client.__remove_player(client.client_data.entity_id, client.client_data.uuid);
         }
     }
     #[allow(unused_must_use)]
-    pub async fn broadcast_player_join(&self, client: &Client<Proxy>) {
+    pub async fn broadcast_player_join(&self, client: &Client<Handler, Proxy>) {
         for other_client in self.player_list.iter() {
             if other_client.client_data.entity_id == client.client_data.entity_id {
                 continue;
             }
-            let add_player = {
-                let player = client.player.read().await;
-                ClientCommand::AddPlayer {
-                    client_data: client.client_data.clone(),
-                    position: player.position.clone(),
-                    rotation: player.rotation.clone(),
-                    gamemode: player.gamemode.clone() as u8,
-                }
-            };
-            other_client.to_client.send(add_player);
+            let player = client.player.read().await;
+            client.__add_player(
+                client.client_data.clone(),
+                player.gamemode.clone() as u8,
+                player.position.clone(),
+                player.rotation.clone(),
+            );
         }
     }
 }

@@ -73,75 +73,68 @@ impl SerializeField for BitSet {
     }
 }
 
-#[derive(Debug, PartialEq, SerializeField)]
-#[protocol(typ = "firework_protocol_core::VarInt")]
-pub enum Particle {
-    AmbientEntityEffect,
-    AngryVillager,
-    Block,
-    BlockMarker,
-    Bubble,
-    Cloud,
-    Crit,
-    DamageIndicator,
-    DragonBreath,
-    DrippingLava,
-    FallingLava,
-    LandingLava,
-    DrippingWater,
-    FallingWater,
-    Dust,
-    DustColorTransition,
-    Effect,
-    ElderGuardian,
-    EnchantedHit,
-    Enchant,
-    EndRod,
-    EntityEffect,
-    ExplosionEmitter,
-    Explosion,
-    SonicBoom,
-    FallingDust,
-    Firework,
-    Fishing,
-    Flame,
-    SculkSoul,
-    SculkCharge,
-    SculkChargePop,
-    SoulFireFlame,
-    Soul,
-    Flash,
-    HappyVillager,
-    Composter,
-    Heart,
-    InstantEffect,
-    Item,
-    Vibration,
-    ItemSlime,
-    ItemSnowball,
-    LargeSmoke,
-    Lava,
-    Mycelium,
-    Note,
-    Poof,
-    Portal,
-    Rain,
-    Smoke,
-    Sneeze,
-    Spit,
-    SquidInk,
-    SweepAttack,
-    TotemOfUndying,
-    Underwater,
-    Splash,
-    Witch,
-    BubblePop,
-    CurrentDown,
-    BubbleColumnUp,
-    Nautilus,
-    Dolphin,
-    CampfireCosySmoke,
-    CampFireSignalSmoke,
+#[derive(Debug, PartialEq, Clone)]
+pub enum Particles {
+    Dust {
+        red: f32,
+        green: f32,
+        blue: f32,
+        /// The scale, will be clamped between 0.01 and 4.
+        scale: f32,
+    },
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct Particle {
+    particle: Particles,
+    long_distance: bool,
+    x: f64,
+    y: f64,
+    z: f64,
+    offset_x: f32,
+    offset_y: f32,
+    offset_z: f32,
+    max_speed: f32,
+    count: i32,
+}
+
+impl SerializeField for Particle {
+    fn serialize<W: Write>(&self, mut writer: W) {
+        #[allow(unused_variables)]
+        VarInt::from(match self.particle {
+            Particles::Dust {
+                red,
+                green,
+                blue,
+                scale,
+            } => 14,
+        })
+        .serialize(&mut writer);
+
+        self.long_distance.serialize(&mut writer);
+        self.x.serialize(&mut writer);
+        self.y.serialize(&mut writer);
+        self.z.serialize(&mut writer);
+        self.offset_x.serialize(&mut writer);
+        self.offset_y.serialize(&mut writer);
+        self.offset_z.serialize(&mut writer);
+        self.max_speed.serialize(&mut writer);
+        self.count.serialize(&mut writer);
+
+        match self.particle {
+            Particles::Dust {
+                red,
+                green,
+                blue,
+                scale,
+            } => {
+                red.serialize(&mut writer);
+                green.serialize(&mut writer);
+                blue.serialize(&mut writer);
+                scale.serialize(&mut writer);
+            }
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]

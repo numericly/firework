@@ -23,7 +23,7 @@ pub trait GuiPackets {
     fn handle_click<Handler, Proxy>(
         &self,
         slot: i16,
-        client: &Client<Proxy>,
+        client: &Client<Handler, Proxy>,
         server: &Server<Handler, Proxy>,
     ) where
         Handler: ServerHandler<Proxy> + Send + Sync + 'static,
@@ -43,7 +43,7 @@ impl Gui {
     pub async fn handle_click<Handler, Proxy>(
         &self,
         slot: i16,
-        client: &Client<Proxy>,
+        client: &Client<Handler, Proxy>,
         server: &Server<Handler, Proxy>,
     ) -> Result<(), ConnectionError>
     where
@@ -201,7 +201,7 @@ impl GuiPackets for GameQueueMenuGui {
     fn handle_click<Handler, Proxy>(
         &self,
         slot: i16,
-        client: &Client<Proxy>,
+        client: &Client<Handler, Proxy>,
         server: &Server<Handler, Proxy>,
     ) where
         Handler: ServerHandler<Proxy> + Send + Sync + 'static,
