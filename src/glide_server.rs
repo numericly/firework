@@ -1,8 +1,11 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
 use firework::{
-    client::{Client, ClientCommand, GameMode, InventorySlot, Player},
-    AxisAlignedBB, BlockPos, ConnectionError, Rotation, Server, ServerHandler, Vec3,
+    client::{Client, GameMode, InventorySlot, Player},
+    AxisAlignedBB, BlockPos, ConnectionError, PlayerHandler, Rotation, Server, ServerHandler, Vec3,
 };
+
 use firework_authentication::Profile;
 use firework_data::items::{Elytra, Item};
 use firework_protocol::data_types::{ItemNbt, Slot};
@@ -12,12 +15,12 @@ use tokio::sync::RwLock;
 use crate::MiniGameProxy;
 
 const SPAWN_AREA: AxisAlignedBB = AxisAlignedBB {
+    max: BlockPos { x: 4, y: 169, z: 7 },
     min: BlockPos {
         x: -4,
         y: 166,
         z: -3,
     },
-    max: BlockPos { x: 4, y: 168, z: 7 },
 };
 
 enum GameState {
@@ -29,8 +32,20 @@ pub struct GlideServerHandler {
     game_state: RwLock<GameState>,
 }
 
+pub struct GlidePlayerHandler {}
+
+impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
+    fn new(
+        server: Arc<Server<GlideServerHandler, MiniGameProxy>>,
+        proxy: Arc<MiniGameProxy>,
+    ) -> Self {
+        Self {}
+    }
+}
+
 #[async_trait]
 impl ServerHandler<MiniGameProxy> for GlideServerHandler {
+    type PlayerHandler = GlidePlayerHandler;
     fn new() -> Self {
         Self {
             game_state: RwLock::new(GameState::Waiting),
@@ -49,9 +64,6 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
             ..Player::default()
         };
 
-        Vec3::new(4.5, 168.0, 7.5);
-        Vec3::new(-3.5, 166.0, -2.5);
-
         player.inventory.set_slot(
             InventorySlot::Chestplate,
             Some(Slot {
@@ -69,21 +81,22 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
         &self,
         server: &Server<Self, MiniGameProxy>,
         proxy: &MiniGameProxy,
-        client: &Client<MiniGameProxy>,
+        client: &Client<Self, MiniGameProxy>,
         on_ground: bool,
     ) -> Result<bool, ConnectionError> {
         // return Ok(on_ground);
+        // client.change_to_play();
         let player_pos = client.player.read().await.position.clone();
         if !SPAWN_AREA.within(BlockPos::from(player_pos)) && on_ground {
-            client
-                .set_velocity(client.get_velocity().await + Vec3::new(0., 0.5, 0.))
-                .await?;
+            // client
+            //     .set_velocity(client.get_velocity().await + Vec3::new(0., 0.5, 0.))
+            //     .await?;
             let health = client.player.read().await.health.clone();
             let new_health = health - 2.;
             if new_health <= 0. {
                 server.handle_death(server, proxy, client).await?;
             } else {
-                client.set_health(new_health).await?;
+                // client.set_health(new_health).await?;
             }
         }
 
@@ -93,12 +106,9 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
         &self,
         server: &Server<Self, MiniGameProxy>,
         proxy: &MiniGameProxy,
-        client: &Client<MiniGameProxy>,
+        client: &Client<Self, MiniGameProxy>,
     ) -> Result<bool, ConnectionError> {
-        client.to_client.send(ClientCommand::SyncPosition {
-            position: Vec3::new(0.5, 168.0, 0.5),
-            rotation: Rotation { yaw: 0., pitch: 0. },
-        });
+        client.sync_position(Vec3::new(0.5, 168.0, 0.5), Rotation { yaw: 0., pitch: 0. });
         Ok(true)
     }
 }

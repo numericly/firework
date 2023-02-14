@@ -47,8 +47,8 @@ use std::collections::HashMap;
 use nbt::Blob;
 
 use crate::data_types::{
-    self, Attribute, BitSet, CommandNode, DeathLocation, PlayerAbilityFlags, PlayerInfoAction,
-    PlayerPositionFlags, Recipe, Slot,
+    self, Attribute, BitSet, CommandNode, DeathLocation, Particle, PlayerAbilityFlags,
+    PlayerInfoAction, PlayerPositionFlags, Recipe, Slot,
 };
 
 pub trait ClientBoundPacketID {
@@ -156,17 +156,8 @@ define_client_bound_protocol! {
         sky_light: Vec<Vec<i8>>,
         block_light: Vec<Vec<i8>>
     },
-    Particle, 0x22, Play => {
-        particle: data_types::Particle,
-        long_distance: bool,
-        x: f64,
-        y: f64,
-        z: f64,
-        offset_x: f32,
-        offset_y: f32,
-        offset_z: f32,
-        max_speed: f32,
-        particle_count: i32
+    ParticlePacket, 0x22, Play => {
+        particle: Particle
     },
     LoginPlay, 0x24, Play => {
         entity_id: i32,
