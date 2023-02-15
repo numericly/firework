@@ -218,5 +218,5 @@ impl ServerProxy for MiniGameProxy {
 async fn main() {
     std::env::set_var("RUST_BACKTRACE", "1");
 
-    ServerManager::<MiniGameProxy>::run(25566).await;
+    ServerManager::<MiniGameProxy>::run(25565).await;
 }

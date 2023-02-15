@@ -121,6 +121,7 @@ impl SerializeField for Particle {
         self.max_speed.serialize(&mut writer);
         self.count.serialize(&mut writer);
 
+        #[allow(unreachable_patterns)]
         match self.particle {
             Particles::Dust {
                 red,
@@ -133,6 +134,7 @@ impl SerializeField for Particle {
                 blue.serialize(&mut writer);
                 scale.serialize(&mut writer);
             }
+            _ => {}
         }
     }
 }

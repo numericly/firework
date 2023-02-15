@@ -29,7 +29,7 @@ struct Boost {
     area: AxisAlignedBB,
     velocity: Vec3,
 }
-const CANYON_BOOSTS: [Boost; 3] = [
+const CANYON_BOOSTS: [Boost; 5] = [
     Boost {
         area: AxisAlignedBB {
             max: BlockPos {
@@ -44,7 +44,7 @@ const CANYON_BOOSTS: [Boost; 3] = [
             },
         },
 
-        velocity: Vec3::new(0., 0.02, 0.35),
+        velocity: Vec3::new(0., 0.02, 0.11),
     },
     Boost {
         area: AxisAlignedBB {
@@ -59,7 +59,7 @@ const CANYON_BOOSTS: [Boost; 3] = [
                 z: 351,
             },
         },
-        velocity: Vec3::new(0., 0.02, 0.35),
+        velocity: Vec3::new(0., 0.02, 0.11),
     },
     Boost {
         area: AxisAlignedBB {
@@ -74,13 +74,44 @@ const CANYON_BOOSTS: [Boost; 3] = [
                 z: 606,
             },
         },
-        velocity: Vec3::new(0., 0.05, -0.4),
+        velocity: Vec3::new(0., 0.05, -0.25),
+    },
+    Boost {
+        area: AxisAlignedBB {
+            max: BlockPos {
+                x: 40,
+                y: -16,
+                z: 363,
+            },
+            min: BlockPos {
+                x: 36,
+                y: -21,
+                z: 354,
+            },
+        },
+        velocity: Vec3::new(-0.03, 0.10, -0.20),
+    },
+    Boost {
+        area: AxisAlignedBB {
+            max: BlockPos {
+                x: -11,
+                y: -20,
+                z: 277,
+            },
+            min: BlockPos {
+                x: -15,
+                y: -25,
+                z: 268,
+            },
+        },
+        velocity: Vec3::new(-0.01, 0.12, -0.20),
     },
 ];
 
-enum BoostStatus {
-    Active { percent: f32 },
-    Cooldown { start_time: Instant },
+#[derive(Debug, Clone)]
+struct BoostStatus {
+    percent: f32,
+    direction: Vec3,
 }
 
 enum GameState {
@@ -90,18 +121,58 @@ enum GameState {
 
 pub struct GlideServerHandler {
     game_state: RwLock<GameState>,
-    damage_grace_period: DashMap<u128, Instant>,
-    boost_status: DashMap<u128, BoostStatus>,
 }
 
-pub struct GlidePlayerHandler {}
+pub struct GlidePlayerHandler {
+    boost_status: RwLock<Option<BoostStatus>>,
+    server: Arc<Server<GlideServerHandler, MiniGameProxy>>,
+    proxy: Arc<MiniGameProxy>,
+}
 
+#[async_trait]
 impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
     fn new(
         server: Arc<Server<GlideServerHandler, MiniGameProxy>>,
         proxy: Arc<MiniGameProxy>,
     ) -> Self {
-        Self {}
+        Self {
+            boost_status: RwLock::new(None),
+            server,
+            proxy,
+        }
+    }
+
+    async fn on_tick(
+        &self,
+        client: &Client<GlideServerHandler, MiniGameProxy>,
+    ) -> Result<(), ConnectionError> {
+        let position = client.player.read().await.position.clone();
+        for boost in CANYON_BOOSTS.iter() {
+            if boost.area.within(BlockPos::from(position.clone())) {
+                let mut boost_status = self.boost_status.write().await;
+                if boost_status.is_none() {
+                    boost_status.replace(BoostStatus {
+                        percent: 0.,
+                        direction: boost.velocity.clone(),
+                    });
+                }
+            }
+        }
+        let boost_status = self.boost_status.read().await.clone();
+        if let Some(BoostStatus { percent, direction }) = boost_status {
+            if percent >= 1. {
+                self.boost_status.write().await.take();
+            } else {
+                let velocity = client.player.read().await.velocity.clone();
+                client.set_velocity(velocity + direction.clone());
+                self.boost_status.write().await.replace(BoostStatus {
+                    percent: percent + 0.08,
+                    direction,
+                });
+            }
+        }
+
+        Ok(())
     }
 }
 
@@ -111,8 +182,6 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
     fn new() -> Self {
         Self {
             game_state: RwLock::new(GameState::Waiting),
-            damage_grace_period: DashMap::new(),
-            boost_status: DashMap::new(),
         }
     }
     async fn on_tick(&self, server: &Server<Self, MiniGameProxy>, proxy: &MiniGameProxy) {}
@@ -145,42 +214,41 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
         &self,
         server: &Server<Self, MiniGameProxy>,
         proxy: &MiniGameProxy,
-        client: &Client<MiniGameProxy>,
+        client: &Client<Self, MiniGameProxy>,
         position: Vec3,
     ) -> Result<Option<Vec3>, ConnectionError> {
         for boost in CANYON_BOOSTS.iter() {
-            if boost.area.within(BlockPos::from(position.clone())) {
-                if let Some(BoostStatus::Cooldown { start_time }) =
-                    self.boost_status.get(&client.client_data.uuid).as_deref()
-                {
-                    if start_time.elapsed().as_millis() < 1_000 {
-                        return Ok(Some(position));
-                    }
-                }
+            if boost.area.within(BlockPos::from(position.clone())) {}
+            // if boost.area.within(BlockPos::from(position.clone())) {
+            //     if let Some(BoostStatus::Cooldown { start_time }) =
+            //         self.boost_status.get(&client.client_data.uuid).as_deref()
+            //     {
+            //         if start_time.elapsed().as_millis() < 1_000 {
+            //             return Ok(Some(position));
+            //         }
+            //     }
 
-                client
-                    .set_velocity(client.get_velocity().await + boost.velocity.clone())
-                    .await?;
+            //     client.set_velocity(client.get_velocity().await + boost.velocity.clone());
 
-                match self.boost_status.entry(client.client_data.uuid) {
-                    Entry::Occupied(mut entry) => {
-                        let BoostStatus::Active { percent } = entry.get_mut() else {
-                            return Ok(Some(position));
-                        };
-                        if *percent >= 1. {
-                            entry.insert(BoostStatus::Cooldown {
-                                start_time: Instant::now(),
-                            });
-                        } else {
-                            *percent += 0.167;
-                        }
-                    }
-                    Entry::Vacant(entry) => {
-                        entry.insert(BoostStatus::Active { percent: 0. });
-                    }
-                }
-                return Ok(Some(position));
-            }
+            //     match self.boost_status.entry(client.client_data.uuid) {
+            //         Entry::Occupied(mut entry) => {
+            //             let BoostStatus::Active { percent } = entry.get_mut() else {
+            //                 return Ok(Some(position));
+            //             };
+            //             if *percent >= 1. {
+            //                 entry.insert(BoostStatus::Cooldown {
+            //                     start_time: Instant::now(),
+            //                 });
+            //             } else {
+            //                 *percent += 0.167;
+            //             }
+            //         }
+            //         Entry::Vacant(entry) => {
+            //             entry.insert(BoostStatus::Active { percent: 0. });
+            //         }
+            //     }
+            //     return Ok(Some(position));
+            // }
         }
         Ok(Some(position))
     }
@@ -192,45 +260,36 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
         on_ground: bool,
     ) -> Result<bool, ConnectionError> {
         return Ok(on_ground);
-        let player_pos = client.player.read().await.position.clone();
-
-        if SPAWN_AREA.within(BlockPos::from(player_pos)) {
-            return Ok(on_ground);
-        };
-
-        let grace = self.damage_grace_period.get(&client.client_data.uuid);
-
-        if let Some(grace) = &grace {
-            if grace.elapsed().as_millis() < 1_000 {
-                return Ok(on_ground);
-            }
-        }
-
-        drop(grace);
-
-        if on_ground {
-            client
-                .set_velocity(client.get_velocity().await + Vec3::new(0., 0.5, 0.))
-                .await?;
-            let health = client.player.read().await.health.clone();
-            let new_health = health - 2.;
-            if new_health <= 0. {
-                server.handle_death(server, proxy, client).await?;
-            } else {
-                client.set_health(new_health).await?;
-            }
-            let entry = self.damage_grace_period.entry(client.client_data.uuid);
-            match entry {
-                dashmap::mapref::entry::Entry::Occupied(mut entry) => {
-                    entry.insert(Instant::now());
-                }
-                dashmap::mapref::entry::Entry::Vacant(entry) => {
-                    entry.insert(Instant::now());
-                }
-            }
-        }
-
-        Ok(on_ground)
+        // let player_pos = client.player.read().await.position.clone();
+        // if SPAWN_AREA.within(BlockPos::from(player_pos)) {
+        //     return Ok(on_ground);
+        // };
+        // let grace = self.damage_grace_period.get(&client.client_data.uuid);
+        // if let Some(grace) = &grace {
+        //     if grace.elapsed().as_millis() < 1_000 {
+        //         return Ok(on_ground);
+        //     }
+        // }
+        // drop(grace);
+        // if on_ground {
+        //     client.set_velocity(client.get_velocity().await + Vec3::new(0., 0.5, 0.));
+        //     let health = client.player.read().await.health.clone();
+        //     let new_health = health - 2.;
+        //     if new_health <= 0. {
+        //         server.handle_death(server, proxy, client).await?;
+        //     } else {
+        //         client.set_health(new_health);
+        //     }
+        //     let entry = self.damage_grace_period.entry(client.client_data.uuid);
+        //     match entry {
+        //         dashmap::mapref::entry::Entry::Occupied(mut entry) => {
+        //             entry.insert(Instant::now());
+        //         }
+        //         dashmap::mapref::entry::Entry::Vacant(entry) => {
+        //             entry.insert(Instant::now());
+        //         }
+        //     }
+        // }
     }
     async fn on_player_death(
         &self,

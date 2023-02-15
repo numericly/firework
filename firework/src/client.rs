@@ -1,4 +1,4 @@
-use crate::PlayerHandler;
+use crate::{entities::EntityDataFlags, PlayerHandler};
 use crate::{
     entities::{EntityMetadata, END_INDEX},
     gui::{GameQueueMenuGui, Gui, Gui::*, GuiPackets},
@@ -118,17 +118,31 @@ pub struct Player {
 
     pub position: Vec3,
     pub previous_position: Option<PreviousPosition>,
+    pub velocity: Vec3,
 
     pub on_ground: bool,
     pub rotation: Rotation,
     pub sneaking: bool,
     pub sprinting: bool,
+
+    pub elytra_flying: bool,
+
     pub flying: bool,
     pub flying_allowed: bool,
     pub inventory: Inventory,
     pub open_gui: Option<Gui>,
     pub health: f32,
     pub max_health: f32,
+}
+
+impl Player {
+    pub fn entity_flags(&self) -> EntityDataFlags {
+        EntityDataFlags::new()
+            .with_is_elytra_flying(self.elytra_flying)
+            .with_is_crouching(self.sneaking)
+            .with_is_sprinting(self.sprinting)
+            .with_has_glowing_effect(true)
+    }
 }
 
 #[derive(Debug)]
@@ -226,7 +240,7 @@ where
     ping_acknowledged: Mutex<bool>,
     server: Arc<Server<Handler, Proxy>>,
     proxy: Arc<Proxy>,
-    handler: Handler::PlayerHandler,
+    pub handler: Handler::PlayerHandler,
 }
 
 impl<Handler: ServerHandler<Proxy>, Proxy> Client<Handler, Proxy>
@@ -881,6 +895,11 @@ where
                             .handle_sneaking(&self.proxy, self, false)
                             .await?
                     }
+                    PlayerCommandAction::StartFlyingWithElytra => {
+                        self.server
+                            .handle_elytra_flying(&self.proxy, self, true)
+                            .await?
+                    }
                     _ => {}
                 }
             }
@@ -1254,9 +1273,12 @@ where
             if let Some(information) = client.client_data.settings.read().await.as_ref() {
                 self.update_entity_metadata(
                     client.client_data.entity_id,
-                    vec![EntityMetadata::PlayerDisplayedSkinParts(
-                        information.displayed_skin_parts.clone(),
-                    )],
+                    vec![
+                        EntityMetadata::EntityFlags(client.player.read().await.entity_flags()),
+                        EntityMetadata::PlayerDisplayedSkinParts(
+                            information.displayed_skin_parts.clone(),
+                        ),
+                    ],
                 )
                 .await?;
             }

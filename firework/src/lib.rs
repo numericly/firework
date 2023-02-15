@@ -116,6 +116,9 @@ impl Vec3 {
     pub const fn new(x: f64, y: f64, z: f64) -> Vec3 {
         Vec3 { x, y, z }
     }
+    pub const fn scalar(s: f64) -> Vec3 {
+        Vec3 { x: s, y: s, z: s }
+    }
 }
 
 impl Add for Vec3 {
@@ -446,13 +449,16 @@ where
 
     proxy: PhantomData<Proxy>,
 }
-
+#[async_trait]
 pub trait PlayerHandler<Handler, Proxy>
 where
     Handler: ServerHandler<Proxy> + Send + Sync + 'static,
     Proxy: ServerProxy + Send + Sync + 'static,
 {
     fn new(server: Arc<Server<Handler, Proxy>>, proxy: Arc<Proxy>) -> Self;
+    async fn on_tick(&self, client: &Client<Handler, Proxy>) -> Result<(), ConnectionError> {
+        Ok(())
+    }
 }
 
 #[async_trait]
@@ -605,6 +611,9 @@ where
     }
     pub async fn handle_tick(&self, proxy: Arc<Proxy>) {
         self.handler.on_tick(&self, &proxy).await;
+        for client in self.player_list.iter() {
+            client.handler.on_tick(&client).await;
+        }
     }
     pub async fn handle_connection(
         self: Arc<Self>,
@@ -856,7 +865,7 @@ where
             const SHOW_RESPAWN_SCREEN: bool = false;
             if !SHOW_RESPAWN_SCREEN {
                 let max_health = client.player.read().await.max_health.clone();
-                // client.set_health(max_health).await?;
+                client.set_health(max_health);
             }
         }
         Ok(())
@@ -892,11 +901,21 @@ where
                 .on_player_move(self, proxy, client, pos)
                 .await?;
             if let Some(pos) = &pos {
-                client.player.write().await.previous_position = Some(PreviousPosition {
+                let mut player = client.player.write().await;
+                if let Some(previous_position) = &player.previous_position {
+                    let multiplier = previous_position.time.elapsed().as_secs_f64()
+                        / Duration::from_millis(50).as_secs_f64();
+
+                    let delta = pos.clone() - previous_position.position.clone();
+                    player.velocity =
+                        delta * Vec3::new(multiplier, multiplier, multiplier) * Vec3::scalar(0.5);
+                }
+                player.previous_position = Some(PreviousPosition {
                     position: previous_pos.clone(),
                     time: Instant::now(),
                 });
-                client.player.write().await.position = pos.clone();
+                player.position = pos.clone();
+
                 let previous_chunk_x = previous_pos.x as i32 >> 4;
                 let previous_chunk_z = previous_pos.z as i32 >> 4;
 
@@ -925,16 +944,22 @@ where
             None
         };
 
-        self.broadcast_entity_move(
-            client.client_data.entity_id,
-            pos,
-            previous_pos,
-            rot,
-            previous_rot,
-            on_ground,
-        )
-        .await;
+        self.broadcast_entity_move(client, pos, previous_pos, rot, previous_rot, on_ground)
+            .await;
 
+        Ok(())
+    }
+    pub async fn handle_elytra_flying(
+        &self,
+        proxy: &Proxy,
+        client: &Client<Handler, Proxy>,
+        flying: bool,
+    ) -> Result<(), ConnectionError> {
+        let mut player = client.player.write().await;
+        player.elytra_flying = flying;
+        let metadata = vec![EntityMetadata::EntityFlags(player.entity_flags())];
+        self.broadcast_entity_metadata_update(client, metadata)
+            .await;
         Ok(())
     }
     pub async fn handle_sneaking(
@@ -948,16 +973,17 @@ where
             .on_player_sneak(self, proxy, client, sneaking)
             .await?
         {
-            client.player.write().await.sneaking = sneaking;
+            let mut player = client.player.write().await;
+            player.sneaking = sneaking;
             let metadata = vec![
                 EntityMetadata::EntityPose(if sneaking {
                     Pose::Sneaking
                 } else {
                     Pose::Standing
                 }),
-                EntityMetadata::EntityFlags(EntityDataFlags::new().with_is_crouching(sneaking)),
+                EntityMetadata::EntityFlags(player.entity_flags()),
             ];
-            self.broadcast_entity_metadata_update(client.client_data.entity_id, metadata)
+            self.broadcast_entity_metadata_update(client, metadata)
                 .await;
         }
         Ok(())
@@ -973,11 +999,10 @@ where
             .on_player_sprint(self, proxy, client, sprinting)
             .await?
         {
-            client.player.write().await.sprinting = sprinting;
-            let metadata = vec![EntityMetadata::EntityFlags(
-                EntityDataFlags::new().with_is_sprinting(sprinting),
-            )];
-            self.broadcast_entity_metadata_update(client.client_data.entity_id, metadata)
+            let mut player = client.player.write().await;
+            player.sprinting = sprinting;
+            let metadata = vec![EntityMetadata::EntityFlags(player.entity_flags())];
+            self.broadcast_entity_metadata_update(client, metadata)
                 .await;
         }
         Ok(())
@@ -992,19 +1017,19 @@ where
     #[allow(unused_must_use)]
     pub async fn broadcast_entity_move(
         &self,
-        entity_id: i32,
+        client: &Client<Handler, Proxy>,
         position: Option<Vec3>,
         previous_position: Vec3,
         rotation: Option<Rotation>,
         previous_rotation: Rotation,
         on_ground: bool,
     ) {
-        for client in self.player_list.iter() {
-            if entity_id == client.client_data.entity_id {
+        for other_client in self.player_list.iter() {
+            if client.client_data.entity_id == other_client.client_data.entity_id {
                 continue;
             }
-            client.__move_entity(
-                entity_id,
+            other_client.__move_entity(
+                client.client_data.entity_id,
                 position.clone(),
                 previous_position.clone(),
                 rotation.clone(),
@@ -1016,14 +1041,14 @@ where
     #[allow(unused_must_use)]
     pub async fn broadcast_entity_metadata_update(
         &self,
-        entity_id: i32,
+        client: &Client<Handler, Proxy>,
         metadata: Vec<EntityMetadata>,
     ) {
-        for client in self.player_list.iter() {
-            if entity_id == client.client_data.entity_id {
+        for other_client in self.player_list.iter() {
+            if client.client_data.entity_id == other_client.client_data.entity_id {
                 continue;
             }
-            client.__update_entity_metadata(entity_id, metadata.clone());
+            other_client.__update_entity_metadata(client.client_data.entity_id, metadata.clone());
         }
     }
     #[allow(unused_must_use)]
@@ -1032,7 +1057,7 @@ where
             if other_client.client_data.entity_id == client.client_data.entity_id {
                 continue;
             }
-            client.__remove_player(client.client_data.entity_id, client.client_data.uuid);
+            other_client.__remove_player(client.client_data.entity_id, client.client_data.uuid);
         }
     }
     #[allow(unused_must_use)]
@@ -1042,7 +1067,7 @@ where
                 continue;
             }
             let player = client.player.read().await;
-            client.__add_player(
+            other_client.__add_player(
                 client.client_data.clone(),
                 player.gamemode.clone() as u8,
                 player.position.clone(),
