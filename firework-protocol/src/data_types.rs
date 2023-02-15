@@ -5,6 +5,7 @@ use firework_protocol_core::{
 use firework_protocol_derive::{DeserializeField, SerializeField};
 use modular_bitfield::bitfield;
 use nbt::{de, ser};
+use std::fmt::Debug;
 use std::io::{Read, Write};
 
 #[derive(PartialEq)]
@@ -410,38 +411,6 @@ impl SerializeField for Recipe {
     }
 }
 
-use std::{cell::Cell, fmt::Debug};
-
-#[derive(Debug, PartialEq)]
-pub struct CommandNode {
-    pub node_type: NodeType,
-    pub redirect: Option<Box<CommandNode>>,
-    pub is_executable: bool,
-    pub children: Vec<CommandNode>,
-
-    node_index: Cell<Option<i32>>,
-}
-
-#[derive(Debug, PartialEq)]
-pub enum NodeType {
-    Root,
-    Literal {
-        name: String,
-    },
-    Argument {
-        name: String,
-        parser: Parser,
-        suggestions_type: Option<SuggestionsType>,
-    },
-}
-
-#[derive(Debug, PartialEq, SerializeField)]
-#[protocol(typ = "firework_protocol_core::VarInt")]
-pub enum Parser {
-    Bool,
-    Float(FloatProps),
-}
-
 #[derive(Debug, PartialEq, DeserializeField)]
 #[protocol(typ = "firework_protocol_core::VarInt")]
 
@@ -459,206 +428,6 @@ pub enum InventoryOperationMode {
 pub struct SlotUpdate {
     pub slot_number: i16,
     pub slot_value: Option<Slot>,
-}
-
-#[derive(Debug, PartialEq)]
-pub struct FloatProps {
-    pub min: Option<f32>,
-    pub max: Option<f32>,
-}
-
-impl SerializeField for FloatProps {
-    fn serialize<W: std::io::Write>(&self, mut writer: W) {
-        let flags = {
-            let mut flags = 0x00u8;
-            if self.min.is_some() {
-                flags |= 0x01;
-            }
-            if self.max.is_some() {
-                flags |= 0x02;
-            }
-            flags
-        };
-        flags.serialize(&mut writer);
-        if let Some(min) = self.min {
-            min.serialize(&mut writer);
-        }
-        if let Some(max) = self.max {
-            max.serialize(&mut writer);
-        }
-    }
-}
-
-#[derive(Debug, PartialEq)]
-pub enum SuggestionsType {
-    AskServer,
-    AllRecipes,
-    AvailableSounds,
-    AvailableBiomes,
-    SummonableEntities,
-}
-
-impl SerializeField for CommandNode {
-    fn serialize<W: std::io::Write>(&self, mut writer: W) {
-        let mut start_index = 0;
-        self.assign_index(&mut start_index);
-
-        VarInt(start_index).serialize(&mut writer);
-
-        self.write(&mut writer);
-
-        VarInt(0).serialize(&mut writer);
-    }
-}
-
-impl CommandNode {
-    pub fn new(
-        node_type: NodeType,
-        redirect: Option<Box<CommandNode>>,
-        is_executable: bool,
-        children: Vec<CommandNode>,
-    ) -> Self {
-        CommandNode {
-            node_type,
-            redirect,
-            is_executable,
-            children,
-            node_index: Cell::new(None),
-        }
-    }
-    fn write<W: std::io::Write>(&self, mut writer: &mut W) {
-        let flags = {
-            let mut flags = 0x00u8;
-
-            match self.node_type {
-                NodeType::Root => flags |= 0x00,
-                NodeType::Literal { .. } => flags |= 0x01,
-                NodeType::Argument {
-                    ref suggestions_type,
-                    ..
-                } => {
-                    flags |= 0x02;
-                    if let Some(_) = suggestions_type {
-                        flags |= 0x10;
-                    }
-                }
-            }
-
-            if self.is_executable {
-                flags |= 0x04;
-            }
-
-            if let Some(_) = self.redirect {
-                flags |= 0x08;
-            }
-
-            flags
-        };
-
-        flags.serialize(&mut writer);
-
-        VarInt(self.children.len() as i32).serialize(&mut writer);
-        for child in &self.children {
-            VarInt(child.node_index.get().expect("Node indexes not calculated"))
-                .serialize(&mut writer);
-        }
-
-        if let Some(redirect) = &self.redirect {
-            VarInt(
-                redirect
-                    .node_index
-                    .get()
-                    .expect("Node indexes not calculated"),
-            )
-            .serialize(&mut writer);
-        }
-
-        match &self.node_type {
-            NodeType::Root => (),
-            NodeType::Literal { name } => {
-                name.serialize(&mut writer);
-            }
-            NodeType::Argument {
-                name,
-                parser,
-                suggestions_type,
-            } => {
-                name.serialize(&mut writer);
-                parser.serialize(&mut writer);
-                if let Some(suggestions_type) = suggestions_type {
-                    suggestions_type.serialize(&mut writer);
-                }
-            }
-        }
-
-        for child in &self.children {
-            child.write(writer);
-        }
-    }
-    fn assign_index(&self, current_index: &mut i32) {
-        self.node_index.set(Some(*current_index));
-        *current_index += 1;
-
-        for child in &self.children {
-            child.assign_index(current_index);
-        }
-    }
-}
-
-impl SerializeField for SuggestionsType {
-    fn serialize<W: std::io::Write>(&self, mut writer: W) {
-        match self {
-            SuggestionsType::AskServer => {
-                "minecraft:ask_server".to_string().serialize(&mut writer);
-            }
-            SuggestionsType::AllRecipes => {
-                "minecraft:all_recipes".to_string().serialize(&mut writer);
-            }
-            SuggestionsType::AvailableSounds => {
-                "minecraft:available_sounds"
-                    .to_string()
-                    .serialize(&mut writer);
-            }
-            SuggestionsType::AvailableBiomes => {
-                "minecraft:available_biomes"
-                    .to_string()
-                    .serialize(&mut writer);
-            }
-            SuggestionsType::SummonableEntities => {
-                "minecraft:summonable_entities"
-                    .to_string()
-                    .serialize(&mut writer);
-            }
-        }
-    }
-}
-
-mod test {
-    #[allow(unused_imports)]
-    use super::*;
-
-    #[test]
-    fn test() {
-        let node = CommandNode::new(
-            NodeType::Root,
-            None,
-            false,
-            vec![CommandNode::new(
-                NodeType::Literal {
-                    name: "test".to_string(),
-                },
-                None,
-                false,
-                vec![],
-            )],
-        );
-        let mut buffer = Vec::new();
-
-        node.serialize(&mut buffer);
-
-        println!("{:?}", buffer);
-        panic!();
-    }
 }
 
 impl SerializeField for DisplaySkinParts {
@@ -680,6 +449,259 @@ impl SerializeField for Attribute {
                 value.serialize(&mut writer);
                 VarInt(0).serialize(&mut writer);
             }
+        }
+    }
+}
+
+pub mod commands {
+    use firework_protocol_core::{SerializeField, VarInt};
+    use std::fmt::Debug;
+    use std::{cell::Cell, future::Future, pin::Pin};
+
+    pub struct CommandNode {
+        pub node_type: NodeType,
+        pub redirect: Option<Box<CommandNode>>,
+        pub execution: Option<Box<dyn Fn() -> Pin<Box<dyn Future<Output = ()>>>>>,
+        pub children: Vec<CommandNode>,
+
+        node_index: Cell<Option<i32>>,
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub enum NodeType {
+        Root,
+        Literal {
+            name: String,
+        },
+        Argument {
+            name: String,
+            parser: ArgumentType,
+            suggestions_type: Option<SuggestionsType>,
+        },
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub enum SuggestionsType {
+        AskServer,
+        AllRecipes,
+        AvailableSounds,
+        AvailableBiomes,
+        SummonableEntities,
+    }
+
+    #[derive(Debug, PartialEq)]
+    pub enum ArgumentType {
+        Bool,
+        Float { min: Option<f32>, max: Option<f32> },
+    }
+
+    impl CommandNode {
+        pub fn root() -> Self {
+            Self {
+                node_type: NodeType::Root,
+                redirect: None,
+                execution: None,
+                children: Vec::new(),
+                node_index: Cell::new(None),
+            }
+        }
+        pub fn literal(name: &'static str) -> Self {
+            Self {
+                node_type: NodeType::Literal {
+                    name: name.to_string(),
+                },
+                redirect: None,
+                execution: None,
+                children: Vec::new(),
+                node_index: Cell::new(None),
+            }
+        }
+        pub fn argument(
+            name: &'static str,
+            argument: ArgumentType,
+            suggestions_type: Option<SuggestionsType>,
+        ) -> Self {
+            Self {
+                node_type: NodeType::Argument {
+                    name: name.to_string(),
+                    parser: argument,
+                    suggestions_type,
+                },
+                redirect: None,
+                execution: None,
+                children: Vec::new(),
+                node_index: Cell::new(None),
+            }
+        }
+        pub fn sub_command(mut self, node: CommandNode) -> Self {
+            self.children.push(node);
+            self
+        }
+        pub fn executable<T: Fn() -> F + 'static, F: Future<Output = ()> + 'static>(
+            mut self,
+            exec: &'static T,
+        ) -> Self {
+            self.execution = Some(Box::new(|| Box::pin(exec())));
+            self
+        }
+        fn write<W: std::io::Write>(&self, mut writer: &mut W) {
+            let flags = {
+                let mut flags = 0x00u8;
+
+                match self.node_type {
+                    NodeType::Root => flags |= 0x00,
+                    NodeType::Literal { .. } => flags |= 0x01,
+                    NodeType::Argument {
+                        ref suggestions_type,
+                        ..
+                    } => {
+                        flags |= 0x02;
+                        if let Some(_) = suggestions_type {
+                            flags |= 0x10;
+                        }
+                    }
+                }
+
+                if self.execution.is_some() {
+                    flags |= 0x04;
+                }
+
+                if let Some(_) = self.redirect {
+                    flags |= 0x08;
+                }
+
+                flags
+            };
+
+            flags.serialize(&mut writer);
+
+            VarInt(self.children.len() as i32).serialize(&mut writer);
+            for child in &self.children {
+                VarInt(child.node_index.get().expect("Node indexes not calculated"))
+                    .serialize(&mut writer);
+            }
+
+            if let Some(redirect) = &self.redirect {
+                VarInt(
+                    redirect
+                        .node_index
+                        .get()
+                        .expect("Node indexes not calculated"),
+                )
+                .serialize(&mut writer);
+            }
+
+            match &self.node_type {
+                NodeType::Root => (),
+                NodeType::Literal { name } => {
+                    name.serialize(&mut writer);
+                }
+                NodeType::Argument {
+                    name,
+                    parser,
+                    suggestions_type,
+                } => {
+                    name.serialize(&mut writer);
+                    parser.serialize(&mut writer);
+                    if let Some(suggestions_type) = suggestions_type {
+                        suggestions_type.serialize(&mut writer);
+                    }
+                }
+            }
+
+            for child in &self.children {
+                child.write(writer);
+            }
+        }
+        fn assign_index(&self, current_index: &mut i32) {
+            self.node_index.set(Some(*current_index));
+            *current_index += 1;
+
+            for child in &self.children {
+                child.assign_index(current_index);
+            }
+        }
+    }
+
+    impl SerializeField for CommandNode {
+        fn serialize<W: std::io::Write>(&self, mut writer: W) {
+            let mut start_index = 0;
+            self.assign_index(&mut start_index);
+
+            VarInt(start_index).serialize(&mut writer);
+
+            self.write(&mut writer);
+
+            VarInt(0).serialize(&mut writer);
+        }
+    }
+
+    impl SerializeField for SuggestionsType {
+        fn serialize<W: std::io::Write>(&self, mut writer: W) {
+            match self {
+                SuggestionsType::AskServer => {
+                    "minecraft:ask_server".to_string().serialize(&mut writer);
+                }
+                SuggestionsType::AllRecipes => {
+                    "minecraft:all_recipes".to_string().serialize(&mut writer);
+                }
+                SuggestionsType::AvailableSounds => {
+                    "minecraft:available_sounds"
+                        .to_string()
+                        .serialize(&mut writer);
+                }
+                SuggestionsType::AvailableBiomes => {
+                    "minecraft:available_biomes"
+                        .to_string()
+                        .serialize(&mut writer);
+                }
+                SuggestionsType::SummonableEntities => {
+                    "minecraft:summonable_entities"
+                        .to_string()
+                        .serialize(&mut writer);
+                }
+            }
+        }
+    }
+
+    impl SerializeField for ArgumentType {
+        fn serialize<W: std::io::Write>(&self, mut writer: W) {
+            match self {
+                ArgumentType::Bool => {
+                    VarInt(0).serialize(&mut writer);
+                }
+                ArgumentType::Float { min, max } => {
+                    VarInt(1).serialize(&mut writer);
+                    let flags = {
+                        let mut flags = 0x00u8;
+                        if min.is_some() {
+                            flags |= 0x01;
+                        }
+                        if max.is_some() {
+                            flags |= 0x02;
+                        }
+                        flags
+                    };
+                    flags.serialize(&mut writer);
+                    if let Some(min) = min {
+                        min.serialize(&mut writer);
+                    }
+                    if let Some(max) = max {
+                        max.serialize(&mut writer);
+                    }
+                }
+            }
+        }
+    }
+
+    impl Debug for CommandNode {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            let mut debug = f.debug_struct("CommandNode");
+            debug.field("node_type", &self.node_type);
+            debug.field("redirect", &self.redirect);
+            debug.field("children", &self.children);
+            debug.field("node_index", &self.node_index);
+            debug.finish()
         }
     }
 }

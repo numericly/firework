@@ -115,6 +115,10 @@ define_server_bound_protocol! {
         displayed_skin_parts: DisplaySkinParts,
         main_hand: MainHand
     },
+    CommandSuggestionsRequest, 0x08, Play => {
+        transaction_id: VarInt,
+        command: String
+    },
     ClickContainer, 0x0A, Play => {
         window_id: u8,
         state_id: VarInt,

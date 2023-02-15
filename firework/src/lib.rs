@@ -1,17 +1,19 @@
 use crate::client::{Client, ClientCommand, Player};
-use crate::entities::{EntityDataFlags, EntityMetadata, Pose};
+use crate::entities::{EntityMetadata, Pose};
 use async_trait::async_trait;
 use client::PreviousPosition;
 use dashmap::{DashMap, DashSet};
 use firework_authentication::{authenticate, AuthenticationError, Profile};
 use firework_protocol::client_bound::{
-    EncryptionRequest, LoginDisconnect, LoginSuccess, Pong, ServerStatus, SetCompression,
+    ClientBoundPacketID, EncryptionRequest, LoginDisconnect, LoginSuccess, Pong, SerializePacket,
+    ServerStatus, SetCompression,
 };
 use firework_protocol::server_bound::{ClientInformation, Ping, ServerBoundPacket};
 use firework_protocol::{read_specific_packet, ConnectionState, Protocol, ProtocolError};
 use firework_protocol_core::VarInt;
 use firework_world::World;
 use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
+use std::fmt::Debug;
 use std::sync::Arc;
 use std::time::Duration;
 use std::{collections::HashSet, time::Instant};
@@ -231,6 +233,8 @@ pub struct ServerManager<T: Sized, const PLAYER_RESERVED_ENTITY_IDS: i32 = 1_000
 #[async_trait]
 pub trait ServerProxy {
     type TransferData: Clone + Send + Sync + 'static;
+    type Roles: Clone + Send + Sync + 'static;
+    type Permissions: Clone + Send + Sync + 'static;
     async fn new() -> Self
     where
         Self: Sized;
@@ -450,6 +454,7 @@ where
     proxy: PhantomData<Proxy>,
 }
 #[async_trait]
+#[allow(unused_variables)]
 pub trait PlayerHandler<Handler, Proxy>
 where
     Handler: ServerHandler<Proxy> + Send + Sync + 'static,
@@ -458,6 +463,78 @@ where
     fn new(server: Arc<Server<Handler, Proxy>>, proxy: Arc<Proxy>) -> Self;
     async fn on_tick(&self, client: &Client<Handler, Proxy>) -> Result<(), ConnectionError> {
         Ok(())
+    }
+    async fn on_client_bound_packet(
+        &self,
+        client: &Client<Handler, Proxy>,
+    ) -> Result<(), ConnectionError> {
+        Ok(())
+    }
+    async fn on_server_bound_packet(
+        &self,
+        client: &Client<Handler, Proxy>,
+    ) -> Result<(), ConnectionError> {
+        Ok(())
+    }
+    async fn on_client_command(
+        &self,
+        client: &Client<Handler, Proxy>,
+        command: ClientCommand<Proxy::TransferData>,
+    ) -> Result<Option<ClientCommand<Proxy::TransferData>>, ConnectionError> {
+        Ok(Some(command))
+    }
+    async fn on_chat(
+        &self,
+        client: &Client<Handler, Proxy>,
+        chat: String,
+    ) -> Result<Option<String>, ConnectionError> {
+        let name = &client.player.read().await.profile.name;
+        Ok(Some(format!(r#"{{ "text": "<{}> {}"}}"#, name, chat)))
+    }
+    async fn on_death(&self, client: &Client<Handler, Proxy>) -> Result<bool, ConnectionError> {
+        Ok(true)
+    }
+    async fn on_chat_command(
+        &self,
+        client: &Client<Handler, Proxy>,
+        command: String,
+    ) -> Result<Option<String>, ConnectionError> {
+        Ok(Some(command))
+    }
+    async fn on_move(
+        &self,
+        client: &Client<Handler, Proxy>,
+        pos: Vec3,
+    ) -> Result<Option<Vec3>, ConnectionError> {
+        Ok(Some(pos))
+    }
+    async fn on_look(
+        &self,
+        client: &Client<Handler, Proxy>,
+        rotation: Rotation,
+    ) -> Result<Option<Rotation>, ConnectionError> {
+        Ok(Some(rotation))
+    }
+    async fn on_on_ground(
+        &self,
+        client: &Client<Handler, Proxy>,
+        on_ground: bool,
+    ) -> Result<bool, ConnectionError> {
+        Ok(on_ground)
+    }
+    async fn on_sneak(
+        &self,
+        client: &Client<Handler, Proxy>,
+        sneaking: bool,
+    ) -> Result<Option<bool>, ConnectionError> {
+        Ok(Some(sneaking))
+    }
+    async fn on_sprint(
+        &self,
+        client: &Client<Handler, Proxy>,
+        sprinting: bool,
+    ) -> Result<Option<bool>, ConnectionError> {
+        Ok(Some(sprinting))
     }
 }
 
@@ -488,96 +565,6 @@ where
         client: &Client<Self, Proxy>,
     ) -> Result<(), ConnectionError> {
         Ok(())
-    }
-    async fn on_client_command(
-        &self,
-        server: &Server<Self, Proxy>,
-        proxy: &Proxy,
-        client: &Client<Self, Proxy>,
-        command: ClientCommand<Proxy::TransferData>,
-    ) -> Result<Option<ClientCommand<Proxy::TransferData>>, ConnectionError> {
-        Ok(Some(command))
-    }
-    async fn on_client_packet(
-        &self,
-        server: &Server<Self, Proxy>,
-        proxy: &Proxy,
-        client: &Client<Self, Proxy>,
-        packet: ServerBoundPacket,
-    ) -> Result<Option<ServerBoundPacket>, ConnectionError> {
-        Ok(Some(packet))
-    }
-    async fn on_chat(
-        &self,
-        server: &Server<Self, Proxy>,
-        proxy: &Proxy,
-        client: &Client<Self, Proxy>,
-        chat: String,
-    ) -> Result<Option<String>, ConnectionError> {
-        let name = &client.player.read().await.profile.name;
-        Ok(Some(format!(r#"{{ "text": "<{}> {}"}}"#, name, chat)))
-    }
-    async fn on_player_death(
-        &self,
-        server: &Server<Self, Proxy>,
-        proxy: &Proxy,
-        client: &Client<Self, Proxy>,
-    ) -> Result<bool, ConnectionError> {
-        Ok(true)
-    }
-    async fn on_chat_command(
-        &self,
-        server: &Server<Self, Proxy>,
-        proxy: &Proxy,
-        client: &Client<Self, Proxy>,
-        command: String,
-    ) -> Result<Option<String>, ConnectionError> {
-        Ok(Some(command))
-    }
-    async fn on_player_move(
-        &self,
-        server: &Server<Self, Proxy>,
-        proxy: &Proxy,
-        client: &Client<Self, Proxy>,
-        pos: Vec3,
-    ) -> Result<Option<Vec3>, ConnectionError> {
-        Ok(Some(pos))
-    }
-    async fn on_player_look(
-        &self,
-        server: &Server<Self, Proxy>,
-        proxy: &Proxy,
-        client: &Client<Self, Proxy>,
-        rotation: Rotation,
-    ) -> Result<Option<Rotation>, ConnectionError> {
-        Ok(Some(rotation))
-    }
-    async fn on_player_on_ground(
-        &self,
-        server: &Server<Self, Proxy>,
-        proxy: &Proxy,
-        client: &Client<Self, Proxy>,
-        on_ground: bool,
-    ) -> Result<bool, ConnectionError> {
-        Ok(on_ground)
-    }
-    async fn on_player_sneak(
-        &self,
-        server: &Server<Self, Proxy>,
-        proxy: &Proxy,
-        client: &Client<Self, Proxy>,
-        sneaking: bool,
-    ) -> Result<Option<bool>, ConnectionError> {
-        Ok(Some(sneaking))
-    }
-    async fn on_player_sprint(
-        &self,
-        server: &Server<Self, Proxy>,
-        proxy: &Proxy,
-        client: &Client<Self, Proxy>,
-        sprinting: bool,
-    ) -> Result<Option<bool>, ConnectionError> {
-        Ok(Some(sprinting))
     }
 }
 
@@ -726,24 +713,12 @@ where
                     select! {
                         command = to_client_receiver.recv() => {
                             let command = command?;
-
-                            if let Some(command) = command_listener_server
-                                .handler
-                                .on_client_command(
-                                    &command_listener_server,
-                                    &command_listener_proxy,
-                                    client.value(),
+                            if let Some(data) = client
+                                .handle_command(
                                     command
                                 )
-                                .await?
-                            {
-                                if let Some(data) = client
-                                    .handle_command(
-                                        command
-                                    )
-                                    .await? {
-                                    return Ok(data);
-                                }
+                                .await? {
+                                return Ok(data);
                             }
                         }
                         _ = command_listener_token.cancelled() => {
@@ -768,21 +743,7 @@ where
                     select! {
                         event = client.read_packet() => {
                             let event = event?;
-                            if let Some(event) = event_listener_server
-                                .handler
-                                .on_client_packet(
-                                    &event_listener_server,
-                                    &event_listener_proxy,
-                                    client.value(), event
-                                )
-                                .await?
-                            {
-                                client
-                                    .handle_packet(
-                                        event
-                                    )
-                                    .await?;
-                            }
+                            client.handle_packet(event).await?;
                         }
                         _ = event_listener_token.cancelled() => {
                             return Err(ConnectionError::ClientCancelled)
@@ -859,7 +820,7 @@ where
         proxy: &Proxy,
         client: &Client<Handler, Proxy>,
     ) -> Result<(), ConnectionError> {
-        if self.handler.on_player_death(server, proxy, client).await? {
+        if client.handler.on_death(client).await? {
             // self.broadcast_player_death(&client).await;
             // Set health 0
             const SHOW_RESPAWN_SCREEN: bool = false;
@@ -876,7 +837,7 @@ where
         client: &Client<Handler, Proxy>,
         message: String,
     ) -> Result<(), ConnectionError> {
-        let message = self.handler.on_chat(self, proxy, client, message).await?;
+        let message = client.handler.on_chat(client, message).await?;
         if let Some(message) = message {
             self.broadcast_chat(message).await;
         }
@@ -890,16 +851,9 @@ where
         position: Option<Vec3>,
         rotation: Option<Rotation>,
     ) -> Result<(), ConnectionError> {
-        let on_ground = self
-            .handler
-            .on_player_on_ground(self, proxy, client, on_ground)
-            .await?;
         let previous_pos = client.player.read().await.position.clone();
         let pos = if let Some(pos) = position {
-            let pos = self
-                .handler
-                .on_player_move(self, proxy, client, pos)
-                .await?;
+            let pos = client.handler.on_move(client, pos).await?;
             if let Some(pos) = &pos {
                 let mut player = client.player.write().await;
                 if let Some(previous_position) = &player.previous_position {
@@ -932,10 +886,7 @@ where
         };
         let previous_rot = client.player.read().await.rotation.clone();
         let rot = if let Some(rot) = rotation {
-            let rot = self
-                .handler
-                .on_player_look(self, proxy, client, rot)
-                .await?;
+            let rot = client.handler.on_look(client, rot).await?;
             if let Some(rot) = &rot {
                 client.player.write().await.rotation = rot.clone();
             };
@@ -943,6 +894,8 @@ where
         } else {
             None
         };
+
+        let on_ground = client.handler.on_on_ground(client, on_ground).await?;
 
         self.broadcast_entity_move(client, pos, previous_pos, rot, previous_rot, on_ground)
             .await;
@@ -968,11 +921,7 @@ where
         client: &Client<Handler, Proxy>,
         sneaking: bool,
     ) -> Result<(), ConnectionError> {
-        if let Some(sneaking) = self
-            .handler
-            .on_player_sneak(self, proxy, client, sneaking)
-            .await?
-        {
+        if let Some(sneaking) = client.handler.on_sneak(client, sneaking).await? {
             let mut player = client.player.write().await;
             player.sneaking = sneaking;
             let metadata = vec![
@@ -994,11 +943,7 @@ where
         client: &Client<Handler, Proxy>,
         sprinting: bool,
     ) -> Result<(), ConnectionError> {
-        if let Some(sprinting) = self
-            .handler
-            .on_player_sprint(self, proxy, client, sprinting)
-            .await?
-        {
+        if let Some(sprinting) = client.handler.on_sprint(client, sprinting).await? {
             let mut player = client.player.write().await;
             player.sprinting = sprinting;
             let metadata = vec![EntityMetadata::EntityFlags(player.entity_flags())];

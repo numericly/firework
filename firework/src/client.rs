@@ -21,9 +21,10 @@ use firework_protocol::{
         UpdateEntityPosition, UpdateEntityPositionAndRotation, UpdateEntityRotation,
     },
     data_types::{
-        self, AddPlayer, Attribute, CommandNode, FloatProps, ItemNbt, ItemNbtDisplay, NodeType,
-        Parser, Particle, PlayerAbilityFlags, PlayerCommandAction, PlayerInfoAction,
-        PlayerPositionFlags, Slot, UpdateGameMode, UpdateLatency, UpdateListed,
+        commands::{ArgumentType, CommandNode, SuggestionsType},
+        AddPlayer, Attribute, ItemNbt, ItemNbtDisplay, Particle, PlayerAbilityFlags,
+        PlayerCommandAction, PlayerInfoAction, PlayerPositionFlags, Slot, UpdateGameMode,
+        UpdateLatency, UpdateListed,
     },
     read_specific_packet,
     server_bound::{ChatMessage, PlayerCommand, ServerBoundPacket},
@@ -33,7 +34,6 @@ use firework_protocol_core::{DeserializeField, Position, SerializeField, Unsized
 use rand::Rng;
 use std::{
     fmt::Debug,
-    marker::PhantomData,
     sync::Arc,
     time::{Duration, Instant},
 };
@@ -141,7 +141,6 @@ impl Player {
             .with_is_elytra_flying(self.elytra_flying)
             .with_is_crouching(self.sneaking)
             .with_is_sprinting(self.sprinting)
-            .with_has_glowing_effect(true)
     }
 }
 
@@ -311,40 +310,37 @@ where
         Ok(())
     }
     pub(super) async fn change_to_play(&self) -> Result<(), ConnectionError> {
-        self.connection
-            .write_packet({
-                let player = self.player.read().await;
-                LoginPlay {
-                    entity_id: self.client_data.entity_id,
-                    is_hardcore: false,
-                    game_mode: player.gamemode.clone() as u8,
-                    previous_game_mode: player.previous_gamemode,
-                    dimensions: vec![
-                        "minecraft:overworld".to_string(),
-                        "minecraft:the_nether".to_string(),
-                        "minecraft:the_end".to_string(),
-                    ],
-                    registry_codec: UnsizedVec(REGISTRY.clone()),
-                    dimension_type: "minecraft:overworld".to_string(),
-                    dimension_name: "minecraft:overworld".to_string(),
-                    hashed_seed: 0,
-                    max_players: VarInt(10),
-                    view_distance: VarInt(7),
-                    simulation_distance: VarInt(5),
-                    reduced_debug_info: player.reduced_debug_info,
-                    enable_respawn_screen: true,
-                    is_debug: false,
-                    is_flat: false,
-                    death_location: None,
-                }
-            })
-            .await?;
+        self.send_packet({
+            let player = self.player.read().await;
+            LoginPlay {
+                entity_id: self.client_data.entity_id,
+                is_hardcore: false,
+                game_mode: player.gamemode.clone() as u8,
+                previous_game_mode: player.previous_gamemode,
+                dimensions: vec![
+                    "minecraft:overworld".to_string(),
+                    "minecraft:the_nether".to_string(),
+                    "minecraft:the_end".to_string(),
+                ],
+                registry_codec: UnsizedVec(REGISTRY.clone()),
+                dimension_type: "minecraft:overworld".to_string(),
+                dimension_name: "minecraft:overworld".to_string(),
+                hashed_seed: 0,
+                max_players: VarInt(10),
+                view_distance: VarInt(7),
+                simulation_distance: VarInt(5),
+                reduced_debug_info: player.reduced_debug_info,
+                enable_respawn_screen: true,
+                is_debug: false,
+                is_flat: false,
+                death_location: None,
+            }
+        })
+        .await?;
 
         *self.connection.connection_state.write().await = ConnectionState::Play;
 
-        self.connection
-            .write_packet(SetTags { tags: &TAGS })
-            .await?;
+        self.send_packet(SetTags { tags: &TAGS }).await?;
 
         let client_settings =
             read_specific_packet!(self.connection.as_ref(), ClientInformation).await?;
@@ -409,93 +405,69 @@ where
         })
         .await?;
 
-        self.connection
-            .write_packet(SetRecipes {
-                recipes: Vec::new(),
-            })
-            .await?;
+        self.send_packet(SetRecipes {
+            recipes: Vec::new(),
+        })
+        .await?;
 
         // OP permission level packet here
 
-        self.connection
-            .write_packet(Commands {
-                root: CommandNode::new(
-                    NodeType::Root,
-                    None,
-                    false,
-                    vec![CommandNode::new(
-                        NodeType::Literal {
-                            name: "test_command".to_string(),
+        let mut buf = Vec::new();
+        {
+            let root = CommandNode::root()
+                .sub_command(
+                    CommandNode::literal("play").sub_command(CommandNode::argument(
+                        "game",
+                        ArgumentType::Float {
+                            min: Some(10.),
+                            max: None,
                         },
-                        None,
-                        false,
-                        vec![
-                            CommandNode::new(
-                                NodeType::Argument {
-                                    name: "true_or_false".to_string(),
-                                    parser: Parser::Bool,
-                                    suggestions_type: None,
-                                },
-                                None,
-                                true,
-                                vec![],
-                            ),
-                            CommandNode::new(
-                                NodeType::Argument {
-                                    name: "0_to_1".to_string(),
-                                    parser: Parser::Float(FloatProps {
-                                        min: Some(0.0),
-                                        max: Some(1.0),
-                                    }),
-                                    suggestions_type: None,
-                                },
-                                None,
-                                true,
-                                vec![],
-                            ),
-                        ],
-                    )],
-                ),
-            })
-            .await?;
+                        Some(SuggestionsType::AskServer),
+                    )),
+                )
+                .sub_command(CommandNode::literal("echo"));
+
+            root.serialize(&mut buf);
+        }
+        self.send_packet(Commands {
+            data: UnsizedVec(buf),
+        })
+        .await?;
 
         // Unlock recipes packet
 
-        self.connection
-            .write_packet({
-                let player = self.player.read().await;
-                SynchronizePlayerPosition {
-                    x: player.position.x,
-                    y: player.position.y,
-                    z: player.position.z,
-                    yaw: player.rotation.yaw,
-                    pitch: player.rotation.pitch,
-                    flags: PlayerPositionFlags::new(),
-                    teleport_id: VarInt(0),
-                    dismount_vehicle: false,
-                }
-            })
-            .await?;
+        self.send_packet({
+            let player = self.player.read().await;
+            SynchronizePlayerPosition {
+                x: player.position.x,
+                y: player.position.y,
+                z: player.position.z,
+                yaw: player.rotation.yaw,
+                pitch: player.rotation.pitch,
+                flags: PlayerPositionFlags::new(),
+                teleport_id: VarInt(0),
+                dismount_vehicle: false,
+            }
+        })
+        .await?;
 
         self.add_all_players().await?;
 
         // Initialize world border packet
 
-        self.connection
-            .write_packet(SetDefaultSpawn {
-                position: Position { x: 0, y: 47, z: 0 },
-                yaw: 90.0,
-            })
-            .await?;
+        self.send_packet(SetDefaultSpawn {
+            position: Position { x: 0, y: 47, z: 0 },
+            yaw: 90.0,
+        })
+        .await?;
 
-        self.connection
-            .write_packet(SetContainerContent {
-                window_id: 0,
-                state_id: VarInt(0),
-                items: self.player.read().await.inventory.slots.to_vec(),
-                held_item: None,
-            })
-            .await?;
+        self.send_packet(SetContainerContent {
+            window_id: 0,
+            state_id: VarInt(0),
+            items: self.player.read().await.inventory.slots.to_vec(),
+            held_item: None,
+        })
+        .await?;
 
         // Advancements packet
 
@@ -846,7 +818,11 @@ where
         &self,
         packet: ServerBoundPacket,
     ) -> Result<(), ConnectionError> {
+        self.handler.on_server_bound_packet(self).await?;
         match packet {
+            ServerBoundPacket::CommandSuggestionsRequest(packet) => {
+                println!("CommandSuggestionsRequest: {:?}", packet);
+            }
             ServerBoundPacket::ServerBoundKeepAlive(_) => {
                 let mut ping_acknowledged = self.ping_acknowledged.lock().await;
 
@@ -1165,21 +1141,20 @@ where
     ) -> Result<(), ConnectionError> {
         self.send_packet(content).await?;
         // Lmao this is test code
-        self.connection
-            .write_packet(SoundEffect {
-                sound: IdMapHolder::Direct(CustomSound {
-                    resource_location: "minecraft:music.glide_map_1".to_string(),
-                    range: None,
-                }),
-                sound_source: SoundSource::Player,
-                x: 0,
-                y: 374,
-                z: 0,
-                volume: 1.,
-                pitch: 1.,
-                seed: 0,
-            })
-            .await?;
+        self.send_packet(SoundEffect {
+            sound: IdMapHolder::Direct(CustomSound {
+                resource_location: "minecraft:music.glide_map_1".to_string(),
+                range: None,
+            }),
+            sound_source: SoundSource::Player,
+            x: 0,
+            y: 374,
+            z: 0,
+            volume: 1.,
+            pitch: 1.,
+            seed: 0,
+        })
+        .await?;
 
         Ok(())
     }
@@ -1290,6 +1265,7 @@ where
         &self,
         packet: T,
     ) -> Result<(), ConnectionError> {
+        self.handler.on_client_bound_packet(self).await?;
         self.connection.write_packet(packet).await?;
         Ok(())
     }

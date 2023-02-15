@@ -99,9 +99,9 @@ pub enum Pose {
 
 #[test]
 fn test() {
-    let flags = EntityMetadata::EntityFlags(EntityDataFlags::new());
-    let mut writer = Vec::new();
-    flags.serialize(&mut writer);
-    println!("{:?}", writer);
-    panic!("test")
+    // let flags = EntityMetadata::EntityFlags(EntityDataFlags::new());
+    // let mut writer = Vec::new();
+    // flags.serialize(&mut writer);
+    // println!("{:?}", writer);
+    // panic!("test")
 }

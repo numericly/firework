@@ -4,7 +4,7 @@ use firework_protocol::Protocol;
 use firework_world::World;
 use glide_server::GlideServerHandler;
 use lobby_server::LobbyServerHandler;
-use std::sync::Arc;
+use std::{default, sync::Arc};
 use tokio::sync::RwLock;
 
 mod glide_server;
@@ -102,9 +102,20 @@ enum TransferData {
     Glide,
 }
 
+#[derive(Debug, Clone, Default)]
+enum Roles {
+    #[default]
+    Default,
+}
+
+#[derive(Debug, Clone)]
+enum Permissions {}
+
 #[async_trait]
 impl ServerProxy for MiniGameProxy {
     type TransferData = TransferData;
+    type Roles = Roles;
+    type Permissions = Permissions;
     async fn new() -> Self {
         let lobby_server = Server::new(
             World::new("./firework-world/lobby", false),

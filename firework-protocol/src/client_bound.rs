@@ -9,7 +9,7 @@ macro_rules! define_client_bound_protocol {
         $(,)?
     ) => {
         $(
-            #[derive(Debug, PartialEq)]
+            #[derive(Debug)]
             pub struct $name {
                 $(pub $field: $type),*
             }
@@ -47,8 +47,8 @@ use std::collections::HashMap;
 use nbt::Blob;
 
 use crate::data_types::{
-    self, Attribute, BitSet, CommandNode, DeathLocation, Particle, PlayerAbilityFlags,
-    PlayerInfoAction, PlayerPositionFlags, Recipe, Slot,
+    Attribute, BitSet, DeathLocation, Particle, PlayerAbilityFlags, PlayerInfoAction,
+    PlayerPositionFlags, Recipe, Slot,
 };
 
 pub trait ClientBoundPacketID {
@@ -101,7 +101,7 @@ define_client_bound_protocol! {
         locked: bool
     },
     Commands, 0x0E, Play => {
-        root: CommandNode
+        data: UnsizedVec<u8>
     },
     CloseContainer, 0x0F, Play => {
         window_id: u8

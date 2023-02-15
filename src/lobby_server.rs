@@ -1,8 +1,9 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
+use cipher::typenum::Min;
 use firework::{
-    client::{Client, ClientCommand, GameMode, InventorySlot, Player},
+    client::{Client, GameMode, InventorySlot, Player},
     PlayerHandler,
 };
 use firework::{ConnectionError, Rotation, Server, ServerHandler, Vec3};
@@ -11,16 +12,24 @@ use firework_data::items::{Compass, Item};
 use firework_protocol::data_types::{ItemNbt, Slot};
 use firework_protocol_core::VarInt;
 
-use crate::{MiniGameProxy, TransferData};
+use crate::MiniGameProxy;
 
 pub struct LobbyPlayerHandler {}
 
+#[async_trait]
 impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
     fn new(
-        server: Arc<Server<LobbyServerHandler, MiniGameProxy>>,
-        proxy: Arc<MiniGameProxy>,
+        _server: Arc<Server<LobbyServerHandler, MiniGameProxy>>,
+        _proxy: Arc<MiniGameProxy>,
     ) -> Self {
         Self {}
+    }
+    async fn on_chat_command(
+        &self,
+        client: &Client<LobbyServerHandler, MiniGameProxy>,
+        command: String,
+    ) -> Result<Option<String>, ConnectionError> {
+        Ok(Some(command))
     }
 }
 
@@ -36,9 +45,9 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
         let mut player = Player {
             gamemode: GameMode::Adventure,
             max_health: 20.0,
-            health: 19.99999999,
+            health: 20.0,
             position: Vec3::new(0.5, 46.0, 0.5),
-            rotation: Rotation::new(-90., 0.),
+            rotation: Rotation::new(-90.0, 0.0),
             profile,
             uuid,
             ..Player::default()
@@ -55,26 +64,5 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
             }),
         );
         Ok(player)
-    }
-    async fn on_chat(
-        &self,
-        server: &Server<Self, MiniGameProxy>,
-        proxy: &MiniGameProxy,
-        client: &Client<Self, MiniGameProxy>,
-        chat: String,
-    ) -> Result<Option<String>, ConnectionError> {
-        let name = &client.player.read().await.profile.name;
-        client.transfer(TransferData::Glide);
-        Ok(Some(format!(r#"{{ "text": "<{}> {}"}}"#, name, chat)))
-    }
-    async fn on_chat_command(
-        &self,
-        server: &Server<Self, MiniGameProxy>,
-        proxy: &MiniGameProxy,
-        client: &Client<Self, MiniGameProxy>,
-        command: String,
-    ) -> Result<Option<String>, ConnectionError> {
-        println!("command: {}", command);
-        Ok(None)
     }
 }
