@@ -1,14 +1,13 @@
 use async_trait::async_trait;
+use cipher::typenum::Min;
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
+    commands::{ArgumentType, CommandNode, StringTypes},
     AxisAlignedBB, BlockPos, ConnectionError, PlayerHandler, Rotation, Server, ServerHandler, Vec3,
 };
 use firework_authentication::Profile;
 use firework_data::items::{Elytra, Item};
-use firework_protocol::data_types::{
-    commands::{ArgumentType, CommandNode, StringTypes, SuggestionsType},
-    ItemNbt, Slot,
-};
+use firework_protocol::data_types::{ItemNbt, Slot};
 use firework_protocol_core::VarInt;
 use std::sync::Arc;
 use tokio::sync::RwLock;
@@ -119,7 +118,7 @@ enum GameState {
 
 pub struct GlideServerHandler {
     game_state: RwLock<GameState>,
-    commands: CommandNode,
+    commands: CommandNode<Self, MiniGameProxy>,
 }
 
 pub struct GlidePlayerHandler {
@@ -224,7 +223,7 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
         &self,
         server: &Server<GlideServerHandler, MiniGameProxy>,
         proxy: &MiniGameProxy,
-    ) -> Result<&CommandNode, ConnectionError> {
+    ) -> Result<&CommandNode<Self, MiniGameProxy>, ConnectionError> {
         Ok(&self.commands)
     }
 }

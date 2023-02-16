@@ -47,8 +47,8 @@ use std::collections::HashMap;
 use nbt::Blob;
 
 use crate::data_types::{
-    commands::SuggestionMatch, Attribute, BitSet, DeathLocation, Particle, PlayerAbilityFlags,
-    PlayerInfoAction, PlayerPositionFlags, Recipe, Slot,
+    Attribute, BitSet, DeathLocation, Particle, PlayerAbilityFlags, PlayerInfoAction,
+    PlayerPositionFlags, Recipe, Slot, SuggestionMatch,
 };
 
 pub trait ClientBoundPacketID {

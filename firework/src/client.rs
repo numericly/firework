@@ -22,7 +22,6 @@ use firework_protocol::{
         UpdateEntityPositionAndRotation, UpdateEntityRotation,
     },
     data_types::{
-        commands::{ArgumentType, CommandNode, StringTypes, SuggestionMatch, SuggestionsType},
         AddPlayer, Attribute, ItemNbt, ItemNbtDisplay, Particle, PlayerAbilityFlags,
         PlayerCommandAction, PlayerInfoAction, PlayerPositionFlags, Slot, UpdateGameMode,
         UpdateLatency, UpdateListed,
@@ -813,7 +812,6 @@ where
         self.handler.on_server_bound_packet(self).await?;
         match packet {
             ServerBoundPacket::CommandSuggestionsRequest(packet) => {
-                println!("CommandSuggestionsRequest: {:?}", packet);
                 // let parts = packet.command[1..].split(' ').collect::<Vec<&str>>();
                 let root = self
                     .server
@@ -821,18 +819,19 @@ where
                     .get_commands(&self.server, &self.proxy)
                     .await?;
 
-                root.suggestions(packet.command.as_str(), 0).await;
+                let suggestions = root.suggestions(packet.command.as_str(), 0).await;
 
-                self.send_packet(CommandSuggestionsResponse {
-                    transaction_id: packet.transaction_id,
-                    start: VarInt(6),
-                    length: VarInt(0),
-                    suggestions: vec![SuggestionMatch {
-                        r#match: "glide".to_string(),
-                        tooltip: None,
-                    }],
-                })
-                .await?;
+                // dbg!(&suggestions);
+
+                if let Some(suggestions) = suggestions {
+                    self.send_packet(CommandSuggestionsResponse {
+                        transaction_id: packet.transaction_id,
+                        start: VarInt::from(suggestions.start as i32),
+                        length: VarInt::from(suggestions.length as i32),
+                        suggestions: suggestions.suggestions,
+                    })
+                    .await?;
+                }
             }
             ServerBoundPacket::ServerBoundKeepAlive(_) => {
                 let mut ping_acknowledged = self.ping_acknowledged.lock().await;
@@ -854,6 +853,16 @@ where
                 self.server.handle_chat(&self.proxy, self, message).await?
             }
             ServerBoundPacket::ChatCommand(ChatCommand { command }) => {
+                let root = self
+                    .server
+                    .handler
+                    .get_commands(&self.server, &self.proxy)
+                    .await?;
+
+                let result = root.execute(command.as_str(), 0, self.server.clone()).await;
+
+                // dbg!(result);
+
                 self.server
                     .handle_chat_command(&self.proxy, self, command)
                     .await?

@@ -290,6 +290,7 @@ name = "firework"
 version = "0.1.0"
 dependencies = [
  "aes",
+ "async-recursion",
  "async-trait",
  "byteorder",
  "cfb8",

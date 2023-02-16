@@ -4,16 +4,15 @@ use async_trait::async_trait;
 use cipher::typenum::Min;
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
+    commands::{ArgumentType, CommandNode, StringTypes},
     PlayerHandler,
 };
 use firework::{ConnectionError, Rotation, Server, ServerHandler, Vec3};
 use firework_authentication::Profile;
 use firework_data::items::{Compass, Item};
-use firework_protocol::data_types::{
-    commands::{ArgumentType, CommandNode, StringTypes, SuggestionsType},
-    ItemNbt, Slot,
-};
+use firework_protocol::data_types::{ItemNbt, Slot};
 use firework_protocol_core::VarInt;
+use tokio::pin;
 
 use crate::MiniGameProxy;
 
@@ -41,7 +40,7 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
 }
 
 pub struct LobbyServerHandler {
-    commands: CommandNode,
+    commands: CommandNode<Self, MiniGameProxy>,
 }
 
 #[async_trait]
@@ -51,15 +50,30 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
         Self {
             commands: CommandNode::root()
                 .sub_command(
-                    CommandNode::literal("play").sub_command(CommandNode::argument(
-                        "game",
+                    CommandNode::literal("play").sub_command(
+                        CommandNode::argument(
+                            "game",
+                            ArgumentType::String {
+                                string_type: StringTypes::SingleWord,
+                                suggestions: Some(vec![
+                                    "glide".to_string(),
+                                    "tumble".to_string(),
+                                    "battle".to_string(),
+                                ]),
+                            },
+                        )
+                        .executable(Box::new(move |string: &str| Box::pin(play(string)))),
+                    ),
+                )
+                .sub_command(
+                    CommandNode::literal("echo").sub_command(CommandNode::argument(
+                        "text",
                         ArgumentType::String {
                             string_type: StringTypes::SingleWord,
-                            suggestions: Some(vec!["glide".to_string()]),
+                            suggestions: None,
                         },
                     )),
-                )
-                .sub_command(CommandNode::literal("echo")),
+                ),
         }
     }
     async fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError> {
@@ -90,7 +104,15 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
         &self,
         server: &Server<LobbyServerHandler, MiniGameProxy>,
         proxy: &MiniGameProxy,
-    ) -> Result<&CommandNode, ConnectionError> {
+    ) -> Result<&CommandNode<LobbyServerHandler, MiniGameProxy>, ConnectionError> {
         Ok(&self.commands)
     }
+}
+
+async fn play(server: &str) {
+    println!("playing server {server:?}")
+}
+
+async fn echo(server: Arc<Server<LobbyServerHandler, MiniGameProxy>>) {
+    println!("echoing")
 }

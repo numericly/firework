@@ -34,3 +34,4 @@ firework_authentication = { path = "../firework-authentication" }
 firework_data = { path = "../firework-data" }
 firework_world = { path = "../firework-world" }
 futures = "0.3.26"
+async-recursion = "1.0.2"
