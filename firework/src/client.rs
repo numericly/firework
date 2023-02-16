@@ -11,23 +11,24 @@ use firework_data::{
 };
 use firework_protocol::{
     client_bound::{
-        ChangeDifficulty, ClientBoundKeepAlive, ClientBoundPacketID, CloseContainer, Commands,
-        CustomSound, IdMapHolder, LoginPlay, ParticlePacket, PlayDisconnect, PlayerAbilities,
-        PlayerInfo, PluginMessage, RemoveEntities, RemoveInfoPlayer, ResourcePack, Respawn,
-        SerializePacket, SetCenterChunk, SetContainerContent, SetContainerSlot, SetDefaultSpawn,
-        SetEntityMetadata, SetEntityVelocity, SetHealth, SetHeldItem, SetRecipes, SetTags,
-        SoundEffect, SoundSource, SpawnPlayer, SynchronizePlayerPosition, SystemChatMessage,
-        TeleportEntity, UnloadChunk, UpdateAttributes, UpdateEntityHeadRotation,
-        UpdateEntityPosition, UpdateEntityPositionAndRotation, UpdateEntityRotation,
+        ChangeDifficulty, ClientBoundKeepAlive, ClientBoundPacketID, CloseContainer,
+        CommandSuggestionsResponse, Commands, CustomSound, IdMapHolder, LoginPlay, ParticlePacket,
+        PlayDisconnect, PlayerAbilities, PlayerInfo, PluginMessage, RemoveEntities,
+        RemoveInfoPlayer, ResourcePack, Respawn, SerializePacket, SetCenterChunk,
+        SetContainerContent, SetContainerSlot, SetDefaultSpawn, SetEntityMetadata,
+        SetEntityVelocity, SetHealth, SetHeldItem, SetRecipes, SetTags, SoundEffect, SoundSource,
+        SpawnPlayer, SynchronizePlayerPosition, SystemChatMessage, TeleportEntity, UnloadChunk,
+        UpdateAttributes, UpdateEntityHeadRotation, UpdateEntityPosition,
+        UpdateEntityPositionAndRotation, UpdateEntityRotation,
     },
     data_types::{
-        commands::{ArgumentType, CommandNode, SuggestionsType},
+        commands::{ArgumentType, CommandNode, StringTypes, SuggestionMatch, SuggestionsType},
         AddPlayer, Attribute, ItemNbt, ItemNbtDisplay, Particle, PlayerAbilityFlags,
         PlayerCommandAction, PlayerInfoAction, PlayerPositionFlags, Slot, UpdateGameMode,
         UpdateLatency, UpdateListed,
     },
     read_specific_packet,
-    server_bound::{ChatMessage, PlayerCommand, ServerBoundPacket},
+    server_bound::{ChatCommand, ChatMessage, PlayerCommand, ServerBoundPacket},
     ConnectionState, Protocol, ProtocolError,
 };
 use firework_protocol_core::{DeserializeField, Position, SerializeField, UnsizedVec, VarInt};
@@ -413,22 +414,13 @@ where
         // OP permission level packet here
 
         let mut buf = Vec::new();
-        {
-            let root = CommandNode::root()
-                .sub_command(
-                    CommandNode::literal("play").sub_command(CommandNode::argument(
-                        "game",
-                        ArgumentType::Float {
-                            min: Some(10.),
-                            max: None,
-                        },
-                        Some(SuggestionsType::AskServer),
-                    )),
-                )
-                .sub_command(CommandNode::literal("echo"));
+        let root = self
+            .server
+            .handler
+            .get_commands(&self.server, &self.proxy)
+            .await?;
+        root.serialize(&mut buf).await;
 
-            root.serialize(&mut buf);
-        }
         self.send_packet(Commands {
             data: UnsizedVec(buf),
         })
@@ -822,6 +814,25 @@ where
         match packet {
             ServerBoundPacket::CommandSuggestionsRequest(packet) => {
                 println!("CommandSuggestionsRequest: {:?}", packet);
+                // let parts = packet.command[1..].split(' ').collect::<Vec<&str>>();
+                let root = self
+                    .server
+                    .handler
+                    .get_commands(&self.server, &self.proxy)
+                    .await?;
+
+                root.suggestions(packet.command.as_str(), 0).await;
+
+                self.send_packet(CommandSuggestionsResponse {
+                    transaction_id: packet.transaction_id,
+                    start: VarInt(6),
+                    length: VarInt(0),
+                    suggestions: vec![SuggestionMatch {
+                        r#match: "glide".to_string(),
+                        tooltip: None,
+                    }],
+                })
+                .await?;
             }
             ServerBoundPacket::ServerBoundKeepAlive(_) => {
                 let mut ping_acknowledged = self.ping_acknowledged.lock().await;
@@ -833,14 +844,19 @@ where
                 *ping_acknowledged = true;
             }
             ServerBoundPacket::ChatMessage(ChatMessage { message }) => {
-                let gui = GameQueueMenuGui {};
+                // let gui = GameQueueMenuGui {};
 
-                self.send_packet(gui.open()).await?;
+                // self.send_packet(gui.open()).await?;
 
-                self.send_packet(gui.draw()).await?;
-                self.player.write().await.open_gui = Some(GameQueueMenuGui(gui));
+                // self.send_packet(gui.draw()).await?;
+                // self.player.write().await.open_gui = Some(GameQueueMenuGui(gui));
 
                 self.server.handle_chat(&self.proxy, self, message).await?
+            }
+            ServerBoundPacket::ChatCommand(ChatCommand { command }) => {
+                self.server
+                    .handle_chat_command(&self.proxy, self, command)
+                    .await?
             }
             ServerBoundPacket::PlayerCommand(PlayerCommand {
                 entity_id,

@@ -47,8 +47,8 @@ use std::collections::HashMap;
 use nbt::Blob;
 
 use crate::data_types::{
-    Attribute, BitSet, DeathLocation, Particle, PlayerAbilityFlags, PlayerInfoAction,
-    PlayerPositionFlags, Recipe, Slot,
+    commands::SuggestionMatch, Attribute, BitSet, DeathLocation, Particle, PlayerAbilityFlags,
+    PlayerInfoAction, PlayerPositionFlags, Recipe, Slot,
 };
 
 pub trait ClientBoundPacketID {
@@ -99,6 +99,12 @@ define_client_bound_protocol! {
     ChangeDifficulty, 0x0B, Play => {
         difficulty: u8,
         locked: bool
+    },
+    CommandSuggestionsResponse, 0x0D, Play => {
+        transaction_id: VarInt,
+        start: VarInt,
+        length: VarInt,
+        suggestions: Vec<SuggestionMatch>
     },
     Commands, 0x0E, Play => {
         data: UnsizedVec<u8>

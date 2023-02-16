@@ -20,17 +20,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "authentication"
-version = "0.1.0"
+name = "async-recursion"
+version = "1.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3b015a331cc64ebd1774ba119538573603427eaace0a1950c423ab971f903796"
 dependencies = [
- "num-bigint",
- "protocol_core",
- "protocol_derive",
- "reqwest",
- "serde",
- "serde_json",
- "sha1",
- "thiserror",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -232,13 +229,84 @@ dependencies = [
 ]
 
 [[package]]
+name = "firework_authentication"
+version = "0.1.0"
+dependencies = [
+ "firework_protocol_core",
+ "firework_protocol_derive",
+ "num-bigint",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sha1",
+ "thiserror",
+]
+
+[[package]]
+name = "firework_data"
+version = "0.1.0"
+dependencies = [
+ "convert_case",
+ "hematite-nbt",
+ "lazy_static",
+ "proc-macro2",
+ "quote",
+ "rust-format",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "firework_protocol"
+version = "0.1.0"
+dependencies = [
+ "aes",
+ "async-recursion",
+ "byteorder",
+ "cfb8",
+ "firework_authentication",
+ "firework_data",
+ "firework_protocol_core",
+ "firework_protocol_derive",
+ "hematite-nbt",
+ "miniz_oxide 0.7.1",
+ "modular-bitfield",
+ "reqwest",
+ "serde",
+ "sha1",
+ "thiserror",
+ "tokio",
+]
+
+[[package]]
+name = "firework_protocol_core"
+version = "0.1.0"
+dependencies = [
+ "byteorder",
+ "firework_data",
+ "hematite-nbt",
+ "thiserror",
+]
+
+[[package]]
+name = "firework_protocol_derive"
+version = "0.1.0"
+dependencies = [
+ "darling",
+ "firework_protocol_core",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "flate2"
 version = "1.0.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a8a2db397cb1c8772f31494cb8917e48cd1e64f0fa7efac59fbd741a0a8ce841"
 dependencies = [
  "crc32fast",
- "miniz_oxide",
+ "miniz_oxide 0.6.2",
 ]
 
 [[package]]
@@ -546,24 +614,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2a60c7ce501c71e03a9c9c0d35b861413ae925bd979cc7a4e30d060069aaac8d"
 
 [[package]]
-name = "minecraft_data"
-version = "0.1.0"
-dependencies = [
- "convert_case",
- "hematite-nbt",
- "lazy_static",
- "proc-macro2",
- "quote",
- "rust-format",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "miniz_oxide"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b275950c28b37e794e8c55d88aeb5e139d0ce23fdbbeda68f8d7174abdf9e8fa"
+dependencies = [
+ "adler",
+]
+
+[[package]]
+name = "miniz_oxide"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e7810e0be55b428ada41041c41f32c9f1a42817901b4ccf45fa3d4b6561e74c7"
 dependencies = [
  "adler",
 ]
@@ -764,48 +827,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5d727cae5b39d21da60fa540906919ad737832fe0b1c165da3a34d6548c849d6"
 dependencies = [
  "unicode-ident",
-]
-
-[[package]]
-name = "protocol"
-version = "0.1.0"
-dependencies = [
- "aes",
- "authentication",
- "byteorder",
- "cfb8",
- "hematite-nbt",
- "minecraft_data",
- "miniz_oxide",
- "modular-bitfield",
- "protocol_core",
- "protocol_derive",
- "reqwest",
- "serde",
- "sha1",
- "thiserror",
- "tokio",
-]
-
-[[package]]
-name = "protocol_core"
-version = "0.1.0"
-dependencies = [
- "byteorder",
- "hematite-nbt",
- "minecraft_data",
- "thiserror",
-]
-
-[[package]]
-name = "protocol_derive"
-version = "0.1.0"
-dependencies = [
- "darling",
- "proc-macro2",
- "protocol_core",
- "quote",
- "syn",
 ]
 
 [[package]]

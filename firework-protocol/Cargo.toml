@@ -21,3 +21,4 @@ firework_data = { path = "../firework-data" }
 firework_protocol_derive = { path = "./derive" }
 firework_protocol_core = { path = "./core" }
 firework_authentication = { path = "../firework-authentication" }
+async-recursion = "1.0.2"

@@ -5,7 +5,10 @@ use firework::{
 };
 use firework_authentication::Profile;
 use firework_data::items::{Elytra, Item};
-use firework_protocol::data_types::{ItemNbt, Slot};
+use firework_protocol::data_types::{
+    commands::{ArgumentType, CommandNode, StringTypes, SuggestionsType},
+    ItemNbt, Slot,
+};
 use firework_protocol_core::VarInt;
 use std::sync::Arc;
 use tokio::sync::RwLock;
@@ -116,6 +119,7 @@ enum GameState {
 
 pub struct GlideServerHandler {
     game_state: RwLock<GameState>,
+    commands: CommandNode,
 }
 
 pub struct GlidePlayerHandler {
@@ -177,6 +181,17 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
     fn new() -> Self {
         Self {
             game_state: RwLock::new(GameState::Waiting),
+            commands: CommandNode::root()
+                .sub_command(
+                    CommandNode::literal("play").sub_command(CommandNode::argument(
+                        "game",
+                        ArgumentType::String {
+                            string_type: StringTypes::SingleWord,
+                            suggestions: None,
+                        },
+                    )),
+                )
+                .sub_command(CommandNode::literal("echo")),
         }
     }
     async fn on_tick(&self, _server: &Server<Self, MiniGameProxy>, _proxy: &MiniGameProxy) {}
@@ -204,5 +219,12 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
         );
 
         Ok(player)
+    }
+    async fn get_commands(
+        &self,
+        server: &Server<GlideServerHandler, MiniGameProxy>,
+        proxy: &MiniGameProxy,
+    ) -> Result<&CommandNode, ConnectionError> {
+        Ok(&self.commands)
     }
 }

@@ -454,30 +454,34 @@ impl SerializeField for Attribute {
 }
 
 pub mod commands {
+    use async_recursion::async_recursion;
     use firework_protocol_core::{SerializeField, VarInt};
-    use std::fmt::Debug;
-    use std::{cell::Cell, future::Future, pin::Pin};
+    use firework_protocol_derive::SerializeField;
+    use std::{fmt::Debug, io::Write};
+    use std::{future::Future, pin::Pin};
+    use tokio::sync::Mutex;
+
+    #[derive(Debug, PartialEq, SerializeField)]
+    pub struct SuggestionMatch {
+        pub r#match: String,
+        pub tooltip: Option<String>,
+    }
 
     pub struct CommandNode {
         pub node_type: NodeType,
         pub redirect: Option<Box<CommandNode>>,
-        pub execution: Option<Box<dyn Fn() -> Pin<Box<dyn Future<Output = ()>>>>>,
+        pub execution:
+            Option<Box<dyn Fn() -> Pin<Box<dyn Future<Output = ()> + Send>> + Send + Sync>>,
         pub children: Vec<CommandNode>,
 
-        node_index: Cell<Option<i32>>,
+        node_index: Mutex<Option<i32>>,
     }
 
     #[derive(Debug, PartialEq)]
     pub enum NodeType {
         Root,
-        Literal {
-            name: String,
-        },
-        Argument {
-            name: String,
-            parser: ArgumentType,
-            suggestions_type: Option<SuggestionsType>,
-        },
+        Literal { name: String },
+        Argument { name: String, parser: ArgumentType },
     }
 
     #[derive(Debug, PartialEq)]
@@ -489,10 +493,25 @@ pub mod commands {
         SummonableEntities,
     }
 
+    #[derive(SerializeField, Debug, PartialEq)]
+    #[protocol(typ = "firework_protocol_core::VarInt")]
+    pub enum StringTypes {
+        SingleWord,
+        QuotablePhrase,
+        GreedyPhrase,
+    }
+
     #[derive(Debug, PartialEq)]
     pub enum ArgumentType {
         Bool,
-        Float { min: Option<f32>, max: Option<f32> },
+        Float {
+            min: Option<f32>,
+            max: Option<f32>,
+        },
+        String {
+            string_type: StringTypes,
+            suggestions: Option<Vec<String>>,
+        },
     }
 
     impl CommandNode {
@@ -502,7 +521,7 @@ pub mod commands {
                 redirect: None,
                 execution: None,
                 children: Vec::new(),
-                node_index: Cell::new(None),
+                node_index: Mutex::new(None),
             }
         }
         pub fn literal(name: &'static str) -> Self {
@@ -513,51 +532,116 @@ pub mod commands {
                 redirect: None,
                 execution: None,
                 children: Vec::new(),
-                node_index: Cell::new(None),
+                node_index: Mutex::new(None),
             }
         }
-        pub fn argument(
-            name: &'static str,
-            argument: ArgumentType,
-            suggestions_type: Option<SuggestionsType>,
-        ) -> Self {
+        pub fn argument(name: &'static str, argument: ArgumentType) -> Self {
             Self {
                 node_type: NodeType::Argument {
                     name: name.to_string(),
                     parser: argument,
-                    suggestions_type,
                 },
                 redirect: None,
                 execution: None,
                 children: Vec::new(),
-                node_index: Cell::new(None),
+                node_index: Mutex::new(None),
             }
         }
         pub fn sub_command(mut self, node: CommandNode) -> Self {
             self.children.push(node);
             self
         }
-        pub fn executable<T: Fn() -> F + 'static, F: Future<Output = ()> + 'static>(
+        pub fn executable<
+            T: Fn() -> F + 'static + Send + Sync,
+            F: Future<Output = ()> + Send + 'static,
+        >(
             mut self,
             exec: &'static T,
         ) -> Self {
             self.execution = Some(Box::new(|| Box::pin(exec())));
             self
         }
-        fn write<W: std::io::Write>(&self, mut writer: &mut W) {
+        pub async fn serialize<W: Write + Send + Sync>(&self, mut writer: W) {
+            let mut start_index = 0;
+            self.assign_index(&mut start_index).await;
+
+            VarInt(start_index).serialize(&mut writer);
+
+            self.write(&mut writer).await;
+
+            VarInt(0).serialize(&mut writer);
+        }
+        #[async_recursion]
+        pub async fn suggestions(&self, input: &str, index: usize) {
+            match &self.node_type {
+                NodeType::Root => {
+                    if input.len() == 0 {
+                        return;
+                    }
+                    for child in &self.children {
+                        child.suggestions(&input[1..], 1).await;
+                    }
+                }
+                NodeType::Literal { name } => {
+                    if input.len() == 0 {
+                        return;
+                    }
+                    let (data, next_data) = if let Some((data, next_data)) = input.split_once(" ") {
+                        (data, Some(next_data))
+                    } else {
+                        (input, None)
+                    };
+                    if data == name {
+                        if let Some(next_data) = next_data {
+                            for child in &self.children {
+                                child.suggestions(next_data, index + data.len() + 1).await;
+                            }
+                        } else if let Some(exec) = &self.execution {
+                            exec().await;
+                        }
+                    }
+                }
+                NodeType::Argument { name, parser } => match parser {
+                    ArgumentType::String {
+                        string_type,
+                        suggestions,
+                    } => {
+                        match string_type {
+                            StringTypes::SingleWord => {
+                                let (data, next_data) =
+                                    if let Some((data, next_data)) = input.split_once(" ") {
+                                        (data, Some(next_data))
+                                    } else {
+                                        (input, None)
+                                    };
+                            }
+                        }
+                        println!("Index: {}", index);
+                        println!("Checking string: {}", input);
+                        println!("Suggestions: {:?}", suggestions);
+                        // return Ok((index, index + input.len(), Vec::new()));
+                    }
+                    _ => {}
+                },
+            }
+        }
+        #[async_recursion]
+        async fn write<W: Write + Send + Sync>(&self, mut writer: &mut W) {
             let flags = {
                 let mut flags = 0x00u8;
 
-                match self.node_type {
+                match &self.node_type {
                     NodeType::Root => flags |= 0x00,
                     NodeType::Literal { .. } => flags |= 0x01,
-                    NodeType::Argument {
-                        ref suggestions_type,
-                        ..
-                    } => {
+                    NodeType::Argument { parser, .. } => {
                         flags |= 0x02;
-                        if let Some(_) = suggestions_type {
-                            flags |= 0x10;
+                        match parser {
+                            ArgumentType::String { suggestions, .. } => {
+                                if suggestions.is_some() {
+                                    flags |= 0x10
+                                }
+                            }
+                            _ => {}
                         }
                     }
                 }
@@ -577,15 +661,22 @@ pub mod commands {
 
             VarInt(self.children.len() as i32).serialize(&mut writer);
             for child in &self.children {
-                VarInt(child.node_index.get().expect("Node indexes not calculated"))
-                    .serialize(&mut writer);
+                VarInt(
+                    child
+                        .node_index
+                        .lock()
+                        .await
+                        .expect("Node indexes not calculated"),
+                )
+                .serialize(&mut writer);
             }
 
             if let Some(redirect) = &self.redirect {
                 VarInt(
                     redirect
                         .node_index
-                        .get()
+                        .lock()
+                        .await
                         .expect("Node indexes not calculated"),
                 )
                 .serialize(&mut writer);
@@ -596,43 +687,24 @@ pub mod commands {
                 NodeType::Literal { name } => {
                     name.serialize(&mut writer);
                 }
-                NodeType::Argument {
-                    name,
-                    parser,
-                    suggestions_type,
-                } => {
+                NodeType::Argument { name, parser } => {
                     name.serialize(&mut writer);
                     parser.serialize(&mut writer);
-                    if let Some(suggestions_type) = suggestions_type {
-                        suggestions_type.serialize(&mut writer);
-                    }
                 }
             }
 
             for child in &self.children {
-                child.write(writer);
+                child.write(writer).await;
             }
         }
-        fn assign_index(&self, current_index: &mut i32) {
-            self.node_index.set(Some(*current_index));
+        #[async_recursion]
+        async fn assign_index(&self, current_index: &mut i32) {
+            self.node_index.lock().await.replace(*current_index);
             *current_index += 1;
 
             for child in &self.children {
-                child.assign_index(current_index);
+                child.assign_index(current_index).await;
             }
-        }
-    }
-
-    impl SerializeField for CommandNode {
-        fn serialize<W: std::io::Write>(&self, mut writer: W) {
-            let mut start_index = 0;
-            self.assign_index(&mut start_index);
-
-            VarInt(start_index).serialize(&mut writer);
-
-            self.write(&mut writer);
-
-            VarInt(0).serialize(&mut writer);
         }
     }
 
@@ -688,6 +760,16 @@ pub mod commands {
                     }
                     if let Some(max) = max {
                         max.serialize(&mut writer);
+                    }
+                }
+                ArgumentType::String {
+                    string_type,
+                    suggestions,
+                } => {
+                    VarInt(5).serialize(&mut writer);
+                    string_type.serialize(&mut writer);
+                    if let Some(_) = suggestions {
+                        SuggestionsType::AskServer.serialize(&mut writer);
                     }
                 }
             }

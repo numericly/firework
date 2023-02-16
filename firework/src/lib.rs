@@ -4,11 +4,13 @@ use async_trait::async_trait;
 use client::PreviousPosition;
 use dashmap::{DashMap, DashSet};
 use firework_authentication::{authenticate, AuthenticationError, Profile};
-use firework_protocol::client_bound::{
-    ClientBoundPacketID, EncryptionRequest, LoginDisconnect, LoginSuccess, Pong, SerializePacket,
-    ServerStatus, SetCompression,
-};
 use firework_protocol::server_bound::{ClientInformation, Ping, ServerBoundPacket};
+use firework_protocol::{
+    client_bound::{
+        EncryptionRequest, LoginDisconnect, LoginSuccess, Pong, ServerStatus, SetCompression,
+    },
+    data_types::commands::CommandNode,
+};
 use firework_protocol::{read_specific_packet, ConnectionState, Protocol, ProtocolError};
 use firework_protocol_core::VarInt;
 use firework_world::World;
@@ -547,6 +549,11 @@ where
 {
     type PlayerHandler: PlayerHandler<Self, Proxy> + Send + Sync + 'static;
     fn new() -> Self;
+    async fn get_commands(
+        &self,
+        server: &Server<Self, Proxy>,
+        proxy: &Proxy,
+    ) -> Result<&CommandNode, ConnectionError>;
     async fn on_load(&self, server: &Server<Self, Proxy>, proxy: &Proxy) {}
     async fn on_tick(&self, server: &Server<Self, Proxy>, proxy: &Proxy) {}
     async fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError>;
@@ -841,6 +848,15 @@ where
         if let Some(message) = message {
             self.broadcast_chat(message).await;
         }
+        Ok(())
+    }
+    pub async fn handle_chat_command(
+        &self,
+        proxy: &Proxy,
+        client: &Client<Handler, Proxy>,
+        command: String,
+    ) -> Result<(), ConnectionError> {
+        client.handler.on_chat_command(client, command).await?;
         Ok(())
     }
     pub async fn handle_position_update(

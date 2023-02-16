@@ -9,7 +9,10 @@ use firework::{
 use firework::{ConnectionError, Rotation, Server, ServerHandler, Vec3};
 use firework_authentication::Profile;
 use firework_data::items::{Compass, Item};
-use firework_protocol::data_types::{ItemNbt, Slot};
+use firework_protocol::data_types::{
+    commands::{ArgumentType, CommandNode, StringTypes, SuggestionsType},
+    ItemNbt, Slot,
+};
 use firework_protocol_core::VarInt;
 
 use crate::MiniGameProxy;
@@ -29,17 +32,35 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
         client: &Client<LobbyServerHandler, MiniGameProxy>,
         command: String,
     ) -> Result<Option<String>, ConnectionError> {
+        let command_data = command.split(' ').collect::<Vec<&str>>();
+
+        println!("Command: {:?}", command_data);
+
         Ok(Some(command))
     }
 }
 
-pub struct LobbyServerHandler {}
+pub struct LobbyServerHandler {
+    commands: CommandNode,
+}
 
 #[async_trait]
 impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
     type PlayerHandler = LobbyPlayerHandler;
     fn new() -> Self {
-        Self {}
+        Self {
+            commands: CommandNode::root()
+                .sub_command(
+                    CommandNode::literal("play").sub_command(CommandNode::argument(
+                        "game",
+                        ArgumentType::String {
+                            string_type: StringTypes::SingleWord,
+                            suggestions: Some(vec!["glide".to_string()]),
+                        },
+                    )),
+                )
+                .sub_command(CommandNode::literal("echo")),
+        }
     }
     async fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError> {
         let mut player = Player {
@@ -64,5 +85,12 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
             }),
         );
         Ok(player)
+    }
+    async fn get_commands(
+        &self,
+        server: &Server<LobbyServerHandler, MiniGameProxy>,
+        proxy: &MiniGameProxy,
+    ) -> Result<&CommandNode, ConnectionError> {
+        Ok(&self.commands)
     }
 }
