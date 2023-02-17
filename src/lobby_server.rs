@@ -62,7 +62,9 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
                                 ]),
                             },
                         )
-                        .executable(Box::new(move |string: &str| Box::pin(play(string)))),
+                        .executable(Box::new(move |server, client| {
+                            Box::pin(play(server, client))
+                        })),
                     ),
                 )
                 .sub_command(
@@ -109,8 +111,11 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
     }
 }
 
-async fn play(server: &str) {
-    println!("playing server {server:?}")
+async fn play(
+    server: &Server<LobbyServerHandler, MiniGameProxy>,
+    client: &Client<LobbyServerHandler, MiniGameProxy>,
+) {
+    println!("playing server {}", server.world.path)
 }
 
 async fn echo(server: Arc<Server<LobbyServerHandler, MiniGameProxy>>) {

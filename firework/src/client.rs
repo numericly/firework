@@ -859,7 +859,7 @@ where
                     .get_commands(&self.server, &self.proxy)
                     .await?;
 
-                let result = root.execute(command.as_str(), 0, self.server.clone()).await;
+                let result = root.execute(command.as_str(), 0, &self.server, &self).await;
 
                 // dbg!(result);
 

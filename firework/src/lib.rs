@@ -1041,12 +1041,11 @@ pub mod commands {
     use firework_protocol::data_types::SuggestionMatch;
     use firework_protocol_core::{SerializeField, VarInt};
     use firework_protocol_derive::SerializeField;
-    use futures::future::{BoxFuture, LocalBoxFuture};
+    use futures::future::BoxFuture;
     use std::{fmt::Debug, io::Write, marker::PhantomData, sync::Arc};
-    use std::{future::Future, pin::Pin};
     use tokio::sync::Mutex;
 
-    use crate::{Server, ServerHandler, ServerProxy};
+    use crate::{client::Client, Server, ServerHandler, ServerProxy};
 
     #[derive(Debug)]
     pub struct Suggestion {
@@ -1062,7 +1061,16 @@ pub mod commands {
     {
         pub node_type: NodeType,
         pub redirect: Option<Box<CommandNode<Handler, Proxy>>>,
-        pub execution: Option<Box<dyn for<'a> Fn(&'a str) -> BoxFuture<'a, ()> + Send + Sync>>,
+        pub execution: Option<
+            Box<
+                dyn for<'a> Fn(
+                        &'a Server<Handler, Proxy>,
+                        &'a Client<Handler, Proxy>,
+                    ) -> BoxFuture<'a, ()>
+                    + Send
+                    + Sync,
+            >,
+        >,
         pub children: Vec<CommandNode<Handler, Proxy>>,
 
         node_index: Mutex<Option<i32>>,
@@ -1156,7 +1164,14 @@ pub mod commands {
         }
         pub fn executable(
             mut self,
-            exec: Box<dyn for<'a> Fn(&'a str) -> BoxFuture<'a, ()> + Send + Sync>,
+            exec: Box<
+                dyn for<'a> Fn(
+                        &'a Server<Handler, Proxy>,
+                        &'a Client<Handler, Proxy>,
+                    ) -> BoxFuture<'a, ()>
+                    + Send
+                    + Sync,
+            >,
         ) -> Self {
             self.execution = Some(exec);
             self
@@ -1254,7 +1269,8 @@ pub mod commands {
             &self,
             input: &str,
             index: usize,
-            server: Arc<Server<Handler, Proxy>>,
+            server: &Server<Handler, Proxy>,
+            client: &Client<Handler, Proxy>,
         ) -> Result<(), String> {
             match &self.node_type {
                 NodeType::Root => {
@@ -1262,7 +1278,7 @@ pub mod commands {
                         return Err("".to_string());
                     }
                     for child in &self.children {
-                        child.execute(input, 0, server.clone()).await?;
+                        child.execute(input, 0, server, client).await?;
                     }
                     Ok(())
                 }
@@ -1279,7 +1295,7 @@ pub mod commands {
                         if let Some(next_data) = next_data {
                             for child in &self.children {
                                 child
-                                    .execute(next_data, index + data.len() + 1, server.clone())
+                                    .execute(next_data, index + data.len() + 1, server, client)
                                     .await?;
                             }
                         }
@@ -1312,13 +1328,14 @@ pub mod commands {
                                             .execute(
                                                 next_data,
                                                 index + data.len() + 1,
-                                                server.clone(),
+                                                server,
+                                                client,
                                             )
                                             .await?;
                                     }
                                 } else {
                                     if let Some(execution) = &self.execution {
-                                        execution("test").await;
+                                        execution(server, client).await;
                                         return Ok(());
                                     }
                                 }
