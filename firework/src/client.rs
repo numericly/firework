@@ -32,8 +32,9 @@ use firework_protocol::{
 };
 use firework_protocol_core::{DeserializeField, Position, SerializeField, UnsizedVec, VarInt};
 use rand::Rng;
+use serde_json::json;
 use std::{
-    fmt::Debug,
+    fmt::{format, Debug},
     sync::Arc,
     time::{Duration, Instant},
 };
@@ -859,8 +860,28 @@ where
                     .get_commands(&self.server, &self.proxy)
                     .await?;
 
-                let result = root.execute(command.as_str(), 0, &self.server, &self).await;
+                let result = root.execute(command.as_str(), 0, &mut Vec::new()).await;
 
+                match result {
+                    Err(err) => {
+                        // dbg!(&err);
+                        self.show_chat_message(format!(
+                            r##"{{"text":"/{}","color":"#AAB0BC"}}"##,
+                            command
+                        ));
+                        self.show_chat_message(
+                        json!(
+                            {
+                                "text": format!("help: {}, type /help for a list of commands", err.to_string()),
+                                "color": "#E96A70"
+                            }
+                        )
+                        .to_string(),
+                    )
+                    }
+                    Ok(Some((exec, args))) => exec(args, &self, &self.server, &self.proxy).await,
+                    _ => {}
+                }
                 // dbg!(result);
 
                 self.server

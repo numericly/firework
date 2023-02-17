@@ -1,10 +1,10 @@
-use std::sync::Arc;
+use std::{fmt::format, sync::Arc};
 
 use async_trait::async_trait;
 use cipher::typenum::Min;
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
-    commands::{ArgumentType, CommandNode, StringTypes},
+    commands::{Argument, ArgumentType, CommandNode, StringTypes},
     PlayerHandler,
 };
 use firework::{ConnectionError, Rotation, Server, ServerHandler, Vec3};
@@ -12,9 +12,10 @@ use firework_authentication::Profile;
 use firework_data::items::{Compass, Item};
 use firework_protocol::data_types::{ItemNbt, Slot};
 use firework_protocol_core::VarInt;
+use serde_json::json;
 use tokio::pin;
 
-use crate::MiniGameProxy;
+use crate::{MiniGameProxy, TransferData};
 
 pub struct LobbyPlayerHandler {}
 
@@ -62,19 +63,28 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
                                 ]),
                             },
                         )
-                        .executable(Box::new(move |server, client| {
-                            Box::pin(play(server, client))
-                        })),
+                        .executable(Box::new(
+                            move |args, client, server, proxy| {
+                                Box::pin(play(args, client, server, proxy))
+                            },
+                        )),
                     ),
                 )
                 .sub_command(
-                    CommandNode::literal("echo").sub_command(CommandNode::argument(
-                        "text",
-                        ArgumentType::String {
-                            string_type: StringTypes::SingleWord,
-                            suggestions: None,
-                        },
-                    )),
+                    CommandNode::literal("echo").sub_command(
+                        CommandNode::argument(
+                            "text",
+                            ArgumentType::String {
+                                string_type: StringTypes::SingleWord,
+                                suggestions: None,
+                            },
+                        )
+                        .executable(Box::new(
+                            move |args, client, server, proxy| {
+                                Box::pin(echo(args, client, server, proxy))
+                            },
+                        )),
+                    ),
                 ),
         }
     }
@@ -112,12 +122,42 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
 }
 
 async fn play(
-    server: &Server<LobbyServerHandler, MiniGameProxy>,
+    args: Vec<Argument>,
     client: &Client<LobbyServerHandler, MiniGameProxy>,
+    server: &Server<LobbyServerHandler, MiniGameProxy>,
+    proxy: &MiniGameProxy,
 ) {
-    println!("playing server {}", server.world.path)
+    let Argument::String { value } = args.get(1).expect("Arg not found") else {
+        return
+    };
+    match value.as_str() {
+        "glide" => client.transfer(TransferData::Glide),
+        value => client.show_chat_message(
+            json!(
+                {
+                    "text": format!("error: game \"{}\" does not exist", value),
+                }
+            )
+            .to_string(),
+        ),
+    }
 }
 
-async fn echo(server: Arc<Server<LobbyServerHandler, MiniGameProxy>>) {
-    println!("echoing")
+async fn echo(
+    args: Vec<Argument>,
+    client: &Client<LobbyServerHandler, MiniGameProxy>,
+    server: &Server<LobbyServerHandler, MiniGameProxy>,
+    proxy: &MiniGameProxy,
+) {
+    let Argument::String { value } = args.get(1).expect("Arg not found") else {
+        return
+    };
+    client.show_chat_message(
+        json!(
+            {
+                "text": value,
+            }
+        )
+        .to_string(),
+    )
 }

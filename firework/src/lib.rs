@@ -1042,7 +1042,9 @@ pub mod commands {
     use firework_protocol_core::{SerializeField, VarInt};
     use firework_protocol_derive::SerializeField;
     use futures::future::BoxFuture;
+    use serde_json::json;
     use std::{fmt::Debug, io::Write, marker::PhantomData, sync::Arc};
+    use thiserror::Error;
     use tokio::sync::Mutex;
 
     use crate::{client::Client, Server, ServerHandler, ServerProxy};
@@ -1064,8 +1066,10 @@ pub mod commands {
         pub execution: Option<
             Box<
                 dyn for<'a> Fn(
-                        &'a Server<Handler, Proxy>,
+                        Vec<Argument>,
                         &'a Client<Handler, Proxy>,
+                        &'a Server<Handler, Proxy>,
+                        &'a Proxy,
                     ) -> BoxFuture<'a, ()>
                     + Send
                     + Sync,
@@ -1113,6 +1117,31 @@ pub mod commands {
             string_type: StringTypes,
             suggestions: Option<Vec<String>>,
         },
+    }
+
+    #[derive(Debug, Clone)]
+    pub enum Argument {
+        Literal { value: String },
+        Bool { value: bool },
+        Float { value: f32 },
+        String { value: String },
+    }
+
+    #[derive(Error, Debug)]
+    pub enum CommandError {
+        #[error("missing command")]
+        EmptyCommand,
+        #[error("no matches for data \"{data}\"")]
+        NoMatches { data: String },
+        #[error("\"{data}\" not in {suggestions:?}")]
+        NotInSuggestions {
+            suggestions: Vec<String>,
+            data: String,
+        },
+        #[error("command is incomplete")]
+        UnknownData,
+        #[error("command is not executable")]
+        NotExecutable,
     }
 
     impl<Handler, Proxy> CommandNode<Handler, Proxy>
@@ -1166,8 +1195,10 @@ pub mod commands {
             mut self,
             exec: Box<
                 dyn for<'a> Fn(
-                        &'a Server<Handler, Proxy>,
+                        Vec<Argument>,
                         &'a Client<Handler, Proxy>,
+                        &'a Server<Handler, Proxy>,
+                        &'a Proxy,
                     ) -> BoxFuture<'a, ()>
                     + Send
                     + Sync,
@@ -1269,22 +1300,40 @@ pub mod commands {
             &self,
             input: &str,
             index: usize,
-            server: &Server<Handler, Proxy>,
-            client: &Client<Handler, Proxy>,
-        ) -> Result<(), String> {
+            mut args: &mut Vec<Argument>,
+        ) -> Result<
+            Option<(
+                &Box<
+                    dyn for<'a> Fn(
+                            Vec<Argument>,
+                            &'a Client<Handler, Proxy>,
+                            &'a Server<Handler, Proxy>,
+                            &'a Proxy,
+                        ) -> BoxFuture<'a, ()>
+                        + Send
+                        + Sync,
+                >,
+                Vec<Argument>,
+            )>,
+            CommandError,
+        > {
             match &self.node_type {
                 NodeType::Root => {
                     if input.len() == 0 {
-                        return Err("".to_string());
+                        return Err(CommandError::EmptyCommand);
                     }
                     for child in &self.children {
-                        child.execute(input, 0, server, client).await?;
+                        if let Some(exec) = child.execute(input, 0, &mut args).await? {
+                            return Ok(Some(exec));
+                        }
                     }
-                    Ok(())
+                    Err(CommandError::NoMatches {
+                        data: input.to_owned(),
+                    })
                 }
                 NodeType::Literal { name } => {
                     if input.len() == 0 {
-                        return Err("".to_string());
+                        return Ok(None);
                     }
                     let (data, next_data) = if let Some((data, next_data)) = input.split_once(" ") {
                         (data, Some(next_data))
@@ -1292,59 +1341,74 @@ pub mod commands {
                         (input, None)
                     };
                     if data == name {
+                        args.push(Argument::Literal {
+                            value: data.to_string(),
+                        });
                         if let Some(next_data) = next_data {
                             for child in &self.children {
-                                child
-                                    .execute(next_data, index + data.len() + 1, server, client)
-                                    .await?;
+                                if let Some(exec) = child
+                                    .execute(next_data, index + data.len() + 1, &mut args)
+                                    .await?
+                                {
+                                    return Ok(Some(exec));
+                                };
                             }
+                            Err(CommandError::UnknownData)
+                        } else {
+                            if let Some(execution) = &self.execution {
+                                return Ok(Some((execution, args.to_vec())));
+                            }
+                            Err(CommandError::NotExecutable)
                         }
+                    } else {
+                        Ok(None)
                     }
-                    Ok(())
                 }
                 NodeType::Argument { parser, .. } => match parser {
                     ArgumentType::String {
                         string_type,
                         suggestions,
-                    } => {
-                        match string_type {
-                            StringTypes::SingleWord => {
-                                let (data, next_data) =
-                                    if let Some((data, next_data)) = input.split_once(" ") {
-                                        (data, Some(next_data))
-                                    } else {
-                                        (input, None)
-                                    };
-
-                                if let Some(suggestions) = suggestions {
-                                    if !suggestions.contains(&data.to_string()) {
-                                        return Err("".to_string());
-                                    }
-                                }
-
-                                if let Some(next_data) = next_data {
-                                    for child in &self.children {
-                                        child
-                                            .execute(
-                                                next_data,
-                                                index + data.len() + 1,
-                                                server,
-                                                client,
-                                            )
-                                            .await?;
-                                    }
+                    } => match string_type {
+                        StringTypes::SingleWord => {
+                            let (data, next_data) =
+                                if let Some((data, next_data)) = input.split_once(" ") {
+                                    (data, Some(next_data))
                                 } else {
-                                    if let Some(execution) = &self.execution {
-                                        execution(server, client).await;
-                                        return Ok(());
-                                    }
+                                    (input, None)
+                                };
+
+                            if let Some(suggestions) = suggestions {
+                                if !suggestions.contains(&data.to_string()) {
+                                    return Err(CommandError::NotInSuggestions {
+                                        suggestions: suggestions.to_owned(),
+                                        data: data.to_owned(),
+                                    });
                                 }
                             }
-                            _ => {}
+
+                            args.push(Argument::String {
+                                value: data.to_string(),
+                            });
+
+                            if let Some(next_data) = next_data {
+                                for child in &self.children {
+                                    if let Some(exec) = child
+                                        .execute(next_data, index + data.len() + 1, &mut args)
+                                        .await?
+                                    {
+                                        return Ok(Some(exec));
+                                    };
+                                }
+                            } else {
+                                if let Some(execution) = &self.execution {
+                                    return Ok(Some((execution, args.to_vec())));
+                                }
+                            }
+                            Ok(None)
                         }
-                        Ok(())
-                    }
-                    _ => return Ok(()),
+                        _ => Ok(None),
+                    },
+                    _ => return Ok(None),
                 },
             }
         }
