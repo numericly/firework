@@ -2,10 +2,12 @@ use crate::{
     client::Client,
     {ConnectionError, Server, ServerHandler, ServerProxy},
 };
+use async_trait::async_trait;
 use firework_data::items::{DiamondShovel, Elytra, IronSword, Item};
 use firework_protocol::{
     client_bound::{OpenScreen, SetContainerContent},
     data_types::{ItemNbt, ItemNbtDisplay, Slot},
+    server_bound::ClickContainer,
 };
 use firework_protocol_core::VarInt;
 
@@ -23,13 +25,63 @@ pub trait GuiPackets {
     fn handle_click<Handler, Proxy>(
         &self,
         slot: i16,
-        client: &Client<Handler, Proxy>,
-        server: &Server<Handler, Proxy>,
+        _client: &Client<Handler, Proxy>,
+        _server: &Server<Handler, Proxy>,
     ) where
         Handler: ServerHandler<Proxy> + Send + Sync + 'static,
         Proxy: ServerProxy + Send + Sync + 'static,
     {
         println!("Clicked on slot: {:?}", slot);
+    }
+}
+
+#[async_trait]
+pub trait GuiScreen<Handler, Proxy>
+where
+    Handler: ServerHandler<Proxy> + Send + Sync + 'static,
+    Proxy: ServerProxy + Send + Sync + 'static,
+{
+    async fn new(client: &Client<Handler, Proxy>) -> Result<Self, ConnectionError>
+    where
+        Self: Sized;
+    async fn handle_click(
+        &self,
+        slot: ClickContainer,
+        client: &Client<Handler, Proxy>,
+    ) -> Result<(), ConnectionError>;
+}
+
+pub struct GameMenu {}
+
+#[async_trait]
+impl<Handler, Proxy> GuiScreen<Handler, Proxy> for GameMenu
+where
+    Handler: ServerHandler<Proxy> + Send + Sync + 'static,
+    Proxy: ServerProxy + Send + Sync + 'static,
+{
+    async fn new(client: &Client<Handler, Proxy>) -> Result<Self, ConnectionError> {
+        println!("Opening game menu");
+        client.show_gui(
+            r#"{"text":"      Minigame Selector","bold":true}"#.to_string(),
+            WindowType::Generic9x1,
+            vec![Some(Slot {
+                item_id: VarInt::from(Elytra::ID as i32),
+                item_count: 1,
+                nbt: ItemNbt {
+                    ..ItemNbt::default()
+                },
+            })],
+        );
+
+        Ok(Self {})
+    }
+    async fn handle_click(
+        &self,
+        slot: ClickContainer,
+        client: &Client<Handler, Proxy>,
+    ) -> Result<(), ConnectionError> {
+        println!("Clicked on slot: {:?}", slot);
+        Ok(())
     }
 }
 
@@ -65,8 +117,9 @@ impl Gui {
     }
 }
 
+#[derive(Debug, Clone)]
 #[allow(dead_code)]
-enum WindowType {
+pub enum WindowType {
     Generic9x1,
     Generic9x2,
     Generic9x3,
@@ -201,8 +254,8 @@ impl GuiPackets for GameQueueMenuGui {
     fn handle_click<Handler, Proxy>(
         &self,
         slot: i16,
-        client: &Client<Handler, Proxy>,
-        server: &Server<Handler, Proxy>,
+        _client: &Client<Handler, Proxy>,
+        _server: &Server<Handler, Proxy>,
     ) where
         Handler: ServerHandler<Proxy> + Send + Sync + 'static,
         Proxy: ServerProxy + Send + Sync + 'static,

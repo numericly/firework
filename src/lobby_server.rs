@@ -1,7 +1,7 @@
-use std::{fmt::format, sync::Arc};
+use std::{sync::Arc};
 
 use async_trait::async_trait;
-use cipher::typenum::Min;
+
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
     commands::{Argument, ArgumentType, CommandNode, StringTypes},
@@ -13,7 +13,7 @@ use firework_data::items::{Compass, Item};
 use firework_protocol::data_types::{ItemNbt, Slot};
 use firework_protocol_core::VarInt;
 use serde_json::json;
-use tokio::pin;
+
 
 use crate::{MiniGameProxy, TransferData};
 
@@ -29,7 +29,7 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
     }
     async fn on_chat_command(
         &self,
-        client: &Client<LobbyServerHandler, MiniGameProxy>,
+        _client: &Client<LobbyServerHandler, MiniGameProxy>,
         command: String,
     ) -> Result<Option<String>, ConnectionError> {
         let command_data = command.split(' ').collect::<Vec<&str>>();
@@ -114,8 +114,8 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
     }
     async fn get_commands(
         &self,
-        server: &Server<LobbyServerHandler, MiniGameProxy>,
-        proxy: &MiniGameProxy,
+        _server: &Server<LobbyServerHandler, MiniGameProxy>,
+        _proxy: &MiniGameProxy,
     ) -> Result<&CommandNode<LobbyServerHandler, MiniGameProxy>, ConnectionError> {
         Ok(&self.commands)
     }
@@ -124,8 +124,8 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
 async fn play(
     args: Vec<Argument>,
     client: &Client<LobbyServerHandler, MiniGameProxy>,
-    server: &Server<LobbyServerHandler, MiniGameProxy>,
-    proxy: &MiniGameProxy,
+    _server: &Server<LobbyServerHandler, MiniGameProxy>,
+    _proxy: &MiniGameProxy,
 ) {
     let Argument::String { value } = args.get(1).expect("Arg not found") else {
         return
@@ -146,8 +146,8 @@ async fn play(
 async fn echo(
     args: Vec<Argument>,
     client: &Client<LobbyServerHandler, MiniGameProxy>,
-    server: &Server<LobbyServerHandler, MiniGameProxy>,
-    proxy: &MiniGameProxy,
+    _server: &Server<LobbyServerHandler, MiniGameProxy>,
+    _proxy: &MiniGameProxy,
 ) {
     let Argument::String { value } = args.get(1).expect("Arg not found") else {
         return

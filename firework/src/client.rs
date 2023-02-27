@@ -1,7 +1,11 @@
-use crate::{entities::EntityDataFlags, PlayerHandler};
+use crate::{
+    entities::EntityDataFlags,
+    gui::{GameMenu, GuiScreen, WindowType},
+    PlayerHandler,
+};
 use crate::{
     entities::{EntityMetadata, END_INDEX},
-    gui::{GameQueueMenuGui, Gui, Gui::*, GuiPackets},
+    gui::{GameQueueMenuGui, GuiPackets},
     {ClientData, ConnectionError, Rotation, Server, ServerHandler, ServerProxy, Vec3},
 };
 use firework_authentication::Profile;
@@ -12,8 +16,8 @@ use firework_data::{
 use firework_protocol::{
     client_bound::{
         ChangeDifficulty, ClientBoundKeepAlive, ClientBoundPacketID, CloseContainer,
-        CommandSuggestionsResponse, Commands, CustomSound, IdMapHolder, LoginPlay, ParticlePacket,
-        PlayDisconnect, PlayerAbilities, PlayerInfo, PluginMessage, RemoveEntities,
+        CommandSuggestionsResponse, Commands, CustomSound, IdMapHolder, LoginPlay, OpenScreen,
+        ParticlePacket, PlayDisconnect, PlayerAbilities, PlayerInfo, PluginMessage, RemoveEntities,
         RemoveInfoPlayer, ResourcePack, Respawn, SerializePacket, SetCenterChunk,
         SetContainerContent, SetContainerSlot, SetDefaultSpawn, SetEntityMetadata,
         SetEntityVelocity, SetHealth, SetHeldItem, SetRecipes, SetTags, SoundEffect, SoundSource,
@@ -22,7 +26,7 @@ use firework_protocol::{
         UpdateEntityPositionAndRotation, UpdateEntityRotation,
     },
     data_types::{
-        AddPlayer, Attribute, ItemNbt, ItemNbtDisplay, Particle, PlayerAbilityFlags,
+        AddPlayer, Arm, Attribute, ItemNbt, ItemNbtDisplay, Particle, PlayerAbilityFlags,
         PlayerCommandAction, PlayerInfoAction, PlayerPositionFlags, Slot, UpdateGameMode,
         UpdateLatency, UpdateListed,
     },
@@ -34,7 +38,7 @@ use firework_protocol_core::{DeserializeField, Position, SerializeField, Unsized
 use rand::Rng;
 use serde_json::json;
 use std::{
-    fmt::{format, Debug},
+    fmt::Debug,
     sync::Arc,
     time::{Duration, Instant},
 };
@@ -89,6 +93,11 @@ where
     DisplayParticles {
         particles: Vec<Particle>,
     },
+    OpenGui {
+        title: String,
+        window_type: WindowType,
+        items: Vec<Option<Slot>>,
+    },
 }
 
 #[derive(Debug, Clone, Default)]
@@ -131,7 +140,6 @@ pub struct Player {
     pub flying: bool,
     pub flying_allowed: bool,
     pub inventory: Inventory,
-    pub open_gui: Option<Gui>,
     pub health: f32,
     pub max_health: f32,
 }
@@ -235,6 +243,7 @@ where
 {
     pub client_data: Arc<ClientData>,
     pub player: RwLock<Player>,
+    pub gui: RwLock<Option<Box<dyn GuiScreen<Handler, Proxy> + Send + Sync>>>,
     to_client: broadcast::Sender<ClientCommand<Proxy::TransferData>>,
     connection: Arc<Protocol>,
     ping_acknowledged: Mutex<bool>,
@@ -260,6 +269,7 @@ where
             connection,
             client_data,
             to_client,
+            gui: RwLock::new(None),
             player: RwLock::new(player),
             ping_acknowledged: Mutex::new(true),
             server: server.clone(),
@@ -772,11 +782,10 @@ where
                 })
                 .await?;
 
-                if let Some(gui) = &self.player.read().await.open_gui {
-                    let close_container = CloseContainer { window_id: 42 };
-                    drop(gui);
-                    self.send_packet(close_container).await?;
-                };
+                if let Some(gui) = self.gui.write().await.take() {
+                    const GUI_ID: u8 = 1;
+                    self.send_packet(CloseContainer { window_id: 1 }).await?;
+                }
 
                 return Ok(Some(data));
             }
@@ -802,6 +811,27 @@ where
                 for particle in particles {
                     self.send_packet(ParticlePacket { particle }).await?;
                 }
+            }
+            ClientCommand::OpenGui {
+                title,
+                window_type,
+                items,
+            } => {
+                const GUI_ID: u8 = 1;
+                self.send_packet(OpenScreen {
+                    window_id: VarInt::from(GUI_ID as i32),
+                    window_type: VarInt::from(window_type as i32),
+                    title,
+                })
+                .await?;
+
+                self.send_packet(SetContainerContent {
+                    window_id: GUI_ID,
+                    state_id: VarInt(0),
+                    items,
+                    held_item: None,
+                })
+                .await?;
             }
         }
         Ok(None)
@@ -959,10 +989,8 @@ where
                     .await?;
             }
             ServerBoundPacket::ClickContainer(click) => {
-                let mut player = self.player.write().await;
-
-                if let Some(gui) = player.open_gui.as_mut() {
-                    gui.handle_click(click.slot, &self, &self.server).await?;
+                if let Some(gui) = self.gui.read().await.as_ref() {
+                    gui.handle_click(click, self).await?;
                 }
             }
             ServerBoundPacket::SetHeldItemServerBound(set_held_item) => {
@@ -970,6 +998,18 @@ where
                 player.selected_slot = set_held_item.slot as u8;
             }
             ServerBoundPacket::UseItem(use_item) => {
+                let used_item_slot = {
+                    match use_item.arm {
+                        Arm::Main => {
+                            let player = self.player.read().await;
+                            InventorySlot::Hotbar {
+                                slot: player.selected_slot as usize,
+                            }
+                        }
+                        Arm::Off => InventorySlot::Offhand,
+                    }
+                };
+
                 let used_item_slot;
                 let used_item;
 
@@ -990,13 +1030,17 @@ where
                     match used_item.item_id.0.try_into().unwrap() {
                         Compass::ID => {
                             // open game queue menu
+
                             let gui = GameQueueMenuGui {};
 
                             self.send_packet(gui.open()).await?;
 
                             self.send_packet(gui.draw()).await?;
 
-                            self.player.write().await.open_gui = Some(GameQueueMenuGui(gui));
+                            self.gui
+                                .write()
+                                .await
+                                .replace(Box::new(GameMenu::new(self).await?));
                         }
                         RedDye::ID => {
                             // while the resource pack is loading, use a placeholder inert item
@@ -1315,31 +1359,47 @@ where
         self.connection.write_packet(packet).await?;
         Ok(())
     }
+    #[allow(unused_must_use)]
     pub fn show_chat_message(&self, message: String) {
         self.to_client.send(ClientCommand::ChatMessage { message });
     }
+    #[allow(unused_must_use)]
     pub fn transfer(&self, transfer_data: Proxy::TransferData) {
         self.to_client.send(ClientCommand::Transfer {
             data: transfer_data,
         });
     }
+    #[allow(unused_must_use)]
     pub fn sync_position(&self, position: Vec3, rotation: Rotation) {
         self.to_client
             .send(ClientCommand::SyncPosition { position, rotation });
     }
+    #[allow(unused_must_use)]
     pub fn disconnect(&self, reason: String) {
         self.to_client.send(ClientCommand::Disconnect { reason });
     }
+    #[allow(unused_must_use)]
     pub fn set_health(&self, health: f32) {
         self.to_client.send(ClientCommand::SetHealth { health });
     }
+    #[allow(unused_must_use)]
     fn send_particles(&self, particles: Vec<Particle>) {
         self.to_client
             .send(ClientCommand::DisplayParticles { particles });
     }
+    #[allow(unused_must_use)]
     pub fn set_velocity(&self, velocity: Vec3) {
         self.to_client.send(ClientCommand::SetVelocity { velocity });
     }
+    #[allow(unused_must_use)]
+    pub fn show_gui(&self, title: String, window_type: WindowType, items: Vec<Option<Slot>>) {
+        self.to_client.send(ClientCommand::OpenGui {
+            title,
+            window_type,
+            items,
+        });
+    }
+    #[allow(unused_must_use)]
     pub fn __move_entity(
         &self,
         entity_id: i32,
@@ -1358,12 +1418,14 @@ where
             on_ground,
         });
     }
+    #[allow(unused_must_use)]
     pub fn __update_entity_metadata(&self, entity_id: i32, metadata: Vec<EntityMetadata>) {
         self.to_client.send(ClientCommand::UpdateEntityMetadata {
             entity_id,
             metadata,
         });
     }
+    #[allow(unused_must_use)]
     pub fn __add_player(
         &self,
         client_data: Arc<ClientData>,
@@ -1378,6 +1440,7 @@ where
             rotation,
         });
     }
+    #[allow(unused_must_use)]
     pub fn __remove_player(&self, entity_id: i32, uuid: u128) {
         self.to_client
             .send(ClientCommand::RemovePlayer { entity_id, uuid });

@@ -32,6 +32,7 @@ pub mod client;
 pub mod commands;
 pub mod entities;
 pub mod gui;
+pub mod items;
 
 #[derive(Debug, Error)]
 pub enum ConnectionError {
@@ -705,7 +706,7 @@ where
         let token = CancellationToken::new();
 
         let command_listener_server = self.clone();
-        let command_listener_proxy = proxy.clone();
+        let _command_listener_proxy = proxy.clone();
         let command_listener_token = token.clone();
 
         let command_listener_handle: JoinHandle<Result<Proxy::TransferData, ConnectionError>> =
@@ -735,7 +736,7 @@ where
             });
 
         let event_listener_server = self.clone();
-        let event_listener_proxy = proxy.clone();
+        let _event_listener_proxy = proxy.clone();
         let event_listener_token = token.clone();
 
         let event_listener_handle: JoinHandle<Result<Proxy::TransferData, ConnectionError>> =
@@ -822,8 +823,8 @@ where
     }
     pub async fn handle_death(
         &self,
-        server: &Server<Handler, Proxy>,
-        proxy: &Proxy,
+        _server: &Server<Handler, Proxy>,
+        _proxy: &Proxy,
         client: &Client<Handler, Proxy>,
     ) -> Result<(), ConnectionError> {
         if client.handler.on_death(client).await? {
@@ -839,7 +840,7 @@ where
     }
     pub async fn handle_chat(
         &self,
-        proxy: &Proxy,
+        _proxy: &Proxy,
         client: &Client<Handler, Proxy>,
         message: String,
     ) -> Result<(), ConnectionError> {
@@ -851,7 +852,7 @@ where
     }
     pub async fn handle_chat_command(
         &self,
-        proxy: &Proxy,
+        _proxy: &Proxy,
         client: &Client<Handler, Proxy>,
         command: String,
     ) -> Result<(), ConnectionError> {
@@ -860,7 +861,7 @@ where
     }
     pub async fn handle_position_update(
         &self,
-        proxy: &Proxy,
+        _proxy: &Proxy,
         client: &Client<Handler, Proxy>,
         on_ground: bool,
         position: Option<Vec3>,
@@ -919,7 +920,7 @@ where
     }
     pub async fn handle_elytra_flying(
         &self,
-        proxy: &Proxy,
+        _proxy: &Proxy,
         client: &Client<Handler, Proxy>,
         flying: bool,
     ) -> Result<(), ConnectionError> {
@@ -932,7 +933,7 @@ where
     }
     pub async fn handle_sneaking(
         &self,
-        proxy: &Proxy,
+        _proxy: &Proxy,
         client: &Client<Handler, Proxy>,
         sneaking: bool,
     ) -> Result<(), ConnectionError> {
@@ -954,7 +955,7 @@ where
     }
     pub async fn handle_sprinting(
         &self,
-        proxy: &Proxy,
+        _proxy: &Proxy,
         client: &Client<Handler, Proxy>,
         sprinting: bool,
     ) -> Result<(), ConnectionError> {

@@ -4,7 +4,7 @@ use firework_protocol::Protocol;
 use firework_world::World;
 use glide_server::GlideServerHandler;
 use lobby_server::LobbyServerHandler;
-use std::{default, sync::Arc};
+use std::{sync::Arc};
 use tokio::sync::RwLock;
 
 mod glide_server;

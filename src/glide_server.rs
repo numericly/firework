@@ -1,9 +1,9 @@
 use async_trait::async_trait;
-use cipher::typenum::Min;
+
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
     commands::{ArgumentType, CommandNode, StringTypes},
-    AxisAlignedBB, BlockPos, ConnectionError, PlayerHandler, Rotation, Server, ServerHandler, Vec3,
+    AxisAlignedBB, BlockPos, ConnectionError, PlayerHandler, Server, ServerHandler, Vec3,
 };
 use firework_authentication::Profile;
 use firework_data::items::{Elytra, Item};
@@ -221,8 +221,8 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
     }
     async fn get_commands(
         &self,
-        server: &Server<GlideServerHandler, MiniGameProxy>,
-        proxy: &MiniGameProxy,
+        _server: &Server<GlideServerHandler, MiniGameProxy>,
+        _proxy: &MiniGameProxy,
     ) -> Result<&CommandNode<Self, MiniGameProxy>, ConnectionError> {
         Ok(&self.commands)
     }
