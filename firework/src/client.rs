@@ -245,9 +245,10 @@ where
     pub player: RwLock<Player>,
     pub gui: RwLock<Option<Box<dyn GuiScreen<Handler, Proxy> + Send + Sync>>>,
     to_client: broadcast::Sender<ClientCommand<Proxy::TransferData>>,
+    to_client_visual: broadcast::Sender<ClientCommand<Proxy::TransferData>>,
     connection: Arc<Protocol>,
     ping_acknowledged: Mutex<bool>,
-    server: Arc<Server<Handler, Proxy>>,
+    pub server: Arc<Server<Handler, Proxy>>,
     proxy: Arc<Proxy>,
     pub handler: Handler::PlayerHandler,
 }
@@ -264,11 +265,13 @@ where
         client_data: Arc<ClientData>,
         player: Player,
         to_client: broadcast::Sender<ClientCommand<Proxy::TransferData>>,
+        to_client_visual: broadcast::Sender<ClientCommand<Proxy::TransferData>>,
     ) -> Client<Handler, Proxy> {
         Client {
             connection,
             client_data,
             to_client,
+            to_client_visual,
             gui: RwLock::new(None),
             player: RwLock::new(player),
             ping_acknowledged: Mutex::new(true),
@@ -1383,8 +1386,8 @@ where
         self.to_client.send(ClientCommand::SetHealth { health });
     }
     #[allow(unused_must_use)]
-    fn send_particles(&self, particles: Vec<Particle>) {
-        self.to_client
+    pub fn send_particles(&self, particles: Vec<Particle>) {
+        self.to_client_visual
             .send(ClientCommand::DisplayParticles { particles });
     }
     #[allow(unused_must_use)]

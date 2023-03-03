@@ -99,6 +99,34 @@ pub struct Particle {
     count: i32,
 }
 
+impl Particle {
+    pub fn new(
+        particle: Particles,
+        long_distance: bool,
+        x: f64,
+        y: f64,
+        z: f64,
+        offset_x: f32,
+        offset_y: f32,
+        offset_z: f32,
+        max_speed: f32,
+        count: i32,
+    ) -> Self {
+        Self {
+            particle,
+            long_distance,
+            x,
+            y,
+            z,
+            offset_x,
+            offset_y,
+            offset_z,
+            max_speed,
+            count,
+        }
+    }
+}
+
 impl SerializeField for Particle {
     fn serialize<W: Write>(&self, mut writer: W) {
         #[allow(unused_variables)]

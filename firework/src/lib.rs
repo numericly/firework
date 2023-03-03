@@ -623,6 +623,9 @@ where
         let (to_client_sender, to_client_receiver) =
             broadcast::channel::<ClientCommand<Proxy::TransferData>>(10);
 
+        let (to_client_visual_sender, to_client_visual_receiver) =
+            broadcast::channel::<ClientCommand<Proxy::TransferData>>(10);
+
         // generate client
         let uuid = player.uuid.clone();
         let client = {
@@ -633,6 +636,7 @@ where
                 client_data.clone(),
                 player,
                 to_client_sender,
+                to_client_visual_sender,
             );
 
             #[allow(unused_must_use)]
@@ -666,7 +670,13 @@ where
 
         let status = self
             .clone()
-            .handle_player(proxy, &client, uuid, to_client_receiver)
+            .handle_player(
+                proxy,
+                &client,
+                uuid,
+                to_client_receiver,
+                to_client_visual_receiver,
+            )
             .await;
 
         self.broadcast_chat(format!(
@@ -687,6 +697,7 @@ where
         client: &Client<Handler, Proxy>,
         uuid: u128,
         mut to_client_receiver: broadcast::Receiver<ClientCommand<Proxy::TransferData>>,
+        mut to_client_visual_receiver: broadcast::Receiver<ClientCommand<Proxy::TransferData>>,
     ) -> Result<Proxy::TransferData, ConnectionError> {
         if client.connection_state().await != ConnectionState::Play {
             client.change_to_play().await?;
@@ -726,6 +737,19 @@ where
                                 )
                                 .await? {
                                 return Ok(data);
+                            }
+                        }
+                        command = to_client_visual_receiver.recv() => {
+                            // it's ok to throw away packets here, they are visual only
+                            // if it throws a lagged error we can just ignore it
+                            if let Ok(command) = command {
+                                if let Some(data) = client
+                                    .handle_command(
+                                        command
+                                    )
+                                    .await? {
+                                    return Ok(data);
+                                }
                             }
                         }
                         _ = command_listener_token.cancelled() => {
