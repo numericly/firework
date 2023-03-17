@@ -169,8 +169,10 @@ const CANYON_BOOSTS: [Boost; 8] = [
     },
 ];
 
-const CANYON_CHECKPOINTS: [AxisAlignedPlane; 1] =
-    [AxisAlignedPlane::new(Vec3::new(-4.5, 66., 193.5), Vec3::new(26.5, 187., 193.5)).unwrap()];
+const CANYON_CHECKPOINTS: [AxisAlignedPlane; 1] = [AxisAlignedPlane::Z {
+    min: Vec3::new(-4.5, 66., 193.5),
+    max: Vec3::new(26.5, 187., 193.5),
+}];
 
 #[derive(Debug, Clone)]
 struct BoostStatus {
