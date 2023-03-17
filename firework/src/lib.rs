@@ -106,6 +106,77 @@ impl AxisAlignedBB {
     }
 }
 
+pub enum AxisAlignedPlane {
+    X { min: Vec3, max: Vec3 },
+    Y { min: Vec3, max: Vec3 },
+    Z { min: Vec3, max: Vec3 },
+}
+
+impl AxisAlignedPlane {
+    pub fn intersects(&self, starting_position: Vec3, delta: Vec3) -> bool {
+        println!(
+            "ray from {:?} to {:?}",
+            starting_position,
+            starting_position.clone() + delta.clone()
+        );
+
+        let t;
+
+        match self {
+            Self::X { min, max } => {
+                if delta.x == 0. {
+                    return false;
+                }
+                t = (min.x - starting_position.x) / delta.x;
+            }
+            Self::Y { min, max } => {
+                if delta.y == 0. {
+                    return false;
+                }
+                t = (min.y - starting_position.y) / delta.y;
+            }
+            Self::Z { min, max } => {
+                if delta.z == 0. {
+                    return false;
+                }
+                t = (min.z - starting_position.z) / delta.z;
+            }
+        }
+
+        // if the intersection is behind the starting position, it doesn't count
+        // likewise, if the intersection is beyond the end of the ray, it doesn't count
+        if t < 0.0 || t > 1.0 {
+            return false;
+        }
+        let intersection = starting_position + delta * Vec3::scalar(t);
+        println!("intersection: {:?}", intersection);
+        self.within(intersection)
+    }
+
+    fn within(&self, position: Vec3) -> bool {
+        match self {
+            Self::X { min, max } => {
+                position.y >= min.y
+                    && position.y <= max.y
+                    && position.z >= min.z
+                    && position.z <= max.z
+            }
+            Self::Y { min, max } => {
+                position.x >= min.x
+                    && position.x <= max.x
+                    && position.z >= min.z
+                    && position.z <= max.z
+            }
+            Self::Z { min, max } => {
+                position.x >= min.x
+                    && position.x <= max.x
+                    && position.y >= min.y
+                    && position.y <= max.y
+            }
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub enum Entities {}
 

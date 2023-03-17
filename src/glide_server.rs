@@ -3,7 +3,8 @@ use cipher::typenum::Min;
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
     commands::{ArgumentType, CommandNode, StringTypes},
-    AxisAlignedBB, BlockPos, ConnectionError, PlayerHandler, Rotation, Server, ServerHandler, Vec3,
+    AxisAlignedBB, AxisAlignedPlane, BlockPos, ConnectionError, PlayerHandler, Rotation, Server,
+    ServerHandler, Vec3,
 };
 use firework_authentication::Profile;
 use firework_data::items::{Elytra, Item};
@@ -167,6 +168,9 @@ const CANYON_BOOSTS: [Boost; 8] = [
         particle_type: BoostParticleType::BoostWest,
     },
 ];
+
+const CANYON_CHECKPOINTS: [AxisAlignedPlane; 1] =
+    [AxisAlignedPlane::new(Vec3::new(-4.5, 66., 193.5), Vec3::new(26.5, 187., 193.5)).unwrap()];
 
 #[derive(Debug, Clone)]
 struct BoostStatus {
