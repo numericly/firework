@@ -1,8 +1,7 @@
 use async_trait::async_trait;
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
-    commands::{Argument, CommandNode},
-    entities::{EntityMetadata, Pose},
+    commands::{ArgumentType, CommandNode, StringTypes},
     AxisAlignedBB, BlockPos, ConnectionError, PlayerHandler, Rotation, Server, ServerHandler, Vec3,
 };
 use firework_authentication::Profile;
@@ -168,6 +167,11 @@ const CANYON_BOOSTS: [Boost; 8] = [
         particle_type: BoostParticleType::BoostWest,
     },
 ];
+
+const CANYON_CHECKPOINTS: [AxisAlignedPlane; 1] = [AxisAlignedPlane::Z {
+    min: Vec3::new(-4.5, 66., 193.5),
+    max: Vec3::new(26.5, 187., 193.5),
+}];
 
 #[derive(Debug, Clone)]
 struct BoostStatus {
