@@ -87,7 +87,7 @@ define_client_bound_protocol! {
         channel: String,
         data: UnsizedVec<u8>
     },
-    SpawnPlayer, 0x02, Play => {
+    SpawnPlayer, 0x03, Play => {
         entity_id: VarInt,
         uuid: u128,
         x: f64,
@@ -96,46 +96,46 @@ define_client_bound_protocol! {
         yaw: i8,
         pitch: i8,
     },
-    ChangeDifficulty, 0x0B, Play => {
+    ChangeDifficulty, 0x0C, Play => {
         difficulty: u8,
         locked: bool
     },
-    CommandSuggestionsResponse, 0x0D, Play => {
+    CommandSuggestionsResponse, 0x0F, Play => {
         transaction_id: VarInt,
         start: VarInt,
         length: VarInt,
         suggestions: Vec<SuggestionMatch>
     },
-    Commands, 0x0E, Play => {
+    Commands, 0x10, Play => {
         data: UnsizedVec<u8>
     },
-    CloseContainer, 0x0F, Play => {
+    CloseContainer, 0x11, Play => {
         window_id: u8
     },
-    SetContainerContent, 0x10, Play => {
+    SetContainerContent, 0x12, Play => {
         window_id: u8,
         state_id: VarInt,
         items: Vec<Option<Slot>>,
         held_item: Option<Slot>
     },
-    SetContainerSlot, 0x12, Play => {
+    SetContainerSlot, 0x14, Play => {
         window_id: u8,
         state_id: VarInt,
         slot: i16,
         item: Option<Slot>
     },
-    PluginMessage, 0x15, Play => {
+    PluginMessage, 0x17, Play => {
         channel: String,
         data: UnsizedVec<u8>
     },
-    PlayDisconnect, 0x17, Play => {
+    PlayDisconnect, 0x1A, Play => {
         reason: String
     },
-    UnloadChunk, 0x1B, Play => {
+    UnloadChunk, 0x1E, Play => {
         x: i32,
         z: i32
     },
-    InitializeWorldBorder, 0x1E, Play => {
+    InitializeWorldBorder, 0x22, Play => {
         x: f64,
         z: f64,
         old_diameter: f64,
@@ -145,10 +145,10 @@ define_client_bound_protocol! {
         warning_time: VarInt,
         warning_blocks: VarInt
     },
-    ClientBoundKeepAlive, 0x1F, Play => {
+    ClientBoundKeepAlive, 0x23, Play => {
         id: i64
     },
-    ChunkUpdateAndLightUpdate, 0x20, Play => {
+    ChunkUpdateAndLightUpdate, 0x24, Play => {
         x: i32,
         z: i32,
         heightmaps: Blob,
@@ -162,10 +162,10 @@ define_client_bound_protocol! {
         sky_light: Vec<Vec<i8>>,
         block_light: Vec<Vec<i8>>
     },
-    ParticlePacket, 0x22, Play => {
+    ParticlePacket, 0x26, Play => {
         particle: Particle
     },
-    LoginPlay, 0x24, Play => {
+    LoginPlay, 0x28, Play => {
         entity_id: i32,
         is_hardcore: bool,
         game_mode: u8,
@@ -184,14 +184,14 @@ define_client_bound_protocol! {
         is_flat: bool,
         death_location: Option<DeathLocation>
     },
-    UpdateEntityPosition, 0x27, Play => {
+    UpdateEntityPosition, 0x2B, Play => {
         entity_id: VarInt,
         delta_x: i16,
         delta_y: i16,
         delta_z: i16,
         on_ground: bool
     },
-    UpdateEntityPositionAndRotation, 0x28, Play => {
+    UpdateEntityPositionAndRotation, 0x2C, Play => {
         entity_id: VarInt,
         delta_x: i16,
         delta_y: i16,
@@ -200,29 +200,29 @@ define_client_bound_protocol! {
         pitch: i8,
         on_ground: bool
     },
-    UpdateEntityRotation, 0x29, Play => {
+    UpdateEntityRotation, 0x2D, Play => {
         entity_id: VarInt,
         yaw: i8,
         pitch: i8,
         on_ground: bool
     },
-    OpenScreen, 0x2C, Play => {
+    OpenScreen, 0x30, Play => {
         window_id: VarInt,
         window_type: VarInt,
         title: String // TODO: Chat
     },
-    PlayerAbilities, 0x30, Play => {
+    PlayerAbilities, 0x34, Play => {
         flags: PlayerAbilityFlags,
         flying_speed: f32,
         walking_speed: f32
     },
-    RemoveInfoPlayer, 0x35, Play => {
+    RemoveInfoPlayer, 0x39, Play => {
         players: Vec<u128>
     },
-    PlayerInfo, 0x36, Play => {
+    PlayerInfo, 0x3A, Play => {
         action: PlayerInfoAction
     },
-    SynchronizePlayerPosition, 0x38, Play => {
+    SynchronizePlayerPosition, 0x3C, Play => {
         x: f64,
         y: f64,
         z: f64,
@@ -230,18 +230,17 @@ define_client_bound_protocol! {
         pitch: f32,
         flags: PlayerPositionFlags,
         teleport_id: VarInt,
-        dismount_vehicle: bool
     },
-    RemoveEntities, 0x3A, Play => {
+    RemoveEntities, 0x3E, Play => {
         entity_ids: Vec<VarInt>
     },
-    ResourcePack, 0x3C, Play => {
+    ResourcePack, 0x40, Play => {
         url: String,
         hash: String,
         forced: bool,
         prompt: Option<String> // TODO: Chat
     },
-    Respawn, 0x3D, Play => {
+    Respawn, 0x41, Play => {
         dimension_type: String,
         dimension_name: String,
         hashed_seed: i64,
@@ -252,37 +251,37 @@ define_client_bound_protocol! {
         copy_metadata: bool,
         death_location: Option<DeathLocation>
     },
-    UpdateEntityHeadRotation, 0x3E, Play => {
+    UpdateEntityHeadRotation, 0x42, Play => {
         entity_id: VarInt,
         yaw: i8
     },
-    SetHeldItem, 0x49, Play => {
+    SetHeldItem, 0x4D, Play => {
         slot: u8
     },
-    SetCenterChunk, 0x4A, Play => {
+    SetCenterChunk, 0x4E, Play => {
         x: VarInt,
         z: VarInt
     },
-    SetDefaultSpawn, 0x4C, Play => {
+    SetDefaultSpawn, 0x50, Play => {
         position: Position,
         yaw: f32
     },
-    SetEntityMetadata, 0x4E, Play => {
+    SetEntityMetadata, 0x52, Play => {
         entity_id: VarInt,
         metadata: UnsizedVec<u8>
     },
-    SetEntityVelocity, 0x50, Play => {
+    SetEntityVelocity, 0x54, Play => {
         entity_id: VarInt,
         velocity_x: i16,
         velocity_y: i16,
         velocity_z: i16
     },
-    SetHealth, 0x53, Play => {
+    SetHealth, 0x57, Play => {
         health: f32,
         food: VarInt,
         food_saturation: f32
     },
-    SoundEffect, 0x5E, Play => {
+    SoundEffect, 0x62, Play => {
         sound: IdMapHolder<CustomSound, VanillaSound>,
         sound_source: SoundSource,
         x: i32,
@@ -292,11 +291,11 @@ define_client_bound_protocol! {
         pitch: f32,
         seed: i64
     },
-    SystemChatMessage, 0x60, Play => {
+    SystemChatMessage, 0x64, Play => {
         message: String,
         action_bar: bool
     },
-    TeleportEntity, 0x64, Play => {
+    TeleportEntity, 0x68, Play => {
         entity_id: VarInt,
         x: f64,
         y: f64,
@@ -305,14 +304,14 @@ define_client_bound_protocol! {
         pitch: i8,
         on_ground: bool
     },
-    UpdateAttributes, 0x66, Play => {
+    UpdateAttributes, 0x6A, Play => {
         entity_id: VarInt,
         attributes: Vec<Attribute>
     },
-    SetRecipes, 0x69, Play => {
+    SetRecipes, 0x6D, Play => {
         recipes: Vec<Recipe>
     },
-    SetTags, 0x6A, Play => {
+    SetTags, 0x6E, Play => {
         tags: &'static HashMap<String, HashMap<String, VarIntList>>
     }
 }

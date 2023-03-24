@@ -10,14 +10,14 @@ pub struct Biome {
     name: String,
     category: String,
     temperature: f32,
-    precipitation: String,
+    has_precipitation: bool,
     dimension: String,
     #[serde(rename = "displayName")]
     display_name: String,
 }
 
 pub fn build_biomes() {
-    let file = fs::read_to_string("./data/1.19.3/biomes.json").expect("Unable to open biomes file");
+    let file = fs::read_to_string("./data/1.19.4/biomes.json").expect("Unable to open biomes file");
     let biomes: Vec<Biome> = serde_json::from_str(file.as_str()).unwrap();
 
     let mut biomes_rs = String::new();

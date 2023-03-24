@@ -26,6 +26,7 @@ pub enum Block {
 	BirchPlanks(BirchPlanks),
 	JunglePlanks(JunglePlanks),
 	AcaciaPlanks(AcaciaPlanks),
+	CherryPlanks(CherryPlanks),
 	DarkOakPlanks(DarkOakPlanks),
 	MangrovePlanks(MangrovePlanks),
 	BambooPlanks(BambooPlanks),
@@ -35,12 +36,14 @@ pub enum Block {
 	BirchSapling(BirchSapling),
 	JungleSapling(JungleSapling),
 	AcaciaSapling(AcaciaSapling),
+	CherrySapling(CherrySapling),
 	DarkOakSapling(DarkOakSapling),
 	MangrovePropagule(MangrovePropagule),
 	Bedrock(Bedrock),
 	Water(Water),
 	Lava(Lava),
 	Sand(Sand),
+	SuspiciousSand(SuspiciousSand),
 	RedSand(RedSand),
 	Gravel(Gravel),
 	GoldOre(GoldOre),
@@ -55,6 +58,7 @@ pub enum Block {
 	BirchLog(BirchLog),
 	JungleLog(JungleLog),
 	AcaciaLog(AcaciaLog),
+	CherryLog(CherryLog),
 	DarkOakLog(DarkOakLog),
 	MangroveLog(MangroveLog),
 	MangroveRoots(MangroveRoots),
@@ -64,6 +68,7 @@ pub enum Block {
 	StrippedBirchLog(StrippedBirchLog),
 	StrippedJungleLog(StrippedJungleLog),
 	StrippedAcaciaLog(StrippedAcaciaLog),
+	StrippedCherryLog(StrippedCherryLog),
 	StrippedDarkOakLog(StrippedDarkOakLog),
 	StrippedOakLog(StrippedOakLog),
 	StrippedMangroveLog(StrippedMangroveLog),
@@ -73,6 +78,7 @@ pub enum Block {
 	BirchWood(BirchWood),
 	JungleWood(JungleWood),
 	AcaciaWood(AcaciaWood),
+	CherryWood(CherryWood),
 	DarkOakWood(DarkOakWood),
 	MangroveWood(MangroveWood),
 	StrippedOakWood(StrippedOakWood),
@@ -80,6 +86,7 @@ pub enum Block {
 	StrippedBirchWood(StrippedBirchWood),
 	StrippedJungleWood(StrippedJungleWood),
 	StrippedAcaciaWood(StrippedAcaciaWood),
+	StrippedCherryWood(StrippedCherryWood),
 	StrippedDarkOakWood(StrippedDarkOakWood),
 	StrippedMangroveWood(StrippedMangroveWood),
 	OakLeaves(OakLeaves),
@@ -87,6 +94,7 @@ pub enum Block {
 	BirchLeaves(BirchLeaves),
 	JungleLeaves(JungleLeaves),
 	AcaciaLeaves(AcaciaLeaves),
+	CherryLeaves(CherryLeaves),
 	DarkOakLeaves(DarkOakLeaves),
 	MangroveLeaves(MangroveLeaves),
 	AzaleaLeaves(AzaleaLeaves),
@@ -147,6 +155,7 @@ pub enum Block {
 	BlackWool(BlackWool),
 	MovingPiston(MovingPiston),
 	Dandelion(Dandelion),
+	Torchflower(Torchflower),
 	Poppy(Poppy),
 	BlueOrchid(BlueOrchid),
 	Allium(Allium),
@@ -188,6 +197,7 @@ pub enum Block {
 	SpruceSign(SpruceSign),
 	BirchSign(BirchSign),
 	AcaciaSign(AcaciaSign),
+	CherrySign(CherrySign),
 	JungleSign(JungleSign),
 	DarkOakSign(DarkOakSign),
 	MangroveSign(MangroveSign),
@@ -200,6 +210,7 @@ pub enum Block {
 	SpruceWallSign(SpruceWallSign),
 	BirchWallSign(BirchWallSign),
 	AcaciaWallSign(AcaciaWallSign),
+	CherryWallSign(CherryWallSign),
 	JungleWallSign(JungleWallSign),
 	DarkOakWallSign(DarkOakWallSign),
 	MangroveWallSign(MangroveWallSign),
@@ -208,6 +219,7 @@ pub enum Block {
 	SpruceHangingSign(SpruceHangingSign),
 	BirchHangingSign(BirchHangingSign),
 	AcaciaHangingSign(AcaciaHangingSign),
+	CherryHangingSign(CherryHangingSign),
 	JungleHangingSign(JungleHangingSign),
 	DarkOakHangingSign(DarkOakHangingSign),
 	CrimsonHangingSign(CrimsonHangingSign),
@@ -218,6 +230,7 @@ pub enum Block {
 	SpruceWallHangingSign(SpruceWallHangingSign),
 	BirchWallHangingSign(BirchWallHangingSign),
 	AcaciaWallHangingSign(AcaciaWallHangingSign),
+	CherryWallHangingSign(CherryWallHangingSign),
 	JungleWallHangingSign(JungleWallHangingSign),
 	DarkOakWallHangingSign(DarkOakWallHangingSign),
 	MangroveWallHangingSign(MangroveWallHangingSign),
@@ -232,6 +245,7 @@ pub enum Block {
 	BirchPressurePlate(BirchPressurePlate),
 	JunglePressurePlate(JunglePressurePlate),
 	AcaciaPressurePlate(AcaciaPressurePlate),
+	CherryPressurePlate(CherryPressurePlate),
 	DarkOakPressurePlate(DarkOakPressurePlate),
 	MangrovePressurePlate(MangrovePressurePlate),
 	BambooPressurePlate(BambooPressurePlate),
@@ -283,6 +297,7 @@ pub enum Block {
 	BirchTrapdoor(BirchTrapdoor),
 	JungleTrapdoor(JungleTrapdoor),
 	AcaciaTrapdoor(AcaciaTrapdoor),
+	CherryTrapdoor(CherryTrapdoor),
 	DarkOakTrapdoor(DarkOakTrapdoor),
 	MangroveTrapdoor(MangroveTrapdoor),
 	BambooTrapdoor(BambooTrapdoor),
@@ -348,11 +363,13 @@ pub enum Block {
 	CobblestoneWall(CobblestoneWall),
 	MossyCobblestoneWall(MossyCobblestoneWall),
 	FlowerPot(FlowerPot),
+	PottedTorchflower(PottedTorchflower),
 	PottedOakSapling(PottedOakSapling),
 	PottedSpruceSapling(PottedSpruceSapling),
 	PottedBirchSapling(PottedBirchSapling),
 	PottedJungleSapling(PottedJungleSapling),
 	PottedAcaciaSapling(PottedAcaciaSapling),
+	PottedCherrySapling(PottedCherrySapling),
 	PottedDarkOakSapling(PottedDarkOakSapling),
 	PottedMangrovePropagule(PottedMangrovePropagule),
 	PottedFern(PottedFern),
@@ -380,6 +397,7 @@ pub enum Block {
 	BirchButton(BirchButton),
 	JungleButton(JungleButton),
 	AcaciaButton(AcaciaButton),
+	CherryButton(CherryButton),
 	DarkOakButton(DarkOakButton),
 	MangroveButton(MangroveButton),
 	BambooButton(BambooButton),
@@ -447,6 +465,7 @@ pub enum Block {
 	RedStainedGlassPane(RedStainedGlassPane),
 	BlackStainedGlassPane(BlackStainedGlassPane),
 	AcaciaStairs(AcaciaStairs),
+	CherryStairs(CherryStairs),
 	DarkOakStairs(DarkOakStairs),
 	MangroveStairs(MangroveStairs),
 	BambooStairs(BambooStairs),
@@ -532,6 +551,7 @@ pub enum Block {
 	BirchSlab(BirchSlab),
 	JungleSlab(JungleSlab),
 	AcaciaSlab(AcaciaSlab),
+	CherrySlab(CherrySlab),
 	DarkOakSlab(DarkOakSlab),
 	MangroveSlab(MangroveSlab),
 	BambooSlab(BambooSlab),
@@ -558,6 +578,7 @@ pub enum Block {
 	BirchFenceGate(BirchFenceGate),
 	JungleFenceGate(JungleFenceGate),
 	AcaciaFenceGate(AcaciaFenceGate),
+	CherryFenceGate(CherryFenceGate),
 	DarkOakFenceGate(DarkOakFenceGate),
 	MangroveFenceGate(MangroveFenceGate),
 	BambooFenceGate(BambooFenceGate),
@@ -565,6 +586,7 @@ pub enum Block {
 	BirchFence(BirchFence),
 	JungleFence(JungleFence),
 	AcaciaFence(AcaciaFence),
+	CherryFence(CherryFence),
 	DarkOakFence(DarkOakFence),
 	MangroveFence(MangroveFence),
 	BambooFence(BambooFence),
@@ -572,6 +594,7 @@ pub enum Block {
 	BirchDoor(BirchDoor),
 	JungleDoor(JungleDoor),
 	AcaciaDoor(AcaciaDoor),
+	CherryDoor(CherryDoor),
 	DarkOakDoor(DarkOakDoor),
 	MangroveDoor(MangroveDoor),
 	BambooDoor(BambooDoor),
@@ -582,6 +605,7 @@ pub enum Block {
 	PurpurPillar(PurpurPillar),
 	PurpurStairs(PurpurStairs),
 	EndStoneBricks(EndStoneBricks),
+	TorchflowerCrop(TorchflowerCrop),
 	Beetroots(Beetroots),
 	DirtPath(DirtPath),
 	EndGateway(EndGateway),
@@ -941,6 +965,7 @@ pub enum Block {
 	Azalea(Azalea),
 	FloweringAzalea(FloweringAzalea),
 	MossCarpet(MossCarpet),
+	PinkPetals(PinkPetals),
 	MossBlock(MossBlock),
 	BigDripleaf(BigDripleaf),
 	BigDripleafStem(BigDripleafStem),
@@ -980,6 +1005,7 @@ pub enum Block {
 	PearlescentFroglight(PearlescentFroglight),
 	Frogspawn(Frogspawn),
 	ReinforcedDeepslate(ReinforcedDeepslate),
+	DecoratedPot(DecoratedPot),
 }
 
 impl Block {
@@ -1003,6 +1029,7 @@ impl Block {
 			Block::BirchPlanks(_) => BirchPlanks::DISPLAY_NAME,
 			Block::JunglePlanks(_) => JunglePlanks::DISPLAY_NAME,
 			Block::AcaciaPlanks(_) => AcaciaPlanks::DISPLAY_NAME,
+			Block::CherryPlanks(_) => CherryPlanks::DISPLAY_NAME,
 			Block::DarkOakPlanks(_) => DarkOakPlanks::DISPLAY_NAME,
 			Block::MangrovePlanks(_) => MangrovePlanks::DISPLAY_NAME,
 			Block::BambooPlanks(_) => BambooPlanks::DISPLAY_NAME,
@@ -1012,12 +1039,14 @@ impl Block {
 			Block::BirchSapling(_) => BirchSapling::DISPLAY_NAME,
 			Block::JungleSapling(_) => JungleSapling::DISPLAY_NAME,
 			Block::AcaciaSapling(_) => AcaciaSapling::DISPLAY_NAME,
+			Block::CherrySapling(_) => CherrySapling::DISPLAY_NAME,
 			Block::DarkOakSapling(_) => DarkOakSapling::DISPLAY_NAME,
 			Block::MangrovePropagule(_) => MangrovePropagule::DISPLAY_NAME,
 			Block::Bedrock(_) => Bedrock::DISPLAY_NAME,
 			Block::Water(_) => Water::DISPLAY_NAME,
 			Block::Lava(_) => Lava::DISPLAY_NAME,
 			Block::Sand(_) => Sand::DISPLAY_NAME,
+			Block::SuspiciousSand(_) => SuspiciousSand::DISPLAY_NAME,
 			Block::RedSand(_) => RedSand::DISPLAY_NAME,
 			Block::Gravel(_) => Gravel::DISPLAY_NAME,
 			Block::GoldOre(_) => GoldOre::DISPLAY_NAME,
@@ -1032,6 +1061,7 @@ impl Block {
 			Block::BirchLog(_) => BirchLog::DISPLAY_NAME,
 			Block::JungleLog(_) => JungleLog::DISPLAY_NAME,
 			Block::AcaciaLog(_) => AcaciaLog::DISPLAY_NAME,
+			Block::CherryLog(_) => CherryLog::DISPLAY_NAME,
 			Block::DarkOakLog(_) => DarkOakLog::DISPLAY_NAME,
 			Block::MangroveLog(_) => MangroveLog::DISPLAY_NAME,
 			Block::MangroveRoots(_) => MangroveRoots::DISPLAY_NAME,
@@ -1041,6 +1071,7 @@ impl Block {
 			Block::StrippedBirchLog(_) => StrippedBirchLog::DISPLAY_NAME,
 			Block::StrippedJungleLog(_) => StrippedJungleLog::DISPLAY_NAME,
 			Block::StrippedAcaciaLog(_) => StrippedAcaciaLog::DISPLAY_NAME,
+			Block::StrippedCherryLog(_) => StrippedCherryLog::DISPLAY_NAME,
 			Block::StrippedDarkOakLog(_) => StrippedDarkOakLog::DISPLAY_NAME,
 			Block::StrippedOakLog(_) => StrippedOakLog::DISPLAY_NAME,
 			Block::StrippedMangroveLog(_) => StrippedMangroveLog::DISPLAY_NAME,
@@ -1050,6 +1081,7 @@ impl Block {
 			Block::BirchWood(_) => BirchWood::DISPLAY_NAME,
 			Block::JungleWood(_) => JungleWood::DISPLAY_NAME,
 			Block::AcaciaWood(_) => AcaciaWood::DISPLAY_NAME,
+			Block::CherryWood(_) => CherryWood::DISPLAY_NAME,
 			Block::DarkOakWood(_) => DarkOakWood::DISPLAY_NAME,
 			Block::MangroveWood(_) => MangroveWood::DISPLAY_NAME,
 			Block::StrippedOakWood(_) => StrippedOakWood::DISPLAY_NAME,
@@ -1057,6 +1089,7 @@ impl Block {
 			Block::StrippedBirchWood(_) => StrippedBirchWood::DISPLAY_NAME,
 			Block::StrippedJungleWood(_) => StrippedJungleWood::DISPLAY_NAME,
 			Block::StrippedAcaciaWood(_) => StrippedAcaciaWood::DISPLAY_NAME,
+			Block::StrippedCherryWood(_) => StrippedCherryWood::DISPLAY_NAME,
 			Block::StrippedDarkOakWood(_) => StrippedDarkOakWood::DISPLAY_NAME,
 			Block::StrippedMangroveWood(_) => StrippedMangroveWood::DISPLAY_NAME,
 			Block::OakLeaves(_) => OakLeaves::DISPLAY_NAME,
@@ -1064,6 +1097,7 @@ impl Block {
 			Block::BirchLeaves(_) => BirchLeaves::DISPLAY_NAME,
 			Block::JungleLeaves(_) => JungleLeaves::DISPLAY_NAME,
 			Block::AcaciaLeaves(_) => AcaciaLeaves::DISPLAY_NAME,
+			Block::CherryLeaves(_) => CherryLeaves::DISPLAY_NAME,
 			Block::DarkOakLeaves(_) => DarkOakLeaves::DISPLAY_NAME,
 			Block::MangroveLeaves(_) => MangroveLeaves::DISPLAY_NAME,
 			Block::AzaleaLeaves(_) => AzaleaLeaves::DISPLAY_NAME,
@@ -1124,6 +1158,7 @@ impl Block {
 			Block::BlackWool(_) => BlackWool::DISPLAY_NAME,
 			Block::MovingPiston(_) => MovingPiston::DISPLAY_NAME,
 			Block::Dandelion(_) => Dandelion::DISPLAY_NAME,
+			Block::Torchflower(_) => Torchflower::DISPLAY_NAME,
 			Block::Poppy(_) => Poppy::DISPLAY_NAME,
 			Block::BlueOrchid(_) => BlueOrchid::DISPLAY_NAME,
 			Block::Allium(_) => Allium::DISPLAY_NAME,
@@ -1165,6 +1200,7 @@ impl Block {
 			Block::SpruceSign(_) => SpruceSign::DISPLAY_NAME,
 			Block::BirchSign(_) => BirchSign::DISPLAY_NAME,
 			Block::AcaciaSign(_) => AcaciaSign::DISPLAY_NAME,
+			Block::CherrySign(_) => CherrySign::DISPLAY_NAME,
 			Block::JungleSign(_) => JungleSign::DISPLAY_NAME,
 			Block::DarkOakSign(_) => DarkOakSign::DISPLAY_NAME,
 			Block::MangroveSign(_) => MangroveSign::DISPLAY_NAME,
@@ -1177,6 +1213,7 @@ impl Block {
 			Block::SpruceWallSign(_) => SpruceWallSign::DISPLAY_NAME,
 			Block::BirchWallSign(_) => BirchWallSign::DISPLAY_NAME,
 			Block::AcaciaWallSign(_) => AcaciaWallSign::DISPLAY_NAME,
+			Block::CherryWallSign(_) => CherryWallSign::DISPLAY_NAME,
 			Block::JungleWallSign(_) => JungleWallSign::DISPLAY_NAME,
 			Block::DarkOakWallSign(_) => DarkOakWallSign::DISPLAY_NAME,
 			Block::MangroveWallSign(_) => MangroveWallSign::DISPLAY_NAME,
@@ -1185,6 +1222,7 @@ impl Block {
 			Block::SpruceHangingSign(_) => SpruceHangingSign::DISPLAY_NAME,
 			Block::BirchHangingSign(_) => BirchHangingSign::DISPLAY_NAME,
 			Block::AcaciaHangingSign(_) => AcaciaHangingSign::DISPLAY_NAME,
+			Block::CherryHangingSign(_) => CherryHangingSign::DISPLAY_NAME,
 			Block::JungleHangingSign(_) => JungleHangingSign::DISPLAY_NAME,
 			Block::DarkOakHangingSign(_) => DarkOakHangingSign::DISPLAY_NAME,
 			Block::CrimsonHangingSign(_) => CrimsonHangingSign::DISPLAY_NAME,
@@ -1195,6 +1233,7 @@ impl Block {
 			Block::SpruceWallHangingSign(_) => SpruceWallHangingSign::DISPLAY_NAME,
 			Block::BirchWallHangingSign(_) => BirchWallHangingSign::DISPLAY_NAME,
 			Block::AcaciaWallHangingSign(_) => AcaciaWallHangingSign::DISPLAY_NAME,
+			Block::CherryWallHangingSign(_) => CherryWallHangingSign::DISPLAY_NAME,
 			Block::JungleWallHangingSign(_) => JungleWallHangingSign::DISPLAY_NAME,
 			Block::DarkOakWallHangingSign(_) => DarkOakWallHangingSign::DISPLAY_NAME,
 			Block::MangroveWallHangingSign(_) => MangroveWallHangingSign::DISPLAY_NAME,
@@ -1209,6 +1248,7 @@ impl Block {
 			Block::BirchPressurePlate(_) => BirchPressurePlate::DISPLAY_NAME,
 			Block::JunglePressurePlate(_) => JunglePressurePlate::DISPLAY_NAME,
 			Block::AcaciaPressurePlate(_) => AcaciaPressurePlate::DISPLAY_NAME,
+			Block::CherryPressurePlate(_) => CherryPressurePlate::DISPLAY_NAME,
 			Block::DarkOakPressurePlate(_) => DarkOakPressurePlate::DISPLAY_NAME,
 			Block::MangrovePressurePlate(_) => MangrovePressurePlate::DISPLAY_NAME,
 			Block::BambooPressurePlate(_) => BambooPressurePlate::DISPLAY_NAME,
@@ -1260,6 +1300,7 @@ impl Block {
 			Block::BirchTrapdoor(_) => BirchTrapdoor::DISPLAY_NAME,
 			Block::JungleTrapdoor(_) => JungleTrapdoor::DISPLAY_NAME,
 			Block::AcaciaTrapdoor(_) => AcaciaTrapdoor::DISPLAY_NAME,
+			Block::CherryTrapdoor(_) => CherryTrapdoor::DISPLAY_NAME,
 			Block::DarkOakTrapdoor(_) => DarkOakTrapdoor::DISPLAY_NAME,
 			Block::MangroveTrapdoor(_) => MangroveTrapdoor::DISPLAY_NAME,
 			Block::BambooTrapdoor(_) => BambooTrapdoor::DISPLAY_NAME,
@@ -1325,11 +1366,13 @@ impl Block {
 			Block::CobblestoneWall(_) => CobblestoneWall::DISPLAY_NAME,
 			Block::MossyCobblestoneWall(_) => MossyCobblestoneWall::DISPLAY_NAME,
 			Block::FlowerPot(_) => FlowerPot::DISPLAY_NAME,
+			Block::PottedTorchflower(_) => PottedTorchflower::DISPLAY_NAME,
 			Block::PottedOakSapling(_) => PottedOakSapling::DISPLAY_NAME,
 			Block::PottedSpruceSapling(_) => PottedSpruceSapling::DISPLAY_NAME,
 			Block::PottedBirchSapling(_) => PottedBirchSapling::DISPLAY_NAME,
 			Block::PottedJungleSapling(_) => PottedJungleSapling::DISPLAY_NAME,
 			Block::PottedAcaciaSapling(_) => PottedAcaciaSapling::DISPLAY_NAME,
+			Block::PottedCherrySapling(_) => PottedCherrySapling::DISPLAY_NAME,
 			Block::PottedDarkOakSapling(_) => PottedDarkOakSapling::DISPLAY_NAME,
 			Block::PottedMangrovePropagule(_) => PottedMangrovePropagule::DISPLAY_NAME,
 			Block::PottedFern(_) => PottedFern::DISPLAY_NAME,
@@ -1357,6 +1400,7 @@ impl Block {
 			Block::BirchButton(_) => BirchButton::DISPLAY_NAME,
 			Block::JungleButton(_) => JungleButton::DISPLAY_NAME,
 			Block::AcaciaButton(_) => AcaciaButton::DISPLAY_NAME,
+			Block::CherryButton(_) => CherryButton::DISPLAY_NAME,
 			Block::DarkOakButton(_) => DarkOakButton::DISPLAY_NAME,
 			Block::MangroveButton(_) => MangroveButton::DISPLAY_NAME,
 			Block::BambooButton(_) => BambooButton::DISPLAY_NAME,
@@ -1424,6 +1468,7 @@ impl Block {
 			Block::RedStainedGlassPane(_) => RedStainedGlassPane::DISPLAY_NAME,
 			Block::BlackStainedGlassPane(_) => BlackStainedGlassPane::DISPLAY_NAME,
 			Block::AcaciaStairs(_) => AcaciaStairs::DISPLAY_NAME,
+			Block::CherryStairs(_) => CherryStairs::DISPLAY_NAME,
 			Block::DarkOakStairs(_) => DarkOakStairs::DISPLAY_NAME,
 			Block::MangroveStairs(_) => MangroveStairs::DISPLAY_NAME,
 			Block::BambooStairs(_) => BambooStairs::DISPLAY_NAME,
@@ -1509,6 +1554,7 @@ impl Block {
 			Block::BirchSlab(_) => BirchSlab::DISPLAY_NAME,
 			Block::JungleSlab(_) => JungleSlab::DISPLAY_NAME,
 			Block::AcaciaSlab(_) => AcaciaSlab::DISPLAY_NAME,
+			Block::CherrySlab(_) => CherrySlab::DISPLAY_NAME,
 			Block::DarkOakSlab(_) => DarkOakSlab::DISPLAY_NAME,
 			Block::MangroveSlab(_) => MangroveSlab::DISPLAY_NAME,
 			Block::BambooSlab(_) => BambooSlab::DISPLAY_NAME,
@@ -1535,6 +1581,7 @@ impl Block {
 			Block::BirchFenceGate(_) => BirchFenceGate::DISPLAY_NAME,
 			Block::JungleFenceGate(_) => JungleFenceGate::DISPLAY_NAME,
 			Block::AcaciaFenceGate(_) => AcaciaFenceGate::DISPLAY_NAME,
+			Block::CherryFenceGate(_) => CherryFenceGate::DISPLAY_NAME,
 			Block::DarkOakFenceGate(_) => DarkOakFenceGate::DISPLAY_NAME,
 			Block::MangroveFenceGate(_) => MangroveFenceGate::DISPLAY_NAME,
 			Block::BambooFenceGate(_) => BambooFenceGate::DISPLAY_NAME,
@@ -1542,6 +1589,7 @@ impl Block {
 			Block::BirchFence(_) => BirchFence::DISPLAY_NAME,
 			Block::JungleFence(_) => JungleFence::DISPLAY_NAME,
 			Block::AcaciaFence(_) => AcaciaFence::DISPLAY_NAME,
+			Block::CherryFence(_) => CherryFence::DISPLAY_NAME,
 			Block::DarkOakFence(_) => DarkOakFence::DISPLAY_NAME,
 			Block::MangroveFence(_) => MangroveFence::DISPLAY_NAME,
 			Block::BambooFence(_) => BambooFence::DISPLAY_NAME,
@@ -1549,6 +1597,7 @@ impl Block {
 			Block::BirchDoor(_) => BirchDoor::DISPLAY_NAME,
 			Block::JungleDoor(_) => JungleDoor::DISPLAY_NAME,
 			Block::AcaciaDoor(_) => AcaciaDoor::DISPLAY_NAME,
+			Block::CherryDoor(_) => CherryDoor::DISPLAY_NAME,
 			Block::DarkOakDoor(_) => DarkOakDoor::DISPLAY_NAME,
 			Block::MangroveDoor(_) => MangroveDoor::DISPLAY_NAME,
 			Block::BambooDoor(_) => BambooDoor::DISPLAY_NAME,
@@ -1559,6 +1608,7 @@ impl Block {
 			Block::PurpurPillar(_) => PurpurPillar::DISPLAY_NAME,
 			Block::PurpurStairs(_) => PurpurStairs::DISPLAY_NAME,
 			Block::EndStoneBricks(_) => EndStoneBricks::DISPLAY_NAME,
+			Block::TorchflowerCrop(_) => TorchflowerCrop::DISPLAY_NAME,
 			Block::Beetroots(_) => Beetroots::DISPLAY_NAME,
 			Block::DirtPath(_) => DirtPath::DISPLAY_NAME,
 			Block::EndGateway(_) => EndGateway::DISPLAY_NAME,
@@ -1918,6 +1968,7 @@ impl Block {
 			Block::Azalea(_) => Azalea::DISPLAY_NAME,
 			Block::FloweringAzalea(_) => FloweringAzalea::DISPLAY_NAME,
 			Block::MossCarpet(_) => MossCarpet::DISPLAY_NAME,
+			Block::PinkPetals(_) => PinkPetals::DISPLAY_NAME,
 			Block::MossBlock(_) => MossBlock::DISPLAY_NAME,
 			Block::BigDripleaf(_) => BigDripleaf::DISPLAY_NAME,
 			Block::BigDripleafStem(_) => BigDripleafStem::DISPLAY_NAME,
@@ -1957,6 +2008,7 @@ impl Block {
 			Block::PearlescentFroglight(_) => PearlescentFroglight::DISPLAY_NAME,
 			Block::Frogspawn(_) => Frogspawn::DISPLAY_NAME,
 			Block::ReinforcedDeepslate(_) => ReinforcedDeepslate::DISPLAY_NAME,
+			Block::DecoratedPot(_) => DecoratedPot::DISPLAY_NAME,
 		}
 	}
 	pub fn get_transparency(&self) -> bool {
@@ -1979,6 +2031,7 @@ impl Block {
 			Block::BirchPlanks(_) => BirchPlanks::TRANSPARENT,
 			Block::JunglePlanks(_) => JunglePlanks::TRANSPARENT,
 			Block::AcaciaPlanks(_) => AcaciaPlanks::TRANSPARENT,
+			Block::CherryPlanks(_) => CherryPlanks::TRANSPARENT,
 			Block::DarkOakPlanks(_) => DarkOakPlanks::TRANSPARENT,
 			Block::MangrovePlanks(_) => MangrovePlanks::TRANSPARENT,
 			Block::BambooPlanks(_) => BambooPlanks::TRANSPARENT,
@@ -1988,12 +2041,14 @@ impl Block {
 			Block::BirchSapling(_) => BirchSapling::TRANSPARENT,
 			Block::JungleSapling(_) => JungleSapling::TRANSPARENT,
 			Block::AcaciaSapling(_) => AcaciaSapling::TRANSPARENT,
+			Block::CherrySapling(_) => CherrySapling::TRANSPARENT,
 			Block::DarkOakSapling(_) => DarkOakSapling::TRANSPARENT,
 			Block::MangrovePropagule(_) => MangrovePropagule::TRANSPARENT,
 			Block::Bedrock(_) => Bedrock::TRANSPARENT,
 			Block::Water(_) => Water::TRANSPARENT,
 			Block::Lava(_) => Lava::TRANSPARENT,
 			Block::Sand(_) => Sand::TRANSPARENT,
+			Block::SuspiciousSand(_) => SuspiciousSand::TRANSPARENT,
 			Block::RedSand(_) => RedSand::TRANSPARENT,
 			Block::Gravel(_) => Gravel::TRANSPARENT,
 			Block::GoldOre(_) => GoldOre::TRANSPARENT,
@@ -2008,6 +2063,7 @@ impl Block {
 			Block::BirchLog(_) => BirchLog::TRANSPARENT,
 			Block::JungleLog(_) => JungleLog::TRANSPARENT,
 			Block::AcaciaLog(_) => AcaciaLog::TRANSPARENT,
+			Block::CherryLog(_) => CherryLog::TRANSPARENT,
 			Block::DarkOakLog(_) => DarkOakLog::TRANSPARENT,
 			Block::MangroveLog(_) => MangroveLog::TRANSPARENT,
 			Block::MangroveRoots(_) => MangroveRoots::TRANSPARENT,
@@ -2017,6 +2073,7 @@ impl Block {
 			Block::StrippedBirchLog(_) => StrippedBirchLog::TRANSPARENT,
 			Block::StrippedJungleLog(_) => StrippedJungleLog::TRANSPARENT,
 			Block::StrippedAcaciaLog(_) => StrippedAcaciaLog::TRANSPARENT,
+			Block::StrippedCherryLog(_) => StrippedCherryLog::TRANSPARENT,
 			Block::StrippedDarkOakLog(_) => StrippedDarkOakLog::TRANSPARENT,
 			Block::StrippedOakLog(_) => StrippedOakLog::TRANSPARENT,
 			Block::StrippedMangroveLog(_) => StrippedMangroveLog::TRANSPARENT,
@@ -2026,6 +2083,7 @@ impl Block {
 			Block::BirchWood(_) => BirchWood::TRANSPARENT,
 			Block::JungleWood(_) => JungleWood::TRANSPARENT,
 			Block::AcaciaWood(_) => AcaciaWood::TRANSPARENT,
+			Block::CherryWood(_) => CherryWood::TRANSPARENT,
 			Block::DarkOakWood(_) => DarkOakWood::TRANSPARENT,
 			Block::MangroveWood(_) => MangroveWood::TRANSPARENT,
 			Block::StrippedOakWood(_) => StrippedOakWood::TRANSPARENT,
@@ -2033,6 +2091,7 @@ impl Block {
 			Block::StrippedBirchWood(_) => StrippedBirchWood::TRANSPARENT,
 			Block::StrippedJungleWood(_) => StrippedJungleWood::TRANSPARENT,
 			Block::StrippedAcaciaWood(_) => StrippedAcaciaWood::TRANSPARENT,
+			Block::StrippedCherryWood(_) => StrippedCherryWood::TRANSPARENT,
 			Block::StrippedDarkOakWood(_) => StrippedDarkOakWood::TRANSPARENT,
 			Block::StrippedMangroveWood(_) => StrippedMangroveWood::TRANSPARENT,
 			Block::OakLeaves(_) => OakLeaves::TRANSPARENT,
@@ -2040,6 +2099,7 @@ impl Block {
 			Block::BirchLeaves(_) => BirchLeaves::TRANSPARENT,
 			Block::JungleLeaves(_) => JungleLeaves::TRANSPARENT,
 			Block::AcaciaLeaves(_) => AcaciaLeaves::TRANSPARENT,
+			Block::CherryLeaves(_) => CherryLeaves::TRANSPARENT,
 			Block::DarkOakLeaves(_) => DarkOakLeaves::TRANSPARENT,
 			Block::MangroveLeaves(_) => MangroveLeaves::TRANSPARENT,
 			Block::AzaleaLeaves(_) => AzaleaLeaves::TRANSPARENT,
@@ -2100,6 +2160,7 @@ impl Block {
 			Block::BlackWool(_) => BlackWool::TRANSPARENT,
 			Block::MovingPiston(_) => MovingPiston::TRANSPARENT,
 			Block::Dandelion(_) => Dandelion::TRANSPARENT,
+			Block::Torchflower(_) => Torchflower::TRANSPARENT,
 			Block::Poppy(_) => Poppy::TRANSPARENT,
 			Block::BlueOrchid(_) => BlueOrchid::TRANSPARENT,
 			Block::Allium(_) => Allium::TRANSPARENT,
@@ -2141,6 +2202,7 @@ impl Block {
 			Block::SpruceSign(_) => SpruceSign::TRANSPARENT,
 			Block::BirchSign(_) => BirchSign::TRANSPARENT,
 			Block::AcaciaSign(_) => AcaciaSign::TRANSPARENT,
+			Block::CherrySign(_) => CherrySign::TRANSPARENT,
 			Block::JungleSign(_) => JungleSign::TRANSPARENT,
 			Block::DarkOakSign(_) => DarkOakSign::TRANSPARENT,
 			Block::MangroveSign(_) => MangroveSign::TRANSPARENT,
@@ -2153,6 +2215,7 @@ impl Block {
 			Block::SpruceWallSign(_) => SpruceWallSign::TRANSPARENT,
 			Block::BirchWallSign(_) => BirchWallSign::TRANSPARENT,
 			Block::AcaciaWallSign(_) => AcaciaWallSign::TRANSPARENT,
+			Block::CherryWallSign(_) => CherryWallSign::TRANSPARENT,
 			Block::JungleWallSign(_) => JungleWallSign::TRANSPARENT,
 			Block::DarkOakWallSign(_) => DarkOakWallSign::TRANSPARENT,
 			Block::MangroveWallSign(_) => MangroveWallSign::TRANSPARENT,
@@ -2161,6 +2224,7 @@ impl Block {
 			Block::SpruceHangingSign(_) => SpruceHangingSign::TRANSPARENT,
 			Block::BirchHangingSign(_) => BirchHangingSign::TRANSPARENT,
 			Block::AcaciaHangingSign(_) => AcaciaHangingSign::TRANSPARENT,
+			Block::CherryHangingSign(_) => CherryHangingSign::TRANSPARENT,
 			Block::JungleHangingSign(_) => JungleHangingSign::TRANSPARENT,
 			Block::DarkOakHangingSign(_) => DarkOakHangingSign::TRANSPARENT,
 			Block::CrimsonHangingSign(_) => CrimsonHangingSign::TRANSPARENT,
@@ -2171,6 +2235,7 @@ impl Block {
 			Block::SpruceWallHangingSign(_) => SpruceWallHangingSign::TRANSPARENT,
 			Block::BirchWallHangingSign(_) => BirchWallHangingSign::TRANSPARENT,
 			Block::AcaciaWallHangingSign(_) => AcaciaWallHangingSign::TRANSPARENT,
+			Block::CherryWallHangingSign(_) => CherryWallHangingSign::TRANSPARENT,
 			Block::JungleWallHangingSign(_) => JungleWallHangingSign::TRANSPARENT,
 			Block::DarkOakWallHangingSign(_) => DarkOakWallHangingSign::TRANSPARENT,
 			Block::MangroveWallHangingSign(_) => MangroveWallHangingSign::TRANSPARENT,
@@ -2185,6 +2250,7 @@ impl Block {
 			Block::BirchPressurePlate(_) => BirchPressurePlate::TRANSPARENT,
 			Block::JunglePressurePlate(_) => JunglePressurePlate::TRANSPARENT,
 			Block::AcaciaPressurePlate(_) => AcaciaPressurePlate::TRANSPARENT,
+			Block::CherryPressurePlate(_) => CherryPressurePlate::TRANSPARENT,
 			Block::DarkOakPressurePlate(_) => DarkOakPressurePlate::TRANSPARENT,
 			Block::MangrovePressurePlate(_) => MangrovePressurePlate::TRANSPARENT,
 			Block::BambooPressurePlate(_) => BambooPressurePlate::TRANSPARENT,
@@ -2236,6 +2302,7 @@ impl Block {
 			Block::BirchTrapdoor(_) => BirchTrapdoor::TRANSPARENT,
 			Block::JungleTrapdoor(_) => JungleTrapdoor::TRANSPARENT,
 			Block::AcaciaTrapdoor(_) => AcaciaTrapdoor::TRANSPARENT,
+			Block::CherryTrapdoor(_) => CherryTrapdoor::TRANSPARENT,
 			Block::DarkOakTrapdoor(_) => DarkOakTrapdoor::TRANSPARENT,
 			Block::MangroveTrapdoor(_) => MangroveTrapdoor::TRANSPARENT,
 			Block::BambooTrapdoor(_) => BambooTrapdoor::TRANSPARENT,
@@ -2301,11 +2368,13 @@ impl Block {
 			Block::CobblestoneWall(_) => CobblestoneWall::TRANSPARENT,
 			Block::MossyCobblestoneWall(_) => MossyCobblestoneWall::TRANSPARENT,
 			Block::FlowerPot(_) => FlowerPot::TRANSPARENT,
+			Block::PottedTorchflower(_) => PottedTorchflower::TRANSPARENT,
 			Block::PottedOakSapling(_) => PottedOakSapling::TRANSPARENT,
 			Block::PottedSpruceSapling(_) => PottedSpruceSapling::TRANSPARENT,
 			Block::PottedBirchSapling(_) => PottedBirchSapling::TRANSPARENT,
 			Block::PottedJungleSapling(_) => PottedJungleSapling::TRANSPARENT,
 			Block::PottedAcaciaSapling(_) => PottedAcaciaSapling::TRANSPARENT,
+			Block::PottedCherrySapling(_) => PottedCherrySapling::TRANSPARENT,
 			Block::PottedDarkOakSapling(_) => PottedDarkOakSapling::TRANSPARENT,
 			Block::PottedMangrovePropagule(_) => PottedMangrovePropagule::TRANSPARENT,
 			Block::PottedFern(_) => PottedFern::TRANSPARENT,
@@ -2333,6 +2402,7 @@ impl Block {
 			Block::BirchButton(_) => BirchButton::TRANSPARENT,
 			Block::JungleButton(_) => JungleButton::TRANSPARENT,
 			Block::AcaciaButton(_) => AcaciaButton::TRANSPARENT,
+			Block::CherryButton(_) => CherryButton::TRANSPARENT,
 			Block::DarkOakButton(_) => DarkOakButton::TRANSPARENT,
 			Block::MangroveButton(_) => MangroveButton::TRANSPARENT,
 			Block::BambooButton(_) => BambooButton::TRANSPARENT,
@@ -2400,6 +2470,7 @@ impl Block {
 			Block::RedStainedGlassPane(_) => RedStainedGlassPane::TRANSPARENT,
 			Block::BlackStainedGlassPane(_) => BlackStainedGlassPane::TRANSPARENT,
 			Block::AcaciaStairs(_) => AcaciaStairs::TRANSPARENT,
+			Block::CherryStairs(_) => CherryStairs::TRANSPARENT,
 			Block::DarkOakStairs(_) => DarkOakStairs::TRANSPARENT,
 			Block::MangroveStairs(_) => MangroveStairs::TRANSPARENT,
 			Block::BambooStairs(_) => BambooStairs::TRANSPARENT,
@@ -2485,6 +2556,7 @@ impl Block {
 			Block::BirchSlab(_) => BirchSlab::TRANSPARENT,
 			Block::JungleSlab(_) => JungleSlab::TRANSPARENT,
 			Block::AcaciaSlab(_) => AcaciaSlab::TRANSPARENT,
+			Block::CherrySlab(_) => CherrySlab::TRANSPARENT,
 			Block::DarkOakSlab(_) => DarkOakSlab::TRANSPARENT,
 			Block::MangroveSlab(_) => MangroveSlab::TRANSPARENT,
 			Block::BambooSlab(_) => BambooSlab::TRANSPARENT,
@@ -2511,6 +2583,7 @@ impl Block {
 			Block::BirchFenceGate(_) => BirchFenceGate::TRANSPARENT,
 			Block::JungleFenceGate(_) => JungleFenceGate::TRANSPARENT,
 			Block::AcaciaFenceGate(_) => AcaciaFenceGate::TRANSPARENT,
+			Block::CherryFenceGate(_) => CherryFenceGate::TRANSPARENT,
 			Block::DarkOakFenceGate(_) => DarkOakFenceGate::TRANSPARENT,
 			Block::MangroveFenceGate(_) => MangroveFenceGate::TRANSPARENT,
 			Block::BambooFenceGate(_) => BambooFenceGate::TRANSPARENT,
@@ -2518,6 +2591,7 @@ impl Block {
 			Block::BirchFence(_) => BirchFence::TRANSPARENT,
 			Block::JungleFence(_) => JungleFence::TRANSPARENT,
 			Block::AcaciaFence(_) => AcaciaFence::TRANSPARENT,
+			Block::CherryFence(_) => CherryFence::TRANSPARENT,
 			Block::DarkOakFence(_) => DarkOakFence::TRANSPARENT,
 			Block::MangroveFence(_) => MangroveFence::TRANSPARENT,
 			Block::BambooFence(_) => BambooFence::TRANSPARENT,
@@ -2525,6 +2599,7 @@ impl Block {
 			Block::BirchDoor(_) => BirchDoor::TRANSPARENT,
 			Block::JungleDoor(_) => JungleDoor::TRANSPARENT,
 			Block::AcaciaDoor(_) => AcaciaDoor::TRANSPARENT,
+			Block::CherryDoor(_) => CherryDoor::TRANSPARENT,
 			Block::DarkOakDoor(_) => DarkOakDoor::TRANSPARENT,
 			Block::MangroveDoor(_) => MangroveDoor::TRANSPARENT,
 			Block::BambooDoor(_) => BambooDoor::TRANSPARENT,
@@ -2535,6 +2610,7 @@ impl Block {
 			Block::PurpurPillar(_) => PurpurPillar::TRANSPARENT,
 			Block::PurpurStairs(_) => PurpurStairs::TRANSPARENT,
 			Block::EndStoneBricks(_) => EndStoneBricks::TRANSPARENT,
+			Block::TorchflowerCrop(_) => TorchflowerCrop::TRANSPARENT,
 			Block::Beetroots(_) => Beetroots::TRANSPARENT,
 			Block::DirtPath(_) => DirtPath::TRANSPARENT,
 			Block::EndGateway(_) => EndGateway::TRANSPARENT,
@@ -2894,6 +2970,7 @@ impl Block {
 			Block::Azalea(_) => Azalea::TRANSPARENT,
 			Block::FloweringAzalea(_) => FloweringAzalea::TRANSPARENT,
 			Block::MossCarpet(_) => MossCarpet::TRANSPARENT,
+			Block::PinkPetals(_) => PinkPetals::TRANSPARENT,
 			Block::MossBlock(_) => MossBlock::TRANSPARENT,
 			Block::BigDripleaf(_) => BigDripleaf::TRANSPARENT,
 			Block::BigDripleafStem(_) => BigDripleafStem::TRANSPARENT,
@@ -2933,6 +3010,7 @@ impl Block {
 			Block::PearlescentFroglight(_) => PearlescentFroglight::TRANSPARENT,
 			Block::Frogspawn(_) => Frogspawn::TRANSPARENT,
 			Block::ReinforcedDeepslate(_) => ReinforcedDeepslate::TRANSPARENT,
+			Block::DecoratedPot(_) => DecoratedPot::TRANSPARENT,
 		}
 	}
 	pub fn get_emit_light(&self) -> u8 {
@@ -2955,6 +3033,7 @@ impl Block {
 			Block::BirchPlanks(_) => BirchPlanks::EMIT_LIGHT,
 			Block::JunglePlanks(_) => JunglePlanks::EMIT_LIGHT,
 			Block::AcaciaPlanks(_) => AcaciaPlanks::EMIT_LIGHT,
+			Block::CherryPlanks(_) => CherryPlanks::EMIT_LIGHT,
 			Block::DarkOakPlanks(_) => DarkOakPlanks::EMIT_LIGHT,
 			Block::MangrovePlanks(_) => MangrovePlanks::EMIT_LIGHT,
 			Block::BambooPlanks(_) => BambooPlanks::EMIT_LIGHT,
@@ -2964,12 +3043,14 @@ impl Block {
 			Block::BirchSapling(_) => BirchSapling::EMIT_LIGHT,
 			Block::JungleSapling(_) => JungleSapling::EMIT_LIGHT,
 			Block::AcaciaSapling(_) => AcaciaSapling::EMIT_LIGHT,
+			Block::CherrySapling(_) => CherrySapling::EMIT_LIGHT,
 			Block::DarkOakSapling(_) => DarkOakSapling::EMIT_LIGHT,
 			Block::MangrovePropagule(_) => MangrovePropagule::EMIT_LIGHT,
 			Block::Bedrock(_) => Bedrock::EMIT_LIGHT,
 			Block::Water(_) => Water::EMIT_LIGHT,
 			Block::Lava(_) => Lava::EMIT_LIGHT,
 			Block::Sand(_) => Sand::EMIT_LIGHT,
+			Block::SuspiciousSand(_) => SuspiciousSand::EMIT_LIGHT,
 			Block::RedSand(_) => RedSand::EMIT_LIGHT,
 			Block::Gravel(_) => Gravel::EMIT_LIGHT,
 			Block::GoldOre(_) => GoldOre::EMIT_LIGHT,
@@ -2984,6 +3065,7 @@ impl Block {
 			Block::BirchLog(_) => BirchLog::EMIT_LIGHT,
 			Block::JungleLog(_) => JungleLog::EMIT_LIGHT,
 			Block::AcaciaLog(_) => AcaciaLog::EMIT_LIGHT,
+			Block::CherryLog(_) => CherryLog::EMIT_LIGHT,
 			Block::DarkOakLog(_) => DarkOakLog::EMIT_LIGHT,
 			Block::MangroveLog(_) => MangroveLog::EMIT_LIGHT,
 			Block::MangroveRoots(_) => MangroveRoots::EMIT_LIGHT,
@@ -2993,6 +3075,7 @@ impl Block {
 			Block::StrippedBirchLog(_) => StrippedBirchLog::EMIT_LIGHT,
 			Block::StrippedJungleLog(_) => StrippedJungleLog::EMIT_LIGHT,
 			Block::StrippedAcaciaLog(_) => StrippedAcaciaLog::EMIT_LIGHT,
+			Block::StrippedCherryLog(_) => StrippedCherryLog::EMIT_LIGHT,
 			Block::StrippedDarkOakLog(_) => StrippedDarkOakLog::EMIT_LIGHT,
 			Block::StrippedOakLog(_) => StrippedOakLog::EMIT_LIGHT,
 			Block::StrippedMangroveLog(_) => StrippedMangroveLog::EMIT_LIGHT,
@@ -3002,6 +3085,7 @@ impl Block {
 			Block::BirchWood(_) => BirchWood::EMIT_LIGHT,
 			Block::JungleWood(_) => JungleWood::EMIT_LIGHT,
 			Block::AcaciaWood(_) => AcaciaWood::EMIT_LIGHT,
+			Block::CherryWood(_) => CherryWood::EMIT_LIGHT,
 			Block::DarkOakWood(_) => DarkOakWood::EMIT_LIGHT,
 			Block::MangroveWood(_) => MangroveWood::EMIT_LIGHT,
 			Block::StrippedOakWood(_) => StrippedOakWood::EMIT_LIGHT,
@@ -3009,6 +3093,7 @@ impl Block {
 			Block::StrippedBirchWood(_) => StrippedBirchWood::EMIT_LIGHT,
 			Block::StrippedJungleWood(_) => StrippedJungleWood::EMIT_LIGHT,
 			Block::StrippedAcaciaWood(_) => StrippedAcaciaWood::EMIT_LIGHT,
+			Block::StrippedCherryWood(_) => StrippedCherryWood::EMIT_LIGHT,
 			Block::StrippedDarkOakWood(_) => StrippedDarkOakWood::EMIT_LIGHT,
 			Block::StrippedMangroveWood(_) => StrippedMangroveWood::EMIT_LIGHT,
 			Block::OakLeaves(_) => OakLeaves::EMIT_LIGHT,
@@ -3016,6 +3101,7 @@ impl Block {
 			Block::BirchLeaves(_) => BirchLeaves::EMIT_LIGHT,
 			Block::JungleLeaves(_) => JungleLeaves::EMIT_LIGHT,
 			Block::AcaciaLeaves(_) => AcaciaLeaves::EMIT_LIGHT,
+			Block::CherryLeaves(_) => CherryLeaves::EMIT_LIGHT,
 			Block::DarkOakLeaves(_) => DarkOakLeaves::EMIT_LIGHT,
 			Block::MangroveLeaves(_) => MangroveLeaves::EMIT_LIGHT,
 			Block::AzaleaLeaves(_) => AzaleaLeaves::EMIT_LIGHT,
@@ -3076,6 +3162,7 @@ impl Block {
 			Block::BlackWool(_) => BlackWool::EMIT_LIGHT,
 			Block::MovingPiston(_) => MovingPiston::EMIT_LIGHT,
 			Block::Dandelion(_) => Dandelion::EMIT_LIGHT,
+			Block::Torchflower(_) => Torchflower::EMIT_LIGHT,
 			Block::Poppy(_) => Poppy::EMIT_LIGHT,
 			Block::BlueOrchid(_) => BlueOrchid::EMIT_LIGHT,
 			Block::Allium(_) => Allium::EMIT_LIGHT,
@@ -3117,6 +3204,7 @@ impl Block {
 			Block::SpruceSign(_) => SpruceSign::EMIT_LIGHT,
 			Block::BirchSign(_) => BirchSign::EMIT_LIGHT,
 			Block::AcaciaSign(_) => AcaciaSign::EMIT_LIGHT,
+			Block::CherrySign(_) => CherrySign::EMIT_LIGHT,
 			Block::JungleSign(_) => JungleSign::EMIT_LIGHT,
 			Block::DarkOakSign(_) => DarkOakSign::EMIT_LIGHT,
 			Block::MangroveSign(_) => MangroveSign::EMIT_LIGHT,
@@ -3129,6 +3217,7 @@ impl Block {
 			Block::SpruceWallSign(_) => SpruceWallSign::EMIT_LIGHT,
 			Block::BirchWallSign(_) => BirchWallSign::EMIT_LIGHT,
 			Block::AcaciaWallSign(_) => AcaciaWallSign::EMIT_LIGHT,
+			Block::CherryWallSign(_) => CherryWallSign::EMIT_LIGHT,
 			Block::JungleWallSign(_) => JungleWallSign::EMIT_LIGHT,
 			Block::DarkOakWallSign(_) => DarkOakWallSign::EMIT_LIGHT,
 			Block::MangroveWallSign(_) => MangroveWallSign::EMIT_LIGHT,
@@ -3137,6 +3226,7 @@ impl Block {
 			Block::SpruceHangingSign(_) => SpruceHangingSign::EMIT_LIGHT,
 			Block::BirchHangingSign(_) => BirchHangingSign::EMIT_LIGHT,
 			Block::AcaciaHangingSign(_) => AcaciaHangingSign::EMIT_LIGHT,
+			Block::CherryHangingSign(_) => CherryHangingSign::EMIT_LIGHT,
 			Block::JungleHangingSign(_) => JungleHangingSign::EMIT_LIGHT,
 			Block::DarkOakHangingSign(_) => DarkOakHangingSign::EMIT_LIGHT,
 			Block::CrimsonHangingSign(_) => CrimsonHangingSign::EMIT_LIGHT,
@@ -3147,6 +3237,7 @@ impl Block {
 			Block::SpruceWallHangingSign(_) => SpruceWallHangingSign::EMIT_LIGHT,
 			Block::BirchWallHangingSign(_) => BirchWallHangingSign::EMIT_LIGHT,
 			Block::AcaciaWallHangingSign(_) => AcaciaWallHangingSign::EMIT_LIGHT,
+			Block::CherryWallHangingSign(_) => CherryWallHangingSign::EMIT_LIGHT,
 			Block::JungleWallHangingSign(_) => JungleWallHangingSign::EMIT_LIGHT,
 			Block::DarkOakWallHangingSign(_) => DarkOakWallHangingSign::EMIT_LIGHT,
 			Block::MangroveWallHangingSign(_) => MangroveWallHangingSign::EMIT_LIGHT,
@@ -3161,6 +3252,7 @@ impl Block {
 			Block::BirchPressurePlate(_) => BirchPressurePlate::EMIT_LIGHT,
 			Block::JunglePressurePlate(_) => JunglePressurePlate::EMIT_LIGHT,
 			Block::AcaciaPressurePlate(_) => AcaciaPressurePlate::EMIT_LIGHT,
+			Block::CherryPressurePlate(_) => CherryPressurePlate::EMIT_LIGHT,
 			Block::DarkOakPressurePlate(_) => DarkOakPressurePlate::EMIT_LIGHT,
 			Block::MangrovePressurePlate(_) => MangrovePressurePlate::EMIT_LIGHT,
 			Block::BambooPressurePlate(_) => BambooPressurePlate::EMIT_LIGHT,
@@ -3212,6 +3304,7 @@ impl Block {
 			Block::BirchTrapdoor(_) => BirchTrapdoor::EMIT_LIGHT,
 			Block::JungleTrapdoor(_) => JungleTrapdoor::EMIT_LIGHT,
 			Block::AcaciaTrapdoor(_) => AcaciaTrapdoor::EMIT_LIGHT,
+			Block::CherryTrapdoor(_) => CherryTrapdoor::EMIT_LIGHT,
 			Block::DarkOakTrapdoor(_) => DarkOakTrapdoor::EMIT_LIGHT,
 			Block::MangroveTrapdoor(_) => MangroveTrapdoor::EMIT_LIGHT,
 			Block::BambooTrapdoor(_) => BambooTrapdoor::EMIT_LIGHT,
@@ -3277,11 +3370,13 @@ impl Block {
 			Block::CobblestoneWall(_) => CobblestoneWall::EMIT_LIGHT,
 			Block::MossyCobblestoneWall(_) => MossyCobblestoneWall::EMIT_LIGHT,
 			Block::FlowerPot(_) => FlowerPot::EMIT_LIGHT,
+			Block::PottedTorchflower(_) => PottedTorchflower::EMIT_LIGHT,
 			Block::PottedOakSapling(_) => PottedOakSapling::EMIT_LIGHT,
 			Block::PottedSpruceSapling(_) => PottedSpruceSapling::EMIT_LIGHT,
 			Block::PottedBirchSapling(_) => PottedBirchSapling::EMIT_LIGHT,
 			Block::PottedJungleSapling(_) => PottedJungleSapling::EMIT_LIGHT,
 			Block::PottedAcaciaSapling(_) => PottedAcaciaSapling::EMIT_LIGHT,
+			Block::PottedCherrySapling(_) => PottedCherrySapling::EMIT_LIGHT,
 			Block::PottedDarkOakSapling(_) => PottedDarkOakSapling::EMIT_LIGHT,
 			Block::PottedMangrovePropagule(_) => PottedMangrovePropagule::EMIT_LIGHT,
 			Block::PottedFern(_) => PottedFern::EMIT_LIGHT,
@@ -3309,6 +3404,7 @@ impl Block {
 			Block::BirchButton(_) => BirchButton::EMIT_LIGHT,
 			Block::JungleButton(_) => JungleButton::EMIT_LIGHT,
 			Block::AcaciaButton(_) => AcaciaButton::EMIT_LIGHT,
+			Block::CherryButton(_) => CherryButton::EMIT_LIGHT,
 			Block::DarkOakButton(_) => DarkOakButton::EMIT_LIGHT,
 			Block::MangroveButton(_) => MangroveButton::EMIT_LIGHT,
 			Block::BambooButton(_) => BambooButton::EMIT_LIGHT,
@@ -3376,6 +3472,7 @@ impl Block {
 			Block::RedStainedGlassPane(_) => RedStainedGlassPane::EMIT_LIGHT,
 			Block::BlackStainedGlassPane(_) => BlackStainedGlassPane::EMIT_LIGHT,
 			Block::AcaciaStairs(_) => AcaciaStairs::EMIT_LIGHT,
+			Block::CherryStairs(_) => CherryStairs::EMIT_LIGHT,
 			Block::DarkOakStairs(_) => DarkOakStairs::EMIT_LIGHT,
 			Block::MangroveStairs(_) => MangroveStairs::EMIT_LIGHT,
 			Block::BambooStairs(_) => BambooStairs::EMIT_LIGHT,
@@ -3461,6 +3558,7 @@ impl Block {
 			Block::BirchSlab(_) => BirchSlab::EMIT_LIGHT,
 			Block::JungleSlab(_) => JungleSlab::EMIT_LIGHT,
 			Block::AcaciaSlab(_) => AcaciaSlab::EMIT_LIGHT,
+			Block::CherrySlab(_) => CherrySlab::EMIT_LIGHT,
 			Block::DarkOakSlab(_) => DarkOakSlab::EMIT_LIGHT,
 			Block::MangroveSlab(_) => MangroveSlab::EMIT_LIGHT,
 			Block::BambooSlab(_) => BambooSlab::EMIT_LIGHT,
@@ -3487,6 +3585,7 @@ impl Block {
 			Block::BirchFenceGate(_) => BirchFenceGate::EMIT_LIGHT,
 			Block::JungleFenceGate(_) => JungleFenceGate::EMIT_LIGHT,
 			Block::AcaciaFenceGate(_) => AcaciaFenceGate::EMIT_LIGHT,
+			Block::CherryFenceGate(_) => CherryFenceGate::EMIT_LIGHT,
 			Block::DarkOakFenceGate(_) => DarkOakFenceGate::EMIT_LIGHT,
 			Block::MangroveFenceGate(_) => MangroveFenceGate::EMIT_LIGHT,
 			Block::BambooFenceGate(_) => BambooFenceGate::EMIT_LIGHT,
@@ -3494,6 +3593,7 @@ impl Block {
 			Block::BirchFence(_) => BirchFence::EMIT_LIGHT,
 			Block::JungleFence(_) => JungleFence::EMIT_LIGHT,
 			Block::AcaciaFence(_) => AcaciaFence::EMIT_LIGHT,
+			Block::CherryFence(_) => CherryFence::EMIT_LIGHT,
 			Block::DarkOakFence(_) => DarkOakFence::EMIT_LIGHT,
 			Block::MangroveFence(_) => MangroveFence::EMIT_LIGHT,
 			Block::BambooFence(_) => BambooFence::EMIT_LIGHT,
@@ -3501,6 +3601,7 @@ impl Block {
 			Block::BirchDoor(_) => BirchDoor::EMIT_LIGHT,
 			Block::JungleDoor(_) => JungleDoor::EMIT_LIGHT,
 			Block::AcaciaDoor(_) => AcaciaDoor::EMIT_LIGHT,
+			Block::CherryDoor(_) => CherryDoor::EMIT_LIGHT,
 			Block::DarkOakDoor(_) => DarkOakDoor::EMIT_LIGHT,
 			Block::MangroveDoor(_) => MangroveDoor::EMIT_LIGHT,
 			Block::BambooDoor(_) => BambooDoor::EMIT_LIGHT,
@@ -3511,6 +3612,7 @@ impl Block {
 			Block::PurpurPillar(_) => PurpurPillar::EMIT_LIGHT,
 			Block::PurpurStairs(_) => PurpurStairs::EMIT_LIGHT,
 			Block::EndStoneBricks(_) => EndStoneBricks::EMIT_LIGHT,
+			Block::TorchflowerCrop(_) => TorchflowerCrop::EMIT_LIGHT,
 			Block::Beetroots(_) => Beetroots::EMIT_LIGHT,
 			Block::DirtPath(_) => DirtPath::EMIT_LIGHT,
 			Block::EndGateway(_) => EndGateway::EMIT_LIGHT,
@@ -3870,6 +3972,7 @@ impl Block {
 			Block::Azalea(_) => Azalea::EMIT_LIGHT,
 			Block::FloweringAzalea(_) => FloweringAzalea::EMIT_LIGHT,
 			Block::MossCarpet(_) => MossCarpet::EMIT_LIGHT,
+			Block::PinkPetals(_) => PinkPetals::EMIT_LIGHT,
 			Block::MossBlock(_) => MossBlock::EMIT_LIGHT,
 			Block::BigDripleaf(_) => BigDripleaf::EMIT_LIGHT,
 			Block::BigDripleafStem(_) => BigDripleafStem::EMIT_LIGHT,
@@ -3909,6 +4012,7 @@ impl Block {
 			Block::PearlescentFroglight(_) => PearlescentFroglight::EMIT_LIGHT,
 			Block::Frogspawn(_) => Frogspawn::EMIT_LIGHT,
 			Block::ReinforcedDeepslate(_) => ReinforcedDeepslate::EMIT_LIGHT,
+			Block::DecoratedPot(_) => DecoratedPot::EMIT_LIGHT,
 		}
 	}
 	pub fn get_filter_light(&self) -> u8 {
@@ -3931,6 +4035,7 @@ impl Block {
 			Block::BirchPlanks(_) => BirchPlanks::FILTER_LIGHT,
 			Block::JunglePlanks(_) => JunglePlanks::FILTER_LIGHT,
 			Block::AcaciaPlanks(_) => AcaciaPlanks::FILTER_LIGHT,
+			Block::CherryPlanks(_) => CherryPlanks::FILTER_LIGHT,
 			Block::DarkOakPlanks(_) => DarkOakPlanks::FILTER_LIGHT,
 			Block::MangrovePlanks(_) => MangrovePlanks::FILTER_LIGHT,
 			Block::BambooPlanks(_) => BambooPlanks::FILTER_LIGHT,
@@ -3940,12 +4045,14 @@ impl Block {
 			Block::BirchSapling(_) => BirchSapling::FILTER_LIGHT,
 			Block::JungleSapling(_) => JungleSapling::FILTER_LIGHT,
 			Block::AcaciaSapling(_) => AcaciaSapling::FILTER_LIGHT,
+			Block::CherrySapling(_) => CherrySapling::FILTER_LIGHT,
 			Block::DarkOakSapling(_) => DarkOakSapling::FILTER_LIGHT,
 			Block::MangrovePropagule(_) => MangrovePropagule::FILTER_LIGHT,
 			Block::Bedrock(_) => Bedrock::FILTER_LIGHT,
 			Block::Water(_) => Water::FILTER_LIGHT,
 			Block::Lava(_) => Lava::FILTER_LIGHT,
 			Block::Sand(_) => Sand::FILTER_LIGHT,
+			Block::SuspiciousSand(_) => SuspiciousSand::FILTER_LIGHT,
 			Block::RedSand(_) => RedSand::FILTER_LIGHT,
 			Block::Gravel(_) => Gravel::FILTER_LIGHT,
 			Block::GoldOre(_) => GoldOre::FILTER_LIGHT,
@@ -3960,6 +4067,7 @@ impl Block {
 			Block::BirchLog(_) => BirchLog::FILTER_LIGHT,
 			Block::JungleLog(_) => JungleLog::FILTER_LIGHT,
 			Block::AcaciaLog(_) => AcaciaLog::FILTER_LIGHT,
+			Block::CherryLog(_) => CherryLog::FILTER_LIGHT,
 			Block::DarkOakLog(_) => DarkOakLog::FILTER_LIGHT,
 			Block::MangroveLog(_) => MangroveLog::FILTER_LIGHT,
 			Block::MangroveRoots(_) => MangroveRoots::FILTER_LIGHT,
@@ -3969,6 +4077,7 @@ impl Block {
 			Block::StrippedBirchLog(_) => StrippedBirchLog::FILTER_LIGHT,
 			Block::StrippedJungleLog(_) => StrippedJungleLog::FILTER_LIGHT,
 			Block::StrippedAcaciaLog(_) => StrippedAcaciaLog::FILTER_LIGHT,
+			Block::StrippedCherryLog(_) => StrippedCherryLog::FILTER_LIGHT,
 			Block::StrippedDarkOakLog(_) => StrippedDarkOakLog::FILTER_LIGHT,
 			Block::StrippedOakLog(_) => StrippedOakLog::FILTER_LIGHT,
 			Block::StrippedMangroveLog(_) => StrippedMangroveLog::FILTER_LIGHT,
@@ -3978,6 +4087,7 @@ impl Block {
 			Block::BirchWood(_) => BirchWood::FILTER_LIGHT,
 			Block::JungleWood(_) => JungleWood::FILTER_LIGHT,
 			Block::AcaciaWood(_) => AcaciaWood::FILTER_LIGHT,
+			Block::CherryWood(_) => CherryWood::FILTER_LIGHT,
 			Block::DarkOakWood(_) => DarkOakWood::FILTER_LIGHT,
 			Block::MangroveWood(_) => MangroveWood::FILTER_LIGHT,
 			Block::StrippedOakWood(_) => StrippedOakWood::FILTER_LIGHT,
@@ -3985,6 +4095,7 @@ impl Block {
 			Block::StrippedBirchWood(_) => StrippedBirchWood::FILTER_LIGHT,
 			Block::StrippedJungleWood(_) => StrippedJungleWood::FILTER_LIGHT,
 			Block::StrippedAcaciaWood(_) => StrippedAcaciaWood::FILTER_LIGHT,
+			Block::StrippedCherryWood(_) => StrippedCherryWood::FILTER_LIGHT,
 			Block::StrippedDarkOakWood(_) => StrippedDarkOakWood::FILTER_LIGHT,
 			Block::StrippedMangroveWood(_) => StrippedMangroveWood::FILTER_LIGHT,
 			Block::OakLeaves(_) => OakLeaves::FILTER_LIGHT,
@@ -3992,6 +4103,7 @@ impl Block {
 			Block::BirchLeaves(_) => BirchLeaves::FILTER_LIGHT,
 			Block::JungleLeaves(_) => JungleLeaves::FILTER_LIGHT,
 			Block::AcaciaLeaves(_) => AcaciaLeaves::FILTER_LIGHT,
+			Block::CherryLeaves(_) => CherryLeaves::FILTER_LIGHT,
 			Block::DarkOakLeaves(_) => DarkOakLeaves::FILTER_LIGHT,
 			Block::MangroveLeaves(_) => MangroveLeaves::FILTER_LIGHT,
 			Block::AzaleaLeaves(_) => AzaleaLeaves::FILTER_LIGHT,
@@ -4052,6 +4164,7 @@ impl Block {
 			Block::BlackWool(_) => BlackWool::FILTER_LIGHT,
 			Block::MovingPiston(_) => MovingPiston::FILTER_LIGHT,
 			Block::Dandelion(_) => Dandelion::FILTER_LIGHT,
+			Block::Torchflower(_) => Torchflower::FILTER_LIGHT,
 			Block::Poppy(_) => Poppy::FILTER_LIGHT,
 			Block::BlueOrchid(_) => BlueOrchid::FILTER_LIGHT,
 			Block::Allium(_) => Allium::FILTER_LIGHT,
@@ -4093,6 +4206,7 @@ impl Block {
 			Block::SpruceSign(_) => SpruceSign::FILTER_LIGHT,
 			Block::BirchSign(_) => BirchSign::FILTER_LIGHT,
 			Block::AcaciaSign(_) => AcaciaSign::FILTER_LIGHT,
+			Block::CherrySign(_) => CherrySign::FILTER_LIGHT,
 			Block::JungleSign(_) => JungleSign::FILTER_LIGHT,
 			Block::DarkOakSign(_) => DarkOakSign::FILTER_LIGHT,
 			Block::MangroveSign(_) => MangroveSign::FILTER_LIGHT,
@@ -4105,6 +4219,7 @@ impl Block {
 			Block::SpruceWallSign(_) => SpruceWallSign::FILTER_LIGHT,
 			Block::BirchWallSign(_) => BirchWallSign::FILTER_LIGHT,
 			Block::AcaciaWallSign(_) => AcaciaWallSign::FILTER_LIGHT,
+			Block::CherryWallSign(_) => CherryWallSign::FILTER_LIGHT,
 			Block::JungleWallSign(_) => JungleWallSign::FILTER_LIGHT,
 			Block::DarkOakWallSign(_) => DarkOakWallSign::FILTER_LIGHT,
 			Block::MangroveWallSign(_) => MangroveWallSign::FILTER_LIGHT,
@@ -4113,6 +4228,7 @@ impl Block {
 			Block::SpruceHangingSign(_) => SpruceHangingSign::FILTER_LIGHT,
 			Block::BirchHangingSign(_) => BirchHangingSign::FILTER_LIGHT,
 			Block::AcaciaHangingSign(_) => AcaciaHangingSign::FILTER_LIGHT,
+			Block::CherryHangingSign(_) => CherryHangingSign::FILTER_LIGHT,
 			Block::JungleHangingSign(_) => JungleHangingSign::FILTER_LIGHT,
 			Block::DarkOakHangingSign(_) => DarkOakHangingSign::FILTER_LIGHT,
 			Block::CrimsonHangingSign(_) => CrimsonHangingSign::FILTER_LIGHT,
@@ -4123,6 +4239,7 @@ impl Block {
 			Block::SpruceWallHangingSign(_) => SpruceWallHangingSign::FILTER_LIGHT,
 			Block::BirchWallHangingSign(_) => BirchWallHangingSign::FILTER_LIGHT,
 			Block::AcaciaWallHangingSign(_) => AcaciaWallHangingSign::FILTER_LIGHT,
+			Block::CherryWallHangingSign(_) => CherryWallHangingSign::FILTER_LIGHT,
 			Block::JungleWallHangingSign(_) => JungleWallHangingSign::FILTER_LIGHT,
 			Block::DarkOakWallHangingSign(_) => DarkOakWallHangingSign::FILTER_LIGHT,
 			Block::MangroveWallHangingSign(_) => MangroveWallHangingSign::FILTER_LIGHT,
@@ -4137,6 +4254,7 @@ impl Block {
 			Block::BirchPressurePlate(_) => BirchPressurePlate::FILTER_LIGHT,
 			Block::JunglePressurePlate(_) => JunglePressurePlate::FILTER_LIGHT,
 			Block::AcaciaPressurePlate(_) => AcaciaPressurePlate::FILTER_LIGHT,
+			Block::CherryPressurePlate(_) => CherryPressurePlate::FILTER_LIGHT,
 			Block::DarkOakPressurePlate(_) => DarkOakPressurePlate::FILTER_LIGHT,
 			Block::MangrovePressurePlate(_) => MangrovePressurePlate::FILTER_LIGHT,
 			Block::BambooPressurePlate(_) => BambooPressurePlate::FILTER_LIGHT,
@@ -4188,6 +4306,7 @@ impl Block {
 			Block::BirchTrapdoor(_) => BirchTrapdoor::FILTER_LIGHT,
 			Block::JungleTrapdoor(_) => JungleTrapdoor::FILTER_LIGHT,
 			Block::AcaciaTrapdoor(_) => AcaciaTrapdoor::FILTER_LIGHT,
+			Block::CherryTrapdoor(_) => CherryTrapdoor::FILTER_LIGHT,
 			Block::DarkOakTrapdoor(_) => DarkOakTrapdoor::FILTER_LIGHT,
 			Block::MangroveTrapdoor(_) => MangroveTrapdoor::FILTER_LIGHT,
 			Block::BambooTrapdoor(_) => BambooTrapdoor::FILTER_LIGHT,
@@ -4253,11 +4372,13 @@ impl Block {
 			Block::CobblestoneWall(_) => CobblestoneWall::FILTER_LIGHT,
 			Block::MossyCobblestoneWall(_) => MossyCobblestoneWall::FILTER_LIGHT,
 			Block::FlowerPot(_) => FlowerPot::FILTER_LIGHT,
+			Block::PottedTorchflower(_) => PottedTorchflower::FILTER_LIGHT,
 			Block::PottedOakSapling(_) => PottedOakSapling::FILTER_LIGHT,
 			Block::PottedSpruceSapling(_) => PottedSpruceSapling::FILTER_LIGHT,
 			Block::PottedBirchSapling(_) => PottedBirchSapling::FILTER_LIGHT,
 			Block::PottedJungleSapling(_) => PottedJungleSapling::FILTER_LIGHT,
 			Block::PottedAcaciaSapling(_) => PottedAcaciaSapling::FILTER_LIGHT,
+			Block::PottedCherrySapling(_) => PottedCherrySapling::FILTER_LIGHT,
 			Block::PottedDarkOakSapling(_) => PottedDarkOakSapling::FILTER_LIGHT,
 			Block::PottedMangrovePropagule(_) => PottedMangrovePropagule::FILTER_LIGHT,
 			Block::PottedFern(_) => PottedFern::FILTER_LIGHT,
@@ -4285,6 +4406,7 @@ impl Block {
 			Block::BirchButton(_) => BirchButton::FILTER_LIGHT,
 			Block::JungleButton(_) => JungleButton::FILTER_LIGHT,
 			Block::AcaciaButton(_) => AcaciaButton::FILTER_LIGHT,
+			Block::CherryButton(_) => CherryButton::FILTER_LIGHT,
 			Block::DarkOakButton(_) => DarkOakButton::FILTER_LIGHT,
 			Block::MangroveButton(_) => MangroveButton::FILTER_LIGHT,
 			Block::BambooButton(_) => BambooButton::FILTER_LIGHT,
@@ -4352,6 +4474,7 @@ impl Block {
 			Block::RedStainedGlassPane(_) => RedStainedGlassPane::FILTER_LIGHT,
 			Block::BlackStainedGlassPane(_) => BlackStainedGlassPane::FILTER_LIGHT,
 			Block::AcaciaStairs(_) => AcaciaStairs::FILTER_LIGHT,
+			Block::CherryStairs(_) => CherryStairs::FILTER_LIGHT,
 			Block::DarkOakStairs(_) => DarkOakStairs::FILTER_LIGHT,
 			Block::MangroveStairs(_) => MangroveStairs::FILTER_LIGHT,
 			Block::BambooStairs(_) => BambooStairs::FILTER_LIGHT,
@@ -4437,6 +4560,7 @@ impl Block {
 			Block::BirchSlab(_) => BirchSlab::FILTER_LIGHT,
 			Block::JungleSlab(_) => JungleSlab::FILTER_LIGHT,
 			Block::AcaciaSlab(_) => AcaciaSlab::FILTER_LIGHT,
+			Block::CherrySlab(_) => CherrySlab::FILTER_LIGHT,
 			Block::DarkOakSlab(_) => DarkOakSlab::FILTER_LIGHT,
 			Block::MangroveSlab(_) => MangroveSlab::FILTER_LIGHT,
 			Block::BambooSlab(_) => BambooSlab::FILTER_LIGHT,
@@ -4463,6 +4587,7 @@ impl Block {
 			Block::BirchFenceGate(_) => BirchFenceGate::FILTER_LIGHT,
 			Block::JungleFenceGate(_) => JungleFenceGate::FILTER_LIGHT,
 			Block::AcaciaFenceGate(_) => AcaciaFenceGate::FILTER_LIGHT,
+			Block::CherryFenceGate(_) => CherryFenceGate::FILTER_LIGHT,
 			Block::DarkOakFenceGate(_) => DarkOakFenceGate::FILTER_LIGHT,
 			Block::MangroveFenceGate(_) => MangroveFenceGate::FILTER_LIGHT,
 			Block::BambooFenceGate(_) => BambooFenceGate::FILTER_LIGHT,
@@ -4470,6 +4595,7 @@ impl Block {
 			Block::BirchFence(_) => BirchFence::FILTER_LIGHT,
 			Block::JungleFence(_) => JungleFence::FILTER_LIGHT,
 			Block::AcaciaFence(_) => AcaciaFence::FILTER_LIGHT,
+			Block::CherryFence(_) => CherryFence::FILTER_LIGHT,
 			Block::DarkOakFence(_) => DarkOakFence::FILTER_LIGHT,
 			Block::MangroveFence(_) => MangroveFence::FILTER_LIGHT,
 			Block::BambooFence(_) => BambooFence::FILTER_LIGHT,
@@ -4477,6 +4603,7 @@ impl Block {
 			Block::BirchDoor(_) => BirchDoor::FILTER_LIGHT,
 			Block::JungleDoor(_) => JungleDoor::FILTER_LIGHT,
 			Block::AcaciaDoor(_) => AcaciaDoor::FILTER_LIGHT,
+			Block::CherryDoor(_) => CherryDoor::FILTER_LIGHT,
 			Block::DarkOakDoor(_) => DarkOakDoor::FILTER_LIGHT,
 			Block::MangroveDoor(_) => MangroveDoor::FILTER_LIGHT,
 			Block::BambooDoor(_) => BambooDoor::FILTER_LIGHT,
@@ -4487,6 +4614,7 @@ impl Block {
 			Block::PurpurPillar(_) => PurpurPillar::FILTER_LIGHT,
 			Block::PurpurStairs(_) => PurpurStairs::FILTER_LIGHT,
 			Block::EndStoneBricks(_) => EndStoneBricks::FILTER_LIGHT,
+			Block::TorchflowerCrop(_) => TorchflowerCrop::FILTER_LIGHT,
 			Block::Beetroots(_) => Beetroots::FILTER_LIGHT,
 			Block::DirtPath(_) => DirtPath::FILTER_LIGHT,
 			Block::EndGateway(_) => EndGateway::FILTER_LIGHT,
@@ -4846,6 +4974,7 @@ impl Block {
 			Block::Azalea(_) => Azalea::FILTER_LIGHT,
 			Block::FloweringAzalea(_) => FloweringAzalea::FILTER_LIGHT,
 			Block::MossCarpet(_) => MossCarpet::FILTER_LIGHT,
+			Block::PinkPetals(_) => PinkPetals::FILTER_LIGHT,
 			Block::MossBlock(_) => MossBlock::FILTER_LIGHT,
 			Block::BigDripleaf(_) => BigDripleaf::FILTER_LIGHT,
 			Block::BigDripleafStem(_) => BigDripleafStem::FILTER_LIGHT,
@@ -4885,6 +5014,7 @@ impl Block {
 			Block::PearlescentFroglight(_) => PearlescentFroglight::FILTER_LIGHT,
 			Block::Frogspawn(_) => Frogspawn::FILTER_LIGHT,
 			Block::ReinforcedDeepslate(_) => ReinforcedDeepslate::FILTER_LIGHT,
+			Block::DecoratedPot(_) => DecoratedPot::FILTER_LIGHT,
 		}
 	}
 }
@@ -4924,6 +5054,7 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:birch_planks" => Block::BirchPlanks(BirchPlanks {}),
 		"minecraft:jungle_planks" => Block::JunglePlanks(JunglePlanks {}),
 		"minecraft:acacia_planks" => Block::AcaciaPlanks(AcaciaPlanks {}),
+		"minecraft:cherry_planks" => Block::CherryPlanks(CherryPlanks {}),
 		"minecraft:dark_oak_planks" => Block::DarkOakPlanks(DarkOakPlanks {}),
 		"minecraft:mangrove_planks" => Block::MangrovePlanks(MangrovePlanks {}),
 		"minecraft:bamboo_planks" => Block::BambooPlanks(BambooPlanks {}),
@@ -4963,6 +5094,13 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 				r#stage: map.get("stage").unwrap().parse().unwrap(),
 			})
 		},
+		"minecraft:cherry_sapling" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::CherrySapling(CherrySapling {
+				r#stage: map.get("stage").unwrap().parse().unwrap(),
+			})
+		},
 		"minecraft:dark_oak_sapling" => {
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
@@ -4996,6 +5134,13 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:sand" => Block::Sand(Sand {}),
+		"minecraft:suspicious_sand" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::SuspiciousSand(SuspiciousSand {
+				r#dusted: map.get("dusted").unwrap().parse().unwrap(),
+			})
+		},
 		"minecraft:red_sand" => Block::RedSand(RedSand {}),
 		"minecraft:gravel" => Block::Gravel(Gravel {}),
 		"minecraft:gold_ore" => Block::GoldOre(GoldOre {}),
@@ -5037,6 +5182,13 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
 			Block::AcaciaLog(AcaciaLog {
+				r#axis: map.get("axis").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:cherry_log" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::CherryLog(CherryLog {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
@@ -5103,6 +5255,13 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
+		"minecraft:stripped_cherry_log" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::StrippedCherryLog(StrippedCherryLog {
+				r#axis: map.get("axis").unwrap().parse().unwrap(),
+			})
+		},
 		"minecraft:stripped_dark_oak_log" => {
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
@@ -5166,6 +5325,13 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
+		"minecraft:cherry_wood" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::CherryWood(CherryWood {
+				r#axis: map.get("axis").unwrap().parse().unwrap(),
+			})
+		},
 		"minecraft:dark_oak_wood" => {
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
@@ -5212,6 +5378,13 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
 			Block::StrippedAcaciaWood(StrippedAcaciaWood {
+				r#axis: map.get("axis").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:stripped_cherry_wood" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::StrippedCherryWood(StrippedCherryWood {
 				r#axis: map.get("axis").unwrap().parse().unwrap(),
 			})
 		},
@@ -5269,6 +5442,15 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
 			Block::AcaciaLeaves(AcaciaLeaves {
+				r#distance: map.get("distance").unwrap().parse().unwrap(),
+				r#persistent: map.get("persistent").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:cherry_leaves" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::CherryLeaves(CherryLeaves {
 				r#distance: map.get("distance").unwrap().parse().unwrap(),
 				r#persistent: map.get("persistent").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
@@ -5560,6 +5742,7 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:dandelion" => Block::Dandelion(Dandelion {}),
+		"minecraft:torchflower" => Block::Torchflower(Torchflower {}),
 		"minecraft:poppy" => Block::Poppy(Poppy {}),
 		"minecraft:blue_orchid" => Block::BlueOrchid(BlueOrchid {}),
 		"minecraft:allium" => Block::Allium(Allium {}),
@@ -5710,6 +5893,14 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
+		"minecraft:cherry_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::CherrySign(CherrySign {
+				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
 		"minecraft:jungle_sign" => {
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
@@ -5811,6 +6002,14 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
+		"minecraft:cherry_wall_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::CherryWallSign(CherryWallSign {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
 		"minecraft:jungle_wall_sign" => {
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
@@ -5874,6 +6073,15 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
 			Block::AcaciaHangingSign(AcaciaHangingSign {
+				r#attached: map.get("attached").unwrap().parse().unwrap(),
+				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:cherry_hanging_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::CherryHangingSign(CherryHangingSign {
 				r#attached: map.get("attached").unwrap().parse().unwrap(),
 				r#rotation: map.get("rotation").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
@@ -5961,6 +6169,14 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
 			Block::AcaciaWallHangingSign(AcaciaWallHangingSign {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:cherry_wall_hanging_sign" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::CherryWallHangingSign(CherryWallHangingSign {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
@@ -6072,6 +6288,13 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
 			Block::AcaciaPressurePlate(AcaciaPressurePlate {
+				r#powered: map.get("powered").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:cherry_pressure_plate" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::CherryPressurePlate(CherryPressurePlate {
 				r#powered: map.get("powered").unwrap().parse().unwrap(),
 			})
 		},
@@ -6305,6 +6528,17 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
 			Block::AcaciaTrapdoor(AcaciaTrapdoor {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#half: map.get("half").unwrap().parse().unwrap(),
+				r#open: map.get("open").unwrap().parse().unwrap(),
+				r#powered: map.get("powered").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:cherry_trapdoor" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::CherryTrapdoor(CherryTrapdoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
 				r#open: map.get("open").unwrap().parse().unwrap(),
@@ -6712,11 +6946,13 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:flower_pot" => Block::FlowerPot(FlowerPot {}),
+		"minecraft:potted_torchflower" => Block::PottedTorchflower(PottedTorchflower {}),
 		"minecraft:potted_oak_sapling" => Block::PottedOakSapling(PottedOakSapling {}),
 		"minecraft:potted_spruce_sapling" => Block::PottedSpruceSapling(PottedSpruceSapling {}),
 		"minecraft:potted_birch_sapling" => Block::PottedBirchSapling(PottedBirchSapling {}),
 		"minecraft:potted_jungle_sapling" => Block::PottedJungleSapling(PottedJungleSapling {}),
 		"minecraft:potted_acacia_sapling" => Block::PottedAcaciaSapling(PottedAcaciaSapling {}),
+		"minecraft:potted_cherry_sapling" => Block::PottedCherrySapling(PottedCherrySapling {}),
 		"minecraft:potted_dark_oak_sapling" => Block::PottedDarkOakSapling(PottedDarkOakSapling {}),
 		"minecraft:potted_mangrove_propagule" => Block::PottedMangrovePropagule(PottedMangrovePropagule {}),
 		"minecraft:potted_fern" => Block::PottedFern(PottedFern {}),
@@ -6791,6 +7027,15 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
 			Block::AcaciaButton(AcaciaButton {
+				r#face: map.get("face").unwrap().parse().unwrap(),
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#powered: map.get("powered").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:cherry_button" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::CherryButton(CherryButton {
 				r#face: map.get("face").unwrap().parse().unwrap(),
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#powered: map.get("powered").unwrap().parse().unwrap(),
@@ -7224,6 +7469,16 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
 			Block::AcaciaStairs(AcaciaStairs {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#half: map.get("half").unwrap().parse().unwrap(),
+				r#shape: map.get("shape").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:cherry_stairs" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::CherryStairs(CherryStairs {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
 				r#shape: map.get("shape").unwrap().parse().unwrap(),
@@ -7694,6 +7949,14 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
 			})
 		},
+		"minecraft:cherry_slab" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::CherrySlab(CherrySlab {
+				r#type: map.get("type").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
 		"minecraft:dark_oak_slab" => {
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
@@ -7882,6 +8145,16 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 				r#powered: map.get("powered").unwrap().parse().unwrap(),
 			})
 		},
+		"minecraft:cherry_fence_gate" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::CherryFenceGate(CherryFenceGate {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#in_wall: map.get("in_wall").unwrap().parse().unwrap(),
+				r#open: map.get("open").unwrap().parse().unwrap(),
+				r#powered: map.get("powered").unwrap().parse().unwrap(),
+			})
+		},
 		"minecraft:dark_oak_fence_gate" => {
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
@@ -7949,6 +8222,17 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
 			Block::AcaciaFence(AcaciaFence {
+				r#east: map.get("east").unwrap().parse().unwrap(),
+				r#north: map.get("north").unwrap().parse().unwrap(),
+				r#south: map.get("south").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+				r#west: map.get("west").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:cherry_fence" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::CherryFence(CherryFence {
 				r#east: map.get("east").unwrap().parse().unwrap(),
 				r#north: map.get("north").unwrap().parse().unwrap(),
 				r#south: map.get("south").unwrap().parse().unwrap(),
@@ -8026,6 +8310,17 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
 			Block::AcaciaDoor(AcaciaDoor {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#half: map.get("half").unwrap().parse().unwrap(),
+				r#hinge: map.get("hinge").unwrap().parse().unwrap(),
+				r#open: map.get("open").unwrap().parse().unwrap(),
+				r#powered: map.get("powered").unwrap().parse().unwrap(),
+			})
+		},
+		"minecraft:cherry_door" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::CherryDoor(CherryDoor {
 				r#facing: map.get("facing").unwrap().parse().unwrap(),
 				r#half: map.get("half").unwrap().parse().unwrap(),
 				r#hinge: map.get("hinge").unwrap().parse().unwrap(),
@@ -8111,6 +8406,13 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 			})
 		},
 		"minecraft:end_stone_bricks" => Block::EndStoneBricks(EndStoneBricks {}),
+		"minecraft:torchflower_crop" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::TorchflowerCrop(TorchflowerCrop {
+				r#age: map.get("age").unwrap().parse().unwrap(),
+			})
+		},
 		"minecraft:beetroots" => {
 			if map.is_none() { return Err("Missing block state".to_owned()); }
 			let map = map.unwrap();
@@ -10221,6 +10523,14 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		"minecraft:azalea" => Block::Azalea(Azalea {}),
 		"minecraft:flowering_azalea" => Block::FloweringAzalea(FloweringAzalea {}),
 		"minecraft:moss_carpet" => Block::MossCarpet(MossCarpet {}),
+		"minecraft:pink_petals" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::PinkPetals(PinkPetals {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#flower_amount: map.get("flower_amount").unwrap().parse().unwrap(),
+			})
+		},
 		"minecraft:moss_block" => Block::MossBlock(MossBlock {}),
 		"minecraft:big_dripleaf" => {
 			if map.is_none() { return Err("Missing block state".to_owned()); }
@@ -10427,6 +10737,14 @@ pub fn deserialize_content<'de, T: MapAccess<'de>>(
 		},
 		"minecraft:frogspawn" => Block::Frogspawn(Frogspawn {}),
 		"minecraft:reinforced_deepslate" => Block::ReinforcedDeepslate(ReinforcedDeepslate {}),
+		"minecraft:decorated_pot" => {
+			if map.is_none() { return Err("Missing block state".to_owned()); }
+			let map = map.unwrap();
+			Block::DecoratedPot(DecoratedPot {
+				r#facing: map.get("facing").unwrap().parse().unwrap(),
+				r#waterlogged: map.get("waterlogged").unwrap().parse().unwrap(),
+			})
+		},
 		_ => return Err(format!("unknown block: {}", tag)),
 	})
 }
@@ -11790,6 +12108,17 @@ pub mod blocks_props {
 		const FILTER_LIGHT: u8 = 15;
 	}
 
+	impl BlockProperties for CherryPlanks {
+		const DISPLAY_NAME: &'static str = "Cherry Planks";
+		const HARDNESS: f32 = 2.0;
+		const RESISTANCE: f32 = 3.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 15;
+	}
+
 	impl BlockProperties for DarkOakPlanks {
 		const DISPLAY_NAME: &'static str = "Dark Oak Planks";
 		const HARDNESS: f32 = 2.0;
@@ -11889,6 +12218,17 @@ pub mod blocks_props {
 		const FILTER_LIGHT: u8 = 0;
 	}
 
+	impl BlockProperties for CherrySapling {
+		const DISPLAY_NAME: &'static str = "Cherry Sapling";
+		const HARDNESS: f32 = 0.0;
+		const RESISTANCE: f32 = 0.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
 	impl BlockProperties for DarkOakSapling {
 		const DISPLAY_NAME: &'static str = "Dark Oak Sapling";
 		const HARDNESS: f32 = 0.0;
@@ -11948,6 +12288,17 @@ pub mod blocks_props {
 		const DISPLAY_NAME: &'static str = "Sand";
 		const HARDNESS: f32 = 0.5;
 		const RESISTANCE: f32 = 0.5;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 15;
+	}
+
+	impl BlockProperties for SuspiciousSand {
+		const DISPLAY_NAME: &'static str = "Suspicious Sand";
+		const HARDNESS: f32 = 0.25;
+		const RESISTANCE: f32 = 0.25;
 		const STACK_SIZE: u8 = 64;
 		const DIGGABLE: bool = true;
 		const TRANSPARENT: bool = false;
@@ -12109,6 +12460,17 @@ pub mod blocks_props {
 		const FILTER_LIGHT: u8 = 15;
 	}
 
+	impl BlockProperties for CherryLog {
+		const DISPLAY_NAME: &'static str = "Cherry Log";
+		const HARDNESS: f32 = 2.0;
+		const RESISTANCE: f32 = 2.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 15;
+	}
+
 	impl BlockProperties for DarkOakLog {
 		const DISPLAY_NAME: &'static str = "Dark Oak Log";
 		const HARDNESS: f32 = 2.0;
@@ -12199,6 +12561,17 @@ pub mod blocks_props {
 
 	impl BlockProperties for StrippedAcaciaLog {
 		const DISPLAY_NAME: &'static str = "Stripped Acacia Log";
+		const HARDNESS: f32 = 2.0;
+		const RESISTANCE: f32 = 2.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 15;
+	}
+
+	impl BlockProperties for StrippedCherryLog {
+		const DISPLAY_NAME: &'static str = "Stripped Cherry Log";
 		const HARDNESS: f32 = 2.0;
 		const RESISTANCE: f32 = 2.0;
 		const STACK_SIZE: u8 = 64;
@@ -12307,6 +12680,17 @@ pub mod blocks_props {
 		const FILTER_LIGHT: u8 = 15;
 	}
 
+	impl BlockProperties for CherryWood {
+		const DISPLAY_NAME: &'static str = "Cherry Wood";
+		const HARDNESS: f32 = 2.0;
+		const RESISTANCE: f32 = 2.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 15;
+	}
+
 	impl BlockProperties for DarkOakWood {
 		const DISPLAY_NAME: &'static str = "Dark Oak Wood";
 		const HARDNESS: f32 = 2.0;
@@ -12384,6 +12768,17 @@ pub mod blocks_props {
 		const FILTER_LIGHT: u8 = 15;
 	}
 
+	impl BlockProperties for StrippedCherryWood {
+		const DISPLAY_NAME: &'static str = "Stripped Cherry Wood";
+		const HARDNESS: f32 = 2.0;
+		const RESISTANCE: f32 = 2.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 15;
+	}
+
 	impl BlockProperties for StrippedDarkOakWood {
 		const DISPLAY_NAME: &'static str = "Stripped Dark Oak Wood";
 		const HARDNESS: f32 = 2.0;
@@ -12452,6 +12847,17 @@ pub mod blocks_props {
 
 	impl BlockProperties for AcaciaLeaves {
 		const DISPLAY_NAME: &'static str = "Acacia Leaves";
+		const HARDNESS: f32 = 0.2;
+		const RESISTANCE: f32 = 0.2;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 1;
+	}
+
+	impl BlockProperties for CherryLeaves {
+		const DISPLAY_NAME: &'static str = "Cherry Leaves";
 		const HARDNESS: f32 = 0.2;
 		const RESISTANCE: f32 = 0.2;
 		const STACK_SIZE: u8 = 64;
@@ -13121,6 +13527,17 @@ pub mod blocks_props {
 		const FILTER_LIGHT: u8 = 0;
 	}
 
+	impl BlockProperties for Torchflower {
+		const DISPLAY_NAME: &'static str = "Torchflower";
+		const HARDNESS: f32 = 0.0;
+		const RESISTANCE: f32 = 0.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
 	impl BlockProperties for Poppy {
 		const DISPLAY_NAME: &'static str = "Poppy";
 		const HARDNESS: f32 = 0.0;
@@ -13572,6 +13989,17 @@ pub mod blocks_props {
 		const FILTER_LIGHT: u8 = 0;
 	}
 
+	impl BlockProperties for CherrySign {
+		const DISPLAY_NAME: &'static str = "Cherry Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
 	impl BlockProperties for JungleSign {
 		const DISPLAY_NAME: &'static str = "Jungle Sign";
 		const HARDNESS: f32 = 1.0;
@@ -13704,6 +14132,17 @@ pub mod blocks_props {
 		const FILTER_LIGHT: u8 = 0;
 	}
 
+	impl BlockProperties for CherryWallSign {
+		const DISPLAY_NAME: &'static str = "Cherry Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
 	impl BlockProperties for JungleWallSign {
 		const DISPLAY_NAME: &'static str = "Jungle Sign";
 		const HARDNESS: f32 = 1.0;
@@ -13783,6 +14222,17 @@ pub mod blocks_props {
 
 	impl BlockProperties for AcaciaHangingSign {
 		const DISPLAY_NAME: &'static str = "Acacia Hanging Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for CherryHangingSign {
+		const DISPLAY_NAME: &'static str = "Cherry Hanging Sign";
 		const HARDNESS: f32 = 1.0;
 		const RESISTANCE: f32 = 1.0;
 		const STACK_SIZE: u8 = 16;
@@ -13893,6 +14343,17 @@ pub mod blocks_props {
 
 	impl BlockProperties for AcaciaWallHangingSign {
 		const DISPLAY_NAME: &'static str = "Acacia Hanging Sign";
+		const HARDNESS: f32 = 1.0;
+		const RESISTANCE: f32 = 1.0;
+		const STACK_SIZE: u8 = 16;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for CherryWallHangingSign {
+		const DISPLAY_NAME: &'static str = "Cherry Hanging Sign";
 		const HARDNESS: f32 = 1.0;
 		const RESISTANCE: f32 = 1.0;
 		const STACK_SIZE: u8 = 16;
@@ -14047,6 +14508,17 @@ pub mod blocks_props {
 
 	impl BlockProperties for AcaciaPressurePlate {
 		const DISPLAY_NAME: &'static str = "Acacia Pressure Plate";
+		const HARDNESS: f32 = 0.5;
+		const RESISTANCE: f32 = 0.5;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for CherryPressurePlate {
+		const DISPLAY_NAME: &'static str = "Cherry Pressure Plate";
 		const HARDNESS: f32 = 0.5;
 		const RESISTANCE: f32 = 0.5;
 		const STACK_SIZE: u8 = 64;
@@ -14608,6 +15080,17 @@ pub mod blocks_props {
 
 	impl BlockProperties for AcaciaTrapdoor {
 		const DISPLAY_NAME: &'static str = "Acacia Trapdoor";
+		const HARDNESS: f32 = 3.0;
+		const RESISTANCE: f32 = 3.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for CherryTrapdoor {
+		const DISPLAY_NAME: &'static str = "Cherry Trapdoor";
 		const HARDNESS: f32 = 3.0;
 		const RESISTANCE: f32 = 3.0;
 		const STACK_SIZE: u8 = 64;
@@ -15332,6 +15815,17 @@ pub mod blocks_props {
 		const FILTER_LIGHT: u8 = 0;
 	}
 
+	impl BlockProperties for PottedTorchflower {
+		const DISPLAY_NAME: &'static str = "Potted Torchflower";
+		const HARDNESS: f32 = 0.0;
+		const RESISTANCE: f32 = 0.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
 	impl BlockProperties for PottedOakSapling {
 		const DISPLAY_NAME: &'static str = "Potted Oak Sapling";
 		const HARDNESS: f32 = 0.0;
@@ -15378,6 +15872,17 @@ pub mod blocks_props {
 
 	impl BlockProperties for PottedAcaciaSapling {
 		const DISPLAY_NAME: &'static str = "Potted Acacia Sapling";
+		const HARDNESS: f32 = 0.0;
+		const RESISTANCE: f32 = 0.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for PottedCherrySapling {
+		const DISPLAY_NAME: &'static str = "Potted Cherry Sapling";
 		const HARDNESS: f32 = 0.0;
 		const RESISTANCE: f32 = 0.0;
 		const STACK_SIZE: u8 = 64;
@@ -15675,6 +16180,17 @@ pub mod blocks_props {
 
 	impl BlockProperties for AcaciaButton {
 		const DISPLAY_NAME: &'static str = "Acacia Button";
+		const HARDNESS: f32 = 0.5;
+		const RESISTANCE: f32 = 0.5;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for CherryButton {
+		const DISPLAY_NAME: &'static str = "Cherry Button";
 		const HARDNESS: f32 = 0.5;
 		const RESISTANCE: f32 = 0.5;
 		const STACK_SIZE: u8 = 64;
@@ -16412,6 +16928,17 @@ pub mod blocks_props {
 
 	impl BlockProperties for AcaciaStairs {
 		const DISPLAY_NAME: &'static str = "Acacia Stairs";
+		const HARDNESS: f32 = 2.0;
+		const RESISTANCE: f32 = 3.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for CherryStairs {
+		const DISPLAY_NAME: &'static str = "Cherry Stairs";
 		const HARDNESS: f32 = 2.0;
 		const RESISTANCE: f32 = 3.0;
 		const STACK_SIZE: u8 = 64;
@@ -17356,6 +17883,17 @@ pub mod blocks_props {
 		const FILTER_LIGHT: u8 = 0;
 	}
 
+	impl BlockProperties for CherrySlab {
+		const DISPLAY_NAME: &'static str = "Cherry Slab";
+		const HARDNESS: f32 = 2.0;
+		const RESISTANCE: f32 = 3.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
 	impl BlockProperties for DarkOakSlab {
 		const DISPLAY_NAME: &'static str = "Dark Oak Slab";
 		const HARDNESS: f32 = 2.0;
@@ -17642,6 +18180,17 @@ pub mod blocks_props {
 		const FILTER_LIGHT: u8 = 0;
 	}
 
+	impl BlockProperties for CherryFenceGate {
+		const DISPLAY_NAME: &'static str = "Cherry Fence Gate";
+		const HARDNESS: f32 = 2.0;
+		const RESISTANCE: f32 = 3.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
 	impl BlockProperties for DarkOakFenceGate {
 		const DISPLAY_NAME: &'static str = "Dark Oak Fence Gate";
 		const HARDNESS: f32 = 2.0;
@@ -17719,6 +18268,17 @@ pub mod blocks_props {
 		const FILTER_LIGHT: u8 = 0;
 	}
 
+	impl BlockProperties for CherryFence {
+		const DISPLAY_NAME: &'static str = "Cherry Fence";
+		const HARDNESS: f32 = 2.0;
+		const RESISTANCE: f32 = 3.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = false;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
 	impl BlockProperties for DarkOakFence {
 		const DISPLAY_NAME: &'static str = "Dark Oak Fence";
 		const HARDNESS: f32 = 2.0;
@@ -17787,6 +18347,17 @@ pub mod blocks_props {
 
 	impl BlockProperties for AcaciaDoor {
 		const DISPLAY_NAME: &'static str = "Acacia Door";
+		const HARDNESS: f32 = 3.0;
+		const RESISTANCE: f32 = 3.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
+	impl BlockProperties for CherryDoor {
+		const DISPLAY_NAME: &'static str = "Cherry Door";
 		const HARDNESS: f32 = 3.0;
 		const RESISTANCE: f32 = 3.0;
 		const STACK_SIZE: u8 = 64;
@@ -17904,6 +18475,17 @@ pub mod blocks_props {
 		const TRANSPARENT: bool = false;
 		const EMIT_LIGHT: u8 = 0;
 		const FILTER_LIGHT: u8 = 15;
+	}
+
+	impl BlockProperties for TorchflowerCrop {
+		const DISPLAY_NAME: &'static str = "Torchflower Crop";
+		const HARDNESS: f32 = 0.0;
+		const RESISTANCE: f32 = 0.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
 	}
 
 	impl BlockProperties for Beetroots {
@@ -21855,6 +22437,17 @@ pub mod blocks_props {
 		const FILTER_LIGHT: u8 = 0;
 	}
 
+	impl BlockProperties for PinkPetals {
+		const DISPLAY_NAME: &'static str = "Pink Petals";
+		const HARDNESS: f32 = 0.0;
+		const RESISTANCE: f32 = 0.0;
+		const STACK_SIZE: u8 = 64;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
+
 	impl BlockProperties for MossBlock {
 		const DISPLAY_NAME: &'static str = "Moss Block";
 		const HARDNESS: f32 = 0.1;
@@ -22283,6 +22876,17 @@ pub mod blocks_props {
 		const EMIT_LIGHT: u8 = 0;
 		const FILTER_LIGHT: u8 = 15;
 	}
+
+	impl BlockProperties for DecoratedPot {
+		const DISPLAY_NAME: &'static str = "Decorated Pot";
+		const HARDNESS: f32 = 0.0;
+		const RESISTANCE: f32 = 0.0;
+		const STACK_SIZE: u8 = 1;
+		const DIGGABLE: bool = true;
+		const TRANSPARENT: bool = true;
+		const EMIT_LIGHT: u8 = 0;
+		const FILTER_LIGHT: u8 = 0;
+	}
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
@@ -22344,6 +22948,9 @@ pub struct JunglePlanks;
 pub struct AcaciaPlanks;
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct CherryPlanks;
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkOakPlanks;
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
@@ -22381,6 +22988,11 @@ pub struct AcaciaSapling {
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct CherrySapling {
+	pub r#stage: ConstrainedInt::<0, 1>,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkOakSapling {
 	pub r#stage: ConstrainedInt::<0, 1>,
 }
@@ -22408,6 +23020,11 @@ pub struct Lava {
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Sand;
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct SuspiciousSand {
+	pub r#dusted: ConstrainedInt::<0, 3>,
+}
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct RedSand;
@@ -22462,6 +23079,11 @@ pub struct AcaciaLog {
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct CherryLog {
+	pub r#axis: property_enums::Axis,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkOakLog {
 	pub r#axis: property_enums::Axis,
 }
@@ -22503,6 +23125,11 @@ pub struct StrippedJungleLog {
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StrippedAcaciaLog {
+	pub r#axis: property_enums::Axis,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct StrippedCherryLog {
 	pub r#axis: property_enums::Axis,
 }
 
@@ -22552,6 +23179,11 @@ pub struct AcaciaWood {
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct CherryWood {
+	pub r#axis: property_enums::Axis,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkOakWood {
 	pub r#axis: property_enums::Axis,
 }
@@ -22583,6 +23215,11 @@ pub struct StrippedJungleWood {
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct StrippedAcaciaWood {
+	pub r#axis: property_enums::Axis,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct StrippedCherryWood {
 	pub r#axis: property_enums::Axis,
 }
 
@@ -22626,6 +23263,13 @@ pub struct JungleLeaves {
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaLeaves {
+	pub r#distance: ConstrainedInt::<1, 7>,
+	pub r#persistent: bool,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct CherryLeaves {
 	pub r#distance: ConstrainedInt::<1, 7>,
 	pub r#persistent: bool,
 	pub r#waterlogged: bool,
@@ -22922,6 +23566,9 @@ pub struct MovingPiston {
 pub struct Dandelion;
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct Torchflower;
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Poppy;
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
@@ -23098,6 +23745,12 @@ pub struct AcaciaSign {
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct CherrySign {
+	pub r#rotation: ConstrainedInt::<0, 15>,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct JungleSign {
 	pub r#rotation: ConstrainedInt::<0, 15>,
 	pub r#waterlogged: bool,
@@ -23175,6 +23828,12 @@ pub struct AcaciaWallSign {
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct CherryWallSign {
+	pub r#facing: property_enums::Facing1,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct JungleWallSign {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
@@ -23221,6 +23880,13 @@ pub struct BirchHangingSign {
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaHangingSign {
+	pub r#attached: bool,
+	pub r#rotation: ConstrainedInt::<0, 15>,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct CherryHangingSign {
 	pub r#attached: bool,
 	pub r#rotation: ConstrainedInt::<0, 15>,
 	pub r#waterlogged: bool,
@@ -23288,6 +23954,12 @@ pub struct BirchWallHangingSign {
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaWallHangingSign {
+	pub r#facing: property_enums::Facing1,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct CherryWallHangingSign {
 	pub r#facing: property_enums::Facing1,
 	pub r#waterlogged: bool,
 }
@@ -23371,6 +24043,11 @@ pub struct JunglePressurePlate {
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaPressurePlate {
+	pub r#powered: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct CherryPressurePlate {
 	pub r#powered: bool,
 }
 
@@ -23602,6 +24279,15 @@ pub struct JungleTrapdoor {
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaTrapdoor {
+	pub r#facing: property_enums::Facing1,
+	pub r#half: property_enums::Half1,
+	pub r#open: bool,
+	pub r#powered: bool,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct CherryTrapdoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
 	pub r#open: bool,
@@ -23984,6 +24670,9 @@ pub struct MossyCobblestoneWall {
 pub struct FlowerPot;
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct PottedTorchflower;
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedOakSapling;
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
@@ -23997,6 +24686,9 @@ pub struct PottedJungleSapling;
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedAcaciaSapling;
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct PottedCherrySapling;
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct PottedDarkOakSapling;
@@ -24098,6 +24790,13 @@ pub struct JungleButton {
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaButton {
+	pub r#face: property_enums::Face,
+	pub r#facing: property_enums::Facing1,
+	pub r#powered: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct CherryButton {
 	pub r#face: property_enums::Face,
 	pub r#facing: property_enums::Facing1,
 	pub r#powered: bool,
@@ -24477,6 +25176,14 @@ pub struct BlackStainedGlassPane {
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaStairs {
+	pub r#facing: property_enums::Facing1,
+	pub r#half: property_enums::Half1,
+	pub r#shape: property_enums::Shape1,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct CherryStairs {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half1,
 	pub r#shape: property_enums::Shape1,
@@ -24890,6 +25597,12 @@ pub struct AcaciaSlab {
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct CherrySlab {
+	pub r#type: property_enums::Type2,
+	pub r#waterlogged: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkOakSlab {
 	pub r#type: property_enums::Type2,
 	pub r#waterlogged: bool,
@@ -25042,6 +25755,14 @@ pub struct AcaciaFenceGate {
 }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct CherryFenceGate {
+	pub r#facing: property_enums::Facing1,
+	pub r#in_wall: bool,
+	pub r#open: bool,
+	pub r#powered: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct DarkOakFenceGate {
 	pub r#facing: property_enums::Facing1,
 	pub r#in_wall: bool,
@@ -25094,6 +25815,15 @@ pub struct JungleFence {
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaFence {
+	pub r#east: bool,
+	pub r#north: bool,
+	pub r#south: bool,
+	pub r#waterlogged: bool,
+	pub r#west: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct CherryFence {
 	pub r#east: bool,
 	pub r#north: bool,
 	pub r#south: bool,
@@ -25157,6 +25887,15 @@ pub struct JungleDoor {
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct AcaciaDoor {
+	pub r#facing: property_enums::Facing1,
+	pub r#half: property_enums::Half,
+	pub r#hinge: property_enums::Hinge,
+	pub r#open: bool,
+	pub r#powered: bool,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct CherryDoor {
 	pub r#facing: property_enums::Facing1,
 	pub r#half: property_enums::Half,
 	pub r#hinge: property_enums::Hinge,
@@ -25229,6 +25968,11 @@ pub struct PurpurStairs {
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct EndStoneBricks;
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct TorchflowerCrop {
+	pub r#age: ConstrainedInt::<0, 2>,
+}
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct Beetroots {
@@ -27103,6 +27847,12 @@ pub struct FloweringAzalea;
 pub struct MossCarpet;
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct PinkPetals {
+	pub r#facing: property_enums::Facing1,
+	pub r#flower_amount: ConstrainedInt::<1, 4>,
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct MossBlock;
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
@@ -27302,6 +28052,12 @@ pub struct Frogspawn;
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ReinforcedDeepslate;
 
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct DecoratedPot {
+	pub r#facing: property_enums::Facing1,
+	pub r#waterlogged: bool,
+}
+
 
 pub fn create_global_palette() -> HashMap<Block, usize> {
 	let mut map = HashMap::new();
@@ -27327,6 +28083,7 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 	map.insert(Block::BirchPlanks ( BirchPlanks {} ), map.len());
 	map.insert(Block::JunglePlanks ( JunglePlanks {} ), map.len());
 	map.insert(Block::AcaciaPlanks ( AcaciaPlanks {} ), map.len());
+	map.insert(Block::CherryPlanks ( CherryPlanks {} ), map.len());
 	map.insert(Block::DarkOakPlanks ( DarkOakPlanks {} ), map.len());
 	map.insert(Block::MangrovePlanks ( MangrovePlanks {} ), map.len());
 	map.insert(Block::BambooPlanks ( BambooPlanks {} ), map.len());
@@ -27345,6 +28102,9 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 	}
 	for r#stage in ConstrainedInt::<0, 1>::possible_values() {
 		map.insert(Block::AcaciaSapling ( AcaciaSapling {r#stage: r#stage.clone(), } ), map.len());
+	}
+	for r#stage in ConstrainedInt::<0, 1>::possible_values() {
+		map.insert(Block::CherrySapling ( CherrySapling {r#stage: r#stage.clone(), } ), map.len());
 	}
 	for r#stage in ConstrainedInt::<0, 1>::possible_values() {
 		map.insert(Block::DarkOakSapling ( DarkOakSapling {r#stage: r#stage.clone(), } ), map.len());
@@ -27366,6 +28126,9 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 		map.insert(Block::Lava ( Lava {r#level: r#level.clone(), } ), map.len());
 	}
 	map.insert(Block::Sand ( Sand {} ), map.len());
+	for r#dusted in ConstrainedInt::<0, 3>::possible_values() {
+		map.insert(Block::SuspiciousSand ( SuspiciousSand {r#dusted: r#dusted.clone(), } ), map.len());
+	}
 	map.insert(Block::RedSand ( RedSand {} ), map.len());
 	map.insert(Block::Gravel ( Gravel {} ), map.len());
 	map.insert(Block::GoldOre ( GoldOre {} ), map.len());
@@ -27389,6 +28152,9 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 	}
 	for r#axis in property_enums::Axis::possible_values() {
 		map.insert(Block::AcaciaLog ( AcaciaLog {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::CherryLog ( CherryLog {r#axis: r#axis.clone(), } ), map.len());
 	}
 	for r#axis in property_enums::Axis::possible_values() {
 		map.insert(Block::DarkOakLog ( DarkOakLog {r#axis: r#axis.clone(), } ), map.len());
@@ -27418,6 +28184,9 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 		map.insert(Block::StrippedAcaciaLog ( StrippedAcaciaLog {r#axis: r#axis.clone(), } ), map.len());
 	}
 	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::StrippedCherryLog ( StrippedCherryLog {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
 		map.insert(Block::StrippedDarkOakLog ( StrippedDarkOakLog {r#axis: r#axis.clone(), } ), map.len());
 	}
 	for r#axis in property_enums::Axis::possible_values() {
@@ -27445,6 +28214,9 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 		map.insert(Block::AcaciaWood ( AcaciaWood {r#axis: r#axis.clone(), } ), map.len());
 	}
 	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::CherryWood ( CherryWood {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
 		map.insert(Block::DarkOakWood ( DarkOakWood {r#axis: r#axis.clone(), } ), map.len());
 	}
 	for r#axis in property_enums::Axis::possible_values() {
@@ -27464,6 +28236,9 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 	}
 	for r#axis in property_enums::Axis::possible_values() {
 		map.insert(Block::StrippedAcaciaWood ( StrippedAcaciaWood {r#axis: r#axis.clone(), } ), map.len());
+	}
+	for r#axis in property_enums::Axis::possible_values() {
+		map.insert(Block::StrippedCherryWood ( StrippedCherryWood {r#axis: r#axis.clone(), } ), map.len());
 	}
 	for r#axis in property_enums::Axis::possible_values() {
 		map.insert(Block::StrippedDarkOakWood ( StrippedDarkOakWood {r#axis: r#axis.clone(), } ), map.len());
@@ -27503,6 +28278,13 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 		for r#persistent in bool::possible_values() {
 			for r#waterlogged in bool::possible_values() {
 				map.insert(Block::AcaciaLeaves ( AcaciaLeaves {r#distance: r#distance.clone(), r#persistent: r#persistent.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#distance in ConstrainedInt::<1, 7>::possible_values() {
+		for r#persistent in bool::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::CherryLeaves ( CherryLeaves {r#distance: r#distance.clone(), r#persistent: r#persistent.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
 			}
 		}
 	}
@@ -27728,6 +28510,7 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 		}
 	}
 	map.insert(Block::Dandelion ( Dandelion {} ), map.len());
+	map.insert(Block::Torchflower ( Torchflower {} ), map.len());
 	map.insert(Block::Poppy ( Poppy {} ), map.len());
 	map.insert(Block::BlueOrchid ( BlueOrchid {} ), map.len());
 	map.insert(Block::Allium ( Allium {} ), map.len());
@@ -27849,6 +28632,11 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 	}
 	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
 		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::CherrySign ( CherrySign {r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+		for r#waterlogged in bool::possible_values() {
 			map.insert(Block::JungleSign ( JungleSign {r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
 		}
 	}
@@ -27919,6 +28707,11 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 	}
 	for r#facing in property_enums::Facing1::possible_values() {
 		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::CherryWallSign ( CherryWallSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
 			map.insert(Block::JungleWallSign ( JungleWallSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
 		}
 	}
@@ -27962,6 +28755,13 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 		for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
 			for r#waterlogged in bool::possible_values() {
 				map.insert(Block::AcaciaHangingSign ( AcaciaHangingSign {r#attached: r#attached.clone(), r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#attached in bool::possible_values() {
+		for r#rotation in ConstrainedInt::<0, 15>::possible_values() {
+			for r#waterlogged in bool::possible_values() {
+				map.insert(Block::CherryHangingSign ( CherryHangingSign {r#attached: r#attached.clone(), r#rotation: r#rotation.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
 			}
 		}
 	}
@@ -28029,6 +28829,11 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 	}
 	for r#facing in property_enums::Facing1::possible_values() {
 		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::CherryWallHangingSign ( CherryWallHangingSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
 			map.insert(Block::JungleWallHangingSign ( JungleWallHangingSign {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
 		}
 	}
@@ -28092,6 +28897,9 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 	}
 	for r#powered in bool::possible_values() {
 		map.insert(Block::AcaciaPressurePlate ( AcaciaPressurePlate {r#powered: r#powered.clone(), } ), map.len());
+	}
+	for r#powered in bool::possible_values() {
+		map.insert(Block::CherryPressurePlate ( CherryPressurePlate {r#powered: r#powered.clone(), } ), map.len());
 	}
 	for r#powered in bool::possible_values() {
 		map.insert(Block::DarkOakPressurePlate ( DarkOakPressurePlate {r#powered: r#powered.clone(), } ), map.len());
@@ -28251,6 +29059,17 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 				for r#powered in bool::possible_values() {
 					for r#waterlogged in bool::possible_values() {
 						map.insert(Block::AcaciaTrapdoor ( AcaciaTrapdoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
+					for r#waterlogged in bool::possible_values() {
+						map.insert(Block::CherryTrapdoor ( CherryTrapdoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
 					}
 				}
 			}
@@ -28601,11 +29420,13 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 		}
 	}
 	map.insert(Block::FlowerPot ( FlowerPot {} ), map.len());
+	map.insert(Block::PottedTorchflower ( PottedTorchflower {} ), map.len());
 	map.insert(Block::PottedOakSapling ( PottedOakSapling {} ), map.len());
 	map.insert(Block::PottedSpruceSapling ( PottedSpruceSapling {} ), map.len());
 	map.insert(Block::PottedBirchSapling ( PottedBirchSapling {} ), map.len());
 	map.insert(Block::PottedJungleSapling ( PottedJungleSapling {} ), map.len());
 	map.insert(Block::PottedAcaciaSapling ( PottedAcaciaSapling {} ), map.len());
+	map.insert(Block::PottedCherrySapling ( PottedCherrySapling {} ), map.len());
 	map.insert(Block::PottedDarkOakSapling ( PottedDarkOakSapling {} ), map.len());
 	map.insert(Block::PottedMangrovePropagule ( PottedMangrovePropagule {} ), map.len());
 	map.insert(Block::PottedFern ( PottedFern {} ), map.len());
@@ -28664,6 +29485,13 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 		for r#facing in property_enums::Facing1::possible_values() {
 			for r#powered in bool::possible_values() {
 				map.insert(Block::AcaciaButton ( AcaciaButton {r#face: r#face.clone(), r#facing: r#facing.clone(), r#powered: r#powered.clone(), } ), map.len());
+			}
+		}
+	}
+	for r#face in property_enums::Face::possible_values() {
+		for r#facing in property_enums::Facing1::possible_values() {
+			for r#powered in bool::possible_values() {
+				map.insert(Block::CherryButton ( CherryButton {r#face: r#face.clone(), r#facing: r#facing.clone(), r#powered: r#powered.clone(), } ), map.len());
 			}
 		}
 	}
@@ -29002,6 +29830,15 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 		for r#half in property_enums::Half1::possible_values() {
 			for r#shape in property_enums::Shape1::possible_values() {
 				for r#waterlogged in bool::possible_values() {
+					map.insert(Block::CherryStairs ( CherryStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half1::possible_values() {
+			for r#shape in property_enums::Shape1::possible_values() {
+				for r#waterlogged in bool::possible_values() {
 					map.insert(Block::DarkOakStairs ( DarkOakStairs {r#facing: r#facing.clone(), r#half: r#half.clone(), r#shape: r#shape.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
 				}
 			}
@@ -29273,6 +30110,11 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 	}
 	for r#type in property_enums::Type2::possible_values() {
 		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::CherrySlab ( CherrySlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
+	for r#type in property_enums::Type2::possible_values() {
+		for r#waterlogged in bool::possible_values() {
 			map.insert(Block::DarkOakSlab ( DarkOakSlab {r#type: r#type.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
 		}
 	}
@@ -29405,6 +30247,15 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 		for r#in_wall in bool::possible_values() {
 			for r#open in bool::possible_values() {
 				for r#powered in bool::possible_values() {
+					map.insert(Block::CherryFenceGate ( CherryFenceGate {r#facing: r#facing.clone(), r#in_wall: r#in_wall.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#in_wall in bool::possible_values() {
+			for r#open in bool::possible_values() {
+				for r#powered in bool::possible_values() {
 					map.insert(Block::DarkOakFenceGate ( DarkOakFenceGate {r#facing: r#facing.clone(), r#in_wall: r#in_wall.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
 				}
 			}
@@ -29467,6 +30318,17 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 				for r#waterlogged in bool::possible_values() {
 					for r#west in bool::possible_values() {
 						map.insert(Block::AcaciaFence ( AcaciaFence {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#east in bool::possible_values() {
+		for r#north in bool::possible_values() {
+			for r#south in bool::possible_values() {
+				for r#waterlogged in bool::possible_values() {
+					for r#west in bool::possible_values() {
+						map.insert(Block::CherryFence ( CherryFence {r#east: r#east.clone(), r#north: r#north.clone(), r#south: r#south.clone(), r#waterlogged: r#waterlogged.clone(), r#west: r#west.clone(), } ), map.len());
 					}
 				}
 			}
@@ -29554,6 +30416,17 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 			for r#hinge in property_enums::Hinge::possible_values() {
 				for r#open in bool::possible_values() {
 					for r#powered in bool::possible_values() {
+						map.insert(Block::CherryDoor ( CherryDoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#hinge: r#hinge.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
+					}
+				}
+			}
+		}
+	}
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#half in property_enums::Half::possible_values() {
+			for r#hinge in property_enums::Hinge::possible_values() {
+				for r#open in bool::possible_values() {
+					for r#powered in bool::possible_values() {
 						map.insert(Block::DarkOakDoor ( DarkOakDoor {r#facing: r#facing.clone(), r#half: r#half.clone(), r#hinge: r#hinge.clone(), r#open: r#open.clone(), r#powered: r#powered.clone(), } ), map.len());
 					}
 				}
@@ -29615,6 +30488,9 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 		}
 	}
 	map.insert(Block::EndStoneBricks ( EndStoneBricks {} ), map.len());
+	for r#age in ConstrainedInt::<0, 2>::possible_values() {
+		map.insert(Block::TorchflowerCrop ( TorchflowerCrop {r#age: r#age.clone(), } ), map.len());
+	}
 	for r#age in ConstrainedInt::<0, 3>::possible_values() {
 		map.insert(Block::Beetroots ( Beetroots {r#age: r#age.clone(), } ), map.len());
 	}
@@ -31086,6 +31962,11 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 	map.insert(Block::Azalea ( Azalea {} ), map.len());
 	map.insert(Block::FloweringAzalea ( FloweringAzalea {} ), map.len());
 	map.insert(Block::MossCarpet ( MossCarpet {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#flower_amount in ConstrainedInt::<1, 4>::possible_values() {
+			map.insert(Block::PinkPetals ( PinkPetals {r#facing: r#facing.clone(), r#flower_amount: r#flower_amount.clone(), } ), map.len());
+		}
+	}
 	map.insert(Block::MossBlock ( MossBlock {} ), map.len());
 	for r#facing in property_enums::Facing1::possible_values() {
 		for r#tilt in property_enums::Tilt::possible_values() {
@@ -31249,5 +32130,10 @@ pub fn create_global_palette() -> HashMap<Block, usize> {
 	}
 	map.insert(Block::Frogspawn ( Frogspawn {} ), map.len());
 	map.insert(Block::ReinforcedDeepslate ( ReinforcedDeepslate {} ), map.len());
+	for r#facing in property_enums::Facing1::possible_values() {
+		for r#waterlogged in bool::possible_values() {
+			map.insert(Block::DecoratedPot ( DecoratedPot {r#facing: r#facing.clone(), r#waterlogged: r#waterlogged.clone(), } ), map.len());
+		}
+	}
 	map
 }

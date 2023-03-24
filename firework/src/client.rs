@@ -1,34 +1,28 @@
 use crate::{
     entities::EntityDataFlags,
-    gui::{GameMenu, GuiScreen, WindowType},
+    gui::{GuiScreen, WindowType},
     PlayerHandler,
 };
 use crate::{
     entities::{EntityMetadata, END_INDEX},
-    gui::{GameQueueMenuGui, GuiPackets},
     {ClientData, ConnectionError, Rotation, Server, ServerHandler, ServerProxy, Vec3},
 };
 use firework_authentication::Profile;
-use firework_data::{
-    items::{Compass, GrayDye, Item, LimeDye, RedDye},
-    tags::{REGISTRY, TAGS},
-};
+use firework_data::tags::{REGISTRY, TAGS};
 use firework_protocol::{
     client_bound::{
         ChangeDifficulty, ClientBoundKeepAlive, ClientBoundPacketID, CloseContainer,
         CommandSuggestionsResponse, Commands, CustomSound, IdMapHolder, LoginPlay, OpenScreen,
         ParticlePacket, PlayDisconnect, PlayerAbilities, PlayerInfo, PluginMessage, RemoveEntities,
-        RemoveInfoPlayer, ResourcePack, Respawn, SerializePacket, SetCenterChunk,
-        SetContainerContent, SetContainerSlot, SetDefaultSpawn, SetEntityMetadata,
-        SetEntityVelocity, SetHealth, SetHeldItem, SetRecipes, SetTags, SoundEffect, SoundSource,
-        SpawnPlayer, SynchronizePlayerPosition, SystemChatMessage, TeleportEntity, UnloadChunk,
-        UpdateAttributes, UpdateEntityHeadRotation, UpdateEntityPosition,
-        UpdateEntityPositionAndRotation, UpdateEntityRotation,
+        RemoveInfoPlayer, Respawn, SerializePacket, SetCenterChunk, SetContainerContent,
+        SetDefaultSpawn, SetEntityMetadata, SetEntityVelocity, SetHealth, SetHeldItem, SetRecipes,
+        SetTags, SoundEffect, SoundSource, SpawnPlayer, SynchronizePlayerPosition,
+        SystemChatMessage, TeleportEntity, UnloadChunk, UpdateAttributes, UpdateEntityHeadRotation,
+        UpdateEntityPosition, UpdateEntityPositionAndRotation, UpdateEntityRotation,
     },
     data_types::{
-        AddPlayer, Arm, Attribute, ItemNbt, ItemNbtDisplay, Particle, PlayerAbilityFlags,
-        PlayerCommandAction, PlayerInfoAction, PlayerPositionFlags, Slot, UpdateGameMode,
-        UpdateLatency, UpdateListed,
+        AddPlayer, Arm, Attribute, Particle, PlayerAbilityFlags, PlayerCommandAction,
+        PlayerInfoAction, PlayerPositionFlags, Slot, UpdateGameMode, UpdateLatency, UpdateListed,
     },
     read_specific_packet,
     server_bound::{ChatCommand, ChatMessage, PlayerCommand, ServerBoundPacket},
@@ -454,7 +448,6 @@ where
                 pitch: player.rotation.pitch,
                 flags: PlayerPositionFlags::new(),
                 teleport_id: VarInt(0),
-                dismount_vehicle: false,
             }
         })
         .await?;
@@ -516,7 +509,6 @@ where
                 pitch: player.rotation.pitch,
                 flags: PlayerPositionFlags::new(),
                 teleport_id: VarInt(0),
-                dismount_vehicle: false,
             }
         })
         .await?;
@@ -547,7 +539,6 @@ where
                     pitch: rotation.pitch,
                     flags: PlayerPositionFlags::new(),
                     teleport_id: VarInt(0),
-                    dismount_vehicle: false,
                 })
                 .await?;
 

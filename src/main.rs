@@ -194,7 +194,7 @@ impl ServerProxy for MiniGameProxy {
             false,
             false,
             format!(
-                "                {}F{}i{}r{}e{}w{}ork {}Network {}[1.19.3]{}",
+                "                {}F{}i{}r{}e{}w{}ork {}Network {}[1.19.4]{}",
                 ColorCodes::DarkRed.motd_formatting(),
                 ColorCodes::LightRed.motd_formatting(),
                 ColorCodes::Gold.motd_formatting(),
@@ -218,8 +218,8 @@ impl ServerProxy for MiniGameProxy {
             ),
             100,
             self.connected_players.read().await,
-            "1.19.3",
-            761,
+            "1.19.4",
+            762,
         );
         Ok(motd)
     }

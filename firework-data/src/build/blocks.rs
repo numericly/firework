@@ -69,7 +69,7 @@ pub enum StatePropertyType {
 }
 pub fn build_blocks() {
     let debug = true;
-    let file = fs::read_to_string("./data/1.19.3/blocks.json").expect("Unable to open blocks file");
+    let file = fs::read_to_string("./data/1.19.4/blocks.json").expect("Unable to open blocks file");
     let blocks: Vec<Block> =
         serde_json::from_str(file.as_str()).expect("Failed to deserialize blocks");
 
