@@ -107,10 +107,8 @@ impl ProtocolWriter {
     pub async fn write(&mut self, buf: &[u8]) -> Result<(), io::Error> {
         let mut buf = buf.to_vec();
         if let Some(cipher) = &mut self.cipher {
-            // let start = std::time::Instant::now();
             let (buf, _) = InOutBuf::from(buf.as_mut_slice()).into_chunks();
             cipher.encrypt_blocks_inout_mut(buf);
-            // println!("Encryption took {:?}", start.elapsed());
         }
         self.writer.write_all(buf.as_slice()).await
     }
@@ -175,7 +173,7 @@ impl Protocol {
         VarInt(packet_data.len() as i32).serialize(&mut packet_data_len);
 
         let packet = if self.compression_enabled {
-            let compressed_data = compress_to_vec_zlib(&packet_data, 2); // Level 2 is optimal for net performance
+            let compressed_data = compress_to_vec_zlib(&packet_data, 3); // Level 2 is optimal for net performance
             let mut compressed_packet_data =
                 Vec::with_capacity(compressed_data.len() + packet_data_len.len() + 5);
             VarInt(compressed_data.len() as i32 + packet_data_len.len() as i32)

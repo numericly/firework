@@ -39,11 +39,7 @@ macro_rules! define_server_bound_protocol {
                 let state = *state.read().await;
                 match (state, VarInt::deserialize(&mut reader)?.0) {
                     $(
-                        (ConnectionState::$state, $id) => Ok(Self::$name($name::deserialize(reader).map_err(|e| {
-                            let string = stringify!($name);
-                            println!("Error while deserializing packet: {}", string);
-                            e
-                        })?)),
+                        (ConnectionState::$state, $id) => Ok(Self::$name($name::deserialize(reader)?)),
                     )*
                     (state, id) => Err(DeserializeError::InvalidPacketID { id, state: state as u8 }),
                 }

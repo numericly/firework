@@ -37,7 +37,8 @@ firework = { path = "./firework" }
 
 # Small binary
 [profile.release]
+debug = true
 # codegen-units = 1
 # lto = true
-strip = true  # Automatically strip symbols from the binary.
+# strip = true  # Automatically strip symbols from the binary.
 # opt-level = "z"  # Optimize for size.

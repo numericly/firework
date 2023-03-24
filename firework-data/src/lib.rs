@@ -189,10 +189,7 @@ impl<'de> Deserialize<'de> for Block {
                             None => Err(de::Error::missing_field("Name")),
                         }
                     }
-                    None => {
-                        println!("air");
-                        Ok(Block::Air(blocks::Air {}))
-                    }
+                    None => Ok(Block::Air(blocks::Air {})),
                 }
             }
         }

@@ -1,4 +1,4 @@
-use std::{sync::Arc};
+use std::sync::Arc;
 
 use async_trait::async_trait;
 
@@ -13,7 +13,6 @@ use firework_data::items::{Compass, Item};
 use firework_protocol::data_types::{ItemNbt, Slot};
 use firework_protocol_core::VarInt;
 use serde_json::json;
-
 
 use crate::{MiniGameProxy, TransferData};
 
@@ -33,8 +32,6 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
         command: String,
     ) -> Result<Option<String>, ConnectionError> {
         let command_data = command.split(' ').collect::<Vec<&str>>();
-
-        println!("Command: {:?}", command_data);
 
         Ok(Some(command))
     }

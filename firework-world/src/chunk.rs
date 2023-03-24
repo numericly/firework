@@ -86,7 +86,7 @@ where
                 data: Data::Single(new_data),
             };
         } else {
-            println!("Palette length is {}", self.palette.len());
+            dbg!(&self.palette.len());
             let mut new_data = Vec::with_capacity(CONTAINER_SIZE);
             for i in 0..CONTAINER_SIZE {
                 let array_index = i / values_per_long;
@@ -132,9 +132,7 @@ trait Write {
 
 impl Chunk {
     pub fn from_zlib_reader(reader: &[u8]) -> Result<Chunk, WorldError> {
-        // let start = std::time::Instant::now();
         let raw_chunk: RawChunkData = from_zlib_reader(reader)?;
-        // println!("Deserialization took {:?}", start.elapsed());
 
         let mut section_offset = i8::MAX;
         let mut sections = Vec::new();

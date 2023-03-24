@@ -4,7 +4,7 @@ use firework_protocol::Protocol;
 use firework_world::World;
 use glide_server::GlideServerHandler;
 use lobby_server::LobbyServerHandler;
-use std::{sync::Arc};
+use std::sync::Arc;
 use tokio::sync::RwLock;
 
 mod glide_server;
@@ -183,7 +183,7 @@ impl ServerProxy for MiniGameProxy {
             Err(e) => Err(e),
         };
 
-        println!("result: {:?}, player: {}", result, client_data.profile.name);
+        dbg!(result, &client_data.profile.name);
 
         *self.connected_players.write().await -= 1;
     }

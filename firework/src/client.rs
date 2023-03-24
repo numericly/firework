@@ -37,6 +37,7 @@ use firework_protocol::{
 use firework_protocol_core::{DeserializeField, Position, SerializeField, UnsizedVec, VarInt};
 use rand::Rng;
 use serde_json::json;
+use std::collections::HashMap;
 use std::{
     fmt::Debug,
     sync::Arc,
@@ -244,6 +245,7 @@ where
     pub client_data: Arc<ClientData>,
     pub player: RwLock<Player>,
     pub gui: RwLock<Option<Box<dyn GuiScreen<Handler, Proxy> + Send + Sync>>>,
+    unsynced_entities: RwLock<HashMap<i32, Vec3>>,
     to_client: broadcast::Sender<ClientCommand<Proxy::TransferData>>,
     to_client_visual: broadcast::Sender<ClientCommand<Proxy::TransferData>>,
     connection: Arc<Protocol>,
@@ -271,6 +273,7 @@ where
             connection,
             client_data,
             to_client,
+            unsynced_entities: RwLock::new(HashMap::new()),
             to_client_visual,
             gui: RwLock::new(None),
             player: RwLock::new(player),
@@ -570,6 +573,31 @@ where
                 previous_rotation,
                 on_ground,
             } => {
+                if let Some(position) = &position {
+                    let unsynced_entities = self.unsynced_entities.read().await;
+                    if let Some(old_pos) = unsynced_entities.get(&entity_id).clone() {
+                        dbg!(old_pos, position, entity_id);
+                        let (yaw, pitch) = previous_rotation.serialize();
+                        self.send_packet(TeleportEntity {
+                            entity_id: VarInt(entity_id),
+                            x: position.x,
+                            y: position.y,
+                            z: position.z,
+                            yaw,
+                            pitch,
+                            on_ground,
+                        })
+                        .await?;
+                        self.send_packet(UpdateEntityHeadRotation {
+                            entity_id: VarInt(entity_id),
+                            yaw,
+                        })
+                        .await?;
+                        drop(unsynced_entities);
+                        self.unsynced_entities.write().await.remove(&entity_id);
+                        return Ok(None);
+                    }
+                }
                 match (position, rotation) {
                     (Some(pos), Some(rot)) => {
                         let (delta_x, delta_y, delta_z) = (
@@ -1013,165 +1041,13 @@ where
                     }
                 };
 
-                let used_item_slot;
-                let used_item;
-
-                {
+                let used_item = {
                     let player_read = self.player.read().await;
-                    used_item_slot = player_read.selected_slot.clone();
-                    used_item = match player_read.inventory.get_slot(InventorySlot::Hotbar {
-                        slot: used_item_slot.clone() as usize,
-                    }) {
+                    match player_read.inventory.get_slot(used_item_slot) {
                         Some(item) => Some(item.clone()),
                         None => None,
                     }
-                }
-                if let Some(used_item) = used_item {
-                    // logic for using items (this is hardcoded for now lol also it only works for the lobby server)
-                    // sorry future will probably doing other servers and being like why the heck doesn't this work
-
-                    match used_item.item_id.0.try_into().unwrap() {
-                        Compass::ID => {
-                            // open game queue menu
-
-                            let gui = GameQueueMenuGui {};
-
-                            self.send_packet(gui.open()).await?;
-
-                            self.send_packet(gui.draw()).await?;
-
-                            self.gui
-                                .write()
-                                .await
-                                .replace(Box::new(GameMenu::new(self).await?));
-                        }
-                        RedDye::ID => {
-                            // while the resource pack is loading, use a placeholder inert item
-                            let inert_slot = Slot {
-                                item_id: VarInt(GrayDye::ID as i32),
-                                item_count: 1,
-                                nbt: ItemNbt {
-                                    display: Some(ItemNbtDisplay {
-                                        name: Some(
-                                            r#"{"italic":false,"extra":[
-                                            {"color":"white","text":"Resource Pack: "},
-                                            {"color":"aqua","text":"Loading"},
-                                            {"color":"gray","text":" (Right Click)"}
-                                            ],"text":""}"#
-                                                .to_string(),
-                                        ),
-                                        lore: None,
-                                    }),
-                                    ..Default::default()
-                                },
-                            };
-                            self.connection
-                                .write_packet(SetContainerSlot {
-                                    window_id: 0,
-                                    slot: used_item_slot as i16 + 36,
-                                    item: Some(inert_slot),
-                                    state_id: VarInt(0),
-                                })
-                                .await?;
-
-                            println!("Sending resource pack");
-
-                            // i just hosted it on my dropbox, you can host it on your own server or something if you want
-                            let packet = ResourcePack::new(
-                                "https://cdn.discordapp.com/attachments/921939326517002241/1072220230836826202/MusicPack.zip"
-                                    .to_string(),
-                                None,
-                            )
-                            .await;
-                            if let Err(e) = packet {
-                                println!("Error sending resource pack: {:?}", e);
-                            } else {
-                                self.send_packet(packet.unwrap()).await?;
-                            }
-                            let green_dye_slot = Slot {
-                                item_id: VarInt(LimeDye::ID as i32),
-                                item_count: 1,
-                                nbt: ItemNbt {
-                                    display: Some(ItemNbtDisplay {
-                                        name: Some(
-                                            r#"{"italic":false,"extra":[
-                                            {"color":"white","text":"Resource Pack: "},
-                                            {"color":"green","text":"Enabled"},
-                                            {"color":"gray","text":" (Right click)"}
-                                            ],"text":""}"#
-                                                .to_string(),
-                                        ),
-                                        lore: None,
-                                    }),
-                                    ..Default::default()
-                                },
-                            };
-                            // set the item in the hotbar
-                            self.connection
-                                .write_packet(SetContainerSlot {
-                                    window_id: 0,
-                                    state_id: VarInt(0),
-                                    slot: (used_item_slot as i16) + 36,
-                                    item: Some(green_dye_slot.clone()), // clone bad but this code will be changed anyways
-                                })
-                                .await?;
-
-                            self.player.write().await.inventory.set_slot(
-                                InventorySlot::Hotbar {
-                                    slot: used_item_slot as usize,
-                                },
-                                Some(green_dye_slot),
-                            );
-                        }
-                        LimeDye::ID => {
-                            // remove the resource pack from the client
-
-                            // maybe this works by sending a resource pack packet with an empty url and forced to true
-                            println!("Removing resource pack");
-                            let packet = ResourcePack {
-                                url: "".to_string(),
-                                hash: "".to_string(),
-                                forced: false,
-                                prompt: None,
-                            };
-                            self.send_packet(packet).await?;
-                            let red_dye_slot = Slot {
-                                item_id: VarInt(RedDye::ID as i32),
-                                item_count: 1,
-                                nbt: ItemNbt {
-                                    display: Some(ItemNbtDisplay {
-                                        name: Some(
-                                            r#"{"italic":false,"extra":[
-                                            {"color":"white","text":"Resource Pack: "},
-                                            {"color":"red","text":"Disabled"},
-                                            {"color":"gray","text":" (Right click)"}
-                                            ],"text":""}"#
-                                                .to_string(),
-                                        ),
-                                        lore: None,
-                                    }),
-                                    ..Default::default()
-                                },
-                            };
-                            self.connection
-                                .write_packet(SetContainerSlot {
-                                    window_id: 0,
-                                    state_id: VarInt(0),
-                                    slot: (used_item_slot as i16) + 36,
-                                    item: Some(red_dye_slot.clone()), // clone bad but this code will be changed anyways
-                                })
-                                .await?;
-                            // set the item in the hotbar
-                            self.player.write().await.inventory.set_slot(
-                                InventorySlot::Hotbar {
-                                    slot: used_item_slot as usize,
-                                },
-                                Some(red_dye_slot),
-                            )
-                        }
-                        _ => {}
-                    }
-                }
+                };
             }
             _ => (),
         };
@@ -1220,6 +1096,7 @@ where
                     }
                 };
                 if let Some(packet) = packet {
+                    // dbg!(x + chunk_x, z + chunk_z);
                     self.send_packet(packet).await?;
                 }
                 player_loaded_chunks.insert((x + chunk_x, z + chunk_z));
@@ -1317,6 +1194,7 @@ where
         })
         .await?;
 
+        let mut unsynced_players = self.unsynced_entities.write().await;
         for client in self.server.player_list.iter() {
             if client.client_data.uuid == self.client_data.uuid {
                 continue;
@@ -1325,6 +1203,8 @@ where
             self.send_packet({
                 let player = client.player.read().await;
                 let (yaw, pitch) = player.rotation.serialize();
+
+                unsynced_players.insert(client.client_data.entity_id, player.position.clone());
 
                 SpawnPlayer {
                     entity_id: VarInt(client.client_data.entity_id),
@@ -1458,6 +1338,7 @@ where
         let multiplier = previous_position.time.elapsed().as_secs_f64()
             / Duration::from_millis(50).as_secs_f64();
 
+        println!("{:?} {}", delta.clone() * Vec3::scalar(20.), multiplier);
         delta * Vec3::new(multiplier, multiplier, multiplier)
     }
 }

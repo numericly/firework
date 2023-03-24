@@ -13,10 +13,10 @@ use firework_protocol::{read_specific_packet, ConnectionState, Protocol, Protoco
 use firework_protocol_core::VarInt;
 use firework_world::World;
 use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
-use std::fmt::Debug;
 use std::sync::Arc;
 use std::time::Duration;
 use std::{collections::HashSet, time::Instant};
+use std::{fmt::Debug, ops::Div};
 use std::{marker::PhantomData, ops::Sub};
 use std::{net::SocketAddr, ops::Mul};
 use std::{num::ParseIntError, ops::Add};
@@ -157,6 +157,18 @@ impl Mul for Vec3 {
             x: self.x * rhs.x,
             y: self.y * rhs.y,
             z: self.z * rhs.z,
+        }
+    }
+}
+
+impl Div for Vec3 {
+    type Output = Vec3;
+
+    fn div(self, rhs: Vec3) -> Vec3 {
+        Vec3 {
+            x: self.x / rhs.x,
+            y: self.y / rhs.y,
+            z: self.z / rhs.z,
         }
     }
 }
@@ -621,10 +633,10 @@ where
             .await?;
 
         let (to_client_sender, to_client_receiver) =
-            broadcast::channel::<ClientCommand<Proxy::TransferData>>(10);
+            broadcast::channel::<ClientCommand<Proxy::TransferData>>(100);
 
         let (to_client_visual_sender, to_client_visual_receiver) =
-            broadcast::channel::<ClientCommand<Proxy::TransferData>>(10);
+            broadcast::channel::<ClientCommand<Proxy::TransferData>>(100);
 
         // generate client
         let uuid = player.uuid.clone();
@@ -665,8 +677,7 @@ where
         self.broadcast_chat(format!(
             r#"{{"text": "{} joined the game","color":"yellow"}}"#,
             client.player.read().await.profile.name
-        ))
-        .await;
+        ));
 
         let status = self
             .clone()
@@ -682,8 +693,7 @@ where
         self.broadcast_chat(format!(
             r#"{{"text": "{} left the game","color":"yellow"}}"#,
             client.player.read().await.profile.name
-        ))
-        .await;
+        ));
         self.broadcast_player_leave(&client).await;
 
         drop(client);
@@ -870,7 +880,7 @@ where
     ) -> Result<(), ConnectionError> {
         let message = client.handler.on_chat(client, message).await?;
         if let Some(message) = message {
-            self.broadcast_chat(message).await;
+            self.broadcast_chat(message);
         }
         Ok(())
     }
@@ -892,35 +902,34 @@ where
         rotation: Option<Rotation>,
     ) -> Result<(), ConnectionError> {
         let previous_pos = client.player.read().await.position.clone();
-        let pos = if let Some(pos) = position {
-            let pos = client.handler.on_move(client, pos).await?;
-            if let Some(pos) = &pos {
+        let position = if let Some(position) = position {
+            let position = client.handler.on_move(client, position).await?;
+            if let Some(position) = &position {
                 let mut player = client.player.write().await;
                 if let Some(previous_position) = &player.previous_position {
                     let multiplier = previous_position.time.elapsed().as_secs_f64()
                         / Duration::from_millis(50).as_secs_f64();
 
-                    let delta = pos.clone() - previous_position.position.clone();
-                    player.velocity =
-                        delta * Vec3::new(multiplier, multiplier, multiplier) * Vec3::scalar(0.5);
+                    let delta = position.clone() - previous_position.position.clone();
+                    player.velocity = delta * Vec3::scalar(multiplier);
                 }
                 player.previous_position = Some(PreviousPosition {
-                    position: previous_pos.clone(),
+                    position: position.clone(),
                     time: Instant::now(),
                 });
-                player.position = pos.clone();
+                player.position = position.clone();
 
                 let previous_chunk_x = previous_pos.x as i32 >> 4;
                 let previous_chunk_z = previous_pos.z as i32 >> 4;
 
-                let chunk_x = pos.x as i32 >> 4;
-                let chunk_z = pos.z as i32 >> 4;
+                let chunk_x = position.x as i32 >> 4;
+                let chunk_z = position.z as i32 >> 4;
 
                 if previous_chunk_x != chunk_x || previous_chunk_z != chunk_z {
                     client.move_chunk(chunk_x, chunk_z).await?;
                 }
             };
-            pos
+            position
         } else {
             None
         };
@@ -937,7 +946,7 @@ where
 
         let on_ground = client.handler.on_on_ground(client, on_ground).await?;
 
-        self.broadcast_entity_move(client, pos, previous_pos, rot, previous_rot, on_ground)
+        self.broadcast_entity_move(client, position, previous_pos, rot, previous_rot, on_ground)
             .await;
 
         Ok(())
@@ -951,8 +960,7 @@ where
         let mut player = client.player.write().await;
         player.elytra_flying = flying;
         let metadata = vec![EntityMetadata::EntityFlags(player.entity_flags())];
-        self.broadcast_entity_metadata_update(client, metadata)
-            .await;
+        self.broadcast_entity_metadata_update(client, metadata, false);
         Ok(())
     }
     pub async fn handle_sneaking(
@@ -972,8 +980,7 @@ where
                 }),
                 EntityMetadata::EntityFlags(player.entity_flags()),
             ];
-            self.broadcast_entity_metadata_update(client, metadata)
-                .await;
+            self.broadcast_entity_metadata_update(client, metadata, false);
         }
         Ok(())
     }
@@ -987,13 +994,12 @@ where
             let mut player = client.player.write().await;
             player.sprinting = sprinting;
             let metadata = vec![EntityMetadata::EntityFlags(player.entity_flags())];
-            self.broadcast_entity_metadata_update(client, metadata)
-                .await;
+            self.broadcast_entity_metadata_update(client, metadata, false);
         }
         Ok(())
     }
     #[allow(unused_must_use)]
-    pub async fn broadcast_chat(&self, message: String) {
+    pub fn broadcast_chat(&self, message: String) {
         // TODO: join futures
         for client in self.player_list.iter() {
             client.show_chat_message(message.clone());
@@ -1024,13 +1030,14 @@ where
         }
     }
     #[allow(unused_must_use)]
-    pub async fn broadcast_entity_metadata_update(
+    pub fn broadcast_entity_metadata_update(
         &self,
         client: &Client<Handler, Proxy>,
         metadata: Vec<EntityMetadata>,
+        update_all: bool,
     ) {
         for other_client in self.player_list.iter() {
-            if client.client_data.entity_id == other_client.client_data.entity_id {
+            if client.client_data.entity_id == other_client.client_data.entity_id && !update_all {
                 continue;
             }
             other_client.__update_entity_metadata(client.client_data.entity_id, metadata.clone());

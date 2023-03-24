@@ -1,16 +1,17 @@
 use async_trait::async_trait;
-use cipher::typenum::Min;
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
-    commands::{ArgumentType, CommandNode, StringTypes},
+    commands::{Argument, CommandNode},
+    entities::{EntityMetadata, Pose},
     AxisAlignedBB, BlockPos, ConnectionError, PlayerHandler, Rotation, Server, ServerHandler, Vec3,
 };
 use firework_authentication::Profile;
 use firework_data::items::{Elytra, Item};
 use firework_protocol::data_types::{ItemNbt, Particle, Particles, Slot};
 use firework_protocol_core::VarInt;
+use serde_json::json;
 use std::{sync::Arc, time::Instant};
-use tokio::sync::RwLock;
+use tokio::sync::{Mutex, RwLock};
 
 use crate::MiniGameProxy;
 
@@ -51,7 +52,7 @@ const CANYON_BOOSTS: [Boost; 8] = [
                 z: 352,
             },
         },
-        velocity: Vec3::new(0., 0.02, 0.11),
+        velocity: Vec3::new(0., 0., 0.06),
         particle_type: BoostParticleType::BoostSouth,
     },
     Boost {
@@ -176,17 +177,19 @@ struct BoostStatus {
 
 enum GameState {
     Waiting,
+    Starting { ticks_until_start: u16 },
     Running,
 }
 
 pub struct GlideServerHandler {
     pub created_at: Instant,
-    game_state: RwLock<GameState>,
+    game_state: Mutex<GameState>,
     commands: CommandNode<Self, MiniGameProxy>,
 }
 
 pub struct GlidePlayerHandler {
     boost_status: RwLock<Option<BoostStatus>>,
+    animation_frame: Mutex<u8>,
     server: Arc<Server<GlideServerHandler, MiniGameProxy>>,
     proxy: Arc<MiniGameProxy>,
 }
@@ -199,21 +202,28 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
     ) -> Self {
         Self {
             boost_status: RwLock::new(None),
+            animation_frame: Mutex::new(0),
             server,
             proxy,
         }
     }
 
+    async fn on_move(
+        &self,
+        client: &Client<GlideServerHandler, MiniGameProxy>,
+        pos: Vec3,
+    ) -> Result<Option<Vec3>, ConnectionError> {
+        let start = &client.player.read().await.position;
+        let end = &pos;
+        Ok(Some(pos))
+    }
     async fn on_tick(
         &self,
         client: &Client<GlideServerHandler, MiniGameProxy>,
     ) -> Result<(), ConnectionError> {
+        const PARTICLE_DENSITY: i32 = 2;
+
         let time = client.server.handler.created_at.elapsed().as_secs_f32();
-        let particle_density = 2f32;
-        // check if particle_density is a whole number, if not, panic
-        if particle_density != particle_density.round() {
-            panic!("particle_density must be a whole number")
-        }
         let position = client.player.read().await.position.clone();
         for boost in CANYON_BOOSTS.iter() {
             if boost.area.within(BlockPos::from(position.clone())) {
@@ -270,7 +280,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                 );
             }
 
-            let animation_phase = (time * 0.5 * boost_direction_multiplier).rem_euclid(6.);
+            let animation_phase = (time * 0.4 * boost_direction_multiplier).rem_euclid(6.);
 
             if boost.particle_type == BoostParticleType::Smoke {
             } else if [BoostParticleType::BoostSouth, BoostParticleType::BoostNorth]
@@ -282,10 +292,10 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                     // loop through the amount of particles in each chevron
                     // first, draw the top chevrons
                     for particle_number in
-                        0..=((boost.area.max.x - boost.area.min.x) * particle_density as i32)
+                        0..=((boost.area.max.x - boost.area.min.x) * PARTICLE_DENSITY)
                     {
-                        let particle_x =
-                            boost.area.min.x as f32 + particle_number as f32 / particle_density;
+                        let particle_x = boost.area.min.x as f32
+                            + particle_number as f32 / PARTICLE_DENSITY as f32;
                         let particle_y = boost.area.max.y as f32;
                         let particle_z =
                             boost.area.min.z as f32 + chevron_number as f32 * 6. + animation_phase;
@@ -306,11 +316,11 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                     }
                     //then, draw the left and right chevrons
                     for particle_number in
-                        0..=((boost.area.max.y - boost.area.min.y) * particle_density as i32)
+                        0..=((boost.area.max.y - boost.area.min.y) * PARTICLE_DENSITY)
                     {
                         let particle_x = boost.area.min.x as f32;
-                        let particle_y =
-                            boost.area.min.y as f32 + particle_number as f32 / particle_density;
+                        let particle_y = boost.area.min.y as f32
+                            + particle_number as f32 / PARTICLE_DENSITY as f32;
                         let particle_z =
                             boost.area.min.z as f32 + chevron_number as f32 * 6. + animation_phase;
                         // offset the z based on the distance to the center of x (45deg angle)
@@ -340,13 +350,13 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                     // loop through the amount of particles in each chevron
                     // first, draw the top chevrons
                     for particle_number in
-                        0..=((boost.area.max.z - boost.area.min.z) * particle_density as i32)
+                        0..=((boost.area.max.z - boost.area.min.z) * PARTICLE_DENSITY)
                     {
                         let particle_x =
                             boost.area.min.x as f32 + chevron_number as f32 * 6. + animation_phase;
                         let particle_y = boost.area.max.y as f32;
-                        let particle_z =
-                            boost.area.min.z as f32 + particle_number as f32 / particle_density;
+                        let particle_z = boost.area.min.z as f32
+                            + particle_number as f32 / PARTICLE_DENSITY as f32;
                         // offset the z based on the distance to the center of x (45deg angle)
                         let particle_x =
                             particle_x - (particle_z - middle_z).abs() * boost_direction_multiplier;
@@ -364,12 +374,12 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                     }
                     //then, draw the left and right chevrons
                     for particle_number in
-                        0..=((boost.area.max.y - boost.area.min.y) * particle_density as i32)
+                        0..=((boost.area.max.y - boost.area.min.y) * PARTICLE_DENSITY)
                     {
                         let particle_x =
                             boost.area.min.x as f32 + chevron_number as f32 * 6. + animation_phase;
-                        let particle_y =
-                            boost.area.min.y as f32 + particle_number as f32 / particle_density;
+                        let particle_y = boost.area.min.y as f32
+                            + particle_number as f32 / PARTICLE_DENSITY as f32;
                         let particle_z = boost.area.min.z as f32;
                         // offset the z based on the distance to the center of x (45deg angle)
                         let particle_x =
@@ -395,8 +405,15 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                 }
             }
             // send the particles to the client
-            client.send_particles(particles)
+            let mut animation_frame = self.animation_frame.lock().await;
+            if *animation_frame == 5 {
+                client.send_particles(particles);
+                *animation_frame = 0;
+            } else {
+                *animation_frame += 1;
+            }
         }
+
         let boost_status = self.boost_status.read().await.clone();
         if let Some(BoostStatus { percent, direction }) = boost_status {
             if percent >= 1. {
@@ -405,7 +422,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                 let velocity = client.player.read().await.velocity.clone();
                 client.set_velocity(velocity + direction.clone());
                 self.boost_status.write().await.replace(BoostStatus {
-                    percent: percent + 0.08,
+                    percent: percent + 0.05,
                     direction,
                 });
             }
@@ -421,21 +438,44 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
     fn new() -> Self {
         Self {
             created_at: Instant::now(),
-            game_state: RwLock::new(GameState::Waiting),
-            commands: CommandNode::root()
-                .sub_command(
-                    CommandNode::literal("play").sub_command(CommandNode::argument(
-                        "game",
-                        ArgumentType::String {
-                            string_type: StringTypes::SingleWord,
-                            suggestions: None,
-                        },
-                    )),
-                )
-                .sub_command(CommandNode::literal("echo")),
+            game_state: Mutex::new(GameState::Waiting),
+            commands: CommandNode::root().sub_command(CommandNode::literal("start").executable(
+                Box::new(move |args, client, server, proxy| {
+                    Box::pin(start(args, client, server, proxy))
+                }),
+            )),
         }
     }
-    async fn on_tick(&self, _server: &Server<Self, MiniGameProxy>, _proxy: &MiniGameProxy) {}
+    async fn on_tick(&self, server: &Server<Self, MiniGameProxy>, proxy: &MiniGameProxy) {
+        let mut game_state = self.game_state.lock().await;
+        match &*game_state {
+            GameState::Waiting => {}
+            GameState::Starting { ticks_until_start } => {
+                if *ticks_until_start != 0 {
+                    if *ticks_until_start % 20 == 0 {
+                        server.broadcast_chat(
+                            json!(
+                                {
+                                    "text": format!("The game is starting in {}", *ticks_until_start / 20),
+                                }
+                            )
+                            .to_string(),
+                        );
+                    }
+                    *game_state = GameState::Starting {
+                        ticks_until_start: ticks_until_start - 1,
+                    };
+                    return;
+                }
+                *game_state = GameState::Running;
+
+                drop(game_state);
+
+                self.start_game(server, proxy).await;
+            }
+            GameState::Running => {}
+        }
+    }
     async fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError> {
         let mut player = Player {
             position: Vec3::new(0.5, 168.0, 0.5),
@@ -468,4 +508,46 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
     ) -> Result<&CommandNode<Self, MiniGameProxy>, ConnectionError> {
         Ok(&self.commands)
     }
+}
+
+impl GlideServerHandler {
+    pub async fn start_game(&self, server: &Server<Self, MiniGameProxy>, proxy: &MiniGameProxy) {
+        for client in server.player_list.iter() {
+            {
+                let mut player = client.player.write().await;
+                player.elytra_flying = false;
+                println!("{:?}", player.entity_flags());
+                server.broadcast_entity_metadata_update(
+                    &client,
+                    vec![
+                        EntityMetadata::EntityFlags(player.entity_flags()),
+                        EntityMetadata::EntityPose(Pose::Standing),
+                    ],
+                    true,
+                );
+            }
+            client.show_chat_message(
+                json!(
+                    {
+                        "text": "The game has started!",
+                        "color": "green",
+                        "bold": true
+                    }
+                )
+                .to_string(),
+            );
+            client.sync_position(Vec3::new(0.5, 168.0, 0.5), Rotation { yaw: 0., pitch: 0. })
+        }
+    }
+}
+
+async fn start(
+    args: Vec<Argument>,
+    client: &Client<GlideServerHandler, MiniGameProxy>,
+    _server: &Server<GlideServerHandler, MiniGameProxy>,
+    _proxy: &MiniGameProxy,
+) {
+    *client.server.handler.game_state.lock().await = GameState::Starting {
+        ticks_until_start: 60,
+    };
 }
