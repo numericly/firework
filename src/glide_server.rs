@@ -30,6 +30,12 @@ struct Boost {
     particle_type: BoostParticleType,
 }
 
+struct Checkpoint {
+    plane: AxisAlignedPlane,
+    spawn_position: Vec3,
+    spawn_rotation: Rotation,
+}
+
 #[derive(Debug, PartialEq, Eq)]
 enum BoostParticleType {
     BoostEast,
@@ -170,14 +176,30 @@ const CANYON_BOOSTS: [Boost; 8] = [
     },
 ];
 
-const CANYON_CHECKPOINTS: [AxisAlignedPlane; 2] = [
-    AxisAlignedPlane::Z {
-        min: Vec3::new(-4.5, 66., 193.5),
-        max: Vec3::new(26.5, 187., 193.5),
+const CANYON_CHECKPOINTS: [Checkpoint; 3] = [
+    Checkpoint {
+        plane: AxisAlignedPlane::Z {
+            min: Vec3::new(-4.5, 66., 193.5),
+            max: Vec3::new(26.5, 187., 193.5),
+        },
+        spawn_position: Vec3::new(0.5, 145.5, 168.5),
+        spawn_rotation: Rotation::new(-14.7, 36.7),
     },
-    AxisAlignedPlane::Z {
-        min: Vec3::new(-16.5, 22., 460.5),
-        max: Vec3::new(13.5, 187., 460.5),
+    Checkpoint {
+        plane: AxisAlignedPlane::Z {
+            min: Vec3::new(-16.5, 22., 460.5),
+            max: Vec3::new(13.5, 187., 460.5),
+        },
+        spawn_position: Vec3::new(-2., 122.5, 439.),
+        spawn_rotation: Rotation::new(4.8, 21.2),
+    },
+    Checkpoint {
+        plane: AxisAlignedPlane::Z {
+            min: Vec3::new(106., 35., 575.5),
+            max: Vec3::new(142., 71., 575.5),
+        },
+        spawn_position: Vec3::new(121., 59., 584.),
+        spawn_rotation: Rotation::new(-177.7, 9.3),
     },
 ];
 
@@ -204,7 +226,7 @@ pub struct GlidePlayerHandler {
     animation_frame: Mutex<u8>,
     server: Arc<Server<GlideServerHandler, MiniGameProxy>>,
     proxy: Arc<MiniGameProxy>,
-    checkpoints: Mutex<[bool; 2]>,
+    checkpoints: Mutex<[bool; 3]>,
     last_damage: Mutex<Instant>,
 }
 
@@ -219,7 +241,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
             animation_frame: Mutex::new(0),
             server,
             proxy,
-            checkpoints: Mutex::new([false; 2]),
+            checkpoints: Mutex::new([false; 3]),
             last_damage: Mutex::new(Instant::now()),
         }
     }
@@ -232,8 +254,12 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
         let start = &client.player.read().await.position;
         let end = &pos;
         for (i, checkpoint) in CANYON_CHECKPOINTS.iter().enumerate() {
-            if checkpoint.intersects(start, end) {
-                self.checkpoints.lock().await[i] = true;
+            if checkpoint.plane.intersects(start, end) {
+                println!("Checkpoint {} reached!", i);
+                {
+                    self.checkpoints.lock().await[i] = true;
+                }
+                println!("Checkpoints: {:?}", self.checkpoints.lock().await);
             }
         }
         Ok(Some(pos))
@@ -467,7 +493,25 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                 let health = client.player.read().await.health;
                 if health <= 1. {
                     client.set_health(6.);
-                    client.sync_position(Vec3::new(0., 400., 0.), Rotation::default());
+                    let mut greatest_checkpoint = &Checkpoint {
+                        plane: AxisAlignedPlane::X {
+                            min: Vec3::scalar(0.),
+                            max: Vec3::scalar(0.),
+                        },
+                        spawn_position: Vec3::new(0.5, 173., 0.5),
+                        spawn_rotation: Rotation::new(0., 22.2),
+                    };
+                    for (i, has_checkpoint) in
+                        client.handler.checkpoints.lock().await.iter().enumerate()
+                    {
+                        if *has_checkpoint {
+                            greatest_checkpoint = &CANYON_CHECKPOINTS[i];
+                        }
+                    }
+                    client.sync_position(
+                        greatest_checkpoint.spawn_position.clone(),
+                        greatest_checkpoint.spawn_rotation.clone(),
+                    );
                     client.set_velocity(Vec3::scalar(0.));
                 } else {
                     client.set_health(health - 1.);

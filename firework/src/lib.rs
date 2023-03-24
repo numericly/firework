@@ -120,19 +120,19 @@ impl AxisAlignedPlane {
 
         match self {
             Self::X { min, max } => {
-                if delta.x == 0. {
+                if delta.x == 0.0 {
                     return false;
                 }
                 t = (min.x - starting_position.x) / delta.x;
             }
             Self::Y { min, max } => {
-                if delta.y == 0. {
+                if delta.y == 0.0 {
                     return false;
                 }
                 t = (min.y - starting_position.y) / delta.y;
             }
             Self::Z { min, max } => {
-                if delta.z == 0. {
+                if delta.z == 0.0 {
                     return false;
                 }
                 t = (min.z - starting_position.z) / delta.z;
@@ -145,7 +145,6 @@ impl AxisAlignedPlane {
             return false;
         }
         let intersection = starting_position.clone() + delta * Vec3::scalar(t);
-        println!("intersection: {:?}", intersection);
         self.within(intersection)
     }
 
@@ -247,7 +246,7 @@ pub struct Rotation {
 }
 
 impl Rotation {
-    pub fn new(yaw: f32, pitch: f32) -> Rotation {
+    pub const fn new(yaw: f32, pitch: f32) -> Rotation {
         Rotation { yaw, pitch }
     }
     pub fn serialize(&self) -> (i8, i8) {
