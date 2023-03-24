@@ -83,5 +83,9 @@
     }
   },
   "rust-analyzer.trace.server": "verbose",
-  "rust-analyzer.server.extraEnv": null
+  "rust-analyzer.server.extraEnv": null,
+  "workbench.colorCustomizations": {
+    "minimap.background": "#00000000",
+    "scrollbar.shadow": "#00000000"
+  }
 }

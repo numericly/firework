@@ -1,8 +1,10 @@
 use async_trait::async_trait;
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
-    commands::{ArgumentType, CommandNode, StringTypes},
-    AxisAlignedBB, BlockPos, ConnectionError, PlayerHandler, Rotation, Server, ServerHandler, Vec3,
+    commands::{Argument, ArgumentType, CommandNode, StringTypes},
+    entities::{EntityMetadata, Pose},
+    AxisAlignedBB, AxisAlignedPlane, BlockPos, ConnectionError, PlayerHandler, Rotation, Server,
+    ServerHandler, Vec3,
 };
 use firework_authentication::Profile;
 use firework_data::items::{Elytra, Item};
@@ -168,10 +170,16 @@ const CANYON_BOOSTS: [Boost; 8] = [
     },
 ];
 
-const CANYON_CHECKPOINTS: [AxisAlignedPlane; 1] = [AxisAlignedPlane::Z {
-    min: Vec3::new(-4.5, 66., 193.5),
-    max: Vec3::new(26.5, 187., 193.5),
-}];
+const CANYON_CHECKPOINTS: [AxisAlignedPlane; 2] = [
+    AxisAlignedPlane::Z {
+        min: Vec3::new(-4.5, 66., 193.5),
+        max: Vec3::new(26.5, 187., 193.5),
+    },
+    AxisAlignedPlane::Z {
+        min: Vec3::new(-16.5, 22., 460.5),
+        max: Vec3::new(13.5, 187., 460.5),
+    },
+];
 
 #[derive(Debug, Clone)]
 struct BoostStatus {
@@ -196,6 +204,8 @@ pub struct GlidePlayerHandler {
     animation_frame: Mutex<u8>,
     server: Arc<Server<GlideServerHandler, MiniGameProxy>>,
     proxy: Arc<MiniGameProxy>,
+    checkpoints: Mutex<[bool; 2]>,
+    last_damage: Mutex<Instant>,
 }
 
 #[async_trait]
@@ -209,6 +219,8 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
             animation_frame: Mutex::new(0),
             server,
             proxy,
+            checkpoints: Mutex::new([false; 2]),
+            last_damage: Mutex::new(Instant::now()),
         }
     }
 
@@ -219,6 +231,11 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
     ) -> Result<Option<Vec3>, ConnectionError> {
         let start = &client.player.read().await.position;
         let end = &pos;
+        for (i, checkpoint) in CANYON_CHECKPOINTS.iter().enumerate() {
+            if checkpoint.intersects(start, end) {
+                self.checkpoints.lock().await[i] = true;
+            }
+        }
         Ok(Some(pos))
     }
     async fn on_tick(
@@ -434,6 +451,31 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
 
         Ok(())
     }
+
+    async fn on_on_ground(
+        &self,
+        client: &Client<GlideServerHandler, MiniGameProxy>,
+        on_ground: bool,
+    ) -> Result<bool, ConnectionError> {
+        if on_ground {
+            let mut last_damage = client.handler.last_damage.lock().await;
+            if last_damage.elapsed().as_millis() < 1000 {
+                println!("last damage too recent");
+            } else {
+                println!("damaging player");
+                *last_damage = Instant::now();
+                let health = client.player.read().await.health;
+                if health <= 1. {
+                    client.set_health(6.);
+                    client.sync_position(Vec3::new(0., 400., 0.), Rotation::default());
+                    client.set_velocity(Vec3::scalar(0.));
+                } else {
+                    client.set_health(health - 1.);
+                }
+            }
+        }
+        Ok(on_ground)
+    }
 }
 
 #[async_trait]
@@ -546,7 +588,7 @@ impl GlideServerHandler {
 }
 
 async fn start(
-    args: Vec<Argument>,
+    _args: Vec<Argument>,
     client: &Client<GlideServerHandler, MiniGameProxy>,
     _server: &Server<GlideServerHandler, MiniGameProxy>,
     _proxy: &MiniGameProxy,

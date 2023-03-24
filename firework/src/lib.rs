@@ -113,14 +113,10 @@ pub enum AxisAlignedPlane {
 }
 
 impl AxisAlignedPlane {
-    pub fn intersects(&self, starting_position: Vec3, delta: Vec3) -> bool {
-        println!(
-            "ray from {:?} to {:?}",
-            starting_position,
-            starting_position.clone() + delta.clone()
-        );
-
+    pub fn intersects(&self, starting_position: &Vec3, end: &Vec3) -> bool {
         let t;
+
+        let delta = end.clone() - starting_position.clone();
 
         match self {
             Self::X { min, max } => {
@@ -148,7 +144,7 @@ impl AxisAlignedPlane {
         if t < 0.0 || t > 1.0 {
             return false;
         }
-        let intersection = starting_position + delta * Vec3::scalar(t);
+        let intersection = starting_position.clone() + delta * Vec3::scalar(t);
         println!("intersection: {:?}", intersection);
         self.within(intersection)
     }
