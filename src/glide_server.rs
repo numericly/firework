@@ -1,8 +1,10 @@
 use async_trait::async_trait;
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
-    commands::{ArgumentType, CommandNode, StringTypes},
-    AxisAlignedBB, BlockPos, ConnectionError, PlayerHandler, Rotation, Server, ServerHandler, Vec3,
+    commands::{Argument, ArgumentType, CommandNode, StringTypes},
+    entities::{EntityMetadata, Pose},
+    AxisAlignedBB, AxisAlignedPlane, BlockPos, ConnectionError, PlayerHandler, Rotation, Server,
+    ServerHandler, Vec3,
 };
 use firework_authentication::Profile;
 use firework_data::items::{Elytra, Item};
@@ -546,7 +548,7 @@ impl GlideServerHandler {
 }
 
 async fn start(
-    args: Vec<Argument>,
+    _args: Vec<Argument>,
     client: &Client<GlideServerHandler, MiniGameProxy>,
     _server: &Server<GlideServerHandler, MiniGameProxy>,
     _proxy: &MiniGameProxy,

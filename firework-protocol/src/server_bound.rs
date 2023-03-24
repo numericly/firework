@@ -103,7 +103,13 @@ define_server_bound_protocol! {
     ChatMessage, 0x05, Play => {
         message: String // cryptography is mean
     },
-    ClientInformation, 0x07, Play => {
+    PlayerSession, 0x06, Play => {
+        session_id: u128,
+        expires_at: u64,
+        public_key: Vec<u8>,
+        key_signature: Vec<u8>
+    },
+    ClientInformation, 0x08, Play => {
         locale: String,
         view_distance: u8,
         chat_mode: ChatMode,
@@ -111,11 +117,11 @@ define_server_bound_protocol! {
         displayed_skin_parts: DisplaySkinParts,
         main_hand: MainHand
     },
-    CommandSuggestionsRequest, 0x08, Play => {
+    CommandSuggestionsRequest, 0x09, Play => {
         transaction_id: VarInt,
         command: String
     },
-    ClickContainer, 0x0A, Play => {
+    ClickContainer, 0x0B, Play => {
         window_id: u8,
         state_id: VarInt,
         slot: i16,
@@ -124,23 +130,23 @@ define_server_bound_protocol! {
         slots: Vec<SlotUpdate>,
         // cursor: Option<Slot>
     },
-    CloseContainerServerBound, 0x0B, Play => {
+    CloseContainerServerBound, 0x0C, Play => {
         window_id: u8
     },
-    PluginMessageServerBound, 0x0C, Play => {
+    PluginMessageServerBound, 0x0D, Play => {
         channel: String,
         data: UnsizedVec<u8>
     },
-    ServerBoundKeepAlive, 0x11, Play => {
+    ServerBoundKeepAlive, 0x12, Play => {
         id: i64
     },
-    SetPlayerPosition, 0x13, Play => {
+    SetPlayerPosition, 0x14, Play => {
         x: f64,
         y: f64,
         z: f64,
         on_ground: bool
     },
-    SetPlayerPositionAndRotation, 0x14, Play => {
+    SetPlayerPositionAndRotation, 0x15, Play => {
         x: f64,
         y: f64,
         z: f64,
@@ -148,34 +154,28 @@ define_server_bound_protocol! {
         pitch: f32,
         on_ground: bool
     },
-    SetPlayerRotation, 0x15, Play => {
+    SetPlayerRotation, 0x16, Play => {
         yaw: f32,
         pitch: f32,
         on_ground: bool
     },
-    SetPlayerOnGround, 0x16, Play => {
+    SetPlayerOnGround, 0x17, Play => {
         on_ground: bool
     },
-    PlayerAbilitiesServerBound, 0x1B, Play => {
+    PlayerAbilitiesServerBound, 0x1C, Play => {
         flags: PlayerAbilityFlags
     },
-    PlayerAction, 0x1C, Play => {
+    PlayerAction, 0x1D, Play => {
         status: PlayerActionStatus,
         location: Position,
         face: BlockFace,
         sequence: VarInt
 
     },
-    PlayerCommand, 0x1D, Play => {
+    PlayerCommand, 0x1E, Play => {
         entity_id: VarInt,
         action: PlayerCommandAction,
         action_parameter: VarInt,
-    },
-    PlayerSession, 0x20, Play => {
-        session_id: u128,
-        expires_at: u64,
-        public_key: Vec<u8>,
-        key_signature: Vec<u8>
     },
     ChangeRecipeBookSettings, 0x21, Play => {
         book_type: RecipeBookType,

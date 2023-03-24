@@ -38,8 +38,6 @@ where
     pub children: Vec<CommandNode<Handler, Proxy>>,
 
     node_index: Mutex<Option<i32>>,
-    h: PhantomData<Handler>,
-    p: PhantomData<Proxy>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -116,8 +114,6 @@ where
             execution: None,
             children: Vec::new(),
             node_index: Mutex::new(None),
-            h: PhantomData,
-            p: PhantomData,
         }
     }
     pub fn literal(name: &'static str) -> Self {
@@ -129,8 +125,6 @@ where
             execution: None,
             children: Vec::new(),
             node_index: Mutex::new(None),
-            h: PhantomData,
-            p: PhantomData,
         }
     }
     pub fn argument(name: &'static str, argument: ArgumentType) -> Self {
@@ -143,8 +137,6 @@ where
             execution: None,
             children: Vec::new(),
             node_index: Mutex::new(None),
-            h: PhantomData,
-            p: PhantomData,
         }
     }
     pub fn sub_command(mut self, node: CommandNode<Handler, Proxy>) -> Self {
