@@ -16,9 +16,10 @@ use firework_protocol::{
         ParticlePacket, PlayDisconnect, PlayerAbilities, PlayerInfo, PluginMessage, RemoveEntities,
         RemoveInfoPlayer, Respawn, SerializePacket, SetCenterChunk, SetContainerContent,
         SetDefaultSpawn, SetEntityMetadata, SetEntityVelocity, SetHealth, SetHeldItem, SetRecipes,
-        SetTags, SoundEffect, SoundSource, SpawnPlayer, SynchronizePlayerPosition,
-        SystemChatMessage, TeleportEntity, UnloadChunk, UpdateAttributes, UpdateEntityHeadRotation,
-        UpdateEntityPosition, UpdateEntityPositionAndRotation, UpdateEntityRotation,
+        SetSubtitleText, SetTags, SetTitleAnimationTimes, SetTitleText, SoundEffect, SoundSource,
+        SpawnPlayer, SynchronizePlayerPosition, SystemChatMessage, TeleportEntity, UnloadChunk,
+        UpdateAttributes, UpdateEntityHeadRotation, UpdateEntityPosition,
+        UpdateEntityPositionAndRotation, UpdateEntityRotation,
     },
     data_types::{
         AddPlayer, Arm, Attribute, Particle, PlayerAbilityFlags, PlayerCommandAction,
@@ -92,6 +93,17 @@ where
         title: String,
         window_type: WindowType,
         items: Vec<Option<Slot>>,
+    },
+    ShowTitle {
+        title: String,
+        subtitle: String,
+        fade_in: i32,
+        fade_out: i32,
+        stay: i32,
+    },
+    SendSystemChatMessage {
+        message: String, // TODO: chat
+        action_bar: bool,
     },
 }
 
@@ -855,6 +867,38 @@ where
                 })
                 .await?;
             }
+            ClientCommand::ShowTitle {
+                title,
+                subtitle,
+                fade_in,
+                fade_out,
+                stay,
+            } => {
+                self.send_packet(SetTitleText {
+                    title: title.clone(),
+                })
+                .await?;
+                self.send_packet(SetSubtitleText {
+                    subtitle: subtitle.clone(),
+                })
+                .await?;
+                self.send_packet(SetTitleAnimationTimes {
+                    fade_in,
+                    fade_out,
+                    stay,
+                })
+                .await?;
+            }
+            ClientCommand::SendSystemChatMessage {
+                message,
+                action_bar,
+            } => {
+                self.send_packet(SystemChatMessage {
+                    message,
+                    action_bar,
+                })
+                .await?;
+            }
         }
         Ok(None)
     }
@@ -1238,6 +1282,13 @@ where
         self.to_client.send(ClientCommand::ChatMessage { message });
     }
     #[allow(unused_must_use)]
+    pub fn send_system_chat_message(&self, message: String, action_bar: bool) {
+        self.to_client.send(ClientCommand::SendSystemChatMessage {
+            message,
+            action_bar,
+        });
+    }
+    #[allow(unused_must_use)]
     pub fn transfer(&self, transfer_data: Proxy::TransferData) {
         self.to_client.send(ClientCommand::Transfer {
             data: transfer_data,
@@ -1271,6 +1322,23 @@ where
             title,
             window_type,
             items,
+        });
+    }
+    #[allow(unused_must_use)]
+    pub fn show_title(
+        &self,
+        title: String,
+        subtitle: String,
+        fade_in: i32,
+        stay: i32,
+        fade_out: i32,
+    ) {
+        self.to_client.send(ClientCommand::ShowTitle {
+            title,
+            subtitle,
+            fade_in,
+            stay,
+            fade_out,
         });
     }
     #[allow(unused_must_use)]
@@ -1333,7 +1401,5 @@ where
         delta * Vec3::new(multiplier, multiplier, multiplier)
     }
 }
-
-//  hi xavier
 
 mod internal {}

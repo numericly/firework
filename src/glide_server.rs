@@ -176,7 +176,16 @@ const CANYON_BOOSTS: [Boost; 8] = [
     },
 ];
 
-const CANYON_CHECKPOINTS: [Checkpoint; 3] = [
+const CANYON_CHECKPOINTS: [Checkpoint; 10] = [
+    Checkpoint {
+        // start
+        plane: AxisAlignedPlane::X {
+            min: Vec3::new(0.5, 173., 0.5),
+            max: Vec3::new(0.5, 173., 0.5),
+        },
+        spawn_position: Vec3::new(0.5, 173., 0.5),
+        spawn_rotation: Rotation::new(0., 22.2),
+    },
     Checkpoint {
         plane: AxisAlignedPlane::Z {
             min: Vec3::new(-4.5, 66., 193.5),
@@ -200,6 +209,55 @@ const CANYON_CHECKPOINTS: [Checkpoint; 3] = [
         },
         spawn_position: Vec3::new(121., 59., 584.),
         spawn_rotation: Rotation::new(-177.7, 9.3),
+    },
+    Checkpoint {
+        plane: AxisAlignedPlane::Y {
+            min: Vec3::new(88., 37., 416.),
+            max: Vec3::new(155., 37., 458.),
+        },
+        spawn_position: Vec3::new(145., 51., 434.),
+        spawn_rotation: Rotation::new(90., 59.),
+    },
+    Checkpoint {
+        plane: AxisAlignedPlane::Z {
+            min: Vec3::new(23., -23., 369.5),
+            max: Vec3::new(46., 0., 369.5),
+        },
+        spawn_position: Vec3::new(33., -10.5, 376.),
+        spawn_rotation: Rotation::new(-165., 29.),
+    },
+    Checkpoint {
+        plane: AxisAlignedPlane::X {
+            min: Vec3::new(-67.5, 25., 266.),
+            max: Vec3::new(-67.5, 51., 283.),
+        },
+        spawn_position: Vec3::new(-64., 40., 275.),
+        spawn_rotation: Rotation::new(109., 37.),
+    },
+    Checkpoint {
+        plane: AxisAlignedPlane::Z {
+            min: Vec3::new(-47., -20., 428.5),
+            max: Vec3::new(-27., 2., 428.5),
+        },
+        spawn_position: Vec3::new(-36., -3., 421.),
+        spawn_rotation: Rotation::new(9., 26.3),
+    },
+    Checkpoint {
+        plane: AxisAlignedPlane::X {
+            min: Vec3::new(-87.5, -28., 485.),
+            max: Vec3::new(-87.5, -3., 504.),
+        },
+        spawn_position: Vec3::new(-69.7, -14., -493.4),
+        spawn_rotation: Rotation::new(84.4, 39.9),
+    },
+    Checkpoint {
+        // finish line
+        plane: AxisAlignedPlane::Z {
+            min: Vec3::new(-112., -55., 669.5),
+            max: Vec3::new(-84., 40., 669.5),
+        },
+        spawn_position: Vec3::new(-98., -35., 660.),
+        spawn_rotation: Rotation::new(0., 27.),
     },
 ];
 
@@ -226,7 +284,7 @@ pub struct GlidePlayerHandler {
     animation_frame: Mutex<u8>,
     server: Arc<Server<GlideServerHandler, MiniGameProxy>>,
     proxy: Arc<MiniGameProxy>,
-    checkpoints: Mutex<[bool; 3]>,
+    checkpoints: Mutex<[bool; 10]>,
     last_damage: Mutex<Instant>,
 }
 
@@ -241,7 +299,9 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
             animation_frame: Mutex::new(0),
             server,
             proxy,
-            checkpoints: Mutex::new([false; 3]),
+            checkpoints: Mutex::new([
+                true, false, false, false, false, false, false, false, false, false,
+            ]),
             last_damage: Mutex::new(Instant::now()),
         }
     }
@@ -253,6 +313,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
     ) -> Result<Option<Vec3>, ConnectionError> {
         let start = &client.player.read().await.position;
         let end = &pos;
+        // check for passing through checkpoints
         for (i, checkpoint) in CANYON_CHECKPOINTS.iter().enumerate() {
             if checkpoint.plane.intersects(start, end) {
                 println!("Checkpoint {} reached!", i);
@@ -475,6 +536,63 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
             }
         }
 
+        // find which two checkpoints the player is between
+        let mut checkpoints = self.checkpoints.lock().await;
+        let mut checkpoint_index = 0;
+        for i in 0..checkpoints.len() {
+            if checkpoints[i] {
+                checkpoint_index = i;
+            }
+        }
+        let first_checkpoint = &CANYON_CHECKPOINTS[checkpoint_index];
+        let second_checkpoint = &CANYON_CHECKPOINTS[(checkpoint_index + 1) % checkpoints.len()];
+
+        // find the center of each checkpoint
+        let first_checkpoint_center = first_checkpoint.plane.center();
+        let second_checkpoint_center = second_checkpoint.plane.center();
+
+        // get the current position of the player
+        let player_position = client.player.read().await.position.clone();
+
+        // find the distance between the player and the center of each checkpoint
+        let first_checkpoint_distance = first_checkpoint_center.distance(&player_position);
+        let second_checkpoint_distance = second_checkpoint_center.distance(&player_position);
+
+        // get the percentage of the way between the two checkpoints
+        let checkpoint_percent =
+            first_checkpoint_distance / (first_checkpoint_distance + second_checkpoint_distance);
+
+        println!(
+            "{}% of the way to checkpoint {}",
+            (checkpoint_percent * 100.).round(),
+            checkpoint_index + 1
+        );
+
+        let checkpoint_count = CANYON_CHECKPOINTS.len();
+        // decrease dashes when there are more checkpoints to achieve a constant width
+        let dashes_per_checkpoint = 70 / (checkpoint_count - 1) - 1;
+        let mut checkpoint_representation = String::new();
+        for i in 0..(checkpoint_count - 1) {
+            if i == checkpoint_index {
+                checkpoint_representation.push_str(&format!(
+                    "||{}{}{}",
+                    "-".repeat((checkpoint_percent * dashes_per_checkpoint as f64) as usize),
+                    "o",
+                    "-".repeat(((1. - checkpoint_percent) * dashes_per_checkpoint as f64) as usize)
+                ));
+            } else {
+                checkpoint_representation
+                    .push_str(&format!("||{}", "-".repeat(dashes_per_checkpoint),));
+            }
+        }
+        checkpoint_representation.push_str(&format!("||"));
+
+        let chat_message = format!(
+            "{{\"text\": \"{}\",\"bold\": true}}",
+            checkpoint_representation
+        );
+
+        client.send_system_chat_message(chat_message.to_string(), true);
         Ok(())
     }
 

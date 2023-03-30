@@ -281,6 +281,17 @@ define_client_bound_protocol! {
         food: VarInt,
         food_saturation: f32
     },
+    SetSubtitleText, 0x5D, Play => {
+        subtitle: String // TODO: Chat
+    },
+    SetTitleText, 0x5F, Play => {
+        title: String // TODO: Chat
+    },
+    SetTitleAnimationTimes, 0x60, Play => {
+        fade_in: i32,
+        stay: i32,
+        fade_out: i32
+    },
     SoundEffect, 0x62, Play => {
         sound: IdMapHolder<CustomSound, VanillaSound>,
         sound_source: SoundSource,

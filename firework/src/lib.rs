@@ -170,6 +170,14 @@ impl AxisAlignedPlane {
             }
         }
     }
+
+    pub fn center(&self) -> Vec3 {
+        match self {
+            Self::X { min, max } => Vec3::new(min.x, (min.y + max.y) / 2.0, (min.z + max.z) / 2.0),
+            Self::Y { min, max } => Vec3::new((min.x + max.x) / 2.0, min.y, (min.z + max.z) / 2.0),
+            Self::Z { min, max } => Vec3::new((min.x + max.x) / 2.0, (min.y + max.y) / 2.0, min.z),
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -188,6 +196,15 @@ impl Vec3 {
     }
     pub const fn scalar(s: f64) -> Vec3 {
         Vec3 { x: s, y: s, z: s }
+    }
+    pub fn dot(&self, other: &Vec3) -> f64 {
+        self.x * other.x + self.y * other.y + self.z * other.z
+    }
+    pub fn length(&self) -> f64 {
+        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+    }
+    pub fn distance(&self, other: &Vec3) -> f64 {
+        (self.clone() - other.clone()).length()
     }
 }
 
