@@ -558,6 +558,15 @@ where
     Proxy: ServerProxy + Send + Sync + 'static,
 {
     fn new(server: Arc<Server<Handler, Proxy>>, proxy: Arc<Proxy>) -> Self;
+    async fn on_pre_load(&self, client: &Client<Handler, Proxy>) -> Result<(), ConnectionError> {
+        Ok(())
+    }
+    async fn on_post_load(&self, client: &Client<Handler, Proxy>) -> Result<(), ConnectionError> {
+        Ok(())
+    }
+    async fn on_leave(&self, client: &Client<Handler, Proxy>) -> Result<(), ConnectionError> {
+        Ok(())
+    }
     async fn on_tick(&self, client: &Client<Handler, Proxy>) -> Result<(), ConnectionError> {
         Ok(())
     }
@@ -797,10 +806,9 @@ where
         } else {
             client.transfer_world().await?;
         }
+        client.handler.on_pre_load(client).await?;
         client.load_world().await?;
-        self.handler
-            .on_client_post_world_load(&self, &proxy, client)
-            .await?;
+        client.handler.on_post_load(client).await?;
         self.broadcast_player_join(&client).await;
 
         self.handler
@@ -931,6 +939,8 @@ where
                 }
             }
         };
+
+        client.handler.on_leave(client).await?;
 
         if let Ok(err) = result {
             err

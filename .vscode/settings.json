@@ -13,6 +13,7 @@
     "dashmap",
     "decryptor",
     "DEEPSLATE",
+    "Deque",
     "deserializers",
     "diggable",
     "Dripleaf",

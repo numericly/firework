@@ -257,7 +257,7 @@ where
     connection: Arc<Protocol>,
     ping_acknowledged: Mutex<bool>,
     pub server: Arc<Server<Handler, Proxy>>,
-    proxy: Arc<Proxy>,
+    pub proxy: Arc<Proxy>,
     pub handler: Handler::PlayerHandler,
 }
 

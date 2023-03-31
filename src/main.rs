@@ -4,11 +4,13 @@ use firework_protocol::Protocol;
 use firework_world::World;
 use glide_server::GlideServerHandler;
 use lobby_server::LobbyServerHandler;
+use queue::Queue;
 use std::sync::Arc;
-use tokio::sync::RwLock;
+use tokio::sync::{Mutex, RwLock};
 
 mod glide_server;
 mod lobby_server;
+mod queue;
 
 #[allow(dead_code)]
 pub enum ColorCodes {
@@ -93,7 +95,9 @@ impl ColorCodes {
 
 struct MiniGameProxy {
     connected_players: RwLock<u32>,
+
     lobby_server: Arc<Server<LobbyServerHandler, MiniGameProxy>>,
+    pub glide_queue: Mutex<Queue<MiniGameProxy, GlideServerHandler, 8>>,
     glide_server: Arc<Server<GlideServerHandler, MiniGameProxy>>,
 }
 
@@ -148,6 +152,7 @@ impl ServerProxy for MiniGameProxy {
         Self {
             lobby_server,
             glide_server,
+            glide_queue: Mutex::new(Queue::default()),
             connected_players: RwLock::new(0),
         }
     }
@@ -223,6 +228,10 @@ impl ServerProxy for MiniGameProxy {
         );
         Ok(motd)
     }
+}
+
+impl MiniGameProxy {
+    async fn join_glide_queue(&self) {}
 }
 
 #[tokio::main]

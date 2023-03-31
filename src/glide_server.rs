@@ -305,7 +305,42 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
             last_damage: Mutex::new(Instant::now()),
         }
     }
-
+    async fn on_post_load(
+        &self,
+        client: &Client<GlideServerHandler, MiniGameProxy>,
+    ) -> Result<(), ConnectionError> {
+        // Show the welcome message
+        client.show_chat_message(
+            json!([
+                {
+                    "text": "\n"
+                },
+                {
+                    "text": "Welcome to the Glide Minigame!",
+                    "color": "aqua"
+                },
+                {
+                    "text": "\n\n"
+                },
+                {
+                    "text": "How to play",
+                    "color": "dark_green"
+                },
+                {
+                    "text": "\n"
+                },
+                {
+                    "text": "- Fly through boost pads to increase your speed\n- Use checkpoints to save your position\n- Reach the finish line first to win the game",
+                "color": "green"
+                },
+                {
+                    "text": "\n "
+                }
+              ])
+            .to_string(),
+        );
+        Ok(())
+    }
     async fn on_move(
         &self,
         client: &Client<GlideServerHandler, MiniGameProxy>,
@@ -530,7 +565,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                 let velocity = client.player.read().await.velocity.clone();
                 client.set_velocity(velocity + direction.clone());
                 self.boost_status.write().await.replace(BoostStatus {
-                    percent: percent + 0.05,
+                    percent: percent + 0.10,
                     direction,
                 });
             }
@@ -570,7 +605,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
 
         let checkpoint_count = CANYON_CHECKPOINTS.len();
         // decrease dashes when there are more checkpoints to achieve a constant width
-        let dashes_per_checkpoint = 70 / (checkpoint_count - 1) - 1;
+        let dashes_per_checkpoint = 45 / (checkpoint_count - 1) - 1;
         let mut checkpoint_representation = String::new();
         for i in 0..(checkpoint_count - 1) {
             if i == checkpoint_index {
@@ -662,11 +697,20 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
                 if *ticks_until_start != 0 {
                     if *ticks_until_start % 20 == 0 {
                         server.broadcast_chat(
-                            json!(
+                            json!([
                                 {
-                                    "text": format!("The game is starting in {}", *ticks_until_start / 20),
+                                  "text": "The game will start in ",
+                                  "color": "yellow"
+                                },
+                                {
+                                  "text": format!("{}", *ticks_until_start / 20),
+                                  "color": "green"
+                                },
+                                {
+                                  "text": " seconds...",
+                                  "color": "yellow"
                                 }
-                            )
+                            ])
                             .to_string(),
                         );
                     }
@@ -719,12 +763,11 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
 }
 
 impl GlideServerHandler {
-    pub async fn start_game(&self, server: &Server<Self, MiniGameProxy>, proxy: &MiniGameProxy) {
+    async fn start_game(&self, server: &Server<Self, MiniGameProxy>, _proxy: &MiniGameProxy) {
         for client in server.player_list.iter() {
             {
                 let mut player = client.player.write().await;
                 player.elytra_flying = false;
-                println!("{:?}", player.entity_flags());
                 server.broadcast_entity_metadata_update(
                     &client,
                     vec![
@@ -756,6 +799,6 @@ async fn start(
     _proxy: &MiniGameProxy,
 ) {
     *client.server.handler.game_state.lock().await = GameState::Starting {
-        ticks_until_start: 60,
+        ticks_until_start: 100,
     };
 }
