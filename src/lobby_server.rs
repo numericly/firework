@@ -29,6 +29,7 @@ pub struct QueuedPlayer {
 }
 
 pub struct LobbyPlayerHandler {
+    proxy: Arc<MiniGameProxy>,
     pub queued: Mutex<Option<QueuedPlayer>>,
 }
 
@@ -36,10 +37,11 @@ pub struct LobbyPlayerHandler {
 impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
     fn new(
         _server: Arc<Server<LobbyServerHandler, MiniGameProxy>>,
-        _proxy: Arc<MiniGameProxy>,
+        proxy: Arc<MiniGameProxy>,
     ) -> Self {
         Self {
             queued: Mutex::new(None),
+            proxy,
         }
     }
     async fn on_tick(
@@ -123,13 +125,7 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
         &self,
         client: &Client<LobbyServerHandler, MiniGameProxy>,
     ) -> Result<(), ConnectionError> {
-        client
-            .proxy
-            .glide_queue
-            .lock()
-            .await
-            .leave_queue(client.client_data.uuid)
-            .await;
+        self.leave_queue(client.client_data.uuid).await;
         Ok(())
     }
     async fn on_chat_command(
@@ -138,6 +134,19 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
         command: String,
     ) -> Result<Option<String>, ConnectionError> {
         Ok(Some(command))
+    }
+}
+
+impl LobbyPlayerHandler {
+    async fn leave_queue(&self, uuid: u128) {
+        let mut queued = self.queued.lock().await.take();
+        if let Some(queued) = queued.as_mut() {
+            match queued.mini_game {
+                MiniGame::Glide => self.proxy.glide_queue.lock().await.leave_queue(uuid).await,
+                MiniGame::Tumble => {}
+                MiniGame::Battle => {}
+            }
+        }
     }
 }
 
@@ -191,22 +200,11 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
                         )),
                     ),
                 )
-                .sub_command(
-                    CommandNode::literal("echo").sub_command(
-                        CommandNode::argument(
-                            "text",
-                            ArgumentType::String {
-                                string_type: StringTypes::SingleWord,
-                                suggestions: None,
-                            },
-                        )
-                        .executable(Box::new(
-                            move |args, client, server, proxy| {
-                                Box::pin(echo(args, client, server, proxy))
-                            },
-                        )),
-                    ),
-                ),
+                .sub_command(CommandNode::literal("leave_queue").executable(Box::new(
+                    move |args, client, server, proxy| {
+                        Box::pin(leave_queue(args, client, server, proxy))
+                    },
+                ))),
         }
     }
     async fn on_tick(&self, _server: &Server<Self, MiniGameProxy>, proxy: &MiniGameProxy) {
@@ -283,17 +281,27 @@ async fn queue(
                 .lock()
                 .await
                 .queue(client.client_data.uuid.clone())
-                .await
-                .unwrap();
+                .await;
 
-            let mut queued = client.handler.queued.lock().await;
+            let receiver = match receiver {
+                Ok(receiver) => receiver,
+                Err(_) => {
+                    client.send_system_chat_message(
+                        json!(
+                            {
+                                "text": "error: already queued",
+                            }
+                        )
+                        .to_string(),
+                        false,
+                    );
+                    return;
+                }
+            };
 
-            if queued.is_some() {
-                // TODO: self.leave_queue().await;
-                queued.take();
-            }
+            client.handler.leave_queue(client.client_data.uuid).await;
 
-            queued.replace(QueuedPlayer {
+            client.handler.queued.lock().await.replace(QueuedPlayer {
                 receiver,
                 mini_game: MiniGame::Glide,
             });
@@ -309,21 +317,20 @@ async fn queue(
     }
 }
 
-async fn echo(
-    args: Vec<Argument>,
+async fn leave_queue(
+    _args: Vec<Argument>,
     client: &Client<LobbyServerHandler, MiniGameProxy>,
     _server: &Server<LobbyServerHandler, MiniGameProxy>,
     _proxy: &MiniGameProxy,
 ) {
-    let Argument::String { value } = args.get(1).expect("Arg not found") else {
-        return
-    };
-    client.show_chat_message(
+    client.handler.leave_queue(client.client_data.uuid).await;
+    client.send_system_chat_message(
         json!(
             {
-                "text": value,
+                "text": "",
             }
         )
         .to_string(),
+        true,
     )
 }
