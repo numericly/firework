@@ -8,10 +8,16 @@ use firework::{
 };
 use firework_authentication::Profile;
 use firework_data::items::{Elytra, Item};
-use firework_protocol::data_types::{ItemNbt, Particle, Particles, Slot};
+use firework_protocol::{
+    client_bound::{CustomSound, IdMapHolder, SoundSource, VanillaSound},
+    data_types::{ItemNbt, Particle, Particles, Slot},
+};
 use firework_protocol_core::VarInt;
 use serde_json::json;
-use std::{sync::Arc, time::Instant};
+use std::{
+    sync::Arc,
+    time::{Duration, Instant},
+};
 use tokio::sync::{Mutex, RwLock};
 
 use crate::MiniGameProxy;
@@ -285,6 +291,7 @@ pub struct GlidePlayerHandler {
     server: Arc<Server<GlideServerHandler, MiniGameProxy>>,
     proxy: Arc<MiniGameProxy>,
     checkpoints: Mutex<[bool; 10]>,
+    start_time: Mutex<Option<Instant>>,
     last_damage: Mutex<Instant>,
 }
 
@@ -302,6 +309,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
             checkpoints: Mutex::new([
                 true, false, false, false, false, false, false, false, false, false,
             ]),
+            start_time: Mutex::new(None),
             last_damage: Mutex::new(Instant::now()),
         }
     }
@@ -339,6 +347,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
               ])
             .to_string(),
         );
+        self.start_time.lock().await.replace(Instant::now());
         Ok(())
     }
     async fn on_move(
@@ -351,13 +360,85 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
         // check for passing through checkpoints
         for (i, checkpoint) in CANYON_CHECKPOINTS.iter().enumerate() {
             if checkpoint.plane.intersects(start, end) {
-                println!("Checkpoint {} reached!", i);
                 {
                     self.checkpoints.lock().await[i] = true;
+
+                    let is_finish_line = i == CANYON_CHECKPOINTS.len() - 1;
+
+                    if is_finish_line {
+                        // send title to the client
+                        client.send_title(
+                            json!({
+                                "text":
+                                    format!(
+                                        "Finished race in {}",
+                                        format_duration(
+                                            self.start_time.lock().await.unwrap().elapsed()
+                                        )
+                                    )
+                            })
+                            .to_string(),
+                            "{\"text\":\"\"}".to_string(),
+                            0,
+                            100,
+                            0,
+                        );
+                        // send an exp level up sound for the finish line
+                        client.send_sound(
+                            IdMapHolder::Direct(CustomSound {
+                                resource_location: "minecraft:entity.player.levelup".to_string(),
+                                range: Some(999999.),
+                            }),
+                            SoundSource::Master,
+                            client.player.read().await.position.clone(),
+                            1.,
+                            1.,
+                        );
+                    } else {
+                        // send title to the client
+                        client.send_title(
+                            "{\"text\":\"Checkpoint\"}".to_string(),
+                            json!({
+                                "text":
+                                    format!(
+                                        "Reached Checkpoint {} in {}",
+                                        i,
+                                        format_duration(
+                                            self.start_time.lock().await.unwrap().elapsed()
+                                        )
+                                    )
+                            })
+                            .to_string(),
+                            0,
+                            20,
+                            0,
+                        );
+                        // send an exp orb pickup sound for all checkpoints
+                        client.send_sound(
+                            IdMapHolder::Direct(CustomSound {
+                                resource_location: "minecraft:entity.experience_orb.pickup"
+                                    .to_string(),
+                                range: Some(999999.),
+                            }),
+                            SoundSource::Master,
+                            client.player.read().await.position.clone(),
+                            1.,
+                            1.,
+                        );
+                    }
                 }
                 println!("Checkpoints: {:?}", self.checkpoints.lock().await);
             }
         }
+
+        fn format_duration(dur: Duration) -> String {
+            let secs = dur.as_millis();
+            let mins = secs / 1000 / 60;
+            let millis = secs % 1000;
+            let secs = secs / 1000 % 60;
+            format!("{}:{:02}.{:03}", mins, secs, millis)
+        }
+
         Ok(Some(pos))
     }
     async fn on_tick(
@@ -597,11 +678,11 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
         let checkpoint_percent =
             first_checkpoint_distance / (first_checkpoint_distance + second_checkpoint_distance);
 
-        println!(
-            "{}% of the way to checkpoint {}",
-            (checkpoint_percent * 100.).round(),
-            checkpoint_index + 1
-        );
+        // println!(
+        //     "{}% of the way to checkpoint {}",
+        //     (checkpoint_percent * 100.).round(),
+        //     checkpoint_index + 1
+        // );
 
         let checkpoint_count = CANYON_CHECKPOINTS.len();
         // decrease dashes when there are more checkpoints to achieve a constant width

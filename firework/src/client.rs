@@ -19,7 +19,7 @@ use firework_protocol::{
         SetSubtitleText, SetTags, SetTitleAnimationTimes, SetTitleText, SoundEffect, SoundSource,
         SpawnPlayer, SynchronizePlayerPosition, SystemChatMessage, TeleportEntity, UnloadChunk,
         UpdateAttributes, UpdateEntityHeadRotation, UpdateEntityPosition,
-        UpdateEntityPositionAndRotation, UpdateEntityRotation,
+        UpdateEntityPositionAndRotation, UpdateEntityRotation, VanillaSound,
     },
     data_types::{
         AddPlayer, Arm, Attribute, Particle, PlayerAbilityFlags, PlayerCommandAction,
@@ -32,7 +32,7 @@ use firework_protocol::{
 use firework_protocol_core::{DeserializeField, Position, SerializeField, UnsizedVec, VarInt};
 use rand::Rng;
 use serde_json::json;
-use std::collections::HashMap;
+use std::{collections::HashMap, os::windows::process};
 use std::{
     fmt::Debug,
     sync::Arc,
@@ -94,7 +94,7 @@ where
         window_type: WindowType,
         items: Vec<Option<Slot>>,
     },
-    ShowTitle {
+    SendTitle {
         title: String,
         subtitle: String,
         fade_in: i32,
@@ -104,6 +104,13 @@ where
     SendSystemChatMessage {
         message: String, // TODO: chat
         action_bar: bool,
+    },
+    SendSound {
+        sound: IdMapHolder<CustomSound, VanillaSound>,
+        source: SoundSource,
+        position: Vec3,
+        volume: f32,
+        pitch: f32,
     },
 }
 
@@ -867,7 +874,7 @@ where
                 })
                 .await?;
             }
-            ClientCommand::ShowTitle {
+            ClientCommand::SendTitle {
                 title,
                 subtitle,
                 fade_in,
@@ -896,6 +903,29 @@ where
                 self.send_packet(SystemChatMessage {
                     message,
                     action_bar,
+                })
+                .await?;
+            }
+            ClientCommand::SendSound {
+                sound,
+                source,
+                position,
+                volume,
+                pitch,
+            } => {
+                fn process_number(input: f64) -> i32 {
+                    (input * 8.) as i32
+                }
+
+                self.send_packet(SoundEffect {
+                    sound,
+                    sound_source: source,
+                    x: process_number(position.x),
+                    y: process_number(position.y),
+                    z: process_number(position.z),
+                    volume,
+                    pitch,
+                    seed: rand::random(),
                 })
                 .await?;
             }
@@ -1325,7 +1355,7 @@ where
         });
     }
     #[allow(unused_must_use)]
-    pub fn show_title(
+    pub fn send_title(
         &self,
         title: String,
         subtitle: String,
@@ -1333,12 +1363,29 @@ where
         stay: i32,
         fade_out: i32,
     ) {
-        self.to_client.send(ClientCommand::ShowTitle {
+        self.to_client.send(ClientCommand::SendTitle {
             title,
             subtitle,
             fade_in,
             stay,
             fade_out,
+        });
+    }
+    #[allow(unused_must_use)]
+    pub fn send_sound(
+        &self,
+        sound: IdMapHolder<CustomSound, VanillaSound>,
+        source: SoundSource,
+        position: Vec3,
+        volume: f32,
+        pitch: f32,
+    ) {
+        self.to_client_visual.send(ClientCommand::SendSound {
+            sound,
+            source,
+            position,
+            volume,
+            pitch,
         });
     }
     #[allow(unused_must_use)]

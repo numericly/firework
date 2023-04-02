@@ -346,14 +346,14 @@ impl ResourcePack {
 
         Ok(Self {
             url,
-            hash: hash,
+            hash,
             forced,
             prompt,
         })
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum IdMapHolder<T, U> {
     Direct(T),
     Reference(U),
@@ -373,7 +373,7 @@ impl<T: SerializeField, U: Palette> SerializeField for IdMapHolder<T, U> {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum VanillaSound {}
 
 impl Palette for VanillaSound {
@@ -382,13 +382,13 @@ impl Palette for VanillaSound {
     }
 }
 
-#[derive(SerializeField, Debug, PartialEq)]
+#[derive(SerializeField, Debug, PartialEq, Clone)]
 pub struct CustomSound {
     pub resource_location: String,
     pub range: Option<f32>,
 }
 
-#[derive(Debug, PartialEq, SerializeField)]
+#[derive(Debug, PartialEq, SerializeField, Clone)]
 #[protocol(typ = "u8")]
 pub enum SoundSource {
     Master,
