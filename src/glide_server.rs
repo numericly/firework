@@ -711,7 +711,6 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
         client.send_system_chat_message(chat_message.to_string(), true);
         Ok(())
     }
-
     async fn on_on_ground(
         &self,
         client: &Client<GlideServerHandler, MiniGameProxy>,
@@ -719,10 +718,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
     ) -> Result<bool, ConnectionError> {
         if on_ground {
             let mut last_damage = client.handler.last_damage.lock().await;
-            if last_damage.elapsed().as_millis() < 1000 {
-                println!("last damage too recent");
-            } else {
-                println!("damaging player");
+            if last_damage.elapsed().as_millis() > 1000 {
                 *last_damage = Instant::now();
                 let health = client.player.read().await.health;
                 if health <= 1. {

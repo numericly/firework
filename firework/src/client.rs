@@ -32,7 +32,7 @@ use firework_protocol::{
 use firework_protocol_core::{DeserializeField, Position, SerializeField, UnsizedVec, VarInt};
 use rand::Rng;
 use serde_json::json;
-use std::{collections::HashMap, os::windows::process};
+use std::collections::HashMap;
 use std::{
     fmt::Debug,
     sync::Arc,
@@ -569,11 +569,22 @@ where
                 let chunk_x = position.x as i32 >> 4;
                 let chunk_z = position.z as i32 >> 4;
 
-                self.player.write().await.position = position;
+                self.player.write().await.position = position.clone();
 
                 if previous_chunk_x != chunk_x || previous_chunk_z != chunk_z {
                     self.move_chunk(chunk_x, chunk_z).await?;
                 }
+
+                self.server
+                    .broadcast_entity_move(
+                        &self,
+                        Some(position),
+                        previous_position,
+                        None,
+                        rotation,
+                        false,
+                    )
+                    .await;
             }
             ClientCommand::MoveEntity {
                 entity_id,
