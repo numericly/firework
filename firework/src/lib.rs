@@ -67,6 +67,8 @@ pub enum ConnectionError {
     ClientCancelled,
     #[error("world error {0}")]
     WorldError(#[from] firework_world::WorldError),
+    #[error("server not found {0}")]
+    ServerNotFound(u128),
 }
 
 #[derive(Debug, Clone, Default)]
@@ -96,13 +98,13 @@ impl AxisAlignedBB {
     pub fn new(min: BlockPos, max: BlockPos) -> AxisAlignedBB {
         AxisAlignedBB { min, max }
     }
-    pub fn within(&self, pos: BlockPos) -> bool {
-        pos.x >= self.min.x
-            && pos.x <= self.max.x
-            && pos.y >= self.min.y
-            && pos.y <= self.max.y
-            && pos.z >= self.min.z
-            && pos.z <= self.max.z
+    pub fn within(&self, pos: Vec3) -> bool {
+        pos.x >= self.min.x as f64
+            && pos.x <= self.max.x as f64
+            && pos.y >= self.min.y as f64
+            && pos.y <= self.max.y as f64
+            && pos.z >= self.min.z as f64
+            && pos.z <= self.max.z as f64
     }
 }
 
@@ -114,37 +116,35 @@ pub enum AxisAlignedPlane {
 
 impl AxisAlignedPlane {
     pub fn intersects(&self, starting_position: &Vec3, end: &Vec3) -> bool {
-        let t;
-
         let delta = end.clone() - starting_position.clone();
 
-        match self {
-            Self::X { min, max } => {
+        let time = match self {
+            Self::X { min, .. } => {
                 if delta.x == 0.0 {
                     return false;
                 }
-                t = (min.x - starting_position.x) / delta.x;
+                (min.x - starting_position.x) / delta.x
             }
-            Self::Y { min, max } => {
+            Self::Y { min, .. } => {
                 if delta.y == 0.0 {
                     return false;
                 }
-                t = (min.y - starting_position.y) / delta.y;
+                (min.y - starting_position.y) / delta.y
             }
-            Self::Z { min, max } => {
+            Self::Z { min, .. } => {
                 if delta.z == 0.0 {
                     return false;
                 }
-                t = (min.z - starting_position.z) / delta.z;
+                (min.z - starting_position.z) / delta.z
             }
-        }
+        };
 
         // if the intersection is behind the starting position, it doesn't count
         // likewise, if the intersection is beyond the end of the ray, it doesn't count
-        if t < 0.0 || t > 1.0 {
+        if time < 0.0 || time > 1.0 {
             return false;
         }
-        let intersection = starting_position.clone() + delta * Vec3::scalar(t);
+        let intersection = starting_position.clone() + delta * Vec3::scalar(time);
         self.within(intersection)
     }
 
@@ -205,6 +205,11 @@ impl Vec3 {
     }
     pub fn distance(&self, other: &Vec3) -> f64 {
         (self.clone() - other.clone()).length()
+    }
+    pub fn normalize(&self) -> Vec3 {
+        let length = self.length();
+
+        Vec3::new(self.x / length, self.y / length, self.z / length)
     }
 }
 
@@ -539,13 +544,14 @@ where
     Proxy: ServerProxy + Send + Sync + 'static,
     Handler: ServerHandler<Proxy> + Send + Sync + 'static,
 {
-    pub world: Arc<World>,
+    pub world: Arc<&'static World>,
     pub entities: Arc<DashMap<i32, Entities>>,
     pub player_list: Arc<DashMap<u128, Client<Handler, Proxy>>>,
     pub difficulty: RwLock<u8>,
     pub difficulty_locked: RwLock<bool>,
     pub handler: Handler,
     pub brand: String,
+    pub id: u128,
     _lowest_free_id: Mutex<i32>,
 
     proxy: PhantomData<Proxy>,
@@ -658,8 +664,8 @@ where
         server: &Server<Self, Proxy>,
         proxy: &Proxy,
     ) -> Result<&CommandNode<Self, Proxy>, ConnectionError>;
-    async fn on_load(&self, server: &Server<Self, Proxy>, proxy: &Proxy) {}
-    async fn on_tick(&self, server: &Server<Self, Proxy>, proxy: &Proxy) {}
+    async fn on_load(&self, server: &Server<Self, Proxy>, proxy: Arc<Proxy>) {}
+    async fn on_tick(&self, server: &Server<Self, Proxy>, proxy: Arc<Proxy>) {}
     async fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError>;
     async fn on_client_connected(
         &self,
@@ -685,7 +691,7 @@ where
     Handler: Send + Sync + 'static,
     Proxy::TransferData: Clone,
 {
-    pub async fn new(world: World, brand: String) -> Arc<Self> {
+    pub fn new(world: &'static World, brand: String, id: u128) -> Arc<Self> {
         Arc::new(Self {
             difficulty: RwLock::new(0),
             difficulty_locked: RwLock::new(false),
@@ -696,19 +702,24 @@ where
             handler: Handler::new(),
             proxy: PhantomData {},
             brand,
+            id,
         })
     }
-    pub async fn run(self: Arc<Self>, proxy: Arc<Proxy>) {
+    pub async fn run(self: Arc<Self>, proxy: Arc<Proxy>, token: CancellationToken) {
         let mut interval = tokio::time::interval(Duration::from_millis(50));
-        self.handler.on_load(&self, &proxy).await;
+        self.handler.on_load(&self, proxy.clone()).await;
         loop {
             interval.tick().await;
 
             self.handle_tick(proxy.clone()).await;
+
+            if token.is_cancelled() {
+                break;
+            }
         }
     }
     pub async fn handle_tick(&self, proxy: Arc<Proxy>) {
-        self.handler.on_tick(&self, &proxy).await;
+        self.handler.on_tick(&self, proxy.clone()).await;
         for client in self.player_list.iter() {
             client.handler.on_tick(&client).await;
         }
@@ -994,6 +1005,19 @@ where
         position: Option<Vec3>,
         rotation: Option<Rotation>,
     ) -> Result<(), ConnectionError> {
+        {
+            let mut player = client.player.write().await;
+            if let Some(previous_position) = &player.previous_position {
+                if let Some(position) = position.clone() {
+                    let multiplier = previous_position.time.elapsed().as_secs_f64()
+                        / Duration::from_millis(50).as_secs_f64();
+
+                    let delta = position.clone() - previous_position.position.clone();
+
+                    player.velocity = delta * Vec3::scalar(multiplier);
+                }
+            }
+        }
         let previous_pos = client.player.read().await.position.clone();
         let position = if let Some(position) = position {
             let position = client.handler.on_move(client, position).await?;

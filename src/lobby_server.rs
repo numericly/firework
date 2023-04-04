@@ -112,8 +112,8 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
                             true,
                         );
                     }
-                    QueueMessage::Started => {
-                        client.transfer(TransferData::Glide);
+                    QueueMessage::Started { game_id } => {
+                        client.transfer(TransferData::Glide { game_id });
                     }
                 }
                 dbg!(msg);
@@ -207,8 +207,8 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
                 ))),
         }
     }
-    async fn on_tick(&self, _server: &Server<Self, MiniGameProxy>, proxy: &MiniGameProxy) {
-        proxy.glide_queue.lock().await.update().await;
+    async fn on_tick(&self, _server: &Server<Self, MiniGameProxy>, proxy: Arc<MiniGameProxy>) {
+        proxy.glide_queue.lock().await.update(proxy.clone()).await;
     }
     async fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError> {
         let mut player = Player {
@@ -253,7 +253,15 @@ async fn play(
         return
     };
     match value.as_str() {
-        "glide" => client.transfer(TransferData::Glide),
+        "glide" => {
+            let game_id = client
+                .proxy
+                .glide_queue
+                .lock()
+                .await
+                .create_server(client.proxy.clone());
+            client.transfer(TransferData::Glide { game_id })
+        }
         value => client.show_chat_message(
             json!(
                 {

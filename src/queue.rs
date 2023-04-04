@@ -1,7 +1,10 @@
-use std::{char::MAX, collections::VecDeque, sync::Arc, time::Instant};
+use std::{collections::VecDeque, sync::Arc};
 
 use firework::{Server, ServerHandler, ServerProxy};
+use firework_world::World;
+use std::collections::HashMap;
 use tokio::sync::broadcast::{self, Receiver, Sender};
+use tokio_util::sync::CancellationToken;
 
 enum GameState {
     NoPlayers,
@@ -17,7 +20,9 @@ pub enum QueueMessage {
         connected_players: usize,
         max_players: usize,
     },
-    Started,
+    Started {
+        game_id: u128,
+    },
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -31,9 +36,11 @@ where
     Proxy: ServerProxy + Send + Sync + 'static,
     Handler: ServerHandler<Proxy> + Send + Sync + 'static,
 {
-    servers: Vec<Arc<Server<Handler, Proxy>>>,
+    servers: HashMap<u128, (Arc<Server<Handler, Proxy>>, CancellationToken)>,
     queue: VecDeque<QueuedPlayer>,
     state: GameState,
+    world: &'static World,
+    brand: String,
 }
 
 const TICKS_PER_SECOND: usize = 20;
@@ -43,6 +50,15 @@ where
     Proxy: ServerProxy + Send + Sync + 'static,
     Handler: ServerHandler<Proxy> + Send + Sync + 'static,
 {
+    pub fn new(world: &'static World, brand: String) -> Self {
+        Self {
+            servers: HashMap::new(),
+            queue: VecDeque::new(),
+            state: GameState::NoPlayers,
+            world,
+            brand,
+        }
+    }
     pub async fn queue(&mut self, uuid: u128) -> Result<Receiver<QueueMessage>, QueueError> {
         let (sender, receiver) = broadcast::channel(100);
 
@@ -56,7 +72,7 @@ where
     pub async fn leave_queue(&mut self, uuid: u128) {
         self.queue.retain(|p| p.uuid != uuid);
     }
-    pub async fn update(&mut self) {
+    pub async fn update(&mut self, proxy: Arc<Proxy>) {
         if self.queue.len() < 2 {
             if self.queue.len() == 0 {
                 self.state = GameState::NoPlayers;
@@ -98,18 +114,23 @@ where
         let time_to_start;
 
         if percentage < 0.5 {
-            time_to_start = 25 * TICKS_PER_SECOND;
+            time_to_start = 12 * TICKS_PER_SECOND;
         } else if percentage < 0.75 {
-            time_to_start = 10 * TICKS_PER_SECOND;
+            time_to_start = 6 * TICKS_PER_SECOND;
         } else {
             time_to_start = 0 * TICKS_PER_SECOND;
         }
 
         if elapsed >= time_to_start {
+            let game_id: u128 = self.create_server(proxy);
+
             for _ in 0..MAX_PLAYERS {
                 let player = self.queue.pop_front();
                 if let Some(player) = player {
-                    player.sender.send(QueueMessage::Started).unwrap();
+                    player
+                        .sender
+                        .send(QueueMessage::Started { game_id })
+                        .unwrap();
                 }
             }
             return;
@@ -131,18 +152,27 @@ where
             }
         }
     }
-}
+    pub fn get_server(&self, game_id: u128) -> Option<Arc<Server<Handler, Proxy>>> {
+        self.servers.get(&game_id).map(|(server, _)| server.clone())
+    }
+    pub fn create_server(&mut self, proxy: Arc<Proxy>) -> u128 {
+        let game_id: u128 = rand::random();
+        let server = Server::new(self.world, self.brand.clone(), game_id);
 
-impl<Proxy, Handler, const MAX_PLAYERS: usize> Default for Queue<Proxy, Handler, MAX_PLAYERS>
-where
-    Proxy: ServerProxy + Send + Sync + 'static,
-    Handler: ServerHandler<Proxy> + Send + Sync + 'static,
-{
-    fn default() -> Self {
-        Self {
-            servers: Vec::new(),
-            queue: VecDeque::new(),
-            state: GameState::NoPlayers,
+        let cancel = CancellationToken::new();
+        let run_cancel = cancel.clone();
+        let run_server = server.clone();
+        tokio::spawn(async move {
+            run_server.run(proxy, run_cancel).await;
+        });
+
+        self.servers.insert(game_id, (server.clone(), cancel));
+
+        game_id
+    }
+    pub fn remove_server(&mut self, game_id: u128) {
+        if let Some((_, token)) = self.servers.remove(&game_id) {
+            token.cancel();
         }
     }
 }

@@ -11,7 +11,7 @@ use firework_authentication::Profile;
 use firework_data::tags::{REGISTRY, TAGS};
 use firework_protocol::{
     client_bound::{
-        ChangeDifficulty, ClientBoundKeepAlive, ClientBoundPacketID, CloseContainer,
+        BossBar, ChangeDifficulty, ClientBoundKeepAlive, ClientBoundPacketID, CloseContainer,
         CommandSuggestionsResponse, Commands, CustomSound, IdMapHolder, LoginPlay, OpenScreen,
         ParticlePacket, PlayDisconnect, PlayerAbilities, PlayerInfo, PluginMessage, RemoveEntities,
         RemoveInfoPlayer, Respawn, SerializePacket, SetCenterChunk, SetContainerContent,
@@ -22,8 +22,9 @@ use firework_protocol::{
         UpdateEntityPositionAndRotation, UpdateEntityRotation, VanillaSound,
     },
     data_types::{
-        AddPlayer, Arm, Attribute, Particle, PlayerAbilityFlags, PlayerCommandAction,
-        PlayerInfoAction, PlayerPositionFlags, Slot, UpdateGameMode, UpdateLatency, UpdateListed,
+        AddPlayer, Arm, Attribute, BossBarAction, BossBarColor, BossBarDivision, Particle,
+        PlayerAbilityFlags, PlayerCommandAction, PlayerInfoAction, PlayerPositionFlags, Slot,
+        UpdateGameMode, UpdateLatency, UpdateListed,
     },
     read_specific_packet,
     server_bound::{ChatCommand, ChatMessage, PlayerCommand, ServerBoundPacket},
@@ -111,6 +112,10 @@ where
         position: Vec3,
         volume: f32,
         pitch: f32,
+    },
+    BossBarAction {
+        uuid: u128,
+        action: BossBarAction,
     },
 }
 
@@ -549,6 +554,9 @@ where
         command: ClientCommand<Proxy::TransferData>,
     ) -> Result<Option<Proxy::TransferData>, ConnectionError> {
         match command {
+            ClientCommand::BossBarAction { uuid, action } => {
+                self.send_packet(BossBar { uuid, action }).await?;
+            }
             ClientCommand::SyncPosition { position, rotation } => {
                 self.send_packet(SynchronizePlayerPosition {
                     x: position.x,
@@ -1398,6 +1406,11 @@ where
             volume,
             pitch,
         });
+    }
+    #[allow(unused_must_use)]
+    pub fn send_boss_bar_action(&self, uuid: u128, action: BossBarAction) {
+        self.to_client
+            .send(ClientCommand::BossBarAction { uuid, action });
     }
     #[allow(unused_must_use)]
     pub fn __move_entity(

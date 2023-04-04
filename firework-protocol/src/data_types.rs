@@ -486,3 +486,52 @@ pub struct SuggestionMatch {
     pub r#match: String,
     pub tooltip: Option<String>,
 }
+
+#[derive(Debug, PartialEq, SerializeField, Clone)]
+#[protocol(typ = "firework_protocol_core::VarInt")]
+
+pub enum BossBarAction {
+    Add {
+        title: String,
+        health: f32,
+        color: BossBarColor,
+        division: BossBarDivision,
+        flags: u8,
+    },
+    Remove,
+    UpdateHealth {
+        health: f32,
+    },
+    UpdateTitle {
+        title: String,
+    },
+    UpdateStyle {
+        color: BossBarColor,
+        division: BossBarDivision,
+    },
+    UpdateFlags {
+        flags: u8,
+    },
+}
+
+#[derive(Debug, PartialEq, SerializeField, Clone)]
+#[protocol(typ = "firework_protocol_core::VarInt")]
+pub enum BossBarColor {
+    Pink,
+    Blue,
+    Red,
+    Green,
+    Yellow,
+    Purple,
+    White,
+}
+
+#[derive(Debug, PartialEq, SerializeField, Clone)]
+#[protocol(typ = "firework_protocol_core::VarInt")]
+pub enum BossBarDivision {
+    NoDivisions,
+    SixDivisions,
+    TenDivisions,
+    TwelveDivisions,
+    TwentyDivisions,
+}

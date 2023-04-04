@@ -47,8 +47,8 @@ use std::collections::HashMap;
 use nbt::Blob;
 
 use crate::data_types::{
-    Attribute, BitSet, DeathLocation, Particle, PlayerAbilityFlags, PlayerInfoAction,
-    PlayerPositionFlags, Recipe, Slot, SuggestionMatch,
+    Attribute, BitSet, BossBarAction, DeathLocation, Particle, PlayerAbilityFlags,
+    PlayerInfoAction, PlayerPositionFlags, Recipe, Slot, SuggestionMatch,
 };
 
 pub trait ClientBoundPacketID {
@@ -95,6 +95,10 @@ define_client_bound_protocol! {
         z: f64,
         yaw: i8,
         pitch: i8,
+    },
+    BossBar, 0x0B, Play => {
+        uuid: u128,
+        action: BossBarAction
     },
     ChangeDifficulty, 0x0C, Play => {
         difficulty: u8,

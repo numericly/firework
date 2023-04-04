@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
-    commands::{Argument, ArgumentType, CommandNode, StringTypes},
+    commands::CommandNode,
     entities::{EntityMetadata, Pose},
     AxisAlignedBB, AxisAlignedPlane, BlockPos, ConnectionError, PlayerHandler, Rotation, Server,
     ServerHandler, Vec3,
@@ -9,8 +9,10 @@ use firework::{
 use firework_authentication::Profile;
 use firework_data::items::{Elytra, Item};
 use firework_protocol::{
-    client_bound::{CustomSound, IdMapHolder, SoundSource, VanillaSound},
-    data_types::{ItemNbt, Particle, Particles, Slot},
+    client_bound::{CustomSound, IdMapHolder, SoundSource},
+    data_types::{
+        BossBarAction, BossBarColor, BossBarDivision, ItemNbt, Particle, Particles, Slot,
+    },
 };
 use firework_protocol_core::VarInt;
 use serde_json::json;
@@ -23,7 +25,7 @@ use tokio::sync::{Mutex, RwLock};
 use crate::MiniGameProxy;
 
 const SPAWN_AREA: AxisAlignedBB = AxisAlignedBB {
-    max: BlockPos { x: 4, y: 169, z: 7 },
+    max: BlockPos { x: 4, y: 169, z: 8 },
     min: BlockPos {
         x: -4,
         y: 166,
@@ -32,7 +34,7 @@ const SPAWN_AREA: AxisAlignedBB = AxisAlignedBB {
 };
 struct Boost {
     area: AxisAlignedBB,
-    velocity: Vec3,
+    speed: f64,
     particle_type: BoostParticleType,
 }
 
@@ -56,22 +58,6 @@ const CANYON_BOOSTS: [Boost; 8] = [
         area: AxisAlignedBB {
             max: BlockPos {
                 x: -38,
-                y: 105,
-                z: 360,
-            },
-            min: BlockPos {
-                x: -43,
-                y: 100,
-                z: 352,
-            },
-        },
-        velocity: Vec3::new(0., 0., 0.06),
-        particle_type: BoostParticleType::BoostSouth,
-    },
-    Boost {
-        area: AxisAlignedBB {
-            max: BlockPos {
-                x: -38,
                 y: 106,
                 z: 315,
             },
@@ -81,7 +67,23 @@ const CANYON_BOOSTS: [Boost; 8] = [
                 z: 307,
             },
         },
-        velocity: Vec3::new(0., 0., 0.),
+        speed: 0.20,
+        particle_type: BoostParticleType::BoostSouth,
+    },
+    Boost {
+        area: AxisAlignedBB {
+            max: BlockPos {
+                x: -38,
+                y: 105,
+                z: 360,
+            },
+            min: BlockPos {
+                x: -43,
+                y: 100,
+                z: 352,
+            },
+        },
+        speed: 0.2,
         particle_type: BoostParticleType::BoostSouth,
     },
     Boost {
@@ -97,7 +99,7 @@ const CANYON_BOOSTS: [Boost; 8] = [
                 z: 607,
             },
         },
-        velocity: Vec3::new(0., 0., 0.),
+        speed: 0.3,
         particle_type: BoostParticleType::BoostNorth,
     },
     Boost {
@@ -113,7 +115,7 @@ const CANYON_BOOSTS: [Boost; 8] = [
                 z: 498,
             },
         },
-        velocity: Vec3::new(0., 0., 0.),
+        speed: 0.15,
         particle_type: BoostParticleType::BoostNorth,
     },
     Boost {
@@ -129,7 +131,7 @@ const CANYON_BOOSTS: [Boost; 8] = [
                 z: 355,
             },
         },
-        velocity: Vec3::new(0., 0., 0.),
+        speed: 0.25,
         particle_type: BoostParticleType::BoostNorth,
     },
     Boost {
@@ -145,7 +147,7 @@ const CANYON_BOOSTS: [Boost; 8] = [
                 z: 269,
             },
         },
-        velocity: Vec3::new(0., 0., 0.),
+        speed: 0.25,
         particle_type: BoostParticleType::BoostNorth,
     },
     Boost {
@@ -161,7 +163,7 @@ const CANYON_BOOSTS: [Boost; 8] = [
                 z: 443,
             },
         },
-        velocity: Vec3::new(0., 0., 0.),
+        speed: 0.25,
         particle_type: BoostParticleType::BoostSouth,
     },
     Boost {
@@ -177,7 +179,7 @@ const CANYON_BOOSTS: [Boost; 8] = [
                 z: 492,
             },
         },
-        velocity: Vec3::new(0., 0., 0.),
+        speed: 0.20,
         particle_type: BoostParticleType::BoostWest,
     },
 ];
@@ -270,13 +272,12 @@ const CANYON_CHECKPOINTS: [Checkpoint; 10] = [
 #[derive(Debug, Clone)]
 struct BoostStatus {
     percent: f32,
-    direction: Vec3,
+    speed: f64,
 }
 
 enum GameState {
-    Waiting,
     Starting { ticks_until_start: u16 },
-    Running,
+    Running { start_time: Instant },
 }
 
 pub struct GlideServerHandler {
@@ -293,6 +294,14 @@ pub struct GlidePlayerHandler {
     checkpoints: Mutex<[bool; 10]>,
     start_time: Mutex<Option<Instant>>,
     last_damage: Mutex<Instant>,
+}
+
+fn format_duration(dur: Duration) -> String {
+    let secs = dur.as_millis();
+    let mins = secs / 1000 / 60;
+    let millis = secs % 1000;
+    let secs = secs / 1000 % 60;
+    format!("{}:{:02}.{:03}", mins, secs, millis)
 }
 
 #[async_trait]
@@ -358,9 +367,9 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
         let start = &client.player.read().await.position;
         let end = &pos;
         // check for passing through checkpoints
-        for (i, checkpoint) in CANYON_CHECKPOINTS.iter().enumerate() {
-            if checkpoint.plane.intersects(start, end) {
-                {
+        if let GameState::Running { start_time } = &*client.server.handler.game_state.lock().await {
+            for (i, checkpoint) in CANYON_CHECKPOINTS.iter().enumerate() {
+                if checkpoint.plane.intersects(start, end) {
                     self.checkpoints.lock().await[i] = true;
 
                     let is_finish_line = i == CANYON_CHECKPOINTS.len() - 1;
@@ -372,9 +381,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                                 "text":
                                     format!(
                                         "Finished race in {}",
-                                        format_duration(
-                                            self.start_time.lock().await.unwrap().elapsed()
-                                        )
+                                        format_duration(start_time.elapsed())
                                     )
                             })
                             .to_string(),
@@ -394,49 +401,58 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                             1.,
                             1.,
                         );
-                    } else {
-                        // send title to the client
-                        client.send_title(
-                            "{\"text\":\"Checkpoint\"}".to_string(),
-                            json!({
-                                "text":
-                                    format!(
-                                        "Reached Checkpoint {} in {}",
-                                        i,
-                                        format_duration(
-                                            self.start_time.lock().await.unwrap().elapsed()
-                                        )
-                                    )
-                            })
-                            .to_string(),
-                            0,
-                            20,
-                            0,
-                        );
-                        // send an exp orb pickup sound for all checkpoints
-                        client.send_sound(
-                            IdMapHolder::Direct(CustomSound {
-                                resource_location: "minecraft:entity.experience_orb.pickup"
-                                    .to_string(),
-                                range: Some(999999.),
-                            }),
-                            SoundSource::Master,
-                            client.player.read().await.position.clone(),
-                            1.,
-                            1.,
-                        );
+                        break;
                     }
+
+                    // send title to the client
+                    client.send_title(
+                        "{\"text\":\"Checkpoint\"}".to_string(),
+                        json!({
+                            "text":
+                                format!(
+                                    "Reached Checkpoint {} in {}",
+                                    i,
+                                    format_duration(start_time.elapsed())
+                                )
+                        })
+                        .to_string(),
+                        0,
+                        20,
+                        0,
+                    );
+
+                    // send an exp orb pickup sound for all checkpoints
+                    client.send_sound(
+                        IdMapHolder::Direct(CustomSound {
+                            resource_location: "minecraft:entity.experience_orb.pickup".to_string(),
+                            range: Some(999999.),
+                        }),
+                        SoundSource::Master,
+                        client.player.read().await.position.clone(),
+                        1.,
+                        1.,
+                    );
+
+                    break;
                 }
-                println!("Checkpoints: {:?}", self.checkpoints.lock().await);
             }
         }
 
-        fn format_duration(dur: Duration) -> String {
-            let secs = dur.as_millis();
-            let mins = secs / 1000 / 60;
-            let millis = secs % 1000;
-            let secs = secs / 1000 % 60;
-            format!("{}:{:02}.{:03}", mins, secs, millis)
+        let boost_status = self.boost_status.read().await.clone();
+        if let Some(BoostStatus { percent, speed }) = boost_status {
+            if percent >= 1. {
+                self.boost_status.write().await.take();
+            } else {
+                let velocity = client.player.read().await.velocity.clone();
+                let player_direction = velocity.normalize();
+                client.set_velocity(
+                    velocity * Vec3::scalar(0.85) + player_direction * Vec3::scalar(speed),
+                );
+                self.boost_status.write().await.replace(BoostStatus {
+                    percent: percent + 0.10,
+                    speed: speed * 1.06,
+                });
+            }
         }
 
         Ok(Some(pos))
@@ -449,21 +465,22 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
 
         let time = client.server.handler.created_at.elapsed().as_secs_f32();
         let position = client.player.read().await.position.clone();
+
         for boost in CANYON_BOOSTS.iter() {
-            if boost.area.within(BlockPos::from(position.clone())) {
+            if boost.area.within(position.clone()) {
                 let mut boost_status = self.boost_status.write().await;
                 if boost_status.is_none() {
                     boost_status.replace(BoostStatus {
                         percent: 0.,
-                        direction: boost.velocity.clone(),
+                        speed: boost.speed.clone(),
                     });
                 }
             }
             // check if any of the dimensions are too far away from the min
             // if so, don't bother
-            if (boost.area.min.x as f64 - position.x).abs() > 30.
-                || (boost.area.min.y as f64 - position.y).abs() > 30.
-                || (boost.area.min.z as f64 - position.z).abs() > 30.
+            if (boost.area.min.x as f64 - position.x).abs() > 50.
+                || (boost.area.min.y as f64 - position.y).abs() > 50.
+                || (boost.area.min.z as f64 - position.z).abs() > 50.
             {
                 continue;
             }
@@ -638,77 +655,61 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
             }
         }
 
-        let boost_status = self.boost_status.read().await.clone();
-        if let Some(BoostStatus { percent, direction }) = boost_status {
-            if percent >= 1. {
-                self.boost_status.write().await.take();
-            } else {
-                let velocity = client.player.read().await.velocity.clone();
-                client.set_velocity(velocity + direction.clone());
-                self.boost_status.write().await.replace(BoostStatus {
-                    percent: percent + 0.10,
-                    direction,
-                });
-            }
-        }
-
-        // find which two checkpoints the player is between
-        let mut checkpoints = self.checkpoints.lock().await;
-        let mut checkpoint_index = 0;
-        for i in 0..checkpoints.len() {
-            if checkpoints[i] {
-                checkpoint_index = i;
-            }
-        }
-        let first_checkpoint = &CANYON_CHECKPOINTS[checkpoint_index];
-        let second_checkpoint = &CANYON_CHECKPOINTS[(checkpoint_index + 1) % checkpoints.len()];
-
-        // find the center of each checkpoint
-        let first_checkpoint_center = first_checkpoint.plane.center();
-        let second_checkpoint_center = second_checkpoint.plane.center();
-
-        // get the current position of the player
-        let player_position = client.player.read().await.position.clone();
-
-        // find the distance between the player and the center of each checkpoint
-        let first_checkpoint_distance = first_checkpoint_center.distance(&player_position);
-        let second_checkpoint_distance = second_checkpoint_center.distance(&player_position);
-
-        // get the percentage of the way between the two checkpoints
-        let checkpoint_percent =
-            first_checkpoint_distance / (first_checkpoint_distance + second_checkpoint_distance);
-
-        // println!(
-        //     "{}% of the way to checkpoint {}",
-        //     (checkpoint_percent * 100.).round(),
-        //     checkpoint_index + 1
+        //
+        //
+        // 90% sure this code causes deadlocks
+        //
+        //
+        // // find which two checkpoints the player is between
+        // let mut checkpoints = self.checkpoints.lock().await;
+        // let mut checkpoint_index = 0;
+        // for i in 0..checkpoints.len() {
+        //     if checkpoints[i] {
+        //         checkpoint_index = i;
+        //     }
+        // }
+        // let first_checkpoint = &CANYON_CHECKPOINTS[checkpoint_index];
+        // let second_checkpoint = &CANYON_CHECKPOINTS[(checkpoint_index + 1) % checkpoints.len()];
+        // // find the center of each checkpoint
+        // let first_checkpoint_center = first_checkpoint.plane.center();
+        // let second_checkpoint_center = second_checkpoint.plane.center();
+        // // get the current position of the player
+        // let player_position = client.player.read().await.position.clone();
+        // // find the distance between the player and the center of each checkpoint
+        // let first_checkpoint_distance = first_checkpoint_center.distance(&player_position);
+        // let second_checkpoint_distance = second_checkpoint_center.distance(&player_position);
+        // // get the percentage of the way between the two checkpoints
+        // let checkpoint_percent =
+        //     first_checkpoint_distance / (first_checkpoint_distance + second_checkpoint_distance);
+        // // println!(
+        // //     "{}% of the way to checkpoint {}",
+        // //     (checkpoint_percent * 100.).round(),
+        // //     checkpoint_index + 1
+        // // );
+        // let checkpoint_count = CANYON_CHECKPOINTS.len();
+        // // decrease dashes when there are more checkpoints to achieve a constant width
+        // let dashes_per_checkpoint = 45 / (checkpoint_count - 1) - 1;
+        // let mut checkpoint_representation = String::new();
+        // for i in 0..(checkpoint_count - 1) {
+        //     if i == checkpoint_index {
+        //         checkpoint_representation.push_str(&format!(
+        //             "||{}{}{}",
+        //             "-".repeat((checkpoint_percent * dashes_per_checkpoint as f64) as usize),
+        //             "o",
+        //             "-".repeat(((1. - checkpoint_percent) * dashes_per_checkpoint as f64) as usize)
+        //         ));
+        //     } else {
+        //         checkpoint_representation
+        //             .push_str(&format!("||{}", "-".repeat(dashes_per_checkpoint),));
+        //     }
+        // }
+        // checkpoint_representation.push_str(&format!("||"));
+        // let chat_message = format!(
+        //     "{{\"text\": \"{}\",\"bold\": true}}",
+        //     checkpoint_representation
         // );
+        // client.send_system_chat_message(chat_message.to_string(), true);
 
-        let checkpoint_count = CANYON_CHECKPOINTS.len();
-        // decrease dashes when there are more checkpoints to achieve a constant width
-        let dashes_per_checkpoint = 45 / (checkpoint_count - 1) - 1;
-        let mut checkpoint_representation = String::new();
-        for i in 0..(checkpoint_count - 1) {
-            if i == checkpoint_index {
-                checkpoint_representation.push_str(&format!(
-                    "||{}{}{}",
-                    "-".repeat((checkpoint_percent * dashes_per_checkpoint as f64) as usize),
-                    "o",
-                    "-".repeat(((1. - checkpoint_percent) * dashes_per_checkpoint as f64) as usize)
-                ));
-            } else {
-                checkpoint_representation
-                    .push_str(&format!("||{}", "-".repeat(dashes_per_checkpoint),));
-            }
-        }
-        checkpoint_representation.push_str(&format!("||"));
-
-        let chat_message = format!(
-            "{{\"text\": \"{}\",\"bold\": true}}",
-            checkpoint_representation
-        );
-
-        client.send_system_chat_message(chat_message.to_string(), true);
         Ok(())
     }
     async fn on_on_ground(
@@ -716,12 +717,15 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
         client: &Client<GlideServerHandler, MiniGameProxy>,
         on_ground: bool,
     ) -> Result<bool, ConnectionError> {
-        if on_ground {
+        if let GameState::Running { .. } = &*client.server.handler.game_state.lock().await {
             let mut last_damage = client.handler.last_damage.lock().await;
-            if last_damage.elapsed().as_millis() > 1000 {
+            if on_ground
+                && last_damage.elapsed().as_millis() > 1000
+                && !SPAWN_AREA.within(client.player.read().await.position.clone())
+            {
                 *last_damage = Instant::now();
-                let health = client.player.read().await.health;
-                if health <= 1. {
+                let health = client.player.read().await.health.clone();
+                if health - 2.0 <= 0. {
                     client.set_health(6.);
                     let mut greatest_checkpoint = &Checkpoint {
                         plane: AxisAlignedPlane::X {
@@ -744,10 +748,11 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                     );
                     client.set_velocity(Vec3::scalar(0.));
                 } else {
-                    client.set_health(health - 1.);
+                    client.set_health(health - 2.);
                 }
             }
         }
+
         Ok(on_ground)
     }
 }
@@ -758,21 +763,22 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
     fn new() -> Self {
         Self {
             created_at: Instant::now(),
-            game_state: Mutex::new(GameState::Waiting),
-            commands: CommandNode::root().sub_command(CommandNode::literal("start").executable(
-                Box::new(move |args, client, server, proxy| {
-                    Box::pin(start(args, client, server, proxy))
-                }),
-            )),
+            game_state: Mutex::new(GameState::Starting {
+                ticks_until_start: 120,
+            }),
+            commands: CommandNode::root(),
         }
     }
-    async fn on_tick(&self, server: &Server<Self, MiniGameProxy>, proxy: &MiniGameProxy) {
+    async fn on_tick(&self, server: &Server<Self, MiniGameProxy>, proxy: Arc<MiniGameProxy>) {
+        if self.created_at.elapsed().as_millis() / 50 >= 200 && server.player_list.len() == 0 {
+            proxy.glide_queue.lock().await.remove_server(server.id);
+            println!("Closing server {:x?} due to inactivity", server.id);
+        }
         let mut game_state = self.game_state.lock().await;
         match &*game_state {
-            GameState::Waiting => {}
             GameState::Starting { ticks_until_start } => {
                 if *ticks_until_start != 0 {
-                    if *ticks_until_start % 20 == 0 {
+                    if *ticks_until_start % 20 == 0 && *ticks_until_start <= 100 {
                         server.broadcast_chat(
                             json!([
                                 {
@@ -796,13 +802,29 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
                     };
                     return;
                 }
-                *game_state = GameState::Running;
+                *game_state = GameState::Running {
+                    start_time: Instant::now(),
+                };
 
                 drop(game_state);
 
-                self.start_game(server, proxy).await;
+                self.start_game(server, &proxy).await;
             }
-            GameState::Running => {}
+            GameState::Running { start_time } => {
+                let time_elapsed = format_duration(start_time.elapsed());
+
+                for player in server.player_list.iter() {
+                    player.send_boss_bar_action(
+                        0,
+                        BossBarAction::UpdateTitle {
+                            title: json!({
+                                "text": format!("Time elapsed: {}", time_elapsed),
+                            })
+                            .to_string(),
+                        },
+                    )
+                }
+            }
         }
     }
     async fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError> {
@@ -854,6 +876,7 @@ impl GlideServerHandler {
                     true,
                 );
             }
+            client.set_health(6.);
             client.show_chat_message(
                 json!(
                     {
@@ -864,18 +887,21 @@ impl GlideServerHandler {
                 )
                 .to_string(),
             );
-            client.sync_position(Vec3::new(0.5, 168.0, 0.5), Rotation { yaw: 0., pitch: 0. })
+            client.sync_position(Vec3::new(0.5, 168.0, 0.5), Rotation { yaw: 0., pitch: 0. });
+
+            client.send_boss_bar_action(
+                0,
+                BossBarAction::Add {
+                    title: json!({
+                        "text": "Time elapsed: 0:00.000",
+                    })
+                    .to_string(),
+                    health: 1.0,
+                    color: BossBarColor::Green,
+                    division: BossBarDivision::NoDivisions,
+                    flags: 0,
+                },
+            )
         }
     }
-}
-
-async fn start(
-    _args: Vec<Argument>,
-    client: &Client<GlideServerHandler, MiniGameProxy>,
-    _server: &Server<GlideServerHandler, MiniGameProxy>,
-    _proxy: &MiniGameProxy,
-) {
-    *client.server.handler.game_state.lock().await = GameState::Starting {
-        ticks_until_start: 100,
-    };
 }

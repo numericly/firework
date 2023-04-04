@@ -1,16 +1,23 @@
 use async_trait::async_trait;
 use firework::{ClientData, ConnectionError, Server, ServerManager, ServerProxy};
 use firework_protocol::Protocol;
-use firework_world::World;
+use firework_world::{world, World};
 use glide_server::GlideServerHandler;
+use lazy_static::lazy_static;
 use lobby_server::LobbyServerHandler;
 use queue::Queue;
 use std::sync::Arc;
 use tokio::sync::{Mutex, RwLock};
+use tokio_util::sync::CancellationToken;
 
 mod glide_server;
 mod lobby_server;
 mod queue;
+
+lazy_static! {
+    static ref LOBBY_WORLD: World = world!("./firework-world/lobby", false);
+    static ref GLIDE_WORLD: World = world!("./firework-world/glide/canyon", false);
+}
 
 #[allow(dead_code)]
 pub enum ColorCodes {
@@ -98,12 +105,11 @@ struct MiniGameProxy {
 
     lobby_server: Arc<Server<LobbyServerHandler, MiniGameProxy>>,
     pub glide_queue: Mutex<Queue<MiniGameProxy, GlideServerHandler, 8>>,
-    glide_server: Arc<Server<GlideServerHandler, MiniGameProxy>>,
 }
 
 #[derive(Debug, Clone)]
 enum TransferData {
-    Glide,
+    Glide { game_id: u128 },
 }
 
 #[derive(Debug, Clone, Default)]
@@ -122,7 +128,7 @@ impl ServerProxy for MiniGameProxy {
     type Permissions = Permissions;
     async fn new() -> Self {
         let lobby_server = Server::new(
-            World::new("./firework-world/lobby", false),
+            &LOBBY_WORLD,
             format!(
                 "{}F{}i{}r{}e{}w{}ork Lobby{}",
                 ColorCodes::DarkRed.chat_formatting(),
@@ -133,37 +139,31 @@ impl ServerProxy for MiniGameProxy {
                 ColorCodes::Aqua.chat_formatting(),
                 ColorCodes::Reset.chat_formatting(),
             ),
-        )
-        .await;
-        let glide_server = Server::new(
-            World::new("./firework-world/glide/canyon", true),
-            format!(
-                "{}F{}i{}r{}e{}w{}ork Glide{}",
-                ColorCodes::DarkRed.chat_formatting(),
-                ColorCodes::LightRed.chat_formatting(),
-                ColorCodes::Gold.chat_formatting(),
-                ColorCodes::LightYellow.chat_formatting(),
-                ColorCodes::LightGreen.chat_formatting(),
-                ColorCodes::Aqua.chat_formatting(),
-                ColorCodes::Reset.chat_formatting(),
-            ),
-        )
-        .await;
+            0,
+        );
         Self {
             lobby_server,
-            glide_server,
-            glide_queue: Mutex::new(Queue::default()),
+            glide_queue: Mutex::new(Queue::new(
+                &GLIDE_WORLD,
+                format!(
+                    "{}F{}i{}r{}e{}w{}ork Glide{}",
+                    ColorCodes::DarkRed.chat_formatting(),
+                    ColorCodes::LightRed.chat_formatting(),
+                    ColorCodes::Gold.chat_formatting(),
+                    ColorCodes::LightYellow.chat_formatting(),
+                    ColorCodes::LightGreen.chat_formatting(),
+                    ColorCodes::Aqua.chat_formatting(),
+                    ColorCodes::Reset.chat_formatting(),
+                ),
+            )),
             connected_players: RwLock::new(0),
         }
     }
     async fn run(self: Arc<Self>) {
-        let glide_server_proxy = self.clone();
-        let glide_server = self.glide_server.clone();
-        tokio::spawn(async move {
-            glide_server.run(glide_server_proxy).await;
-        });
-
-        self.lobby_server.clone().run(self.clone()).await;
+        self.lobby_server
+            .clone()
+            .run(self.clone(), CancellationToken::new())
+            .await;
     }
     async fn handle_connection(self: Arc<Self>, connection: Protocol, client_data: ClientData) {
         let client_data = Arc::new(client_data);
@@ -171,25 +171,32 @@ impl ServerProxy for MiniGameProxy {
 
         *self.connected_players.write().await += 1;
 
-        let result = match self
-            .lobby_server
-            .clone()
-            .handle_connection(self.clone(), connection.clone(), client_data.clone())
-            .await
-        {
-            Ok(transfer_data) => match transfer_data {
-                TransferData::Glide => {
-                    self.glide_server
-                        .clone()
+        loop {
+            let result = self
+                .lobby_server
+                .clone()
+                .handle_connection(self.clone(), connection.clone(), client_data.clone())
+                .await;
+
+            let Ok(transfer_data) = result else {
+                break;
+            };
+
+            match transfer_data {
+                TransferData::Glide { game_id } => {
+                    let server = self.glide_queue.lock().await.get_server(game_id);
+                    let Some(server) = server else {
+                        continue;
+                    };
+                    if let Err(_) = server
                         .handle_connection(self.clone(), connection.clone(), client_data.clone())
                         .await
+                    {
+                        break;
+                    }
                 }
-            },
-            Err(e) => Err(e),
-        };
-
-        dbg!(result, &client_data.profile.name);
-
+            }
+        }
         *self.connected_players.write().await -= 1;
     }
     async fn motd(&self) -> Result<String, ConnectionError> {
@@ -228,10 +235,6 @@ impl ServerProxy for MiniGameProxy {
         );
         Ok(motd)
     }
-}
-
-impl MiniGameProxy {
-    async fn join_glide_queue(&self) {}
 }
 
 #[tokio::main]
