@@ -1,0 +1,16 @@
+[package]
+name = "firework_world_loader"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+proc_macro = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+quote = "*"
+syn = { version = "2.0.13", features = ["extra-traits"] }
+proc-macro2 = "*"
+darling = "0.14.2"
+regex = "1.7.3"

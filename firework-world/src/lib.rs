@@ -4,7 +4,6 @@ use dashmap::DashMap;
 use firework_protocol::client_bound::SerializePacket;
 use std::collections::HashMap;
 use std::fmt::Debug;
-use std::fs::File;
 use std::hash::Hash;
 use std::io::Read;
 use std::sync::Arc;
@@ -12,6 +11,8 @@ use thiserror::Error;
 use tokio::sync::{Mutex, RwLock};
 
 pub mod chunk;
+
+pub use firework_world_loader::world;
 
 #[derive(Debug, Error)]
 pub enum WorldError {
@@ -29,7 +30,6 @@ pub enum Difficulty {
 }
 
 pub struct World {
-    pub path: &'static str,
     pub flat: bool,
     regions: DashMap<(i32, i32), Arc<Region>>,
 }
@@ -64,9 +64,8 @@ pub trait ToPacket<T: SerializePacket> {
 }
 
 impl World {
-    pub fn new(path: &'static str, flat: bool) -> World {
+    pub fn new(flat: bool) -> World {
         World {
-            path,
             flat,
             regions: DashMap::new(),
         }
@@ -94,25 +93,17 @@ impl World {
     pub fn get_region(&self, x: i32, z: i32) -> Result<Option<Arc<Region>>, WorldError> {
         Ok(match self.regions.get(&(x, z)) {
             Some(region) => Some(region.clone()),
-            None => {
-                let file = match File::open(format!("{}/r.{}.{}.mca", self.path, x, z)) {
-                    Ok(file) => file,
-                    Err(err) => match err.kind() {
-                        std::io::ErrorKind::NotFound => return Ok(None),
-                        _ => return Err(err.into()),
-                    },
-                };
-                let region = Arc::new(Region::deserialize(file)?);
-                let region_ref = region.clone();
-                self.regions.insert((x, z), region);
-                Some(region_ref)
-            }
+            None => None,
         })
+    }
+    pub fn add_region<R: Read>(&self, x: i32, z: i32, reader: R) {
+        let region = Arc::new(Region::deserialize(reader).expect("Failed to deserialize region"));
+        self.regions.insert((x, z), region);
     }
 }
 
 impl Region {
-    pub fn deserialize(mut reader: File) -> Result<Region, WorldError> {
+    pub fn deserialize<R: Read>(mut reader: R) -> Result<Region, WorldError> {
         #[derive(Debug)]
         struct ChunkInfo {
             size: u8,

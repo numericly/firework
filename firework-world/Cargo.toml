@@ -16,6 +16,7 @@ thiserror = "1.0.38"
 firework_protocol = {path = "../firework-protocol"}
 firework_protocol_core = {path = "../firework-protocol/core"}
 firework_data = {path = "../firework-data"}
+firework_world_loader = {path = "./world-loader"}
 
 [profile.release]
 opt-level = 3

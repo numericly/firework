@@ -34,6 +34,7 @@ firework_authentication = { path = "./firework-authentication" }
 firework_data = { path = "./firework-data" }
 firework_world = { path = "./firework-world" }
 firework = { path = "./firework" }
+include-flate = "0.2.0"
 
 # Small binary
 [profile.release]
