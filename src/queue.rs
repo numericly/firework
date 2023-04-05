@@ -49,7 +49,7 @@ where
     Proxy: ServerProxy + Send + Sync + 'static,
     Handler: ServerHandler<Proxy> + Send + Sync + 'static,
 {
-    pub fn new(world: &'static World, brand: String) -> Self {
+    pub fn new(brand: String) -> Self {
         Self {
             servers: HashMap::new(),
             queue: VecDeque::new(),

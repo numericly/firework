@@ -3,6 +3,9 @@ name = "firework-server"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+bundle_world = ["firework_world/bundle_world"]
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
@@ -34,11 +37,10 @@ firework_authentication = { path = "./firework-authentication" }
 firework_data = { path = "./firework-data" }
 firework_world = { path = "./firework-world" }
 firework = { path = "./firework" }
+include-flate = "0.2.0"
 
-# Small binary
 [profile.release]
 opt-level = 2
-# debug = true
 # codegen-units = 1
 # lto = true
 # strip = true  # Automatically strip symbols from the binary.

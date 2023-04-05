@@ -1,5 +1,5 @@
 use proc_macro::TokenStream;
-use proc_macro2::TokenStream as TokenStream2;
+use proc_macro2::{Ident, Span, TokenStream as TokenStream2};
 use quote::quote;
 use regex::Regex;
 use std::fs;
@@ -43,8 +43,6 @@ pub fn world(input: TokenStream) -> TokenStream {
             continue;
         };
 
-        let path_str = format!(".{}", path_str);
-
         let Some(file_name) = path.file_name() else {
             continue;
         };
@@ -76,9 +74,24 @@ pub fn world(input: TokenStream) -> TokenStream {
             .as_str()
             .parse()
             .expect("Z must be an i32");
-        output.extend(quote! {
-            world.add_region(#x, #z, include_bytes!(#path_str).as_slice());
-        });
+        if cfg!(feature = "bundle_world") {
+            let ident = Ident::new(
+                &format!(
+                    "R_{}_{}",
+                    x.to_string().replace("-", "_"),
+                    z.to_string().replace("-", "_")
+                ),
+                Span::call_site(),
+            );
+            output.extend(quote! {
+                include_flate::flate!(static #ident: [u8] from #path_str);
+                world.add_region(#x, #z, #ident.as_slice());
+            });
+        } else {
+            output.extend(quote! {
+                world.add_region(#x, #z, std::fs::read(#path_str).expect("Failed to read file").as_slice());
+            });
+        }
     }
 
     quote! {

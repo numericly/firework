@@ -3,6 +3,9 @@ name = "firework_world"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+bundle_world = ["firework_world_loader/bundle_world"]
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]

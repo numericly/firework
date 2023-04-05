@@ -143,19 +143,16 @@ impl ServerProxy for MiniGameProxy {
         );
         Self {
             lobby_server,
-            glide_queue: Mutex::new(Queue::new(
-                &CANYON_GLIDE_WORLD,
-                format!(
-                    "{}F{}i{}r{}e{}w{}ork Glide{}",
-                    ColorCodes::DarkRed.chat_formatting(),
-                    ColorCodes::LightRed.chat_formatting(),
-                    ColorCodes::Gold.chat_formatting(),
-                    ColorCodes::LightYellow.chat_formatting(),
-                    ColorCodes::LightGreen.chat_formatting(),
-                    ColorCodes::Aqua.chat_formatting(),
-                    ColorCodes::Reset.chat_formatting(),
-                ),
-            )),
+            glide_queue: Mutex::new(Queue::new(format!(
+                "{}F{}i{}r{}e{}w{}ork Glide{}",
+                ColorCodes::DarkRed.chat_formatting(),
+                ColorCodes::LightRed.chat_formatting(),
+                ColorCodes::Gold.chat_formatting(),
+                ColorCodes::LightYellow.chat_formatting(),
+                ColorCodes::LightGreen.chat_formatting(),
+                ColorCodes::Aqua.chat_formatting(),
+                ColorCodes::Reset.chat_formatting(),
+            ))),
             connected_players: RwLock::new(0),
         }
     }

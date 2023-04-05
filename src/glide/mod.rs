@@ -1,8 +1,3 @@
-use std::{
-    sync::Arc,
-    time::{Duration, Instant},
-};
-
 use async_trait::async_trait;
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
@@ -23,6 +18,10 @@ use firework_protocol_core::VarInt;
 use firework_world::World;
 use rand::{distributions::Standard, prelude::Distribution, Rng};
 use serde_json::json;
+use std::{
+    sync::Arc,
+    time::{Duration, Instant},
+};
 use tokio::sync::{Mutex, RwLock};
 
 use crate::{MiniGameProxy, CANYON_GLIDE_WORLD, CAVERN_GLIDE_WORLD};
@@ -110,7 +109,7 @@ enum GameState {
     Running { start_time: Instant },
 }
 
-const BOOST_TICKS: usize = 13;
+const BOOST_TICKS: usize = 12;
 
 pub struct GlideServerHandler {
     pub map: Maps,
@@ -308,198 +307,203 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
         &self,
         client: &Client<GlideServerHandler, MiniGameProxy>,
     ) -> Result<(), ConnectionError> {
-        const PARTICLE_DENSITY: i32 = 2;
-
         let map = &self.server.handler.map;
-        let time = client.server.handler.created_at.elapsed().as_secs_f32();
-        let position = client.player.read().await.position.clone();
+        {
+            const PARTICLE_DENSITY: i32 = 2;
+            let time = client.server.handler.created_at.elapsed().as_secs_f32();
+            let position = client.player.read().await.position.clone();
 
-        for boost in map.get_boosts().iter() {
-            if boost.area.within(position.clone()) {
-                let mut boost_status = self.boost_status.write().await;
-                if boost_status.is_none() {
-                    boost_status.replace(BoostStatus {
-                        times_remaining: BOOST_TICKS,
-                        speed: boost.speed.clone(),
-                    });
+            for boost in map.get_boosts().iter() {
+                if boost.area.within(position.clone()) {
+                    let mut boost_status = self.boost_status.write().await;
+                    if boost_status.is_none() {
+                        boost_status.replace(BoostStatus {
+                            times_remaining: BOOST_TICKS,
+                            speed: boost.speed.clone(),
+                        });
+                    }
                 }
-            }
-            // check if any of the dimensions are too far away from the min
-            // if so, don't bother
-            if (boost.area.min.x as f64 - position.x).abs() > 50.
-                || (boost.area.min.y as f64 - position.y).abs() > 50.
-                || (boost.area.min.z as f64 - position.z).abs() > 50.
-            {
-                continue;
-            }
-            let boost_direction_multiplier;
-            let mut particles = Vec::new();
-            let middle_x = (boost.area.max.x + boost.area.min.x) as f32 / 2.;
-            let middle_y = (boost.area.max.y + boost.area.min.y) as f32 / 2.;
-            let middle_z = (boost.area.max.z + boost.area.min.z) as f32 / 2.;
-            if [
-                BoostParticleType::BoostSouth,
-                BoostParticleType::BoostEast,
-                BoostParticleType::Smoke,
-            ]
-            .contains(&boost.particle_type)
-            {
-                boost_direction_multiplier = 1.;
-            } else {
-                boost_direction_multiplier = -1.;
-            }
-
-            fn particle(x: f64, y: f64, z: f64) -> Particle {
-                return Particle::new(
-                    Particles::Dust {
-                        red: 1.,
-                        green: 0.7,
-                        blue: 0.,
-                        scale: 3.,
-                    },
-                    false,
-                    x,
-                    y,
-                    z,
-                    0.,
-                    0.,
-                    0.,
-                    0.,
-                    1,
-                );
-            }
-
-            let animation_phase = (time * 0.4 * boost_direction_multiplier).rem_euclid(6.);
-
-            if boost.particle_type == BoostParticleType::Smoke {
-            } else if [BoostParticleType::BoostSouth, BoostParticleType::BoostNorth]
+                // check if any of the dimensions are too far away from the min
+                // if so, don't bother
+                if (boost.area.min.x as f64 - position.x).abs() > 50.
+                    || (boost.area.min.y as f64 - position.y).abs() > 50.
+                    || (boost.area.min.z as f64 - position.z).abs() > 50.
+                {
+                    continue;
+                }
+                let boost_direction_multiplier;
+                let mut particles = Vec::new();
+                let middle_x = (boost.area.max.x + boost.area.min.x) as f32 / 2.;
+                let middle_y = (boost.area.max.y + boost.area.min.y) as f32 / 2.;
+                let middle_z = (boost.area.max.z + boost.area.min.z) as f32 / 2.;
+                if [
+                    BoostParticleType::BoostSouth,
+                    BoostParticleType::BoostEast,
+                    BoostParticleType::Smoke,
+                ]
                 .contains(&boost.particle_type)
-            {
-                // each chevron is 6 blocks long
-                // loop through the amount of chevrons
-                for chevron_number in 0..=((boost.area.max.z - boost.area.min.z) / 6) {
-                    // loop through the amount of particles in each chevron
-                    // first, draw the top chevrons
-                    for particle_number in
-                        0..=((boost.area.max.x - boost.area.min.x) * PARTICLE_DENSITY)
-                    {
-                        let particle_x = boost.area.min.x as f32
-                            + particle_number as f32 / PARTICLE_DENSITY as f32;
-                        let particle_y = boost.area.max.y as f32;
-                        let particle_z =
-                            boost.area.min.z as f32 + chevron_number as f32 * 6. + animation_phase;
-                        // offset the z based on the distance to the center of x (45deg angle)
-                        let particle_z =
-                            particle_z - (particle_x - middle_x).abs() * boost_direction_multiplier;
-                        // bounds check
-                        if particle_z > boost.area.max.z as f32
-                            || particle_z < boost.area.min.z as f32
+                {
+                    boost_direction_multiplier = 1.;
+                } else {
+                    boost_direction_multiplier = -1.;
+                }
+
+                fn particle(x: f64, y: f64, z: f64) -> Particle {
+                    return Particle::new(
+                        Particles::Dust {
+                            red: 1.,
+                            green: 0.7,
+                            blue: 0.,
+                            scale: 3.,
+                        },
+                        false,
+                        x,
+                        y,
+                        z,
+                        0.,
+                        0.,
+                        0.,
+                        0.,
+                        1,
+                    );
+                }
+
+                let animation_phase = (time * 0.4 * boost_direction_multiplier).rem_euclid(6.);
+
+                if boost.particle_type == BoostParticleType::Smoke {
+                } else if [BoostParticleType::BoostSouth, BoostParticleType::BoostNorth]
+                    .contains(&boost.particle_type)
+                {
+                    // each chevron is 6 blocks long
+                    // loop through the amount of chevrons
+                    for chevron_number in 0..=((boost.area.max.z - boost.area.min.z) / 6) {
+                        // loop through the amount of particles in each chevron
+                        // first, draw the top chevrons
+                        for particle_number in
+                            0..=((boost.area.max.x - boost.area.min.x) * PARTICLE_DENSITY)
                         {
-                            continue;
+                            let particle_x = boost.area.min.x as f32
+                                + particle_number as f32 / PARTICLE_DENSITY as f32;
+                            let particle_y = boost.area.max.y as f32;
+                            let particle_z = boost.area.min.z as f32
+                                + chevron_number as f32 * 6.
+                                + animation_phase;
+                            // offset the z based on the distance to the center of x (45deg angle)
+                            let particle_z = particle_z
+                                - (particle_x - middle_x).abs() * boost_direction_multiplier;
+                            // bounds check
+                            if particle_z > boost.area.max.z as f32
+                                || particle_z < boost.area.min.z as f32
+                            {
+                                continue;
+                            }
+                            particles.push(particle(
+                                particle_x as f64,
+                                particle_y as f64,
+                                particle_z as f64,
+                            ));
                         }
-                        particles.push(particle(
-                            particle_x as f64,
-                            particle_y as f64,
-                            particle_z as f64,
-                        ));
+                        //then, draw the left and right chevrons
+                        for particle_number in
+                            0..=((boost.area.max.y - boost.area.min.y) * PARTICLE_DENSITY)
+                        {
+                            let particle_x = boost.area.min.x as f32;
+                            let particle_y = boost.area.min.y as f32
+                                + particle_number as f32 / PARTICLE_DENSITY as f32;
+                            let particle_z = boost.area.min.z as f32
+                                + chevron_number as f32 * 6.
+                                + animation_phase;
+                            // offset the z based on the distance to the center of x (45deg angle)
+                            let particle_z = particle_z
+                                - (particle_y - middle_y).abs() * boost_direction_multiplier;
+                            // bounds check
+                            if particle_z > boost.area.max.z as f32
+                                || particle_z < boost.area.min.z as f32
+                            {
+                                continue;
+                            }
+                            particles.push(particle(
+                                particle_x as f64,
+                                particle_y as f64,
+                                particle_z as f64,
+                            ));
+                            let particle_x = boost.area.max.x as f32;
+                            particles.push(particle(
+                                particle_x as f64,
+                                particle_y as f64,
+                                particle_z as f64,
+                            ));
+                        }
                     }
-                    //then, draw the left and right chevrons
-                    for particle_number in
-                        0..=((boost.area.max.y - boost.area.min.y) * PARTICLE_DENSITY)
-                    {
-                        let particle_x = boost.area.min.x as f32;
-                        let particle_y = boost.area.min.y as f32
-                            + particle_number as f32 / PARTICLE_DENSITY as f32;
-                        let particle_z =
-                            boost.area.min.z as f32 + chevron_number as f32 * 6. + animation_phase;
-                        // offset the z based on the distance to the center of x (45deg angle)
-                        let particle_z =
-                            particle_z - (particle_y - middle_y).abs() * boost_direction_multiplier;
-                        // bounds check
-                        if particle_z > boost.area.max.z as f32
-                            || particle_z < boost.area.min.z as f32
+                } else {
+                    for chevron_number in 0..=((boost.area.max.x - boost.area.min.x) / 6) {
+                        // loop through the amount of particles in each chevron
+                        // first, draw the top chevrons
+                        for particle_number in
+                            0..=((boost.area.max.z - boost.area.min.z) * PARTICLE_DENSITY)
                         {
-                            continue;
+                            let particle_x = boost.area.min.x as f32
+                                + chevron_number as f32 * 6.
+                                + animation_phase;
+                            let particle_y = boost.area.max.y as f32;
+                            let particle_z = boost.area.min.z as f32
+                                + particle_number as f32 / PARTICLE_DENSITY as f32;
+                            // offset the z based on the distance to the center of x (45deg angle)
+                            let particle_x = particle_x
+                                - (particle_z - middle_z).abs() * boost_direction_multiplier;
+                            // bounds check
+                            if particle_x > boost.area.max.x as f32
+                                || particle_x < boost.area.min.x as f32
+                            {
+                                continue;
+                            }
+                            particles.push(particle(
+                                particle_x as f64,
+                                particle_y as f64,
+                                particle_z as f64,
+                            ));
                         }
-                        particles.push(particle(
-                            particle_x as f64,
-                            particle_y as f64,
-                            particle_z as f64,
-                        ));
-                        let particle_x = boost.area.max.x as f32;
-                        particles.push(particle(
-                            particle_x as f64,
-                            particle_y as f64,
-                            particle_z as f64,
-                        ));
+                        //then, draw the left and right chevrons
+                        for particle_number in
+                            0..=((boost.area.max.y - boost.area.min.y) * PARTICLE_DENSITY)
+                        {
+                            let particle_x = boost.area.min.x as f32
+                                + chevron_number as f32 * 6.
+                                + animation_phase;
+                            let particle_y = boost.area.min.y as f32
+                                + particle_number as f32 / PARTICLE_DENSITY as f32;
+                            let particle_z = boost.area.min.z as f32;
+                            // offset the z based on the distance to the center of x (45deg angle)
+                            let particle_x = particle_x
+                                - (particle_y - middle_y).abs() * boost_direction_multiplier;
+                            // bounds check
+                            if particle_x > boost.area.max.x as f32
+                                || particle_x < boost.area.min.x as f32
+                            {
+                                continue;
+                            }
+                            particles.push(particle(
+                                particle_x as f64,
+                                particle_y as f64,
+                                particle_z as f64,
+                            ));
+                            let particle_z = boost.area.max.z as f32;
+                            particles.push(particle(
+                                particle_x as f64,
+                                particle_y as f64,
+                                particle_z as f64,
+                            ));
+                        }
                     }
                 }
-            } else {
-                for chevron_number in 0..=((boost.area.max.x - boost.area.min.x) / 6) {
-                    // loop through the amount of particles in each chevron
-                    // first, draw the top chevrons
-                    for particle_number in
-                        0..=((boost.area.max.z - boost.area.min.z) * PARTICLE_DENSITY)
-                    {
-                        let particle_x =
-                            boost.area.min.x as f32 + chevron_number as f32 * 6. + animation_phase;
-                        let particle_y = boost.area.max.y as f32;
-                        let particle_z = boost.area.min.z as f32
-                            + particle_number as f32 / PARTICLE_DENSITY as f32;
-                        // offset the z based on the distance to the center of x (45deg angle)
-                        let particle_x =
-                            particle_x - (particle_z - middle_z).abs() * boost_direction_multiplier;
-                        // bounds check
-                        if particle_x > boost.area.max.x as f32
-                            || particle_x < boost.area.min.x as f32
-                        {
-                            continue;
-                        }
-                        particles.push(particle(
-                            particle_x as f64,
-                            particle_y as f64,
-                            particle_z as f64,
-                        ));
-                    }
-                    //then, draw the left and right chevrons
-                    for particle_number in
-                        0..=((boost.area.max.y - boost.area.min.y) * PARTICLE_DENSITY)
-                    {
-                        let particle_x =
-                            boost.area.min.x as f32 + chevron_number as f32 * 6. + animation_phase;
-                        let particle_y = boost.area.min.y as f32
-                            + particle_number as f32 / PARTICLE_DENSITY as f32;
-                        let particle_z = boost.area.min.z as f32;
-                        // offset the z based on the distance to the center of x (45deg angle)
-                        let particle_x =
-                            particle_x - (particle_y - middle_y).abs() * boost_direction_multiplier;
-                        // bounds check
-                        if particle_x > boost.area.max.x as f32
-                            || particle_x < boost.area.min.x as f32
-                        {
-                            continue;
-                        }
-                        particles.push(particle(
-                            particle_x as f64,
-                            particle_y as f64,
-                            particle_z as f64,
-                        ));
-                        let particle_z = boost.area.max.z as f32;
-                        particles.push(particle(
-                            particle_x as f64,
-                            particle_y as f64,
-                            particle_z as f64,
-                        ));
-                    }
+                // send the particles to the client
+                let mut animation_frame = self.animation_frame.lock().await;
+                if *animation_frame == 5 {
+                    client.send_particles(particles);
+                    *animation_frame = 0;
+                } else {
+                    *animation_frame += 1;
                 }
-            }
-            // send the particles to the client
-            let mut animation_frame = self.animation_frame.lock().await;
-            if *animation_frame == 5 {
-                client.send_particles(particles);
-                *animation_frame = 0;
-            } else {
-                *animation_frame += 1;
             }
         }
 
