@@ -12,10 +12,11 @@ use firework_authentication::Profile;
 use firework_data::items::{Compass, Item};
 use firework_protocol::data_types::{ItemNbt, Slot};
 use firework_protocol_core::VarInt;
+use firework_world::World;
 use serde_json::json;
 use tokio::sync::{broadcast::Receiver, Mutex};
 
-use crate::{queue::QueueMessage, MiniGameProxy, TransferData};
+use crate::{queue::QueueMessage, MiniGameProxy, TransferData, LOBBY_WORLD};
 
 enum MiniGame {
     Glide,
@@ -116,7 +117,6 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
                         client.transfer(TransferData::Glide { game_id });
                     }
                 }
-                dbg!(msg);
             }
         }
         Ok(())
@@ -206,6 +206,9 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
                     },
                 ))),
         }
+    }
+    fn get_world(&self) -> &'static World {
+        &LOBBY_WORLD
     }
     async fn on_tick(&self, _server: &Server<Self, MiniGameProxy>, proxy: Arc<MiniGameProxy>) {
         proxy.glide_queue.lock().await.update(proxy.clone()).await;

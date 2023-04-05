@@ -544,7 +544,6 @@ where
     Proxy: ServerProxy + Send + Sync + 'static,
     Handler: ServerHandler<Proxy> + Send + Sync + 'static,
 {
-    pub world: Arc<&'static World>,
     pub entities: Arc<DashMap<i32, Entities>>,
     pub player_list: Arc<DashMap<u128, Client<Handler, Proxy>>>,
     pub difficulty: RwLock<u8>,
@@ -664,6 +663,7 @@ where
         server: &Server<Self, Proxy>,
         proxy: &Proxy,
     ) -> Result<&CommandNode<Self, Proxy>, ConnectionError>;
+    fn get_world(&self) -> &'static World;
     async fn on_load(&self, server: &Server<Self, Proxy>, proxy: Arc<Proxy>) {}
     async fn on_tick(&self, server: &Server<Self, Proxy>, proxy: Arc<Proxy>) {}
     async fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError>;
@@ -695,7 +695,6 @@ where
         Arc::new(Self {
             difficulty: RwLock::new(0),
             difficulty_locked: RwLock::new(false),
-            world: Arc::new(world),
             player_list: Arc::new(DashMap::new()),
             entities: Arc::new(DashMap::new()),
             _lowest_free_id: Mutex::new(0),
@@ -704,6 +703,9 @@ where
             brand,
             id,
         })
+    }
+    pub fn get_world(&self) -> &'static World {
+        self.handler.get_world()
     }
     pub async fn run(self: Arc<Self>, proxy: Arc<Proxy>, token: CancellationToken) {
         let mut interval = tokio::time::interval(Duration::from_millis(50));

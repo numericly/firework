@@ -332,7 +332,7 @@ where
                 gamemode: player.gamemode.clone() as u8,
                 previous_gamemode: player.previous_gamemode,
                 is_debug: false,
-                is_flat: self.server.world.flat,
+                is_flat: self.server.get_world().flat,
                 copy_metadata: true,
                 death_location: None,
             }
@@ -508,7 +508,7 @@ where
         for x in -7..=7 {
             for z in -7..=7 {
                 let packet = {
-                    let chunk_data = self.server.world.get_chunk(x, z).await?;
+                    let chunk_data = self.server.get_world().get_chunk(x, z).await?;
                     if let Some(chunk_lock) = chunk_data {
                         let chunk = chunk_lock.read().await;
                         Some(chunk.into_packet())
@@ -1169,7 +1169,7 @@ where
                 let packet = {
                     let chunk_data = self
                         .server
-                        .world
+                        .get_world()
                         .get_chunk(x + chunk_x, z + chunk_z)
                         .await?;
                     if let Some(chunk_lock) = chunk_data {

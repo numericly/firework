@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use firework::{ClientData, ConnectionError, Server, ServerManager, ServerProxy};
 use firework_protocol::Protocol;
 use firework_world::{world, World};
-use glide_server::GlideServerHandler;
+use glide::GlideServerHandler;
 use lazy_static::lazy_static;
 use lobby_server::LobbyServerHandler;
 use queue::Queue;
@@ -10,13 +10,14 @@ use std::sync::Arc;
 use tokio::sync::{Mutex, RwLock};
 use tokio_util::sync::CancellationToken;
 
-mod glide_server;
+mod glide;
 mod lobby_server;
 mod queue;
 
 lazy_static! {
     static ref LOBBY_WORLD: World = world!("./firework-world/lobby", false);
-    static ref GLIDE_WORLD: World = world!("./firework-world/glide/canyon", false);
+    static ref CANYON_GLIDE_WORLD: World = world!("./firework-world/glide/canyon", false);
+    static ref CAVERN_GLIDE_WORLD: World = world!("./firework-world/glide/cavern", false);
 }
 
 #[allow(dead_code)]
@@ -144,7 +145,7 @@ impl ServerProxy for MiniGameProxy {
         Self {
             lobby_server,
             glide_queue: Mutex::new(Queue::new(
-                &GLIDE_WORLD,
+                &CANYON_GLIDE_WORLD,
                 format!(
                     "{}F{}i{}r{}e{}w{}ork Glide{}",
                     ColorCodes::DarkRed.chat_formatting(),

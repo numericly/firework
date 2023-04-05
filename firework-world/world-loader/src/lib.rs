@@ -2,7 +2,7 @@ use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use regex::Regex;
-use std::{fmt::format, fs};
+use std::fs;
 use syn::{
     self,
     parse::{Parse, ParseStream},
@@ -76,7 +76,6 @@ pub fn world(input: TokenStream) -> TokenStream {
             .as_str()
             .parse()
             .expect("Z must be an i32");
-
         output.extend(quote! {
             world.add_region(#x, #z, include_bytes!(#path_str).as_slice());
         });
