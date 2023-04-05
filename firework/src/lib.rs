@@ -1,14 +1,19 @@
 use crate::client::{Client, ClientCommand, Player};
 use crate::entities::{EntityMetadata, Pose};
 use async_trait::async_trait;
-use client::PreviousPosition;
+use client::{InventorySlot, PreviousPosition};
 use commands::CommandNode;
 use dashmap::{DashMap, DashSet};
 use firework_authentication::{authenticate, AuthenticationError, Profile};
-use firework_protocol::client_bound::{
-    EncryptionRequest, LoginDisconnect, LoginSuccess, Pong, ServerStatus, SetCompression,
+use firework_protocol::server_bound::{
+    ClientInformation, EncryptionResponse, Handshake, LoginStart, Ping, ServerBoundPacket,
 };
-use firework_protocol::server_bound::{ClientInformation, Ping, ServerBoundPacket};
+use firework_protocol::{
+    client_bound::{
+        EncryptionRequest, LoginDisconnect, LoginSuccess, Pong, ServerStatus, SetCompression,
+    },
+    data_types::Slot,
+};
 use firework_protocol::{read_specific_packet, ConnectionState, Protocol, ProtocolError};
 use firework_protocol_core::VarInt;
 use firework_world::World;
@@ -348,7 +353,7 @@ pub struct ClientData {
 }
 
 pub struct ServerManager<T: Sized, const PLAYER_RESERVED_ENTITY_IDS: i32 = 1_000_000> {
-    encryption: Arc<Encryption>,
+    encryption: Option<Arc<Encryption>>,
     proxy: Arc<T>,
     player_entity_ids: DashSet<i32>,
     lowest_free_entity_id: Mutex<i32>,
@@ -367,9 +372,36 @@ pub trait ServerProxy {
     async fn motd(&self) -> Result<String, ConnectionError>;
 }
 
+#[derive(Debug, Clone)]
+pub struct ServerOptions {
+    pub port: u16,
+    pub host: bool,
+    pub encryption: bool,
+}
+
+impl Default for ServerOptions {
+    fn default() -> Self {
+        ServerOptions {
+            port: 25565,
+            host: false,
+            encryption: true,
+        }
+    }
+}
+
 impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerManager<T> {
-    pub async fn run(port: u16) {
-        let encryption = Arc::new(Encryption::new());
+    pub async fn run(opts: ServerOptions) {
+        let ServerOptions {
+            port,
+            host,
+            encryption: encryption_enabled,
+        } = opts;
+
+        let encryption = if encryption_enabled {
+            Some(Arc::new(Encryption::new()))
+        } else {
+            None
+        };
 
         let server = Arc::new(ServerManager {
             encryption,
@@ -380,8 +412,10 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
 
         let cloned_server = server.clone();
 
+        let address = if host { "0.0.0.0" } else { "127.0.0.1" };
+
         tokio::task::spawn(async move {
-            let listener = TcpListener::bind(format!("0.0.0.0:{}", port))
+            let listener = TcpListener::bind(format!("{}:{}", address, port))
                 .await
                 .expect("Failed to bind server to port");
             println!("Server started listening on port: {}", port);
@@ -406,7 +440,7 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
         ip_address: SocketAddr,
         mut connection: Protocol,
     ) -> Result<(), ConnectionError> {
-        let handshake = read_specific_packet!(&connection, Handshake).await?;
+        let handshake: Handshake = read_specific_packet!(&connection, Handshake).await?;
 
         match handshake.next_state {
             // Handle server ping
@@ -436,53 +470,72 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
             ConnectionState::Login => {
                 async fn handle_login(
                     connection: &mut Protocol,
-                    encryption: Arc<Encryption>,
+                    encryption: Option<Arc<Encryption>>,
                 ) -> Result<(u128, Profile), ConnectionError> {
-                    let login_start = read_specific_packet!(connection, LoginStart).await?;
+                    let login_start: LoginStart =
+                        read_specific_packet!(connection, LoginStart).await?;
 
                     let client_username = login_start.name;
+                    let client_uuid = login_start.uuid;
 
-                    let encryption_request = EncryptionRequest {
-                        server_id: "".to_string(), // deprecated after 1.7
-                        public_key: encryption.encoded_pub.clone(),
-                        verify_token: Vec::new(),
-                    };
-                    connection.write_packet(encryption_request).await?;
+                    println!("{:x?} is connecting", client_uuid);
 
-                    let encryption_response =
-                        read_specific_packet!(connection, EncryptionResponse).await?;
+                    let profile = if let Some(encryption) = encryption {
+                        let encryption_request = EncryptionRequest {
+                            server_id: "".to_string(), // deprecated after 1.7
+                            public_key: encryption.encoded_pub.clone(),
+                            verify_token: Vec::new(),
+                        };
+                        connection.write_packet(encryption_request).await?;
 
-                    let shared_secret = encryption.priv_key.decrypt(
-                        rsa::PaddingScheme::PKCS1v15Encrypt,
-                        encryption_response.shared_secret.as_slice(),
-                    )?;
+                        let encryption_response: EncryptionResponse =
+                            read_specific_packet!(connection, EncryptionResponse).await?;
 
-                    if shared_secret.len() != 16usize {
-                        return Err(ConnectionError::InvalidSharedSecretLength(
-                            shared_secret.len(),
-                        ));
-                    }
+                        let shared_secret = encryption.priv_key.decrypt(
+                            rsa::PaddingScheme::PKCS1v15Encrypt,
+                            encryption_response.shared_secret.as_slice(),
+                        )?;
 
-                    let profile = match authenticate(
-                        shared_secret.as_slice(),
-                        encryption.encoded_pub.as_slice(),
-                        client_username,
-                    )
-                    .await
-                    {
-                        Ok(profile) => profile,
-                        Err(err) => {
-                            let disconnect = LoginDisconnect {
-                                reason: format!(r#"{{"text": "{}"}}"#, err),
-                            };
-                            connection.write_packet(disconnect).await;
-                            return Err(ConnectionError::AuthenticationError(err));
+                        if shared_secret.len() != 16usize {
+                            return Err(ConnectionError::InvalidSharedSecretLength(
+                                shared_secret.len(),
+                            ));
                         }
-                    };
 
-                    connection
-                        .enable_encryption(shared_secret.as_slice(), shared_secret.as_slice())
-                        .await;
+                        let profile = match authenticate(
+                            shared_secret.as_slice(),
+                            encryption.encoded_pub.as_slice(),
+                            client_username,
+                        )
+                        .await
+                        {
+                            Ok(profile) => profile,
+                            Err(err) => {
+                                let disconnect = LoginDisconnect {
+                                    reason: format!(r#"{{"text": "{}"}}"#, err),
+                                };
+                                connection.write_packet(disconnect).await;
+                                return Err(ConnectionError::AuthenticationError(err));
+                            }
+                        };
+
+                        connection
+                            .enable_encryption(shared_secret.as_slice(), shared_secret.as_slice())
+                            .await;
+
+                        profile
+                    } else {
+                        let Some(uuid) = client_uuid else {
+                            //TODO: Fix reason
+                            return Err(ConnectionError::ClientCancelled);
+                        };
+                        let profile = Profile {
+                            id: format!("{:x}", uuid),
+                            name: client_username,
+                            ..Default::default()
+                        };
+                        profile
+                    };
 
                     let set_compression = SetCompression {
                         threshold: VarInt(0),
@@ -623,6 +676,14 @@ where
     ) -> Result<Option<String>, ConnectionError> {
         let name = &client.player.read().await.profile.name;
         Ok(Some(format!(r#"{{ "text": "<{}> {}"}}"#, name, chat)))
+    }
+    async fn on_use_item(
+        &self,
+        client: &Client<Handler, Proxy>,
+        item: Option<Slot>,
+        slot_id: InventorySlot,
+    ) -> Result<(), ConnectionError> {
+        Ok(())
     }
     async fn on_death(&self, client: &Client<Handler, Proxy>) -> Result<bool, ConnectionError> {
         Ok(true)

@@ -32,6 +32,7 @@
     "idents",
     "Illusioner",
     "keystream",
+    "lerp",
     "levelup",
     "mapref",
     "memmap",

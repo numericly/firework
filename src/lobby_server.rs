@@ -128,12 +128,24 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
         self.leave_queue(client.client_data.uuid).await;
         Ok(())
     }
-    async fn on_chat_command(
+    async fn on_use_item(
         &self,
-        _client: &Client<LobbyServerHandler, MiniGameProxy>,
-        command: String,
-    ) -> Result<Option<String>, ConnectionError> {
-        Ok(Some(command))
+        client: &Client<LobbyServerHandler, MiniGameProxy>,
+        item: Option<Slot>,
+        slot_id: InventorySlot,
+    ) -> Result<(), ConnectionError> {
+        let Some(item) = item else {
+            return Ok(())
+        };
+
+        match item.item_id.0 as u32 {
+            Compass::ID => {
+                println!("Compass used");
+            }
+            _ => return Ok(()),
+        }
+
+        Ok(())
     }
 }
 
@@ -210,6 +222,7 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
     fn get_world(&self) -> &'static World {
         &LOBBY_WORLD
     }
+
     async fn on_tick(&self, _server: &Server<Self, MiniGameProxy>, proxy: Arc<MiniGameProxy>) {
         proxy.glide_queue.lock().await.update(proxy.clone()).await;
     }

@@ -190,6 +190,7 @@ trait SlotValue {
     fn value(&self) -> usize;
 }
 
+#[derive(Clone, Debug)]
 #[repr(usize)]
 pub enum InventorySlot {
     Boots,
@@ -842,7 +843,7 @@ where
                 })
                 .await?;
 
-                if let Some(gui) = self.gui.write().await.take() {
+                if let Some(_) = self.gui.write().await.take() {
                     const GUI_ID: u8 = 1;
                     self.send_packet(CloseContainer { window_id: 1 }).await?;
                 }
@@ -1126,11 +1127,15 @@ where
 
                 let used_item = {
                     let player_read = self.player.read().await;
-                    match player_read.inventory.get_slot(used_item_slot) {
+                    match player_read.inventory.get_slot(used_item_slot.clone()) {
                         Some(item) => Some(item.clone()),
                         None => None,
                     }
                 };
+
+                self.handler
+                    .on_use_item(self, used_item, used_item_slot)
+                    .await?;
             }
             _ => (),
         };

@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use firework::{ClientData, ConnectionError, Server, ServerManager, ServerProxy};
+use firework::{ClientData, ConnectionError, Server, ServerManager, ServerOptions, ServerProxy};
 use firework_protocol::Protocol;
 use firework_world::{world, World};
 use glide::GlideServerHandler;
@@ -243,5 +243,9 @@ impl ServerProxy for MiniGameProxy {
 async fn main() {
     std::env::set_var("RUST_BACKTRACE", "1");
 
-    ServerManager::<MiniGameProxy>::run(25565).await;
+    ServerManager::<MiniGameProxy>::run(ServerOptions {
+        encryption: true,
+        ..Default::default()
+    })
+    .await;
 }
