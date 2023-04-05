@@ -39,7 +39,6 @@ where
     servers: HashMap<u128, (Arc<Server<Handler, Proxy>>, CancellationToken)>,
     queue: VecDeque<QueuedPlayer>,
     state: GameState,
-    world: &'static World,
     brand: String,
 }
 
@@ -55,7 +54,6 @@ where
             servers: HashMap::new(),
             queue: VecDeque::new(),
             state: GameState::NoPlayers,
-            world,
             brand,
         }
     }
@@ -157,7 +155,7 @@ where
     }
     pub fn create_server(&mut self, proxy: Arc<Proxy>) -> u128 {
         let game_id: u128 = rand::random();
-        let server = Server::new(self.world, self.brand.clone(), game_id);
+        let server = Server::new(self.brand.clone(), game_id);
 
         let cancel = CancellationToken::new();
         let run_cancel = cancel.clone();

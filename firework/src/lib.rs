@@ -691,7 +691,7 @@ where
     Handler: Send + Sync + 'static,
     Proxy::TransferData: Clone,
 {
-    pub fn new(world: &'static World, brand: String, id: u128) -> Arc<Self> {
+    pub fn new(brand: String, id: u128) -> Arc<Self> {
         Arc::new(Self {
             difficulty: RwLock::new(0),
             difficulty_locked: RwLock::new(false),

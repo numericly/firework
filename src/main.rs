@@ -129,7 +129,6 @@ impl ServerProxy for MiniGameProxy {
     type Permissions = Permissions;
     async fn new() -> Self {
         let lobby_server = Server::new(
-            &LOBBY_WORLD,
             format!(
                 "{}F{}i{}r{}e{}w{}ork Lobby{}",
                 ColorCodes::DarkRed.chat_formatting(),
