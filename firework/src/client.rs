@@ -420,18 +420,18 @@ where
         })
         .await?;
 
-        self.send_packet(SetHealth {
-            health: self.player.read().await.health as f32,
-            food: VarInt(20),
-            food_saturation: 5.0,
-        })
-        .await?;
-
         self.send_packet(UpdateAttributes {
             entity_id: VarInt::from(self.client_data.entity_id),
             attributes: vec![Attribute::MaxHealth {
                 value: self.player.read().await.max_health as f64,
             }],
+        })
+        .await?;
+
+        self.send_packet(SetHealth {
+            health: self.player.read().await.health as f32,
+            food: VarInt(20),
+            food_saturation: 5.0,
         })
         .await?;
 
@@ -846,7 +846,6 @@ where
                     const GUI_ID: u8 = 1;
                     self.send_packet(CloseContainer { window_id: 1 }).await?;
                 }
-
                 return Ok(Some(data));
             }
             ClientCommand::SetHealth { health } => {

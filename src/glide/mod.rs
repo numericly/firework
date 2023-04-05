@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
-    commands::CommandNode,
+    commands::{Argument, CommandNode},
     entities::{EntityMetadata, Pose},
     AxisAlignedBB, AxisAlignedPlane, ConnectionError, PlayerHandler, Rotation, Server,
     ServerHandler, Vec3,
@@ -24,7 +24,7 @@ use std::{
 };
 use tokio::sync::{Mutex, RwLock};
 
-use crate::{MiniGameProxy, CANYON_GLIDE_WORLD, CAVERN_GLIDE_WORLD};
+use crate::{MiniGameProxy, TransferData, CANYON_GLIDE_WORLD, CAVERN_GLIDE_WORLD};
 
 mod canyon;
 mod cavern;
@@ -151,6 +151,13 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
             start_time: Mutex::new(None),
             last_damage: Mutex::new(Instant::now()),
         }
+    }
+    async fn on_leave(
+        &self,
+        client: &Client<GlideServerHandler, MiniGameProxy>,
+    ) -> Result<(), ConnectionError> {
+        client.send_boss_bar_action(0, BossBarAction::Remove);
+        Ok(())
     }
     async fn on_post_load(
         &self,
@@ -289,11 +296,15 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                 self.boost_status.write().await.take();
             } else {
                 let velocity = client.player.read().await.velocity.clone();
-                let player_direction = velocity.normalize();
-                client.set_velocity(
-                    velocity * Vec3::scalar(0.85)
-                        + player_direction * Vec3::scalar(speed / BOOST_TICKS as f64),
-                );
+                let direction = client.player.read().await.rotation.direction().normalize();
+                let velocity_direction = velocity.normalize();
+                let velocity_speed = velocity.magnitude();
+
+                let new_direction = velocity_direction.lerp(&direction, 0.15);
+                let new_speed = velocity_speed * 0.85 + speed / BOOST_TICKS as f64;
+
+                client.set_velocity(new_direction * Vec3::scalar(new_speed));
+
                 self.boost_status.write().await.replace(BoostStatus {
                     times_remaining: times_remaining - 1,
                     speed,
@@ -624,7 +635,11 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
             game_state: Mutex::new(GameState::Starting {
                 ticks_until_start: 120,
             }),
-            commands: CommandNode::root(),
+            commands: CommandNode::root().sub_command(CommandNode::literal("lobby").executable(
+                Box::new(move |args, client, server, proxy| {
+                    Box::pin(return_to_lobby(args, client, server, proxy))
+                }),
+            )),
         }
     }
     fn get_world(&self) -> &'static World {
@@ -768,4 +783,13 @@ impl GlideServerHandler {
             )
         }
     }
+}
+
+async fn return_to_lobby(
+    _args: Vec<Argument>,
+    client: &Client<GlideServerHandler, MiniGameProxy>,
+    _server: &Server<GlideServerHandler, MiniGameProxy>,
+    _proxy: &MiniGameProxy,
+) {
+    client.transfer(TransferData::Lobby);
 }

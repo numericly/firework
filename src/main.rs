@@ -110,6 +110,7 @@ struct MiniGameProxy {
 
 #[derive(Debug, Clone)]
 enum TransferData {
+    Lobby,
     Glide { game_id: u128 },
 }
 
@@ -181,7 +182,7 @@ impl ServerProxy for MiniGameProxy {
 
             match transfer_data {
                 TransferData::Glide { game_id } => {
-                    let server = self.glide_queue.lock().await.get_server(game_id);
+                    let server = self.glide_queue.lock().await.get_server(game_id).clone();
                     let Some(server) = server else {
                         continue;
                     };
@@ -192,8 +193,12 @@ impl ServerProxy for MiniGameProxy {
                         break;
                     }
                 }
+                TransferData::Lobby => {
+                    break;
+                }
             }
         }
+
         *self.connected_players.write().await -= 1;
     }
     async fn motd(&self) -> Result<String, ConnectionError> {

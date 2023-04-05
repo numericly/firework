@@ -32,7 +32,6 @@ pub mod client;
 pub mod commands;
 pub mod entities;
 pub mod gui;
-pub mod items;
 
 #[derive(Debug, Error)]
 pub enum ConnectionError {
@@ -211,6 +210,19 @@ impl Vec3 {
 
         Vec3::new(self.x / length, self.y / length, self.z / length)
     }
+    pub fn sum(&self, other: &Vec3) -> Vec3 {
+        Vec3::new(self.x + other.x, self.y + other.y, self.z + other.z)
+    }
+    pub fn magnitude(&self) -> f64 {
+        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+    }
+    pub fn lerp(&self, other: &Vec3, t: f64) -> Vec3 {
+        Vec3::new(
+            self.x + (other.x - self.x) * t,
+            self.y + (other.y - self.y) * t,
+            self.z + (other.z - self.z) * t,
+        )
+    }
 }
 
 impl Add for Vec3 {
@@ -284,6 +296,16 @@ impl Rotation {
         };
         let yaw = (yaw_fixed * yaw_ratio) as i8;
         (yaw, pitch)
+    }
+    pub fn direction(&self) -> Vec3 {
+        let yaw = (-self.yaw).to_radians();
+        let pitch = self.pitch.to_radians();
+
+        let x = yaw.sin() * pitch.cos();
+        let y = -pitch.sin();
+        let z = yaw.cos() * pitch.cos();
+
+        Vec3::new(x as f64, y as f64, z as f64)
     }
 }
 
@@ -814,6 +836,7 @@ where
         mut to_client_receiver: broadcast::Receiver<ClientCommand<Proxy::TransferData>>,
         mut to_client_visual_receiver: broadcast::Receiver<ClientCommand<Proxy::TransferData>>,
     ) -> Result<Proxy::TransferData, ConnectionError> {
+        let mut command_listener_receiver = to_client_receiver.resubscribe();
         if client.connection_state().await != ConnectionState::Play {
             client.change_to_play().await?;
         } else {
@@ -831,7 +854,6 @@ where
         let token = CancellationToken::new();
 
         let command_listener_server = self.clone();
-        let _command_listener_proxy = proxy.clone();
         let command_listener_token = token.clone();
 
         let command_listener_handle: JoinHandle<Result<Proxy::TransferData, ConnectionError>> =
@@ -843,7 +865,7 @@ where
 
                 loop {
                     select! {
-                        command = to_client_receiver.recv() => {
+                        command = command_listener_receiver.recv() => {
                             let command = command?;
                             if let Some(data) = client
                                 .handle_command(
@@ -874,7 +896,6 @@ where
             });
 
         let event_listener_server = self.clone();
-        let _event_listener_proxy = proxy.clone();
         let event_listener_token = token.clone();
 
         let event_listener_handle: JoinHandle<Result<Proxy::TransferData, ConnectionError>> =
@@ -954,6 +975,14 @@ where
         };
 
         client.handler.on_leave(client).await?;
+
+        for _ in 0..to_client_receiver.len() {
+            let command = to_client_receiver.recv().await;
+            #[allow(unused_must_use)]
+            if let Ok(command) = command {
+                client.handle_command(command).await;
+            }
+        }
 
         if let Ok(err) = result {
             err
