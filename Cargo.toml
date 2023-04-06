@@ -37,7 +37,7 @@ firework_authentication = { path = "./firework-authentication" }
 firework_data = { path = "./firework-data" }
 firework_world = { path = "./firework-world" }
 firework = { path = "./firework" }
-include-flate = "0.2.0"
+include-flate = { version= "0.2.0", features = ["stable"] }
 
 [profile.release]
 opt-level = 2

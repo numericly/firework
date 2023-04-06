@@ -6,7 +6,10 @@ use glide::GlideServerHandler;
 use lazy_static::lazy_static;
 use lobby_server::LobbyServerHandler;
 use queue::Queue;
-use std::sync::Arc;
+use std::{
+    sync::Arc,
+    time::{SystemTime, UNIX_EPOCH},
+};
 use tokio::sync::{Mutex, RwLock};
 use tokio_util::sync::CancellationToken;
 
@@ -186,11 +189,14 @@ impl ServerProxy for MiniGameProxy {
                     let Some(server) = server else {
                         continue;
                     };
-                    if let Err(_) = server
+                    match server
                         .handle_connection(self.clone(), connection.clone(), client_data.clone())
                         .await
                     {
-                        break;
+                        Ok(_) => {}
+                        Err(_err) => {
+                            break;
+                        }
                     }
                 }
                 TransferData::Lobby => {
@@ -245,6 +251,7 @@ async fn main() {
 
     ServerManager::<MiniGameProxy>::run(ServerOptions {
         encryption: true,
+        host: true,
         ..Default::default()
     })
     .await;

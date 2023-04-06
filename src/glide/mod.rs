@@ -20,7 +20,7 @@ use rand::{distributions::Standard, prelude::Distribution, Rng};
 use serde_json::json;
 use std::{
     sync::Arc,
-    time::{Duration, Instant},
+    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 use tokio::sync::{Mutex, RwLock};
 
@@ -152,7 +152,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
             last_damage: Mutex::new(Instant::now()),
         }
     }
-    async fn on_leave(
+    async fn on_transfer(
         &self,
         client: &Client<GlideServerHandler, MiniGameProxy>,
     ) -> Result<(), ConnectionError> {
@@ -202,7 +202,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
         pos: Vec3,
     ) -> Result<Option<Vec3>, ConnectionError> {
         let map = &self.server.handler.map;
-        let start = &client.player.read().await.position;
+        let start = &client.player.read().await.position.clone();
         let end = &pos;
         // check for passing through checkpoints
         if let GameState::Running { start_time } = &*client.server.handler.game_state.lock().await {
@@ -214,78 +214,32 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                     // The client reached the next checkpoint
                     if next_checkpoint.plane.intersects(start, end) {
                         drop(next);
+                        drop(start);
 
                         if next_checkpoint_id + 1 >= map.get_checkpoints().len() {
-                            client.send_title(
-                                json!({
-                                    "text": "Finished!"
-                                })
-                                .to_string(),
-                                json!({
-                                    "text":
-                                        format!(
-                                            "Completed race in {}",
-                                            format_duration(start_time.elapsed())
-                                        )
-                                })
-                                .to_string(),
-                                1,
-                                100,
-                                40,
-                            );
-                            // send an exp level up sound for the finish line
-                            client.send_sound(
-                                IdMapHolder::Direct(CustomSound {
-                                    resource_location: "minecraft:entity.player.levelup"
-                                        .to_string(),
-                                    range: None,
-                                }),
-                                SoundSource::Master,
-                                client.player.read().await.position.clone(),
-                                0.5,
-                                1.,
-                            );
-
                             self.last_checkpoint.lock().await.take();
+
+                            self.on_win(client, start_time).await;
                         } else {
-                            client.send_title(
-                                "{\"text\":\"Checkpoint\"}".to_string(),
-                                json!({
-                                    "text":
-                                        format!(
-                                            "Reached Checkpoint {} in {}",
-                                            next_checkpoint_id + 1,
-                                            format_duration(start_time.elapsed())
-                                        )
-                                })
-                                .to_string(),
-                                0,
-                                20,
-                                3,
-                            );
-
-                            client.send_sound(
-                                IdMapHolder::Direct(CustomSound {
-                                    resource_location: "minecraft:entity.experience_orb.pickup"
-                                        .to_string(),
-                                    range: None,
-                                }),
-                                SoundSource::Master,
-                                client.player.read().await.position.clone(),
-                                0.5,
-                                1.,
-                            );
-
                             self.last_checkpoint
                                 .lock()
                                 .await
                                 .replace(next_checkpoint_id + 1);
+
+                            self.on_checkpoint(client, start_time, next_checkpoint_id)
+                                .await;
                         }
                     }
                 }
             }
         }
 
+        Ok(Some(pos))
+    }
+    async fn on_tick(
+        &self,
+        client: &Client<GlideServerHandler, MiniGameProxy>,
+    ) -> Result<(), ConnectionError> {
         let boost_status = self.boost_status.read().await.clone();
         if let Some(BoostStatus {
             speed,
@@ -312,12 +266,6 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
             }
         }
 
-        Ok(Some(pos))
-    }
-    async fn on_tick(
-        &self,
-        client: &Client<GlideServerHandler, MiniGameProxy>,
-    ) -> Result<(), ConnectionError> {
         let map = &self.server.handler.map;
         {
             const PARTICLE_DENSITY: i32 = 2;
@@ -587,12 +535,13 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
             let next = client.handler.last_checkpoint.lock().await;
             if let Some(checkpoint) = *next {
                 if on_ground
-                    && last_damage.elapsed().as_millis() > 1000
+                    && last_damage.elapsed().as_millis() > 500
                     && !map
                         .get_spawn_area()
                         .within(client.player.read().await.position.clone())
                 {
                     *last_damage = Instant::now();
+
                     let health = client.player.read().await.health.clone();
                     if health - 2.0 <= 0. {
                         client.set_health(6.);
@@ -613,8 +562,30 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
 
                         client
                             .sync_position(map.get_spawn_position().clone(), Rotation::new(0., 0.));
+
+                        client.send_sound(
+                            IdMapHolder::Direct(CustomSound {
+                                resource_location: "minecraft:entity.player.death".to_string(),
+                                range: None,
+                            }),
+                            SoundSource::Player,
+                            client.player.read().await.position.clone(),
+                            1.,
+                            1.,
+                        );
+
                         client.set_velocity(Vec3::scalar(0.));
                     } else {
+                        client.send_sound(
+                            IdMapHolder::Direct(CustomSound {
+                                resource_location: "minecraft:entity.player.hurt".to_string(),
+                                range: None,
+                            }),
+                            SoundSource::Player,
+                            client.player.read().await.position.clone(),
+                            1.,
+                            1.,
+                        );
                         client.set_health(health - 2.);
                     }
                 }
@@ -622,6 +593,107 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
         }
 
         Ok(on_ground)
+    }
+}
+
+impl GlidePlayerHandler {
+    async fn on_checkpoint(
+        &self,
+        client: &Client<GlideServerHandler, MiniGameProxy>,
+        start_time: &Instant,
+        check_point_id: usize,
+    ) {
+        client.send_title(
+            "{\"text\":\"Checkpoint\"}".to_string(),
+            json!({
+                "text":
+                    format!(
+                        "Reached Checkpoint {} in {}",
+                        check_point_id + 1,
+                        format_duration(start_time.elapsed())
+                    )
+            })
+            .to_string(),
+            0,
+            40,
+            3,
+        );
+
+        client.send_sound(
+            IdMapHolder::Direct(CustomSound {
+                resource_location: "minecraft:entity.experience_orb.pickup".to_string(),
+                range: None,
+            }),
+            SoundSource::Master,
+            client.player.read().await.position.clone(),
+            0.5,
+            1.,
+        );
+    }
+    async fn on_win(
+        &self,
+        client: &Client<GlideServerHandler, MiniGameProxy>,
+        start_time: &Instant,
+    ) {
+        client.show_chat_message(
+            json!(
+                {
+                    "text": format!(
+                        "Completed race in {}",
+                        format_duration(start_time.elapsed())
+                    ),
+                    "color": "green",
+                }
+            )
+            .to_string(),
+        );
+        client.send_title(
+            json!({
+                "text": "Finished!"
+            })
+            .to_string(),
+            json!({
+                "text":
+                    format!(
+                        "Completed race in {}",
+                        format_duration(start_time.elapsed())
+                    )
+            })
+            .to_string(),
+            1,
+            120,
+            40,
+        );
+        // send an exp level up sound for the finish line
+        client.send_sound(
+            IdMapHolder::Direct(CustomSound {
+                resource_location: "minecraft:entity.player.levelup".to_string(),
+                range: None,
+            }),
+            SoundSource::Master,
+            client.player.read().await.position.clone(),
+            0.5,
+            1.,
+        );
+
+        {
+            let mut player = client.player.write().await;
+            player.elytra_flying = false;
+            client.server.broadcast_entity_metadata_update(
+                &client,
+                vec![
+                    EntityMetadata::EntityFlags(player.entity_flags()),
+                    EntityMetadata::EntityPose(Pose::Standing),
+                ],
+                true,
+            );
+        }
+
+        client.set_flying(true);
+
+        client.set_max_health(20.).await;
+
+        client.set_health(20.)
     }
 }
 

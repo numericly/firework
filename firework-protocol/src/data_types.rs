@@ -464,7 +464,7 @@ impl SerializeField for DisplaySkinParts {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Attribute {
     MaxHealth { value: f64 },
 }

@@ -121,7 +121,7 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
         }
         Ok(())
     }
-    async fn on_leave(
+    async fn on_transfer(
         &self,
         client: &Client<LobbyServerHandler, MiniGameProxy>,
     ) -> Result<(), ConnectionError> {

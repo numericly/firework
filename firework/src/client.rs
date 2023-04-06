@@ -33,7 +33,10 @@ use firework_protocol::{
 use firework_protocol_core::{DeserializeField, Position, SerializeField, UnsizedVec, VarInt};
 use rand::Rng;
 use serde_json::json;
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    time::{SystemTime, UNIX_EPOCH},
+};
 use std::{
     fmt::Debug,
     sync::Arc,
@@ -116,6 +119,12 @@ where
     BossBarAction {
         uuid: u128,
         action: BossBarAction,
+    },
+    SetFlying {
+        flying: bool,
+    },
+    UpdateAttributes {
+        attributes: Vec<Attribute>,
     },
 }
 
@@ -555,6 +564,24 @@ where
         command: ClientCommand<Proxy::TransferData>,
     ) -> Result<Option<Proxy::TransferData>, ConnectionError> {
         match command {
+            ClientCommand::UpdateAttributes { attributes } => {
+                self.send_packet(UpdateAttributes {
+                    entity_id: VarInt::from(self.client_data.entity_id),
+                    attributes,
+                })
+                .await?;
+            }
+            ClientCommand::SetFlying { flying } => {
+                self.player.write().await.flying = flying;
+                self.send_packet(PlayerAbilities {
+                    flags: PlayerAbilityFlags::new()
+                        .with_flying(flying)
+                        .with_allow_flying(self.player.read().await.flying_allowed),
+                    flying_speed: 0.05,
+                    walking_speed: 0.1,
+                })
+                .await?;
+            }
             ClientCommand::BossBarAction { uuid, action } => {
                 self.send_packet(BossBar { uuid, action }).await?;
             }
@@ -847,6 +874,7 @@ where
                     const GUI_ID: u8 = 1;
                     self.send_packet(CloseContainer { window_id: 1 }).await?;
                 }
+
                 return Ok(Some(data));
             }
             ClientCommand::SetHealth { health } => {
@@ -1413,8 +1441,29 @@ where
     }
     #[allow(unused_must_use)]
     pub fn send_boss_bar_action(&self, uuid: u128, action: BossBarAction) {
-        self.to_client
-            .send(ClientCommand::BossBarAction { uuid, action });
+        match &action {
+            BossBarAction::UpdateHealth { .. } => {
+                self.to_client_visual
+                    .send(ClientCommand::BossBarAction { uuid, action });
+            }
+            _ => {
+                self.to_client
+                    .send(ClientCommand::BossBarAction { uuid, action });
+            }
+        }
+    }
+    #[allow(unused_must_use)]
+    pub fn set_flying(&self, flying: bool) {
+        self.to_client.send(ClientCommand::SetFlying { flying });
+    }
+    #[allow(unused_must_use)]
+    pub async fn set_max_health(&self, max_health: f32) {
+        self.player.write().await.max_health = max_health;
+        self.to_client.send(ClientCommand::UpdateAttributes {
+            attributes: vec![Attribute::MaxHealth {
+                value: self.player.read().await.max_health as f64,
+            }],
+        });
     }
     #[allow(unused_must_use)]
     pub fn __move_entity(

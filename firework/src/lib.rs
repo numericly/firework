@@ -18,13 +18,13 @@ use firework_protocol::{read_specific_packet, ConnectionState, Protocol, Protoco
 use firework_protocol_core::VarInt;
 use firework_world::World;
 use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
-use std::sync::Arc;
-use std::time::Duration;
+use std::time::{Duration, SystemTime};
 use std::{collections::HashSet, time::Instant};
 use std::{fmt::Debug, ops::Div};
 use std::{marker::PhantomData, ops::Sub};
 use std::{net::SocketAddr, ops::Mul};
 use std::{num::ParseIntError, ops::Add};
+use std::{sync::Arc, time::UNIX_EPOCH};
 use thiserror::Error;
 use tokio::net::TcpListener;
 use tokio::sync::{broadcast, Mutex, RwLock};
@@ -361,7 +361,7 @@ pub struct ServerManager<T: Sized, const PLAYER_RESERVED_ENTITY_IDS: i32 = 1_000
 
 #[async_trait]
 pub trait ServerProxy {
-    type TransferData: Clone + Send + Sync + 'static;
+    type TransferData: Debug + Clone + Send + Sync + 'static;
     type Roles: Clone + Send + Sync + 'static;
     type Permissions: Clone + Send + Sync + 'static;
     async fn new() -> Self
@@ -644,7 +644,7 @@ where
     async fn on_post_load(&self, client: &Client<Handler, Proxy>) -> Result<(), ConnectionError> {
         Ok(())
     }
-    async fn on_leave(&self, client: &Client<Handler, Proxy>) -> Result<(), ConnectionError> {
+    async fn on_transfer(&self, client: &Client<Handler, Proxy>) -> Result<(), ConnectionError> {
         Ok(())
     }
     async fn on_tick(&self, client: &Client<Handler, Proxy>) -> Result<(), ConnectionError> {
@@ -897,7 +897,6 @@ where
         mut to_client_receiver: broadcast::Receiver<ClientCommand<Proxy::TransferData>>,
         mut to_client_visual_receiver: broadcast::Receiver<ClientCommand<Proxy::TransferData>>,
     ) -> Result<Proxy::TransferData, ConnectionError> {
-        let mut command_listener_receiver = to_client_receiver.resubscribe();
         if client.connection_state().await != ConnectionState::Play {
             client.change_to_play().await?;
         } else {
@@ -926,13 +925,19 @@ where
 
                 loop {
                     select! {
-                        command = command_listener_receiver.recv() => {
-                            let command = command?;
-                            if let Some(data) = client
-                                .handle_command(
-                                    command
-                                )
-                                .await? {
+                        command = to_client_receiver.recv() => {
+                            let command = command.expect("Unable to recv command");
+                            if let Some(data) = client.handle_command(command).await? {
+
+                                client.handler.on_transfer(&client).await?;
+
+                                for _ in 0..to_client_receiver.len() {
+                                    let command = to_client_receiver.recv().await;
+                                    #[allow(unused_must_use)]
+                                    if let Ok(command) = command {
+                                        client.handle_command(command).await;
+                                    }
+                                }
                                 return Ok(data);
                             }
                         }
@@ -940,12 +945,8 @@ where
                             // it's ok to throw away packets here, they are visual only
                             // if it throws a lagged error we can just ignore it
                             if let Ok(command) = command {
-                                if let Some(data) = client
-                                    .handle_command(
-                                        command
-                                    )
-                                    .await? {
-                                    return Ok(data);
+                                if let Some(_) = client.handle_command(command).await? {
+                                    panic!("Visual command cannot return data")
                                 }
                             }
                         }
@@ -1034,16 +1035,6 @@ where
                 }
             }
         };
-
-        client.handler.on_leave(client).await?;
-
-        for _ in 0..to_client_receiver.len() {
-            let command = to_client_receiver.recv().await;
-            #[allow(unused_must_use)]
-            if let Ok(command) = command {
-                client.handle_command(command).await;
-            }
-        }
 
         if let Ok(err) = result {
             err
