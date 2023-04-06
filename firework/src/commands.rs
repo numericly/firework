@@ -3,7 +3,7 @@ use firework_protocol::data_types::SuggestionMatch;
 use firework_protocol_core::{SerializeField, VarInt};
 use firework_protocol_derive::SerializeField;
 use futures::future::BoxFuture;
-use std::{fmt::Debug, io::Write, marker::PhantomData};
+use std::{fmt::Debug, io::Write, marker::PhantomData, sync::Arc};
 use thiserror::Error;
 use tokio::sync::Mutex;
 
@@ -22,7 +22,7 @@ where
     Handler: ServerHandler<Proxy> + Send + Sync + 'static,
 {
     pub node_type: NodeType,
-    pub redirect: Option<Box<CommandNode<Handler, Proxy>>>,
+    pub aliases: Option<Vec<CommandAlias>>,
     pub execution: Option<
         Box<
             dyn for<'a> Fn(
@@ -102,6 +102,12 @@ pub enum CommandError {
     NotExecutable,
 }
 
+#[derive(Debug)]
+pub struct CommandAlias {
+    name: &'static str,
+    index: Mutex<Option<i32>>,
+}
+
 impl<Handler, Proxy> CommandNode<Handler, Proxy>
 where
     Proxy: ServerProxy + Send + Sync + 'static,
@@ -110,7 +116,7 @@ where
     pub fn root() -> Self {
         Self {
             node_type: NodeType::Root,
-            redirect: None,
+            aliases: None,
             execution: None,
             children: Vec::new(),
             node_index: Mutex::new(None),
@@ -121,7 +127,7 @@ where
             node_type: NodeType::Literal {
                 name: name.to_string(),
             },
-            redirect: None,
+            aliases: None,
             execution: None,
             children: Vec::new(),
             node_index: Mutex::new(None),
@@ -133,11 +139,23 @@ where
                 name: name.to_string(),
                 parser: argument,
             },
-            redirect: None,
+            aliases: None,
             execution: None,
             children: Vec::new(),
             node_index: Mutex::new(None),
         }
+    }
+    pub fn set_aliases(mut self, aliases: Vec<&'static str>) -> Self {
+        self.aliases = Some(
+            aliases
+                .iter()
+                .map(|alias| CommandAlias {
+                    name: alias,
+                    index: Mutex::new(None),
+                })
+                .collect(),
+        );
+        self
     }
     pub fn sub_command(mut self, node: CommandNode<Handler, Proxy>) -> Self {
         self.children.push(node);
@@ -364,8 +382,10 @@ where
             },
         }
     }
+    async fn parse(&self) {}
     #[async_recursion]
     async fn write<W: Write + Send + Sync>(&self, mut writer: &mut W) {
+        println!("Writing node {}", self.node_index.lock().await.unwrap());
         let flags = {
             let mut flags = 0x00u8;
 
@@ -389,30 +409,38 @@ where
                 flags |= 0x04;
             }
 
-            if let Some(_) = self.redirect {
-                flags |= 0x08;
-            }
-
             flags
         };
 
         flags.serialize(&mut writer);
 
-        VarInt(self.children.len() as i32).serialize(&mut writer);
-        for child in &self.children {
+        let child_aliases = self
+            .children
+            .iter()
+            .filter_map(|c| {
+                c.aliases
+                    .as_ref()
+                    .map(move |a| a.iter().map(move |a| (a, c)))
+            })
+            .fold(Vec::new(), |mut a, b| {
+                a.extend(b);
+                a
+            });
+
+        VarInt(self.children.len() as i32 + child_aliases.len() as i32).serialize(&mut writer);
+        for (alias, _) in &child_aliases {
             VarInt(
-                child
-                    .node_index
+                alias
+                    .index
                     .lock()
                     .await
                     .expect("Node indexes not calculated"),
             )
             .serialize(&mut writer);
         }
-
-        if let Some(redirect) = &self.redirect {
+        for child in &self.children {
             VarInt(
-                redirect
+                child
                     .node_index
                     .lock()
                     .await
@@ -432,6 +460,40 @@ where
             }
         }
 
+        for (alias, node) in child_aliases {
+            println!(
+                "Writing alias {}, name {}",
+                alias
+                    .index
+                    .lock()
+                    .await
+                    .expect("Node indexes not calculated"),
+                alias.name
+            );
+            let mut flags = 0x00u8;
+
+            // Literal command node
+            flags |= 0x01;
+            // Has redirect node
+            flags |= 0x08;
+
+            flags.serialize(&mut writer);
+
+            // Write the child count
+            VarInt(0).serialize(&mut writer);
+
+            VarInt(
+                node.node_index
+                    .lock()
+                    .await
+                    .expect("Indexes must be generated"),
+            )
+            .serialize(&mut writer);
+
+            // Write the name
+            alias.name.to_string().serialize(&mut writer);
+        }
+
         for child in &self.children {
             child.write(writer).await;
         }
@@ -439,7 +501,17 @@ where
     #[async_recursion]
     async fn assign_index(&self, current_index: &mut i32) {
         self.node_index.lock().await.replace(*current_index);
+
         *current_index += 1;
+
+        for child in &self.children {
+            if let Some(aliases) = &child.aliases {
+                for alias in aliases {
+                    alias.index.lock().await.replace(*current_index);
+                    *current_index += 1;
+                }
+            }
+        }
 
         for child in &self.children {
             child.assign_index(current_index).await;
@@ -523,7 +595,7 @@ where
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut debug = f.debug_struct("CommandNode");
         debug.field("node_type", &self.node_type);
-        debug.field("redirect", &self.redirect);
+        debug.field("aliases", &self.aliases);
         debug.field("children", &self.children);
         debug.field("node_index", &self.node_index);
         debug.finish()

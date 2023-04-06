@@ -6,10 +6,7 @@ use glide::GlideServerHandler;
 use lazy_static::lazy_static;
 use lobby_server::LobbyServerHandler;
 use queue::Queue;
-use std::{
-    sync::Arc,
-    time::{SystemTime, UNIX_EPOCH},
-};
+use std::sync::Arc;
 use tokio::sync::{Mutex, RwLock};
 use tokio_util::sync::CancellationToken;
 
@@ -250,7 +247,7 @@ async fn main() {
     std::env::set_var("RUST_BACKTRACE", "1");
 
     ServerManager::<MiniGameProxy>::run(ServerOptions {
-        encryption: true,
+        encryption: false,
         host: true,
         ..Default::default()
     })

@@ -173,7 +173,7 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
         Self {
             commands: CommandNode::root()
                 .sub_command(
-                    CommandNode::literal("play").sub_command(
+                    CommandNode::literal("practice").sub_command(
                         CommandNode::argument(
                             "game",
                             ArgumentType::String {
@@ -193,30 +193,34 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
                     ),
                 )
                 .sub_command(
-                    CommandNode::literal("queue").sub_command(
-                        CommandNode::argument(
-                            "game",
-                            ArgumentType::String {
-                                string_type: StringTypes::SingleWord,
-                                suggestions: Some(vec![
-                                    "glide".to_string(),
-                                    "tumble".to_string(),
-                                    "battle".to_string(),
-                                ]),
-                            },
+                    CommandNode::literal("play")
+                        .sub_command(
+                            CommandNode::argument(
+                                "game",
+                                ArgumentType::String {
+                                    string_type: StringTypes::SingleWord,
+                                    suggestions: Some(vec![
+                                        "glide".to_string(),
+                                        "tumble".to_string(),
+                                        "battle".to_string(),
+                                    ]),
+                                },
+                            )
+                            .executable(Box::new(
+                                move |args, client, server, proxy| {
+                                    Box::pin(queue(args, client, server, proxy))
+                                },
+                            )),
                         )
-                        .executable(Box::new(
-                            move |args, client, server, proxy| {
-                                Box::pin(queue(args, client, server, proxy))
-                            },
-                        )),
-                    ),
+                        .set_aliases(vec!["join", "p", "queue"]),
                 )
-                .sub_command(CommandNode::literal("leave_queue").executable(Box::new(
-                    move |args, client, server, proxy| {
-                        Box::pin(leave_queue(args, client, server, proxy))
-                    },
-                ))),
+                .sub_command(
+                    CommandNode::literal("leave_queue")
+                        .executable(Box::new(move |args, client, server, proxy| {
+                            Box::pin(leave_queue(args, client, server, proxy))
+                        }))
+                        .set_aliases(vec!["leave", "cancel"]),
+                ),
         }
     }
     fn get_world(&self) -> &'static World {
