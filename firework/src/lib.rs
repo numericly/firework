@@ -994,10 +994,20 @@ where
 
             client.ping().await?;
 
+            let mut missed_pings = 0;
+
             loop {
                 select! {
-                    _ = sleep(Duration::from_secs(15)) => {
-                        client.ping().await?;
+                    _ = sleep(Duration::from_secs(1)) => {
+                        if !client.ping().await? {
+                            missed_pings += 1;
+                            if missed_pings >= 15 {
+                                return Err(ConnectionError::ClientTimedOut)
+                            }
+                            println!("Missed ping: {}", missed_pings);
+                        } else {
+                            missed_pings = 0;
+                        }
                     }
                     _ = timeout_handler_token.cancelled() => {
                         return Err(ConnectionError::ClientCancelled)

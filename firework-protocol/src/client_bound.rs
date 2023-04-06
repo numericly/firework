@@ -150,7 +150,7 @@ define_client_bound_protocol! {
         warning_blocks: VarInt
     },
     ClientBoundKeepAlive, 0x23, Play => {
-        id: i64
+        id: u64
     },
     ChunkUpdateAndLightUpdate, 0x24, Play => {
         x: i32,

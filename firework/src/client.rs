@@ -27,7 +27,9 @@ use firework_protocol::{
         UpdateGameMode, UpdateLatency, UpdateListed,
     },
     read_specific_packet,
-    server_bound::{ChatCommand, ChatMessage, PlayerCommand, ServerBoundPacket},
+    server_bound::{
+        ChatCommand, ChatMessage, PlayerCommand, ServerBoundKeepAlive, ServerBoundPacket,
+    },
     ConnectionState, Protocol, ProtocolError,
 };
 use firework_protocol_core::{DeserializeField, Position, SerializeField, UnsizedVec, VarInt};
@@ -264,6 +266,13 @@ impl Inventory {
     }
 }
 
+#[derive(Debug, Clone)]
+struct ActivePing {
+    response_time: Option<Duration>,
+    start: Instant,
+    id: u64,
+}
+
 // #[derive(Debug)]
 pub struct Client<Handler, Proxy>
 where
@@ -277,7 +286,8 @@ where
     to_client: broadcast::Sender<ClientCommand<Proxy::TransferData>>,
     to_client_visual: broadcast::Sender<ClientCommand<Proxy::TransferData>>,
     connection: Arc<Protocol>,
-    ping_acknowledged: Mutex<bool>,
+    active_pings: Mutex<Vec<ActivePing>>,
+    pub ping: Mutex<Duration>,
     pub server: Arc<Server<Handler, Proxy>>,
     pub proxy: Arc<Proxy>,
     pub handler: Handler::PlayerHandler,
@@ -298,6 +308,7 @@ where
         to_client_visual: broadcast::Sender<ClientCommand<Proxy::TransferData>>,
     ) -> Client<Handler, Proxy> {
         Client {
+            ping: Mutex::new(Duration::from_secs(0)),
             connection,
             client_data,
             to_client,
@@ -305,7 +316,7 @@ where
             to_client_visual,
             gui: RwLock::new(None),
             player: RwLock::new(player),
-            ping_acknowledged: Mutex::new(true),
+            active_pings: Mutex::new(Vec::new()),
             server: server.clone(),
             proxy: proxy.clone(),
             handler: Handler::PlayerHandler::new(server.clone(), proxy.clone()),
@@ -608,6 +619,10 @@ where
                 self.player.write().await.position = position.clone();
 
                 if previous_chunk_x != chunk_x || previous_chunk_z != chunk_z {
+                    println!(
+                        "Moving chunk from {} {} to {} {}",
+                        previous_chunk_x, previous_chunk_z, chunk_x, chunk_z
+                    );
                     self.move_chunk(chunk_x, chunk_z).await?;
                 }
 
@@ -1007,14 +1022,17 @@ where
                     .await?;
                 }
             }
-            ServerBoundPacket::ServerBoundKeepAlive(_) => {
-                let mut ping_acknowledged = self.ping_acknowledged.lock().await;
+            ServerBoundPacket::ServerBoundKeepAlive(ServerBoundKeepAlive { id }) => {
+                let mut active_pings = self.active_pings.lock().await;
 
-                if *ping_acknowledged == true {
-                    println!("Client is being weird");
-                }
+                let ping = active_pings.iter_mut().find(|ping| ping.id == id);
 
-                *ping_acknowledged = true;
+                // Ping is no longer active
+                let Some(ping) = ping else {
+                    return Ok(());
+                };
+
+                ping.response_time.replace(ping.start.elapsed());
             }
             ServerBoundPacket::ChatMessage(ChatMessage { message }) => {
                 // let gui = GameQueueMenuGui {};
@@ -1248,20 +1266,43 @@ where
         self.send_packet(UnloadChunk { x, z }).await?;
         Ok(())
     }
-    pub(super) async fn ping(&self) -> Result<(), ConnectionError> {
-        {
-            let mut ping_acknowledged = self.ping_acknowledged.lock().await;
-            if !*ping_acknowledged {
-                return Err(ConnectionError::ClientTimedOut);
-            } else {
-                *ping_acknowledged = false;
+    pub(super) async fn ping(&self) -> Result<bool, ConnectionError> {
+        let mut active_pings = self.active_pings.lock().await;
+
+        let received_pings = active_pings
+            .iter()
+            .filter(|ping| ping.response_time.is_some())
+            .collect::<Vec<_>>();
+
+        if !received_pings.is_empty() {
+            let mut total_time = Duration::from_secs(0);
+            let total_pings = received_pings.len() as u32;
+
+            for ping in received_pings {
+                let Some(response_time) = ping.response_time else {
+                continue;
+            };
+                total_time += response_time;
             }
+
+            let average_time = total_time / total_pings;
+
+            *self.ping.lock().await = average_time;
         }
+
+        active_pings
+            .retain(|ping| ping.response_time.is_none() && ping.start.elapsed().as_secs() < 15);
 
         let id = rand::thread_rng().gen();
         self.send_packet(ClientBoundKeepAlive { id }).await?;
 
-        Ok(())
+        active_pings.push(ActivePing {
+            id,
+            start: Instant::now(),
+            response_time: None,
+        });
+
+        Ok(true)
     }
     async fn update_entity_metadata(
         &self,

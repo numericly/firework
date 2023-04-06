@@ -43,6 +43,7 @@ pub struct Checkpoint {
 
 #[derive(Debug, Clone)]
 pub struct BoostStatus {
+    velocity: Vec3,
     times_remaining: usize,
     speed: f64,
 }
@@ -244,29 +245,33 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
         if let Some(BoostStatus {
             speed,
             times_remaining,
+            velocity,
         }) = boost_status
         {
             if times_remaining == 0 {
                 self.boost_status.write().await.take();
             } else {
-                let velocity = client.player.read().await.velocity.clone();
                 let direction = client.player.read().await.rotation.direction().normalize();
                 let velocity_direction = velocity.normalize();
                 let velocity_speed = velocity.magnitude();
 
-                let new_direction = velocity_direction.lerp(&direction, 0.15);
-                let new_speed = velocity_speed * 0.85 + speed / BOOST_TICKS as f64;
+                let new_direction = velocity_direction.lerp(&direction, 0.25).normalize();
+                let new_speed = velocity_speed * 0.80 + speed / BOOST_TICKS as f64;
 
-                client.set_velocity(new_direction * Vec3::scalar(new_speed));
+                let new_vec = new_direction * Vec3::scalar(new_speed);
+
+                client.set_velocity(new_vec.clone());
 
                 self.boost_status.write().await.replace(BoostStatus {
                     times_remaining: times_remaining - 1,
                     speed,
+                    velocity: new_vec,
                 });
             }
         }
 
         let map = &self.server.handler.map;
+
         {
             const PARTICLE_DENSITY: i32 = 2;
             let time = client.server.handler.created_at.elapsed().as_secs_f32();
@@ -274,11 +279,13 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
 
             for boost in map.get_boosts().iter() {
                 if boost.area.within(position.clone()) {
+                    let velocity = client.player.read().await.velocity.clone();
                     let mut boost_status = self.boost_status.write().await;
                     if boost_status.is_none() {
                         boost_status.replace(BoostStatus {
                             times_remaining: BOOST_TICKS,
                             speed: boost.speed.clone(),
+                            velocity,
                         });
                     }
                 }
@@ -455,7 +462,9 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                         }
                     }
                 }
+
                 // send the particles to the client
+
                 let mut animation_frame = self.animation_frame.lock().await;
                 if *animation_frame == 5 {
                     client.send_particles(particles);

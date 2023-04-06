@@ -138,7 +138,7 @@ define_server_bound_protocol! {
         data: UnsizedVec<u8>
     },
     ServerBoundKeepAlive, 0x12, Play => {
-        id: i64
+        id: u64
     },
     SetPlayerPosition, 0x14, Play => {
         x: f64,
