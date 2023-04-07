@@ -56,7 +56,7 @@ where
     },
     SyncPosition {
         position: Vec3,
-        rotation: Rotation,
+        rotation: Option<Rotation>,
     },
     Disconnect {
         reason: String,
@@ -597,13 +597,24 @@ where
                 self.send_packet(BossBar { uuid, action }).await?;
             }
             ClientCommand::SyncPosition { position, rotation } => {
+                let (rotation, flags) = if let Some(rotation) = rotation {
+                    let mut flags = PlayerPositionFlags::new();
+                    flags.set_pitch(false);
+                    flags.set_yaw(false);
+                    (rotation, flags)
+                } else {
+                    let mut flags = PlayerPositionFlags::new();
+                    flags.set_pitch(true);
+                    flags.set_yaw(true);
+                    (Rotation::new(0., 0.), flags)
+                };
                 self.send_packet(SynchronizePlayerPosition {
                     x: position.x,
                     y: position.y,
                     z: position.z,
                     yaw: rotation.yaw,
                     pitch: rotation.pitch,
-                    flags: PlayerPositionFlags::new(),
+                    flags: flags,
                     teleport_id: VarInt(0),
                 })
                 .await?;
@@ -1417,7 +1428,7 @@ where
         });
     }
     #[allow(unused_must_use)]
-    pub fn sync_position(&self, position: Vec3, rotation: Rotation) {
+    pub fn sync_position(&self, position: Vec3, rotation: Option<Rotation>) {
         self.to_client
             .send(ClientCommand::SyncPosition { position, rotation });
     }

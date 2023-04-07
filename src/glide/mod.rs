@@ -205,6 +205,22 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
         let map = &self.server.handler.map;
         let start = &client.player.read().await.position.clone();
         let end = &pos;
+
+        // check if the movement is way too fast
+        let max_velocity = 20.0;
+        if (end.clone() - start.clone()).length() > max_velocity {
+            client.sync_position(start.clone(), None);
+            client.set_velocity(
+                client
+                    .player
+                    .read()
+                    .await
+                    .velocity
+                    .clamp(0., max_velocity * 0.9),
+            );
+            return Ok(None);
+        }
+
         // check for passing through checkpoints
         if let GameState::Running { start_time } = &*client.server.handler.game_state.lock().await {
             let next = self.last_checkpoint.lock().await;
@@ -561,7 +577,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                             if let Some(checkpoint) = checkpoint {
                                 client.sync_position(
                                     checkpoint.spawn_position.clone(),
-                                    checkpoint.spawn_rotation.clone(),
+                                    Some(checkpoint.spawn_rotation.clone()),
                                 );
 
                                 client.set_velocity(Vec3::scalar(0.));
@@ -569,8 +585,10 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                             }
                         }
 
-                        client
-                            .sync_position(map.get_spawn_position().clone(), Rotation::new(0., 0.));
+                        client.sync_position(
+                            map.get_spawn_position().clone(),
+                            Some(Rotation::new(0., 0.)),
+                        );
 
                         client.send_sound(
                             IdMapHolder::Direct(CustomSound {
@@ -846,7 +864,7 @@ impl GlideServerHandler {
             );
             client.sync_position(
                 self.map.get_spawn_position().clone(),
-                Rotation { yaw: 0., pitch: 0. },
+                Some(Rotation::new(0., 0.)),
             );
 
             client.send_boss_bar_action(

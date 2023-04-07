@@ -228,6 +228,14 @@ impl Vec3 {
             self.z + (other.z - self.z) * t,
         )
     }
+    pub fn clamp(&self, min: f64, max: f64) -> Vec3 {
+        // clamp the length of the vector between min and max
+        let length = self.length();
+        let length = if length < min { min } else { length };
+        let length = if length > max { max } else { length };
+
+        self.normalize() * Vec3::scalar(length)
+    }
 }
 
 impl Add for Vec3 {
