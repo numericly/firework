@@ -206,7 +206,7 @@ pub const CHECKPOINTS: [Checkpoint; 9] = [
             min: Vec3::new(-87.5, -28., 485.),
             max: Vec3::new(-87.5, -3., 504.),
         },
-        spawn_position: Vec3::new(-69.7, -14., -493.4),
+        spawn_position: Vec3::new(-69.7, -14., 493.4),
         spawn_rotation: Rotation::new(84.4, 39.9),
     },
     Checkpoint {

@@ -1,6 +1,7 @@
 use crate::client::{Client, ClientCommand, Player};
 use crate::entities::{EntityMetadata, Pose};
 use async_trait::async_trait;
+use cipher::Block;
 use client::{InventorySlot, PreviousPosition};
 use commands::CommandNode;
 use dashmap::{DashMap, DashSet};
@@ -82,6 +83,12 @@ pub struct BlockPos {
     pub z: i32,
 }
 
+impl BlockPos {
+    pub const fn new(x: i32, y: i32, z: i32) -> BlockPos {
+        BlockPos { x, y, z }
+    }
+}
+
 impl From<Vec3> for BlockPos {
     fn from(vec: Vec3) -> BlockPos {
         BlockPos {
@@ -99,7 +106,7 @@ pub struct AxisAlignedBB {
 }
 
 impl AxisAlignedBB {
-    pub fn new(min: BlockPos, max: BlockPos) -> AxisAlignedBB {
+    pub const fn new(min: BlockPos, max: BlockPos) -> AxisAlignedBB {
         AxisAlignedBB { min, max }
     }
     pub fn within(&self, pos: Vec3) -> bool {
