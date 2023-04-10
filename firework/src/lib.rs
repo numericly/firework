@@ -18,7 +18,9 @@ use firework_protocol::{
 use firework_protocol::{read_specific_packet, ConnectionState, Protocol, ProtocolError};
 use firework_protocol_core::VarInt;
 use firework_world::World;
+use num_bigint::BigInt;
 use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
+use sha1::{Digest, Sha1};
 use std::time::{Duration, SystemTime};
 use std::{collections::HashSet, time::Instant};
 use std::{fmt::Debug, ops::Div};
@@ -442,7 +444,8 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                     let server = cloned_server.clone();
                     #[allow(unused_must_use)]
                     tokio::task::spawn(async move {
-                        server.handle_connection(socket_addr, connection).await;
+                        let res = server.handle_connection(socket_addr, connection).await;
+                        println!("res {:?}", res);
                     });
                 }
             }
@@ -493,8 +496,6 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                     let client_username = login_start.name;
                     let client_uuid = login_start.uuid;
 
-                    println!("{:x?} is connecting", client_uuid);
-
                     let profile = if let Some(encryption) = encryption {
                         let encryption_request = EncryptionRequest {
                             server_id: "".to_string(), // deprecated after 1.7
@@ -540,10 +541,20 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
 
                         profile
                     } else {
-                        let Some(uuid) = client_uuid else {
-                            //TODO: Fix reason
-                            return Err(ConnectionError::ClientCancelled);
+                        let uuid = if let Some(uuid) = client_uuid {
+                            uuid
+                        } else {
+                            let mut hash = Sha1::new();
+
+                            hash.update(&client_username);
+
+                            let mut uuid_bytes = [0u8; 16];
+
+                            uuid_bytes.copy_from_slice(&hash.finalize().as_slice()[0..16]);
+
+                            u128::from_be_bytes(uuid_bytes)
                         };
+
                         let profile = Profile {
                             id: format!("{:x}", uuid),
                             name: client_username,
@@ -551,14 +562,6 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                         };
                         profile
                     };
-
-                    let set_compression = SetCompression {
-                        threshold: VarInt(0),
-                    };
-
-                    connection.write_packet(set_compression).await?;
-
-                    connection.enable_compression();
 
                     let uuid = u128::from_str_radix(&profile.id, 16)?;
 
@@ -569,6 +572,16 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                     };
 
                     connection.write_packet(login_success).await?;
+
+                    let set_compression = SetCompression {
+                        threshold: VarInt(1),
+                    };
+
+                    connection.write_packet(set_compression).await?;
+
+                    connection.enable_compression();
+
+                    sleep(Duration::from_secs(1)).await;
 
                     Ok((uuid, profile))
                 }
@@ -657,6 +670,9 @@ where
         Ok(())
     }
     async fn on_post_load(&self, client: &Client<Handler, Proxy>) -> Result<(), ConnectionError> {
+        Ok(())
+    }
+    async fn on_leave(&self, client: &Client<Handler, Proxy>) -> Result<(), ConnectionError> {
         Ok(())
     }
     async fn on_transfer(&self, client: &Client<Handler, Proxy>) -> Result<(), ConnectionError> {
@@ -877,11 +893,6 @@ where
             client
         };
 
-        self.broadcast_chat(format!(
-            r#"{{"text": "{} joined the game","color":"yellow"}}"#,
-            client.player.read().await.profile.name
-        ));
-
         let status = self
             .clone()
             .handle_player(
@@ -893,10 +904,6 @@ where
             )
             .await;
 
-        self.broadcast_chat(format!(
-            r#"{{"text": "{} left the game","color":"yellow"}}"#,
-            client.player.read().await.profile.name
-        ));
         self.broadcast_player_leave(&client).await;
 
         drop(client);
@@ -1060,6 +1067,8 @@ where
                 }
             }
         };
+
+        client.handler.on_leave(&client).await?;
 
         if let Ok(err) = result {
             err

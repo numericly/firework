@@ -613,7 +613,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                             1.,
                             1.,
                         );
-                        client.set_health(health - 2.);
+                        // client.set_health(health - 2.);
                     }
                 }
             }

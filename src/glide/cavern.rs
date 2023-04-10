@@ -12,47 +12,53 @@ pub const SPAWN_AREA: AxisAlignedBB = AxisAlignedBB {
     },
 };
 
-pub const BOOSTS: [Boost; 15] = [
+pub const BOOSTS: [Boost; 17] = [
     Boost {
         // 102 93 174, 108 97 179
         area: AxisAlignedBB::new(BlockPos::new(102, 93, 174), BlockPos::new(108, 97, 179)),
-        speed: 3.,
+        speed: 4.,
         particle_type: super::BoostParticleType::BoostEast,
     },
     Boost {
         // 202 76 183, 210 81 188
         area: AxisAlignedBB::new(BlockPos::new(202, 76, 183), BlockPos::new(210, 81, 188)),
-        speed: 3.,
+        speed: 4.5,
         particle_type: super::BoostParticleType::BoostEast,
     },
     Boost {
         // 292 70 131, 297 75 139
         area: AxisAlignedBB::new(BlockPos::new(292, 70, 131), BlockPos::new(297, 75, 139)),
-        speed: 3.,
+        speed: 5.,
         particle_type: super::BoostParticleType::BoostNorth,
     },
     Boost {
         // 249 59 89, 254 64 97
         area: AxisAlignedBB::new(BlockPos::new(249, 59, 89), BlockPos::new(254, 64, 97)),
-        speed: 3.,
+        speed: 5.,
         particle_type: super::BoostParticleType::BoostSouth,
     },
     Boost {
         // 156 61 139, 161 66 147
         area: AxisAlignedBB::new(BlockPos::new(156, 61, 139), BlockPos::new(161, 66, 147)),
-        speed: 3.,
+        speed: 4.,
         particle_type: super::BoostParticleType::BoostSouth,
     },
     Boost {
         // 187 39 119, 192 44 127
         area: AxisAlignedBB::new(BlockPos::new(187, 39, 119), BlockPos::new(192, 44, 127)),
-        speed: 3.,
+        speed: 5.,
         particle_type: super::BoostParticleType::BoostNorth,
     },
     Boost {
         // 101 -5 30, 106 0 42
         area: AxisAlignedBB::new(BlockPos::new(101, -5, 30), BlockPos::new(106, 0, 42)),
-        speed: 3.,
+        speed: 4.5,
+        particle_type: super::BoostParticleType::BoostSouth,
+    },
+    Boost {
+        // 102 8 36, 104 11 43
+        area: AxisAlignedBB::new(BlockPos::new(102, 8, 36), BlockPos::new(105, 11, 43)),
+        speed: 4.5,
         particle_type: super::BoostParticleType::BoostSouth,
     },
     Boost {
@@ -74,15 +80,21 @@ pub const BOOSTS: [Boost; 15] = [
         particle_type: super::BoostParticleType::BoostNorth,
     },
     Boost {
+        // -30 0 178, -26 3 182
+        area: AxisAlignedBB::new(BlockPos::new(-30, 0, 177), BlockPos::new(-26, 3, 182)),
+        speed: 5.,
+        particle_type: super::BoostParticleType::BoostWest,
+    },
+    Boost {
         // -19 8 59, -14 13 66
         area: AxisAlignedBB::new(BlockPos::new(-19, 8, 59), BlockPos::new(-14, 13, 66)),
-        speed: 6.,
+        speed: 4.,
         particle_type: super::BoostParticleType::BoostNorth,
     },
     Boost {
         // 0 29 67, 5 34 75
         area: AxisAlignedBB::new(BlockPos::new(0, 29, 67), BlockPos::new(5, 34, 75)),
-        speed: 2.,
+        speed: 5.,
         particle_type: super::BoostParticleType::BoostNorth,
     },
     Boost {

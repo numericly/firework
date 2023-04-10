@@ -385,7 +385,6 @@ where
     async fn parse(&self) {}
     #[async_recursion]
     async fn write<W: Write + Send + Sync>(&self, mut writer: &mut W) {
-        println!("Writing node {}", self.node_index.lock().await.unwrap());
         let flags = {
             let mut flags = 0x00u8;
 
@@ -461,15 +460,6 @@ where
         }
 
         for (alias, node) in child_aliases {
-            println!(
-                "Writing alias {}, name {}",
-                alias
-                    .index
-                    .lock()
-                    .await
-                    .expect("Node indexes not calculated"),
-                alias.name
-            );
             let mut flags = 0x00u8;
 
             // Literal command node

@@ -146,7 +146,7 @@ mod deserializer {
 
             let mut val = 0;
 
-            for i in 0..4 {
+            for i in 0..5 {
                 let position = i * 7;
                 let current_byte = (&mut reader).read_u8()?;
 

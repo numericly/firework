@@ -188,6 +188,17 @@ define_client_bound_protocol! {
         is_flat: bool,
         death_location: Option<DeathLocation>
     },
+    MapData, 0x29, Play => {
+        map_id: VarInt,
+        scale: u8,
+        locked: bool,
+        icons: Option<Vec<u8>>,
+        columns: u8,
+        rows: u8,
+        offset_x: u8,
+        offset_z: u8,
+        data: Vec<u8>
+    },
     UpdateEntityPosition, 0x2B, Play => {
         entity_id: VarInt,
         delta_x: i16,

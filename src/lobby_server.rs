@@ -10,7 +10,10 @@ use firework::{
 use firework::{ConnectionError, Rotation, Server, ServerHandler, Vec3};
 use firework_authentication::Profile;
 use firework_data::items::{Compass, Item};
-use firework_protocol::data_types::{ItemNbt, Slot};
+use firework_protocol::{
+    client_bound::MapData,
+    data_types::{ItemNbt, Slot},
+};
 use firework_protocol_core::VarInt;
 use firework_world::World;
 use serde_json::json;
@@ -44,6 +47,34 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
             queued: Mutex::new(None),
             proxy,
         }
+    }
+    async fn on_post_load(
+        &self,
+        client: &Client<LobbyServerHandler, MiniGameProxy>,
+    ) -> Result<(), ConnectionError> {
+        client.server.broadcast_chat(format!(
+            r#"{{"text": "{} joined the lobby","color":"yellow"}}"#,
+            client.player.read().await.profile.name
+        ));
+
+        // warning only crashes if less than 35.2 terabytes of memory allocated
+        // let values: Vec<u8> = vec![0; 128 * 128];
+        // for i in 0..=i32::MAX {
+        //     client
+        //         .send_packet(MapData {
+        //             map_id: VarInt(i),
+        //             scale: 1,
+        //             locked: false,
+        //             icons: None,
+        //             columns: 128,
+        //             rows: 128,
+        //             offset_x: 0,
+        //             offset_z: 0,
+        //             data: values.clone(),
+        //         })
+        //         .await?;
+        // }
+        Ok(())
     }
     async fn on_tick(
         &self,
@@ -226,7 +257,6 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
     fn get_world(&self) -> &'static World {
         &LOBBY_WORLD
     }
-
     async fn on_tick(&self, _server: &Server<Self, MiniGameProxy>, proxy: Arc<MiniGameProxy>) {
         proxy.glide_queue.lock().await.update(proxy.clone()).await;
     }
