@@ -1,5 +1,8 @@
 use async_trait::async_trait;
-use firework::{ClientData, ConnectionError, Server, ServerManager, ServerOptions, ServerProxy};
+use firework::{
+    commands::CommandNode, ClientData, ConnectionError, Server, ServerManager, ServerOptions,
+    ServerProxy,
+};
 use firework_protocol::Protocol;
 use firework_world::{world, World};
 use glide::GlideServerHandler;
@@ -252,4 +255,25 @@ async fn main() {
         ..Default::default()
     })
     .await;
+}
+
+#[tokio::test]
+async fn test_parse() {
+    // std::env::set_var("RUST_BACKTRACE", "1");
+    let command_tree: CommandNode<LobbyServerHandler, MiniGameProxy> = CommandNode::root()
+        .sub_command(
+            CommandNode::literal("test")
+                .set_aliases(vec!["t", "t1"])
+                .sub_command(
+                    CommandNode::literal("test2").sub_command(CommandNode::literal("test3")),
+                ),
+        );
+
+    let mut args = Vec::new();
+
+    let node = command_tree.parse("t1 test2 test3", &mut args).await;
+
+    println!("{:?}", node);
+
+    panic!();
 }
