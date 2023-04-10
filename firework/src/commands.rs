@@ -3,7 +3,7 @@ use firework_protocol::data_types::SuggestionMatch;
 use firework_protocol_core::{SerializeField, VarInt};
 use firework_protocol_derive::SerializeField;
 use futures::future::BoxFuture;
-use std::{fmt::Debug, io::Write, marker::PhantomData, sync::Arc};
+use std::{any::Any, fmt::Debug, io::Write, sync::Arc};
 use thiserror::Error;
 use tokio::sync::Mutex;
 
@@ -97,7 +97,7 @@ pub enum CommandError {
         data: String,
     },
     #[error("command is incomplete")]
-    UnknownData,
+    Incomplete,
     #[error("command is not executable")]
     NotExecutable,
 }
@@ -270,7 +270,7 @@ where
         &self,
         input: &str,
         index: usize,
-        mut args: &mut Vec<Argument>,
+        args: &mut Vec<Argument>,
     ) -> Result<
         Option<(
             &Box<
@@ -293,7 +293,7 @@ where
                     return Err(CommandError::EmptyCommand);
                 }
                 for child in &self.children {
-                    if let Some(exec) = child.execute(input, 0, &mut args).await? {
+                    if let Some(exec) = child.execute(input, 0, args).await? {
                         return Ok(Some(exec));
                     }
                 }
@@ -317,13 +317,13 @@ where
                     if let Some(next_data) = next_data {
                         for child in &self.children {
                             if let Some(exec) = child
-                                .execute(next_data, index + data.len() + 1, &mut args)
+                                .execute(next_data, index + data.len() + 1, args)
                                 .await?
                             {
                                 return Ok(Some(exec));
                             };
                         }
-                        Err(CommandError::UnknownData)
+                        Err(CommandError::Incomplete)
                     } else {
                         if let Some(execution) = &self.execution {
                             return Ok(Some((execution, args.to_vec())));
@@ -363,7 +363,7 @@ where
                         if let Some(next_data) = next_data {
                             for child in &self.children {
                                 if let Some(exec) = child
-                                    .execute(next_data, index + data.len() + 1, &mut args)
+                                    .execute(next_data, index + data.len() + 1, args)
                                     .await?
                                 {
                                     return Ok(Some(exec));
@@ -382,7 +382,100 @@ where
             },
         }
     }
-    async fn parse(&self) {}
+    #[async_recursion]
+    pub async fn parse(
+        &self,
+        input: &str,
+        args: &mut Vec<Argument>,
+    ) -> Result<&CommandNode<Handler, Proxy>, CommandError> {
+        match &self.node_type {
+            NodeType::Root => {
+                if input.len() == 0 {
+                    return Err(CommandError::EmptyCommand);
+                }
+
+                let child_aliases = self
+                    .children
+                    .iter()
+                    .filter_map(|c| {
+                        c.aliases
+                            .as_ref()
+                            .map(move |a| a.iter().map(move |a| (a, c)))
+                    })
+                    .fold(Vec::new(), |mut a, b| {
+                        a.extend(b);
+                        a
+                    });
+
+                let (data, next_data) = if let Some((data, next_data)) = input.split_once(" ") {
+                    (data, Some(next_data))
+                } else {
+                    (input, None)
+                };
+
+                for (alias, child) in child_aliases {
+                    if data == alias.name {
+                        if let NodeType::Literal { name } = &child.node_type {
+                            args.push(Argument::Literal {
+                                value: name.to_string(),
+                            });
+
+                            let formatted_command = if let Some(next_data) = next_data {
+                                format!("{} {}", name, next_data)
+                            } else {
+                                name.to_string()
+                            };
+
+                            println!("parsing alias: {}, data: {}", alias.name, formatted_command);
+
+                            if let Ok(data) = child.parse(&formatted_command, args).await {
+                                return Ok(data);
+                            }
+                        }
+                    }
+                }
+
+                for child in &self.children {
+                    if let Ok(data) = child.parse(input, args).await {
+                        return Ok(data);
+                    }
+                }
+                Err(CommandError::NoMatches {
+                    data: input.to_owned(),
+                })
+            }
+            NodeType::Literal { name } => {
+                let (data, next_data) = if let Some((data, next_data)) = input.split_once(" ") {
+                    (data, Some(next_data))
+                } else {
+                    (input, None)
+                };
+
+                println!("parsing literal: {}, data: {}", name, data);
+
+                if data == name {
+                    args.push(Argument::Literal {
+                        value: data.to_string(),
+                    });
+                    if let Some(next_data) = next_data {
+                        for child in &self.children {
+                            if let Ok(data) = child.parse(next_data, args).await {
+                                return Ok(data);
+                            };
+                        }
+                        Err(CommandError::Incomplete)
+                    } else {
+                        Ok(self)
+                    }
+                } else {
+                    Err(CommandError::NoMatches {
+                        data: input.to_owned(),
+                    })
+                }
+            }
+            _ => panic!(),
+        }
+    }
     #[async_recursion]
     async fn write<W: Write + Send + Sync>(&self, mut writer: &mut W) {
         let flags = {
@@ -591,3 +684,16 @@ where
         debug.finish()
     }
 }
+
+// #[tokio::test]
+// async fn test_parse() {
+//     let command_tree = CommandNode::root().sub_command(
+//         CommandNode::literal("test")
+//             .set_aliases(vec!["t", "t1"])
+//             .sub_command(CommandNode::literal("test2").sub_command(CommandNode::literal("test3"))),
+//     );
+
+//     let mut args = Vec::new();
+
+//     command_tree.parse("", &mut args);
+// }
