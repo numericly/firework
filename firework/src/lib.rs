@@ -444,8 +444,7 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                     let server = cloned_server.clone();
                     #[allow(unused_must_use)]
                     tokio::task::spawn(async move {
-                        let res = server.handle_connection(socket_addr, connection).await;
-                        println!("res {:?}", res);
+                        server.handle_connection(socket_addr, connection).await;
                     });
                 }
             }
@@ -563,6 +562,14 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                         profile
                     };
 
+                    let set_compression = SetCompression {
+                        threshold: VarInt(0),
+                    };
+
+                    connection.write_packet(set_compression).await?;
+
+                    connection.enable_compression();
+
                     let uuid = u128::from_str_radix(&profile.id, 16)?;
 
                     let login_success = LoginSuccess {
@@ -572,16 +579,6 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                     };
 
                     connection.write_packet(login_success).await?;
-
-                    let set_compression = SetCompression {
-                        threshold: VarInt(1),
-                    };
-
-                    connection.write_packet(set_compression).await?;
-
-                    connection.enable_compression();
-
-                    sleep(Duration::from_secs(1)).await;
 
                     Ok((uuid, profile))
                 }
