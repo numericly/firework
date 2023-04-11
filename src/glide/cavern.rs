@@ -1,5 +1,5 @@
-use super::{Boost, Checkpoint};
-use firework::{AxisAlignedBB, AxisAlignedPlane, BlockPos, Rotation, Vec3};
+use super::{Boost, Checkpoint, Loft};
+use firework::{AxisAlignedBB, BlockPos, Rotation, Vec3};
 
 pub const SPAWN_POSITION: Vec3 = Vec3::new(0.5, 144.0, 0.5);
 
@@ -116,6 +116,15 @@ pub const BOOSTS: [Boost; 17] = [
         particle_type: super::BoostParticleType::BoostSouth,
     },
 ];
+
+pub const LOFTS: [Loft; 1] = [Loft {
+    area: AxisAlignedBB {
+        // 27 95 149, 30 105 152
+        min: BlockPos::new(27, 95, 149),
+        max: BlockPos::new(30, 105, 152),
+    },
+    speed: 0.35,
+}];
 
 pub const CHECKPOINTS: [Checkpoint; 9] = [
     Checkpoint {

@@ -35,6 +35,11 @@ pub struct Boost {
     particle_type: BoostParticleType,
 }
 
+pub struct Loft {
+    area: AxisAlignedBB,
+    speed: f64,
+}
+
 pub struct Checkpoint {
     plane: AxisAlignedPlane,
     spawn_position: Vec3,
@@ -42,10 +47,17 @@ pub struct Checkpoint {
 }
 
 #[derive(Debug, Clone)]
-pub struct BoostStatus {
-    velocity: Vec3,
-    times_remaining: usize,
-    speed: f64,
+pub enum BoostStatus {
+    ArrowBoost {
+        velocity: Vec3,
+        times_remaining: usize,
+        speed: f64,
+    },
+    Loft {
+        velocity: Vec3,
+        times_remaining: usize,
+        speed: f64,
+    },
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -89,6 +101,12 @@ impl Maps {
         match self {
             Maps::Canyon => &canyon::BOOSTS,
             Maps::Cavern => &cavern::BOOSTS,
+        }
+    }
+    pub fn get_lofts(&self) -> &'static [Loft] {
+        match self {
+            Maps::Canyon => &canyon::LOFTS,
+            Maps::Cavern => &cavern::LOFTS,
         }
     }
     pub fn get_spawn_area(&self) -> &AxisAlignedBB {
@@ -258,7 +276,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
         client: &Client<GlideServerHandler, MiniGameProxy>,
     ) -> Result<(), ConnectionError> {
         let boost_status = self.boost_status.read().await.clone();
-        if let Some(BoostStatus {
+        if let Some(BoostStatus::ArrowBoost {
             speed,
             times_remaining,
             velocity,
@@ -278,10 +296,31 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
 
                 client.set_velocity(new_vec.clone());
 
-                self.boost_status.write().await.replace(BoostStatus {
+                self.boost_status
+                    .write()
+                    .await
+                    .replace(BoostStatus::ArrowBoost {
+                        times_remaining: times_remaining - 1,
+                        speed,
+                        velocity: new_vec,
+                    });
+            }
+        } else if let Some(BoostStatus::Loft {
+            velocity,
+            times_remaining,
+            speed,
+        }) = boost_status
+        {
+            if times_remaining == 0 {
+                self.boost_status.write().await.take();
+            } else {
+                let new_vec = Vec3::new(velocity.x, velocity.y * 0.85 + speed, velocity.z);
+
+                client.set_velocity(new_vec.clone());
+                self.boost_status.write().await.replace(BoostStatus::Loft {
                     times_remaining: times_remaining - 1,
-                    speed,
-                    velocity: new_vec,
+                    speed: speed * 0.85,
+                    velocity: new_vec.clone(),
                 });
             }
         }
@@ -293,12 +332,24 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
             let time = client.server.handler.created_at.elapsed().as_secs_f32();
             let position = client.player.read().await.position.clone();
 
+            for loft in map.get_lofts().iter() {
+                if loft.area.within(position.clone()) {
+                    let velocity = client.player.read().await.velocity.clone();
+                    let mut boost_status = self.boost_status.write().await;
+                    boost_status.replace(BoostStatus::Loft {
+                        times_remaining: 4,
+                        speed: loft.speed.clone(),
+                        velocity,
+                    });
+                }
+            }
+
             for boost in map.get_boosts().iter() {
                 if boost.area.within(position.clone()) {
                     let velocity = client.player.read().await.velocity.clone();
                     let mut boost_status = self.boost_status.write().await;
                     if boost_status.is_none() {
-                        boost_status.replace(BoostStatus {
+                        boost_status.replace(BoostStatus::ArrowBoost {
                             times_remaining: BOOST_TICKS,
                             speed: boost.speed.clone(),
                             velocity,
