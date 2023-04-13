@@ -4,14 +4,14 @@ use firework::{
     commands::{Argument, CommandNode},
     entities::{EntityMetadata, Pose},
     AxisAlignedBB, AxisAlignedPlane, ConnectionError, PlayerHandler, Rotation, Server,
-    ServerHandler, Vec3,
+    ServerHandler, Vec3, TICKS_PER_SECOND,
 };
 use firework_authentication::Profile;
 use firework_data::items::{Elytra, Item};
 use firework_protocol::{
     client_bound::{CustomSound, IdMapHolder, SoundSource},
     data_types::{
-        BossBarAction, BossBarColor, BossBarDivision, ItemNbt, Particle, Particles, Slot,
+        BossBarAction, BossBarColor, BossBarDivision, ItemNbt, Particle, Particles, SlotInner,
     },
 };
 use firework_protocol_core::VarInt;
@@ -20,7 +20,7 @@ use rand::{distributions::Standard, prelude::Distribution, Rng};
 use serde_json::json;
 use std::{
     sync::Arc,
-    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
+    time::{Duration, Instant},
 };
 use tokio::sync::{Mutex, RwLock};
 
@@ -141,10 +141,11 @@ pub struct GlidePlayerHandler {
     boost_status: RwLock<Option<BoostStatus>>,
     animation_frame: Mutex<u8>,
     server: Arc<Server<GlideServerHandler, MiniGameProxy>>,
-    proxy: Arc<MiniGameProxy>,
+    _proxy: Arc<MiniGameProxy>,
     last_checkpoint: Mutex<Option<usize>>,
     start_time: Mutex<Option<Instant>>,
     last_damage: Mutex<Instant>,
+    recent_packets: Mutex<Vec<Instant>>,
 }
 
 fn format_duration(dur: Duration) -> String {
@@ -165,11 +166,36 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
             boost_status: RwLock::new(None),
             animation_frame: Mutex::new(0),
             server,
-            proxy,
+            _proxy: proxy,
+            recent_packets: Mutex::new(Vec::new()),
             last_checkpoint: Mutex::new(Some(0)),
             start_time: Mutex::new(None),
             last_damage: Mutex::new(Instant::now()),
         }
+    }
+    async fn on_server_bound_packet(
+        &self,
+        client: &Client<GlideServerHandler, MiniGameProxy>,
+    ) -> Result<(), ConnectionError> {
+        let mut recent_packets = self.recent_packets.lock().await;
+        recent_packets.push(Instant::now());
+
+        const PACKETS_PER_TICK: usize = 4;
+        const SAMPLE_TIME: usize = 3;
+
+        recent_packets.retain(|i| i.elapsed().as_secs() < SAMPLE_TIME as u64);
+
+        if recent_packets.len() > SAMPLE_TIME * PACKETS_PER_TICK * TICKS_PER_SECOND {
+            client.disconnect(
+                json!({
+                    "text": "Kicked for sending too many packets",
+                    "color": "red"
+                })
+                .to_string(),
+            );
+        }
+
+        Ok(())
     }
     async fn on_transfer(
         &self,
@@ -271,10 +297,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
 
         Ok(Some(pos))
     }
-    async fn on_tick(
-        &self,
-        client: &Client<GlideServerHandler, MiniGameProxy>,
-    ) -> Result<(), ConnectionError> {
+    async fn on_tick(&self, client: &Client<GlideServerHandler, MiniGameProxy>) {
         let boost_status = self.boost_status.read().await.clone();
         if let Some(BoostStatus::ArrowBoost {
             speed,
@@ -568,11 +591,6 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
         // // get the percentage of the way between the two checkpoints
         // let checkpoint_percent =
         //     first_checkpoint_distance / (first_checkpoint_distance + second_checkpoint_distance);
-        // // println!(
-        // //     "{}% of the way to checkpoint {}",
-        // //     (checkpoint_percent * 100.).round(),
-        // //     checkpoint_index + 1
-        // // );
         // let checkpoint_count = CANYON_CHECKPOINTS.len();
         // // decrease dashes when there are more checkpoints to achieve a constant width
         // let dashes_per_checkpoint = 45 / (checkpoint_count - 1) - 1;
@@ -596,8 +614,6 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
         //     checkpoint_representation
         // );
         // client.send_system_chat_message(chat_message.to_string(), true);
-
-        Ok(())
     }
     async fn on_on_ground(
         &self,
@@ -798,13 +814,14 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
     async fn on_tick(&self, server: &Server<Self, MiniGameProxy>, proxy: Arc<MiniGameProxy>) {
         if self.created_at.elapsed().as_millis() / 50 >= 200 && server.player_list.len() == 0 {
             proxy.glide_queue.lock().await.remove_server(server.id);
-            println!("Closing server {:x?} due to inactivity", server.id);
         }
         let mut game_state = self.game_state.lock().await;
         match &*game_state {
             GameState::Starting { ticks_until_start } => {
                 if *ticks_until_start != 0 {
-                    if *ticks_until_start % 20 == 0 && *ticks_until_start <= 100 {
+                    if *ticks_until_start % TICKS_PER_SECOND as u16 == 0
+                        && *ticks_until_start <= 100
+                    {
                         server.broadcast_chat(
                             json!([
                                 {
@@ -867,7 +884,7 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
 
         player.inventory.set_slot(
             InventorySlot::Chestplate,
-            Some(Slot {
+            Some(SlotInner {
                 item_id: VarInt(Elytra::ID as i32),
                 item_count: 1,
                 nbt: ItemNbt {
@@ -880,8 +897,8 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
     }
     async fn get_commands(
         &self,
-        server: &Server<GlideServerHandler, MiniGameProxy>,
-        proxy: &MiniGameProxy,
+        _server: &Server<GlideServerHandler, MiniGameProxy>,
+        _proxy: &MiniGameProxy,
     ) -> Result<&CommandNode<Self, MiniGameProxy>, ConnectionError> {
         Ok(&self.commands)
     }

@@ -1,8 +1,5 @@
 use async_trait::async_trait;
-use firework::{
-    commands::CommandNode, ClientData, ConnectionError, Server, ServerManager, ServerOptions,
-    ServerProxy,
-};
+use firework::{ClientData, ConnectionError, Server, ServerManager, ServerOptions, ServerProxy};
 use firework_protocol::Protocol;
 use firework_world::{world, World};
 use glide::GlideServerHandler;
@@ -250,8 +247,8 @@ async fn main() {
     std::env::set_var("RUST_BACKTRACE", "1");
 
     ServerManager::<MiniGameProxy>::run(ServerOptions {
-        encryption: true,
-        host: true,
+        encryption: false,
+        host: false,
         ..Default::default()
     })
     .await;
@@ -259,7 +256,8 @@ async fn main() {
 
 #[tokio::test]
 async fn test_parse() {
-    // std::env::set_var("RUST_BACKTRACE", "1");
+    use firework::commands::CommandNode;
+
     let command_tree: CommandNode<LobbyServerHandler, MiniGameProxy> = CommandNode::root()
         .sub_command(
             CommandNode::literal("test")

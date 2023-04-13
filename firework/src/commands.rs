@@ -3,7 +3,7 @@ use firework_protocol::data_types::SuggestionMatch;
 use firework_protocol_core::{SerializeField, VarInt};
 use firework_protocol_derive::SerializeField;
 use futures::future::BoxFuture;
-use std::{any::Any, fmt::Debug, io::Write, sync::Arc};
+use std::{fmt::Debug, io::Write};
 use thiserror::Error;
 use tokio::sync::Mutex;
 

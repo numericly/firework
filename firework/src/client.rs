@@ -1,6 +1,6 @@
 use crate::{
     entities::EntityDataFlags,
-    gui::{GuiScreen, WindowType},
+    gui::{GUIInit, GuiScreen},
     PlayerHandler,
 };
 use crate::{
@@ -11,20 +11,20 @@ use firework_authentication::Profile;
 use firework_data::tags::{REGISTRY, TAGS};
 use firework_protocol::{
     client_bound::{
-        BossBar, ChangeDifficulty, ClientBoundKeepAlive, ClientBoundPacketID, CloseContainer,
+        BossBar, ChangeDifficulty, ClientBoundKeepAlive, ClientBoundPacket, CloseContainer,
         CommandSuggestionsResponse, Commands, CustomSound, IdMapHolder, LoginPlay, OpenScreen,
         ParticlePacket, PlayDisconnect, PlayerAbilities, PlayerInfo, PluginMessage, RemoveEntities,
         RemoveInfoPlayer, Respawn, SerializePacket, SetCenterChunk, SetContainerContent,
-        SetDefaultSpawn, SetEntityMetadata, SetEntityVelocity, SetHealth, SetHeldItem, SetRecipes,
-        SetSubtitleText, SetTags, SetTitleAnimationTimes, SetTitleText, SoundEffect, SoundSource,
-        SpawnPlayer, SynchronizePlayerPosition, SystemChatMessage, TeleportEntity, UnloadChunk,
-        UpdateAttributes, UpdateEntityHeadRotation, UpdateEntityPosition,
-        UpdateEntityPositionAndRotation, UpdateEntityRotation, VanillaSound,
+        SetContainerSlot, SetDefaultSpawn, SetEntityMetadata, SetEntityVelocity, SetHealth,
+        SetHeldItem, SetRecipes, SetSubtitleText, SetTags, SetTitleAnimationTimes, SetTitleText,
+        SoundEffect, SoundSource, SpawnPlayer, SynchronizePlayerPosition, SystemChatMessage,
+        TeleportEntity, UnloadChunk, UpdateAttributes, UpdateEntityHeadRotation,
+        UpdateEntityPosition, UpdateEntityPositionAndRotation, UpdateEntityRotation, VanillaSound,
     },
     data_types::{
-        AddPlayer, Arm, Attribute, BossBarAction, BossBarColor, BossBarDivision, Particle,
-        PlayerAbilityFlags, PlayerCommandAction, PlayerInfoAction, PlayerPositionFlags, Slot,
-        UpdateGameMode, UpdateLatency, UpdateListed,
+        AddPlayer, Arm, Attribute, BossBarAction, Particle, PlayerAbilityFlags, PlayerActionStatus,
+        PlayerCommandAction, PlayerInfoAction, PlayerPositionFlags, Slot, UpdateGameMode,
+        UpdateLatency, UpdateListed,
     },
     read_specific_packet,
     server_bound::{
@@ -35,16 +35,15 @@ use firework_protocol::{
 use firework_protocol_core::{DeserializeField, Position, SerializeField, UnsizedVec, VarInt};
 use rand::Rng;
 use serde_json::json;
-use std::{
-    collections::HashMap,
-    time::{SystemTime, UNIX_EPOCH},
-};
+use std::collections::HashMap;
 use std::{
     fmt::Debug,
     sync::Arc,
     time::{Duration, Instant},
 };
 use tokio::sync::{broadcast, Mutex, RwLock};
+
+const SERVER_RENDER_DISTANCE: i32 = 9;
 
 #[derive(Debug, Clone)]
 pub enum ClientCommand<TransferData>
@@ -95,11 +94,13 @@ where
     DisplayParticles {
         particles: Vec<Particle>,
     },
-    OpenGui {
-        title: String,
-        window_type: WindowType,
-        items: Vec<Option<Slot>>,
+    InitGui,
+    UpdateSlot {
+        window_id: i8,
+        slot: u16,
+        item: Slot,
     },
+    CloseGui,
     SendTitle {
         title: String,
         subtitle: String,
@@ -185,12 +186,12 @@ impl Player {
 
 #[derive(Debug)]
 pub struct Inventory {
-    slots: [Option<Slot>; 46],
+    slots: [Slot; 46],
 }
 
 impl Default for Inventory {
     fn default() -> Self {
-        const EMPTY_SLOT: Option<Slot> = None;
+        const EMPTY_SLOT: Slot = None;
         Inventory {
             slots: [EMPTY_SLOT; 46],
         }
@@ -215,12 +216,65 @@ pub enum InventorySlot {
     Offhand,
 }
 
+impl InventorySlot {
+    const CRAFTING_OFFSET: usize = 0;
+    const ARMOR_OFFSET: usize = 5;
+    const HOTBAR_OFFSET: usize = 36;
+    const OFFHAND_OFFSET: usize = 45;
+    const MAIN_INVENTORY_OFFSET: usize = 9;
+    pub fn value(&self) -> usize {
+        match self {
+            InventorySlot::Hotbar { slot } => Self::HOTBAR_OFFSET + slot,
+            InventorySlot::MainInventory { slot } => Self::HOTBAR_OFFSET + 9 + slot,
+            InventorySlot::CraftingGrid { slot } => Self::CRAFTING_OFFSET + 1 + slot,
+            InventorySlot::CraftingResult => Self::CRAFTING_OFFSET,
+            InventorySlot::Offhand => Self::OFFHAND_OFFSET,
+            InventorySlot::Boots => Self::ARMOR_OFFSET + 3,
+            InventorySlot::Leggings => Self::ARMOR_OFFSET + 2,
+            InventorySlot::Chestplate => Self::ARMOR_OFFSET + 1,
+            InventorySlot::Helmet => Self::ARMOR_OFFSET,
+        }
+    }
+    pub fn from_value(value: usize) -> Option<Self> {
+        match value {
+            v if v >= Self::HOTBAR_OFFSET && v < Self::HOTBAR_OFFSET + 9 => {
+                Some(InventorySlot::Hotbar {
+                    slot: v - Self::HOTBAR_OFFSET,
+                })
+            }
+            v if v >= Self::MAIN_INVENTORY_OFFSET && v < Self::MAIN_INVENTORY_OFFSET + 27 => {
+                Some(InventorySlot::MainInventory {
+                    slot: v - Self::MAIN_INVENTORY_OFFSET,
+                })
+            }
+            v if v >= Self::CRAFTING_OFFSET + 1 && v < Self::CRAFTING_OFFSET + 5 => {
+                Some(InventorySlot::CraftingGrid {
+                    slot: v - Self::CRAFTING_OFFSET - 1,
+                })
+            }
+            v if v == Self::CRAFTING_OFFSET => Some(InventorySlot::CraftingResult),
+            v if v == Self::OFFHAND_OFFSET => Some(InventorySlot::Offhand),
+            v if v >= Self::ARMOR_OFFSET && v < Self::ARMOR_OFFSET + 4 => {
+                match v - Self::ARMOR_OFFSET {
+                    0 => Some(InventorySlot::Helmet),
+                    1 => Some(InventorySlot::Chestplate),
+                    2 => Some(InventorySlot::Leggings),
+                    3 => Some(InventorySlot::Boots),
+                    _ => unreachable!(),
+                }
+            }
+            _ => None,
+        }
+    }
+}
+
 impl Inventory {
     const CRAFTING_OFFSET: usize = 0;
     const ARMOR_OFFSET: usize = 5;
     const HOTBAR_OFFSET: usize = 36;
     const OFFHAND_OFFSET: usize = 45;
-    pub fn get_slot(&self, slot: InventorySlot) -> &Option<Slot> {
+    const MAIN_INVENTORY_OFFSET: usize = 9;
+    pub fn get_slot(&self, slot: &InventorySlot) -> &Slot {
         match slot {
             InventorySlot::Helmet => &self.slots[Self::ARMOR_OFFSET],
             InventorySlot::Chestplate => &self.slots[Self::ARMOR_OFFSET + 1],
@@ -229,20 +283,30 @@ impl Inventory {
             InventorySlot::CraftingResult => &self.slots[Self::CRAFTING_OFFSET],
             InventorySlot::Offhand => &self.slots[Self::OFFHAND_OFFSET],
             InventorySlot::CraftingGrid { slot } => {
-                assert!(slot < 4);
+                assert!(*slot < 4);
                 &self.slots[Self::CRAFTING_OFFSET + slot + 1]
             }
             InventorySlot::Hotbar { slot } => {
-                assert!(slot < 9);
+                assert!(*slot < 9);
                 &self.slots[Self::HOTBAR_OFFSET + slot]
             }
             InventorySlot::MainInventory { slot } => {
-                assert!(slot < 36);
-                &self.slots[Self::HOTBAR_OFFSET + slot]
+                assert!(*slot < 27);
+                &self.slots[Self::MAIN_INVENTORY_OFFSET + slot]
             }
         }
     }
-    pub fn set_slot(&mut self, slot: InventorySlot, item: Option<Slot>) {
+    pub fn get_hotbar_slot_from_container(&self, slot: usize) -> &Slot {
+        const HOTBAR_OFFSET: usize = 36;
+        assert!(slot < 9);
+        &self.slots[slot + HOTBAR_OFFSET]
+    }
+    pub fn get_main_slot_from_container(&self, slot: usize) -> &Slot {
+        const MAIN_OFFSET: usize = 0;
+        assert!(slot < 36);
+        &self.slots[slot + MAIN_OFFSET]
+    }
+    pub fn set_slot(&mut self, slot: InventorySlot, item: Slot) {
         match slot {
             InventorySlot::Helmet => self.slots[Self::ARMOR_OFFSET] = item,
             InventorySlot::Chestplate => self.slots[Self::ARMOR_OFFSET + 1] = item,
@@ -259,8 +323,8 @@ impl Inventory {
                 self.slots[slot + Self::HOTBAR_OFFSET] = item
             }
             InventorySlot::MainInventory { slot } => {
-                assert!(slot < 36);
-                self.slots[slot] = item
+                assert!(slot < 27);
+                self.slots[slot + Self::MAIN_INVENTORY_OFFSET] = item
             }
         }
     }
@@ -383,7 +447,7 @@ where
                 dimension_name: "minecraft:overworld".to_string(),
                 hashed_seed: 0,
                 max_players: VarInt(10),
-                view_distance: VarInt(7),
+                view_distance: VarInt(SERVER_RENDER_DISTANCE),
                 simulation_distance: VarInt(5),
                 reduced_debug_info: player.reduced_debug_info,
                 enable_respawn_screen: true,
@@ -526,8 +590,8 @@ where
         })
         .await?;
 
-        for x in -7..=7 {
-            for z in -7..=7 {
+        for x in -2..=2 {
+            for z in -2..=2 {
                 let packet = {
                     let chunk_data = self.server.get_world().get_chunk(x, z).await?;
                     if let Some(chunk_lock) = chunk_data {
@@ -567,6 +631,12 @@ where
             )
             .await?;
         }
+        let (chunk_x, chunk_z) = {
+            let position = &self.player.read().await.position;
+            (position.x as i32 >> 4, position.z as i32 >> 4)
+        };
+
+        self.move_chunk(chunk_x, chunk_z).await?;
 
         Ok(())
     }
@@ -575,6 +645,23 @@ where
         command: ClientCommand<Proxy::TransferData>,
     ) -> Result<Option<Proxy::TransferData>, ConnectionError> {
         match command {
+            ClientCommand::UpdateSlot {
+                window_id,
+                slot,
+                item,
+            } => {
+                self.send_packet(SetContainerSlot {
+                    window_id,
+                    slot: slot as i16,
+                    item,
+                    state_id: VarInt(0),
+                })
+                .await?;
+            }
+            ClientCommand::CloseGui => {
+                self.send_packet(CloseContainer { window_id: 1 }).await?;
+                self.gui.write().await.take();
+            }
             ClientCommand::UpdateAttributes { attributes } => {
                 self.send_packet(UpdateAttributes {
                     entity_id: VarInt::from(self.client_data.entity_id),
@@ -630,10 +717,6 @@ where
                 self.player.write().await.position = position.clone();
 
                 if previous_chunk_x != chunk_x || previous_chunk_z != chunk_z {
-                    println!(
-                        "Moving chunk from {} {} to {} {}",
-                        previous_chunk_x, previous_chunk_z, chunk_x, chunk_z
-                    );
                     self.move_chunk(chunk_x, chunk_z).await?;
                 }
 
@@ -926,11 +1009,19 @@ where
                     self.send_packet(ParticlePacket { particle }).await?;
                 }
             }
-            ClientCommand::OpenGui {
-                title,
-                window_type,
-                items,
-            } => {
+            ClientCommand::InitGui => {
+                let gui = self.gui.read().await;
+
+                let Some(gui) = gui.as_ref() else {
+                    return Ok(None)
+                };
+
+                let GUIInit {
+                    window_type,
+                    title,
+                    items,
+                } = gui.init(self).await?;
+
                 const GUI_ID: u8 = 1;
                 self.send_packet(OpenScreen {
                     window_id: VarInt::from(GUI_ID as i32),
@@ -1011,8 +1102,19 @@ where
     ) -> Result<(), ConnectionError> {
         self.handler.on_server_bound_packet(self).await?;
         match packet {
+            ServerBoundPacket::PlayerAction(action) => match action.status {
+                PlayerActionStatus::DropItem => {
+                    self.handler.on_drop_item(self, false).await?;
+                }
+                PlayerActionStatus::DropItemStack => {
+                    self.handler.on_drop_item(self, true).await?;
+                }
+                PlayerActionStatus::SwapItemInHand => {
+                    self.handler.on_swap_item(self).await?;
+                }
+                a => println!("PlayerAction: {:?}", a),
+            },
             ServerBoundPacket::CommandSuggestionsRequest(packet) => {
-                // let parts = packet.command[1..].split(' ').collect::<Vec<&str>>();
                 let root = self
                     .server
                     .handler
@@ -1046,13 +1148,6 @@ where
                 ping.response_time.replace(ping.start.elapsed());
             }
             ServerBoundPacket::ChatMessage(ChatMessage { message }) => {
-                // let gui = GameQueueMenuGui {};
-
-                // self.send_packet(gui.open()).await?;
-
-                // self.send_packet(gui.draw()).await?;
-                // self.player.write().await.open_gui = Some(GameQueueMenuGui(gui));
-
                 self.server.handle_chat(&self.proxy, self, message).await?
             }
             ServerBoundPacket::ChatCommand(ChatCommand { command }) => {
@@ -1093,7 +1188,7 @@ where
             ServerBoundPacket::PlayerCommand(PlayerCommand {
                 entity_id,
                 action,
-                // This is only used for jumping on a horse which is weird and we don' have horses
+                // This is only used for jumping on a horse which is weird and we don't have horses
                 action_parameter: _action_parameter,
             }) => {
                 if i32::from(entity_id) != self.client_data.entity_id {
@@ -1163,6 +1258,8 @@ where
             ServerBoundPacket::ClickContainer(click) => {
                 if let Some(gui) = self.gui.read().await.as_ref() {
                     gui.handle_click(click, self).await?;
+                } else {
+                    self.handler.on_click_container(self, click).await?;
                 }
             }
             ServerBoundPacket::SetHeldItemServerBound(set_held_item) => {
@@ -1184,7 +1281,7 @@ where
 
                 let used_item = {
                     let player_read = self.player.read().await;
-                    match player_read.inventory.get_slot(used_item_slot.clone()) {
+                    match player_read.inventory.get_slot(&used_item_slot) {
                         Some(item) => Some(item.clone()),
                         None => None,
                     }
@@ -1193,6 +1290,11 @@ where
                 self.handler
                     .on_use_item(self, used_item, used_item_slot)
                     .await?;
+            }
+            ServerBoundPacket::CloseContainerServerBound(container) => {
+                if container.window_id == 1 {
+                    self.gui.write().await.take();
+                }
             }
             _ => (),
         };
@@ -1205,14 +1307,14 @@ where
     ) -> Result<(), ConnectionError> {
         let mut player_loaded_chunks = self.client_data.loaded_chunks.lock().await;
 
-        for chunk in player_loaded_chunks.clone().iter() {
-            if chunk.0 + 7 < chunk_x
-                || chunk.0 - 7 > chunk_x
-                || chunk.1 + 7 < chunk_z
-                || chunk.1 - 7 > chunk_z
+        for (loaded_chunk_x, loaded_chunk_z) in player_loaded_chunks.clone().iter() {
+            if loaded_chunk_x + SERVER_RENDER_DISTANCE < chunk_x
+                || loaded_chunk_x - SERVER_RENDER_DISTANCE > chunk_x
+                || loaded_chunk_z + SERVER_RENDER_DISTANCE < chunk_z
+                || loaded_chunk_z - SERVER_RENDER_DISTANCE > chunk_z
             {
-                self.unload_chunk(chunk.0, chunk.1).await?;
-                player_loaded_chunks.remove(chunk);
+                self.unload_chunk(*loaded_chunk_x, *loaded_chunk_z).await?;
+                player_loaded_chunks.remove(&(*loaded_chunk_x, *loaded_chunk_z));
             }
         }
 
@@ -1222,8 +1324,8 @@ where
         })
         .await?;
 
-        for x in -7..=7 {
-            for z in -7..=7 {
+        for x in -SERVER_RENDER_DISTANCE..=SERVER_RENDER_DISTANCE {
+            for z in -SERVER_RENDER_DISTANCE..=SERVER_RENDER_DISTANCE {
                 if player_loaded_chunks.contains(&(x + chunk_x, z + chunk_z)) {
                     continue;
                 }
@@ -1247,29 +1349,6 @@ where
                 player_loaded_chunks.insert((x + chunk_x, z + chunk_z));
             }
         }
-
-        Ok(())
-    }
-    pub(super) async fn set_container_content(
-        &self,
-        content: SetContainerContent,
-    ) -> Result<(), ConnectionError> {
-        self.send_packet(content).await?;
-        // Lmao this is test code
-        self.send_packet(SoundEffect {
-            sound: IdMapHolder::Direct(CustomSound {
-                resource_location: "minecraft:music.glide_map_1".to_string(),
-                range: None,
-            }),
-            sound_source: SoundSource::Player,
-            x: 0,
-            y: 374,
-            z: 0,
-            volume: 1.,
-            pitch: 1.,
-            seed: 0,
-        })
-        .await?;
 
         Ok(())
     }
@@ -1402,13 +1481,37 @@ where
 
         Ok(())
     }
-    async fn send_packet<T: SerializePacket + ClientBoundPacketID + Debug>(
+    pub async fn send_packet<T: SerializePacket + ClientBoundPacket + Debug>(
         &self,
         packet: T,
     ) -> Result<(), ConnectionError> {
         self.handler.on_client_bound_packet(self).await?;
         self.connection.write_packet(packet).await?;
         Ok(())
+    }
+    #[allow(unused_must_use)]
+    pub async fn display_gui<T: GuiScreen<Handler, Proxy> + Send + Sync + 'static>(&self, gui: T) {
+        *self.gui.write().await = Some(Box::new(gui));
+
+        self.to_client.send(ClientCommand::InitGui);
+    }
+    #[allow(unused_must_use)]
+    pub fn close_gui(&self) {
+        self.to_client.send(ClientCommand::CloseGui);
+    }
+    #[allow(unused_must_use)]
+    pub async fn update_inventory_slot(&self, slot: InventorySlot, item: Slot) {
+        self.player
+            .write()
+            .await
+            .inventory
+            .set_slot(slot.clone(), item.clone());
+
+        self.to_client.send(ClientCommand::UpdateSlot {
+            slot: slot.value() as u16,
+            item,
+            window_id: 0,
+        });
     }
     #[allow(unused_must_use)]
     pub fn show_chat_message(&self, message: String) {
@@ -1448,14 +1551,6 @@ where
     #[allow(unused_must_use)]
     pub fn set_velocity(&self, velocity: Vec3) {
         self.to_client.send(ClientCommand::SetVelocity { velocity });
-    }
-    #[allow(unused_must_use)]
-    pub fn show_gui(&self, title: String, window_type: WindowType, items: Vec<Option<Slot>>) {
-        self.to_client.send(ClientCommand::OpenGui {
-            title,
-            window_type,
-            items,
-        });
     }
     #[allow(unused_must_use)]
     pub fn send_title(

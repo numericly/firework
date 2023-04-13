@@ -62,6 +62,7 @@ pub const END_INDEX: u8 = 0xFF;
 pub struct EntityDataFlags {
     pub is_on_fire: bool,
     pub is_crouching: bool,
+    #[allow(dead_code)]
     deprecated_riding: bool,
     pub is_sprinting: bool,
     pub is_swimming: bool,
@@ -76,7 +77,6 @@ impl SerializeField for EntityDataFlags {
     }
 }
 
-#[allow(dead_code)]
 #[derive(Debug, PartialEq, SerializeField, Clone)]
 #[protocol(typ = "firework_protocol_core::VarInt")]
 pub enum Pose {
@@ -95,13 +95,4 @@ pub enum Pose {
     Sniffing,
     Emerging,
     Digging,
-}
-
-#[test]
-fn test() {
-    // let flags = EntityMetadata::EntityFlags(EntityDataFlags::new());
-    // let mut writer = Vec::new();
-    // flags.serialize(&mut writer);
-    // println!("{:?}", writer);
-    // panic!("test")
 }

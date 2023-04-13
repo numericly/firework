@@ -408,11 +408,12 @@ pub struct UpdateLatency {
 }
 
 #[derive(Debug, PartialEq, SerializeField, Clone, DeserializeField)]
-pub struct Slot {
+pub struct SlotInner {
     pub item_id: VarInt,
     pub item_count: u8,
     pub nbt: ItemNbt,
 }
+pub type Slot = Option<SlotInner>;
 
 impl SerializeField for DeathLocation {
     fn serialize<W: Write>(&self, mut writer: W) {
@@ -455,7 +456,7 @@ pub enum InventoryOperationMode {
 #[derive(Debug, PartialEq, DeserializeField)]
 pub struct SlotUpdate {
     pub slot_number: i16,
-    pub slot_value: Option<Slot>,
+    pub slot_value: Slot,
 }
 
 impl SerializeField for DisplaySkinParts {

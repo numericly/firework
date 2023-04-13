@@ -14,9 +14,12 @@ macro_rules! define_client_bound_protocol {
                 $(pub $field: $type),*
             }
 
-            impl ClientBoundPacketID for $name {
+            impl ClientBoundPacket for $name {
                 fn id() -> i32 {
                     $id
+                }
+                fn name() -> &'static str {
+                    stringify!($name)
                 }
             }
 
@@ -51,8 +54,9 @@ use crate::data_types::{
     PlayerInfoAction, PlayerPositionFlags, Recipe, Slot, SuggestionMatch,
 };
 
-pub trait ClientBoundPacketID {
+pub trait ClientBoundPacket {
     fn id() -> i32;
+    fn name() -> &'static str;
 }
 
 pub trait SerializePacket {
@@ -119,14 +123,14 @@ define_client_bound_protocol! {
     SetContainerContent, 0x12, Play => {
         window_id: u8,
         state_id: VarInt,
-        items: Vec<Option<Slot>>,
-        held_item: Option<Slot>
+        items: Vec<Slot>,
+        held_item: Slot
     },
     SetContainerSlot, 0x14, Play => {
-        window_id: u8,
+        window_id: i8,
         state_id: VarInt,
         slot: i16,
-        item: Option<Slot>
+        item: Slot
     },
     PluginMessage, 0x17, Play => {
         channel: String,
@@ -290,6 +294,13 @@ define_client_bound_protocol! {
         velocity_x: i16,
         velocity_y: i16,
         velocity_z: i16
+    },
+    // This packet is unreasonably weird so I am not going to implement it properly
+    // Source: https://wiki.vg/Protocol#Set_Equipment
+    SetEquipment, 0x55, Play => {
+        entity_id: VarInt,
+        slot: u8,
+        item: Slot
     },
     SetHealth, 0x57, Play => {
         health: f32,

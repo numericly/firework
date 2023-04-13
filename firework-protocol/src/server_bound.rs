@@ -44,6 +44,15 @@ macro_rules! define_server_bound_protocol {
                     (state, id) => Err(DeserializeError::InvalidPacketID { id, state: state as u8 }),
                 }
             }
+            pub fn name(&self) -> &str {
+                match self {
+                    $(
+                        ServerBoundPacket::$name(_) => {
+                            stringify!($name)
+                        }
+                    )*,
+                }
+            }
         }
     };
 }

@@ -1,10 +1,11 @@
 use crate::{
-    client_bound::{ClientBoundPacketID, SerializePacket},
+    client_bound::{ClientBoundPacket, SerializePacket},
     server_bound::ServerBoundPacket,
 };
 use aes::cipher::{inout::InOutBuf, BlockDecryptMut, BlockEncryptMut};
 use aes::{cipher::KeyIvInit, Aes128};
 use cfb8::{self, Decryptor, Encryptor};
+use client_bound::SetCompression;
 use firework_protocol_core::{DeserializeError, DeserializeField, SerializeField, VarInt};
 use firework_protocol_derive::DeserializeField;
 use miniz_oxide::{
@@ -68,7 +69,7 @@ pub struct Protocol {
     pub joined_world: RwLock<bool>,
     writer: Mutex<ProtocolWriter>,
     reader: Mutex<ProtocolReader>,
-    compression_enabled: bool,
+    compression: Option<usize>,
 }
 
 #[derive(Debug)]
@@ -118,7 +119,7 @@ impl Protocol {
     pub fn new(stream: TcpStream) -> Protocol {
         let (reader, writer) = stream.into_split();
         Protocol {
-            compression_enabled: false,
+            compression: None,
             writer: Mutex::new(ProtocolWriter {
                 writer,
                 cipher: None,
@@ -135,6 +136,10 @@ impl Protocol {
         let packet_data = self.read_packet().await?;
         let packet =
             ServerBoundPacket::deserialize(packet_data.as_slice(), &self.connection_state).await?;
+
+        if cfg!(feature = "log_packets") {
+            println!("C -> S {}", packet.name());
+        }
         Ok(packet)
     }
     pub async fn read_packet(&self) -> Result<Vec<u8>, ProtocolError> {
@@ -150,43 +155,54 @@ impl Protocol {
             }
         })?;
 
-        if self.compression_enabled {
-            let mut packet_data = Cursor::new(buffer.as_slice());
-            VarInt::deserialize(&mut packet_data)?;
+        if let Some(compression_threshold) = self.compression {
+            if packet_length >= compression_threshold {
+                let mut packet_data = Cursor::new(buffer.as_slice());
+                VarInt::deserialize(&mut packet_data)?;
 
-            let decompressed = decompress_to_vec_zlib(&buffer[packet_data.position() as usize..])
-                .map_err(|err| ProtocolError::DecompressError(err))?;
+                let decompressed =
+                    decompress_to_vec_zlib(&buffer[packet_data.position() as usize..])
+                        .map_err(|err| ProtocolError::DecompressError(err))?;
 
-            Ok(decompressed)
-        } else {
-            Ok(buffer)
+                return Ok(decompressed);
+            }
         }
+        Ok(buffer)
     }
     pub async fn write_packet<T>(&self, packet: T) -> Result<(), ProtocolError>
     where
-        T: SerializePacket + ClientBoundPacketID + Debug,
+        T: SerializePacket + ClientBoundPacket + Debug,
     {
-        // println!("Sending packet: {:?}", packet);
         let packet_data = packet.serialize();
 
         let mut packet_data_len = Vec::new();
         VarInt(packet_data.len() as i32).serialize(&mut packet_data_len);
 
-        let packet = if self.compression_enabled {
-            let compressed_data = compress_to_vec_zlib(&packet_data, 3); // Level 2 is optimal for net performance
-            let mut compressed_packet_data =
-                Vec::with_capacity(compressed_data.len() + packet_data_len.len() + 5);
-            VarInt(compressed_data.len() as i32 + packet_data_len.len() as i32)
-                .serialize(&mut compressed_packet_data);
-            compressed_packet_data.extend(packet_data_len);
-            compressed_packet_data.extend(compressed_data);
-            compressed_packet_data
+        let packet = if let Some(compression_threshold) = self.compression {
+            if packet_data.len() >= compression_threshold {
+                let compressed_data = compress_to_vec_zlib(&packet_data, 3); // Level 3 is optimal for net performance
+
+                let mut compressed_packet_data =
+                    Vec::with_capacity(compressed_data.len() + packet_data_len.len() + 5);
+                VarInt(compressed_data.len() as i32 + packet_data_len.len() as i32)
+                    .serialize(&mut compressed_packet_data);
+                compressed_packet_data.extend(packet_data_len);
+                compressed_packet_data.extend(compressed_data);
+                compressed_packet_data
+            } else {
+                packet_data_len.extend(packet_data);
+                packet_data_len
+            }
         } else {
             packet_data_len.extend(packet_data);
             packet_data_len
         };
 
         let mut writer = self.writer.lock().await;
+
+        if cfg!(feature = "log_packets") {
+            println!("S -> C {}", T::name());
+        }
 
         writer.write(&packet).await.map_err(|err| {
             if err.kind() == ErrorKind::BrokenPipe {
@@ -200,8 +216,14 @@ impl Protocol {
         self.reader.lock().await.cipher = Some(Decryptor::new_from_slices(key, iv).unwrap());
         self.writer.lock().await.cipher = Some(Encryptor::new_from_slices(key, iv).unwrap());
     }
-    pub fn enable_compression(&mut self) {
-        self.compression_enabled = true;
+    pub async fn enable_compression(&mut self, threshold: usize) -> Result<(), ProtocolError> {
+        let set_compression = SetCompression {
+            threshold: VarInt(threshold as i32),
+        };
+
+        self.write_packet(set_compression).await?;
+        self.compression = Some(threshold);
+        Ok(())
     }
 }
 

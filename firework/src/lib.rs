@@ -1,33 +1,29 @@
 use crate::client::{Client, ClientCommand, Player};
 use crate::entities::{EntityMetadata, Pose};
 use async_trait::async_trait;
-use cipher::Block;
 use client::{InventorySlot, PreviousPosition};
 use commands::CommandNode;
 use dashmap::{DashMap, DashSet};
 use firework_authentication::{authenticate, AuthenticationError, Profile};
 use firework_protocol::server_bound::{
-    ClientInformation, EncryptionResponse, Handshake, LoginStart, Ping, ServerBoundPacket,
+    ClickContainer, ClientInformation, EncryptionResponse, Handshake, LoginStart, Ping,
+    ServerBoundPacket,
 };
 use firework_protocol::{
-    client_bound::{
-        EncryptionRequest, LoginDisconnect, LoginSuccess, Pong, ServerStatus, SetCompression,
-    },
+    client_bound::{EncryptionRequest, LoginDisconnect, LoginSuccess, Pong, ServerStatus},
     data_types::Slot,
 };
 use firework_protocol::{read_specific_packet, ConnectionState, Protocol, ProtocolError};
-use firework_protocol_core::VarInt;
 use firework_world::World;
-use num_bigint::BigInt;
 use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
 use sha1::{Digest, Sha1};
-use std::time::{Duration, SystemTime};
+use std::sync::Arc;
+use std::time::Duration;
 use std::{collections::HashSet, time::Instant};
 use std::{fmt::Debug, ops::Div};
 use std::{marker::PhantomData, ops::Sub};
 use std::{net::SocketAddr, ops::Mul};
 use std::{num::ParseIntError, ops::Add};
-use std::{sync::Arc, time::UNIX_EPOCH};
 use thiserror::Error;
 use tokio::net::TcpListener;
 use tokio::sync::{broadcast, Mutex, RwLock};
@@ -40,6 +36,8 @@ pub mod client;
 pub mod commands;
 pub mod entities;
 pub mod gui;
+
+pub const TICKS_PER_SECOND: usize = 20;
 
 #[derive(Debug, Error)]
 pub enum ConnectionError {
@@ -517,6 +515,7 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                             ));
                         }
 
+                        #[allow(unused_must_use)]
                         let profile = match authenticate(
                             shared_secret.as_slice(),
                             encryption.encoded_pub.as_slice(),
@@ -562,13 +561,7 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                         profile
                     };
 
-                    let set_compression = SetCompression {
-                        threshold: VarInt(0),
-                    };
-
-                    connection.write_packet(set_compression).await?;
-
-                    connection.enable_compression();
+                    connection.enable_compression(0).await?;
 
                     let uuid = u128::from_str_radix(&profile.id, 16)?;
 
@@ -675,9 +668,7 @@ where
     async fn on_transfer(&self, client: &Client<Handler, Proxy>) -> Result<(), ConnectionError> {
         Ok(())
     }
-    async fn on_tick(&self, client: &Client<Handler, Proxy>) -> Result<(), ConnectionError> {
-        Ok(())
-    }
+    async fn on_tick(&self, client: &Client<Handler, Proxy>) {}
     async fn on_client_bound_packet(
         &self,
         client: &Client<Handler, Proxy>,
@@ -708,8 +699,25 @@ where
     async fn on_use_item(
         &self,
         client: &Client<Handler, Proxy>,
-        item: Option<Slot>,
+        item: Slot,
         slot_id: InventorySlot,
+    ) -> Result<(), ConnectionError> {
+        Ok(())
+    }
+    async fn on_click_container(
+        &self,
+        client: &Client<Handler, Proxy>,
+        click: ClickContainer,
+    ) -> Result<(), ConnectionError> {
+        Ok(())
+    }
+    async fn on_swap_item(&self, client: &Client<Handler, Proxy>) -> Result<(), ConnectionError> {
+        Ok(())
+    }
+    async fn on_drop_item(
+        &self,
+        client: &Client<Handler, Proxy>,
+        is_stack: bool,
     ) -> Result<(), ConnectionError> {
         Ok(())
     }

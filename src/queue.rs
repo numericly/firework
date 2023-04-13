@@ -1,7 +1,6 @@
 use std::{collections::VecDeque, sync::Arc};
 
-use firework::{Server, ServerHandler, ServerProxy};
-use firework_world::World;
+use firework::{Server, ServerHandler, ServerProxy, TICKS_PER_SECOND};
 use std::collections::HashMap;
 use tokio::sync::broadcast::{self, Receiver, Sender};
 use tokio_util::sync::CancellationToken;
@@ -41,8 +40,6 @@ where
     state: GameState,
     brand: String,
 }
-
-const TICKS_PER_SECOND: usize = 20;
 
 impl<Proxy, Handler, const MAX_PLAYERS: usize> Queue<Proxy, Handler, MAX_PLAYERS>
 where
