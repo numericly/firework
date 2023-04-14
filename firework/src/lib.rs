@@ -499,7 +499,6 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                         read_specific_packet!(connection, LoginStart).await?;
 
                     let client_username = login_start.name;
-                    let client_uuid = login_start.uuid;
 
                     let profile = if let Some(encryption) = encryption {
                         let encryption_request = EncryptionRequest {
@@ -547,9 +546,7 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
 
                         profile
                     } else {
-                        let uuid = if let Some(uuid) = client_uuid {
-                            uuid
-                        } else {
+                        let uuid = {
                             let mut hash = Sha1::new();
 
                             hash.update(&client_username);
