@@ -355,6 +355,71 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
             let time = client.server.handler.created_at.elapsed().as_secs_f32();
             let position = client.player.read().await.position.clone();
 
+            for checkpoint in map.get_checkpoints().iter() {
+                fn checkpoint_particle_box(
+                    x1: f64,
+                    y1: f64,
+                    z1: f64,
+                    x2: f64,
+                    y2: f64,
+                    z2: f64,
+                ) -> Vec<Particle> {
+                    let mut particles = Vec::new();
+
+                    // sadly the particle system is based around gaussian distributions, so here's a hack to
+                    // make the particles look like a box
+
+                    // add one because we want to include a minimum of 1 segment in each dimension
+                    let count_x = (x2 - x1).abs() as i32 / 12 + 1;
+                    let count_y = (y2 - y1).abs() as i32 / 12 + 1;
+                    let count_z = (z2 - z1).abs() as i32 / 12 + 1;
+
+                    let segment_width = (x2 - x1).abs() / count_x as f64;
+                    let segment_height = (y2 - y1).abs() / count_y as f64;
+                    let segment_depth = (z2 - z1).abs() / count_z as f64;
+
+                    for x in 0..count_x {
+                        for y in 0..count_y {
+                            for z in 0..count_z {
+                                if (x + y + z) % 2 == 0 {
+                                    continue;
+                                }
+                                let x = x1 + (x as f64 + 0.5) * segment_width;
+                                let y = y1 + (y as f64 + 0.5) * segment_height;
+                                let z = z1 + (z as f64 + 0.5) * segment_depth;
+                                particles.push(Particle::new(
+                                    Particles::EndRod,
+                                    true,
+                                    x,
+                                    y,
+                                    z,
+                                    (segment_width / 2.) as f32,
+                                    (segment_height / 2.) as f32,
+                                    (segment_depth / 2.) as f32,
+                                    0.0,
+                                    3,
+                                ));
+                            }
+                        }
+                    }
+                    particles
+                }
+
+                let (min, max) = checkpoint.plane.to_cartesian_pair();
+
+                let center = checkpoint.plane.center();
+
+                if (center.x - position.x).abs() > 100.
+                    || (center.y - position.y).abs() > 100.
+                    || (center.z - position.z).abs() > 100.
+                {
+                    continue;
+                }
+
+                let particles = checkpoint_particle_box(min.x, min.y, min.z, max.x, max.y, max.z);
+                client.send_particles(particles);
+            }
+
             for loft in map.get_lofts().iter() {
                 if loft.area.within(position.clone()) {
                     let velocity = client.player.read().await.velocity.clone();
@@ -365,6 +430,36 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                         velocity,
                     });
                 }
+                fn smoke_particle(x: f64, y: f64, z: f64, height: f32) -> Particle {
+                    const LIFETIME: f32 = 100.0; // lifetime in ticks
+                    let speed = height / LIFETIME;
+                    return Particle::new(
+                        Particles::CampfireCozySmoke,
+                        true,
+                        x,
+                        y,
+                        z,
+                        0.,
+                        1.,
+                        0.,
+                        speed, // blocks per tick
+                        0,
+                    );
+                }
+
+                let mut particles: Vec<Particle> = Vec::new();
+
+                for _ in 0..2 {
+                    let x = loft.area.min.x as f64
+                        + (loft.area.max.x as f64 - loft.area.min.x as f64) * rand::random::<f64>();
+                    let y = loft.area.min.y as f64;
+                    let height = loft.area.max.y as f32 - loft.area.min.y as f32;
+                    let z = loft.area.min.z as f64
+                        + (loft.area.max.z as f64 - loft.area.min.z as f64) * rand::random::<f64>();
+                    particles.push(smoke_particle(x, y, z, height));
+                }
+
+                client.send_particles(particles);
             }
 
             for boost in map.get_boosts().iter() {

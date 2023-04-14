@@ -189,6 +189,14 @@ impl AxisAlignedPlane {
             Self::Z { min, max } => Vec3::new((min.x + max.x) / 2.0, (min.y + max.y) / 2.0, min.z),
         }
     }
+
+    pub fn to_cartesian_pair(&self) -> (Vec3, Vec3) {
+        match self {
+            Self::X { min, max } => (min.clone(), max.clone()),
+            Self::Y { min, max } => (min.clone(), max.clone()),
+            Self::Z { min, max } => (min.clone(), max.clone()),
+        }
+    }
 }
 
 #[derive(Clone, Debug)]

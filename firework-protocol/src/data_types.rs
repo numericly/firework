@@ -83,6 +83,10 @@ pub enum Particles {
         /// The scale, will be clamped between 0.01 and 4.
         scale: f32,
     },
+    CampfireCozySmoke,
+    CampfireSignalSmoke,
+    EndRod,
+    Firework,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -137,6 +141,10 @@ impl SerializeField for Particle {
                 blue,
                 scale,
             } => 14,
+            Particles::CampfireCozySmoke => 67,
+            Particles::CampfireSignalSmoke => 68,
+            Particles::EndRod => 20,
+            Particles::Firework => 26,
         })
         .serialize(&mut writer);
 

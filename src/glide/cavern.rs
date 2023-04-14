@@ -94,14 +94,14 @@ pub const BOOSTS: [Boost; 17] = [
     Boost {
         // 0 29 67, 5 34 75
         area: AxisAlignedBB::new(BlockPos::new(0, 29, 67), BlockPos::new(5, 34, 75)),
-        speed: 5.,
+        speed: 4.,
         particle_type: super::BoostParticleType::BoostNorth,
     },
     Boost {
         // 0 29 -9, 5 34 -1
         area: AxisAlignedBB::new(BlockPos::new(0, 29, -9), BlockPos::new(5, 34, -1)),
-        speed: 2.,
-        particle_type: super::BoostParticleType::BoostSouth,
+        speed: 5.,
+        particle_type: super::BoostParticleType::BoostNorth,
     },
     Boost {
         // 34 13 -38, 39 18 -30
@@ -117,14 +117,217 @@ pub const BOOSTS: [Boost; 17] = [
     },
 ];
 
-pub const LOFTS: [Loft; 1] = [Loft {
-    area: AxisAlignedBB {
-        // 27 95 149, 30 105 152
-        min: BlockPos::new(27, 95, 149),
-        max: BlockPos::new(30, 105, 152),
+pub const LOFTS: [Loft; 26] = [
+    Loft {
+        area: AxisAlignedBB {
+            // 27 95 149, 30 105 152
+            min: BlockPos::new(27, 95, 149),
+            max: BlockPos::new(30, 105, 152),
+        },
+        speed: 0.35,
     },
-    speed: 0.35,
-}];
+    Loft {
+        area: AxisAlignedBB {
+            // 239 57 113, 243 70 117
+            min: BlockPos::new(239, 57, 113),
+            max: BlockPos::new(243, 70, 117),
+        },
+        speed: 0.35,
+    },
+    // the next four are all next to each other
+    Loft {
+        area: AxisAlignedBB {
+            // 166 44 107, 169 54 110
+            min: BlockPos::new(166, 44, 107),
+            max: BlockPos::new(169, 54, 110),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // 172 45 107, 175 54 110
+            min: BlockPos::new(172, 45, 107),
+            max: BlockPos::new(175, 54, 110),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // 166 45 113, 169 54 116
+            min: BlockPos::new(166, 45, 113),
+            max: BlockPos::new(169, 54, 116),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // 172 46 113, 175 54 116
+            min: BlockPos::new(172, 46, 113),
+            max: BlockPos::new(175, 54, 116),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // 184 42 192, 187 52 195
+            min: BlockPos::new(184, 42, 192),
+            max: BlockPos::new(187, 52, 195),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // 104 -5 85, 107 5 88
+            min: BlockPos::new(104, -5, 85),
+            max: BlockPos::new(107, 5, 88),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // 100 -5 85, 103 5 88
+            min: BlockPos::new(100, -5, 85),
+            max: BlockPos::new(103, 5, 88),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // 100 -2 105, 103 8 108
+            min: BlockPos::new(100, -2, 105),
+            max: BlockPos::new(103, 8, 108),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // 89 1 108, 92 11 111
+            min: BlockPos::new(89, 1, 108),
+            max: BlockPos::new(92, 21, 111),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // 79 8 88, 83 18 91
+            min: BlockPos::new(79, 8, 88),
+            max: BlockPos::new(83, 18, 91),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // 71 15 164, 74 20 166
+            min: BlockPos::new(71, 15, 164),
+            max: BlockPos::new(74, 20, 166),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // 40 0 168, 43 10 171
+            min: BlockPos::new(40, 0, 168),
+            max: BlockPos::new(43, 10, 171),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // 4 4 185, 7 14 188
+            min: BlockPos::new(4, 4, 185),
+            max: BlockPos::new(7, 14, 188),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // -35 -12 182, -32 -2 185
+            min: BlockPos::new(-35, -12, 182),
+            max: BlockPos::new(-32, -2, 185),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // -35 -12 176, -32 -2 179
+            min: BlockPos::new(-35, -12, 176),
+            max: BlockPos::new(-32, -2, 179),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // -40 -12 182, -37 -2 185
+            min: BlockPos::new(-40, -12, 182),
+            max: BlockPos::new(-37, -2, 185),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // -40 -12 176, -37 -2 179
+            min: BlockPos::new(-40, -12, 176),
+            max: BlockPos::new(-37, -2, 179),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // -81 11 173, -78 19 176
+            min: BlockPos::new(-81, 11, 173),
+            max: BlockPos::new(-78, 19, 176),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // -38 -1 114, -34 9 118
+            min: BlockPos::new(-38, -1, 114),
+            max: BlockPos::new(-34, 9, 118),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // -13 7 107, -10 27 110
+            min: BlockPos::new(-13, 7, 107),
+            max: BlockPos::new(-10, 27, 110),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // -46 0 89, -43 4 94
+            min: BlockPos::new(-46, 0, 89),
+            max: BlockPos::new(-43, 4, 94),
+        },
+        speed: 0.2,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // 5 14 -34, 10 20 -31
+            min: BlockPos::new(5, 14, -34),
+            max: BlockPos::new(10, 20, -31),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // 50 12 -63, 53 22 -60
+            min: BlockPos::new(50, 12, -63),
+            max: BlockPos::new(53, 22, -60),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        area: AxisAlignedBB {
+            // 17 14 40, 20 24 43
+            min: BlockPos::new(17, 14, 40),
+            max: BlockPos::new(20, 24, 43),
+        },
+        speed: 0.35,
+    },
+];
 
 pub const CHECKPOINTS: [Checkpoint; 9] = [
     Checkpoint {
@@ -173,9 +376,9 @@ pub const CHECKPOINTS: [Checkpoint; 9] = [
         spawn_rotation: Rotation::new(0., 30.),
     },
     Checkpoint {
-        // 81 18 132.5, 67 36 132.5
+        // 81 12 132.5, 67 36 132.5
         plane: firework::AxisAlignedPlane::Z {
-            min: Vec3::new(67., 18., 132.5),
+            min: Vec3::new(67., 12., 132.5),
             max: Vec3::new(81., 36., 132.5),
         },
         spawn_position: Vec3::new(75., 27., 130.),

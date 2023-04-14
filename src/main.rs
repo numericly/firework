@@ -248,7 +248,7 @@ async fn main() {
 
     ServerManager::<MiniGameProxy>::run(ServerOptions {
         encryption: false,
-        host: false,
+        host: true,
         ..Default::default()
     })
     .await;

@@ -172,7 +172,7 @@ pub const CHECKPOINTS: [Checkpoint; 9] = [
     Checkpoint {
         plane: AxisAlignedPlane::Z {
             min: Vec3::new(-16.5, 22., 460.5),
-            max: Vec3::new(13.5, 187., 460.5),
+            max: Vec3::new(13.5, 150., 460.5),
         },
         spawn_position: Vec3::new(-2., 122.5, 439.),
         spawn_rotation: Rotation::new(4.8, 21.2),
