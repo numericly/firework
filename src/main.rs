@@ -16,8 +16,9 @@ mod queue;
 
 lazy_static! {
     static ref LOBBY_WORLD: World = world!("./firework-world/lobby", false);
-    static ref CANYON_GLIDE_WORLD: World = world!("./firework-world/glide/canyon", false);
-    static ref CAVERN_GLIDE_WORLD: World = world!("./firework-world/glide/cavern", false);
+    static ref CANYON_GLIDE_WORLD: World = world!("./firework-world/glide/canyon", true);
+    static ref CAVERN_GLIDE_WORLD: World = world!("./firework-world/glide/cavern", true);
+    static ref TEMPLE_GLIDE_WORLD: World = world!("./firework-world/glide/temple", true);
 }
 
 #[allow(dead_code)]

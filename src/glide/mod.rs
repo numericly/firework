@@ -24,10 +24,13 @@ use std::{
 };
 use tokio::sync::{Mutex, RwLock};
 
-use crate::{MiniGameProxy, TransferData, CANYON_GLIDE_WORLD, CAVERN_GLIDE_WORLD};
+use crate::{
+    MiniGameProxy, TransferData, CANYON_GLIDE_WORLD, CAVERN_GLIDE_WORLD, TEMPLE_GLIDE_WORLD,
+};
 
 mod canyon;
 mod cavern;
+mod temple;
 
 pub struct Boost {
     area: AxisAlignedBB,
@@ -72,14 +75,16 @@ pub enum BoostParticleType {
 pub enum Maps {
     Canyon,
     Cavern,
+    Temple,
 }
 
 impl Distribution<Maps> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Maps {
-        match rng.gen_range(0..=1) {
+        match rng.gen_range(0..=2) {
             0 => Maps::Canyon,
             1 => Maps::Cavern,
-            _ => panic!("Invalid random number huh?"),
+            2 => Maps::Temple,
+            _ => panic!("Invalid random number huh? (https://www.youtube.com/watch?v=4kEO7VjKRB8)"),
         }
     }
 }
@@ -89,36 +94,42 @@ impl Maps {
         match self {
             Maps::Canyon => &CANYON_GLIDE_WORLD,
             Maps::Cavern => &CAVERN_GLIDE_WORLD,
+            Maps::Temple => &TEMPLE_GLIDE_WORLD,
         }
     }
     pub fn get_checkpoints(&self) -> &'static [Checkpoint] {
         match self {
             Maps::Canyon => &canyon::CHECKPOINTS,
             Maps::Cavern => &cavern::CHECKPOINTS,
+            Maps::Temple => &temple::CHECKPOINTS,
         }
     }
     pub fn get_boosts(&self) -> &'static [Boost] {
         match self {
             Maps::Canyon => &canyon::BOOSTS,
             Maps::Cavern => &cavern::BOOSTS,
+            Maps::Temple => &temple::BOOSTS,
         }
     }
     pub fn get_lofts(&self) -> &'static [Loft] {
         match self {
             Maps::Canyon => &canyon::LOFTS,
             Maps::Cavern => &cavern::LOFTS,
+            Maps::Temple => &temple::LOFTS,
         }
     }
     pub fn get_spawn_area(&self) -> &AxisAlignedBB {
         match self {
             Maps::Canyon => &canyon::SPAWN_AREA,
             Maps::Cavern => &cavern::SPAWN_AREA,
+            Maps::Temple => &temple::SPAWN_AREA,
         }
     }
     pub fn get_spawn_position(&self) -> &Vec3 {
         match self {
             Maps::Canyon => &canyon::SPAWN_POSITION,
             Maps::Cavern => &cavern::SPAWN_POSITION,
+            Maps::Temple => &temple::SPAWN_POSITION,
         }
     }
 }
