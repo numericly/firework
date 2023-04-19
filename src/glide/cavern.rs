@@ -348,9 +348,8 @@ pub const CHECKPOINTS: [Checkpoint; 9] = [
         spawn_rotation: Rotation::new(-180., 33.),
     },
     Checkpoint {
-        // 152 63 157.5, 164 75 157.5
         plane: firework::AxisAlignedPlane::Z {
-            min: Vec3::new(152., 63., 157.5),
+            min: Vec3::new(152., 60., 157.5),
             max: Vec3::new(164., 75., 157.5),
         },
         spawn_position: Vec3::new(162., 69., 133.),
