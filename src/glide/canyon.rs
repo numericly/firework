@@ -144,21 +144,71 @@ pub const BOOSTS: [Boost; 8] = [
     },
 ];
 
-pub const LOFTS: [Loft; 1] = [Loft {
-    area: AxisAlignedBB {
-        max: BlockPos {
-            x: -38,
-            y: 106,
-            z: 315,
+pub const LOFTS: [Loft; 8] = [
+    Loft {
+        area: AxisAlignedBB {
+            min: BlockPos::new(107, 43, 590),
+            max: BlockPos::new(109, 48, 592),
         },
-        min: BlockPos {
-            x: -43,
-            y: 101,
-            z: 307,
-        },
+        speed: 0.15,
     },
-    speed: 4.,
-}];
+    Loft {
+        // 115 41 554, 120 49 559
+        area: AxisAlignedBB {
+            min: BlockPos::new(115, 41, 554),
+            max: BlockPos::new(120, 49, 559),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        // 6 -33 397, 10 -21 401
+        area: AxisAlignedBB {
+            min: BlockPos::new(6, -33, 397),
+            max: BlockPos::new(10, -21, 401),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        // -24 12 204, -21 18 207
+        area: AxisAlignedBB {
+            min: BlockPos::new(-24, 12, 204),
+            max: BlockPos::new(-21, 18, 207),
+        },
+        speed: 0.25,
+    },
+    Loft {
+        // -46 12 265, -42 22 269
+        area: AxisAlignedBB {
+            min: BlockPos::new(-46, 12, 265),
+            max: BlockPos::new(-42, 22, 269),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        // -123 12 259, -120 22 262
+        area: AxisAlignedBB {
+            min: BlockPos::new(-123, 12, 259),
+            max: BlockPos::new(-120, 22, 262),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        // -76 29 281, -74 42 283
+        area: AxisAlignedBB {
+            min: BlockPos::new(-76, 29, 281),
+            max: BlockPos::new(-74, 42, 283),
+        },
+        speed: 0.35,
+    },
+    Loft {
+        // 12 99 302, 15 109 305
+        area: AxisAlignedBB {
+            min: BlockPos::new(12, 99, 302),
+            max: BlockPos::new(15, 109, 305),
+        },
+        speed: 0.35,
+    },
+];
 
 pub const CHECKPOINTS: [Checkpoint; 9] = [
     Checkpoint {

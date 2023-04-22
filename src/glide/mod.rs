@@ -80,7 +80,7 @@ pub enum Maps {
 
 impl Distribution<Maps> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Maps {
-        match rng.gen_range(0..=2) {
+        match rng.gen_range(0..3) {
             0 => Maps::Canyon,
             1 => Maps::Cavern,
             2 => Maps::Temple,
@@ -348,13 +348,22 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
             if times_remaining == 0 {
                 self.boost_status.write().await.take();
             } else {
-                let new_vec = Vec3::new(velocity.x, velocity.y * 0.85 + speed, velocity.z);
+                const HORIZONTAL_SPEED_FACTOR: f64 = 0.03;
+
+                let horizontal_boost = Vec3::new(velocity.x, 0., velocity.z).normalize()
+                    * Vec3::scalar(HORIZONTAL_SPEED_FACTOR);
+
+                let new_vec = Vec3::new(
+                    velocity.x + horizontal_boost.x,
+                    velocity.y * 0.90 + speed,
+                    velocity.z + horizontal_boost.z,
+                );
 
                 client.set_velocity(new_vec.clone());
                 self.boost_status.write().await.replace(BoostStatus::Loft {
                     times_remaining: times_remaining - 1,
                     speed: speed * 0.85,
-                    velocity: new_vec.clone(),
+                    velocity: new_vec,
                 });
             }
         }
@@ -786,6 +795,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                             1.,
                             1.,
                         );
+                        // client.send_hurt(client.client_data.entity_id, 0.);
                         // client.set_health(health - 2.);
                     }
                 }

@@ -271,6 +271,24 @@ pub enum BlockFace {
     East,
 }
 
+#[derive(Debug, PartialEq, SerializeField, Clone)]
+#[protocol(typ = "firework_protocol_core::VarInt")]
+pub enum EntityAnimationType {
+    SwingMainArm,
+    TakeDamage,
+    LeaveBed,
+    SwingOffhand,
+    CriticalEffect,
+    MagicCriticalEffect,
+}
+
+#[derive(Debug, PartialEq, DeserializeField)]
+#[protocol(typ = "firework_protocol_core::VarInt")]
+pub enum ClientCommandAction {
+    PerformRespawn,
+    RequestStats,
+}
+
 #[derive(Debug, PartialEq, DeserializeField)]
 #[protocol(typ = "firework_protocol_core::VarInt")]
 pub enum ResourcePackLoadStatus {
@@ -293,13 +311,6 @@ pub enum ChatMode {
 pub enum MainHand {
     Left,
     Right,
-}
-
-#[derive(Debug, PartialEq, DeserializeField, Clone)]
-#[protocol(typ = "firework_protocol_core::VarInt")]
-pub enum Arm {
-    Main,
-    Off,
 }
 
 #[derive(Debug, PartialEq, DeserializeField)]
@@ -543,4 +554,47 @@ pub enum BossBarDivision {
     TenDivisions,
     TwelveDivisions,
     TwentyDivisions,
+}
+
+#[derive(Debug, PartialEq, SerializeField, DeserializeField)]
+#[protocol(typ = "firework_protocol_core::VarInt")]
+pub enum Hand {
+    MainHand,
+    OffHand,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum InteractAction {
+    Interact {
+        hand: Hand,
+    },
+    Attack,
+    InteractAt {
+        hand: Hand,
+        target_x: f32,
+        target_y: f32,
+        target_z: f32,
+    },
+}
+
+impl DeserializeField for InteractAction {
+    fn deserialize<R: Read>(mut reader: R) -> Result<Self, DeserializeError> {
+        let action = VarInt::deserialize(&mut reader)?.0;
+        match action {
+            0 => Ok(InteractAction::Interact {
+                hand: Hand::deserialize(&mut reader)?,
+            }),
+            1 => Ok(InteractAction::Attack),
+            2 => Ok(InteractAction::InteractAt {
+                hand: Hand::deserialize(&mut reader)?,
+                target_x: f32::deserialize(&mut reader)?,
+                target_y: f32::deserialize(&mut reader)?,
+                target_z: f32::deserialize(&mut reader)?,
+            }),
+            _ => Err(DeserializeError::InvalidVariantIndex(
+                action,
+                "InteractAction",
+            )),
+        }
+    }
 }

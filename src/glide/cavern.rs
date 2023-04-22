@@ -389,7 +389,7 @@ pub const CHECKPOINTS: [Checkpoint; 9] = [
         // when there's a solution for the previous checkpoint, this one is solved
         // 3 18 -28.5, 12 26 -28.5
         plane: firework::AxisAlignedPlane::Z {
-            min: Vec3::new(3., 18., -29.),
+            min: Vec3::new(-2., 14., -29.),
             max: Vec3::new(12., 44., -29.),
         },
         // thus, the spawn position can only be for one of them

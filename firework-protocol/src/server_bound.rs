@@ -59,9 +59,9 @@ macro_rules! define_server_bound_protocol {
 
 use crate::{
     data_types::{
-        Arm, BlockFace, ChatMode, DisplaySkinParts, InventoryOperationMode, MainHand,
-        PlayerAbilityFlags, PlayerActionStatus, PlayerCommandAction, RecipeBookType, SignatureData,
-        SlotUpdate,
+        BlockFace, ChatMode, ClientCommandAction, DisplaySkinParts, Hand, InteractAction,
+        InventoryOperationMode, MainHand, PlayerAbilityFlags, PlayerActionStatus,
+        PlayerCommandAction, RecipeBookType, SignatureData, SlotUpdate,
     },
     ConnectionState,
 };
@@ -118,6 +118,9 @@ define_server_bound_protocol! {
         public_key: Vec<u8>,
         key_signature: Vec<u8>
     },
+    ClientCommand, 0x07, Play => {
+        action: ClientCommandAction
+    },
     ClientInformation, 0x08, Play => {
         locale: String,
         view_distance: u8,
@@ -129,6 +132,11 @@ define_server_bound_protocol! {
     CommandSuggestionsRequest, 0x09, Play => {
         transaction_id: VarInt,
         command: String
+    },
+    Interact, 0x10, Play => {
+        entity_id: VarInt,
+        action: InteractAction,
+        sneaking: bool
     },
     ClickContainer, 0x0B, Play => {
         window_id: u8,
@@ -198,10 +206,10 @@ define_server_bound_protocol! {
         slot: u16
     },
     SwingArm, 0x2F, Play => {
-        arm: Arm
+        arm: Hand
     },
     UseItemOn, 0x31, Play => {
-        arm: Arm,
+        arm: Hand,
         location: Position,
         face: BlockFace,
         cursor_x: f32,
@@ -211,7 +219,7 @@ define_server_bound_protocol! {
         sequence: VarInt
     },
     UseItem, 0x32, Play => {
-        arm: Arm,
+        arm: Hand,
         sequence: VarInt
     }
 }

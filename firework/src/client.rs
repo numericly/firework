@@ -22,9 +22,9 @@ use firework_protocol::{
         UpdateEntityPosition, UpdateEntityPositionAndRotation, UpdateEntityRotation, VanillaSound,
     },
     data_types::{
-        AddPlayer, Arm, Attribute, BossBarAction, Particle, PlayerAbilityFlags, PlayerActionStatus,
-        PlayerCommandAction, PlayerInfoAction, PlayerPositionFlags, Slot, UpdateGameMode,
-        UpdateLatency, UpdateListed,
+        AddPlayer, Attribute, BossBarAction, Hand, Particle, PlayerAbilityFlags,
+        PlayerActionStatus, PlayerCommandAction, PlayerInfoAction, PlayerPositionFlags, Slot,
+        UpdateGameMode, UpdateLatency, UpdateListed,
     },
     read_specific_packet,
     server_bound::{
@@ -1269,13 +1269,13 @@ where
             ServerBoundPacket::UseItem(use_item) => {
                 let used_item_slot = {
                     match use_item.arm {
-                        Arm::Main => {
+                        Hand::MainHand => {
                             let player = self.player.read().await;
                             InventorySlot::Hotbar {
                                 slot: player.selected_slot as usize,
                             }
                         }
-                        Arm::Off => InventorySlot::Offhand,
+                        Hand::OffHand => InventorySlot::Offhand,
                     }
                 };
 

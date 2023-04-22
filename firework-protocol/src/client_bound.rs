@@ -50,8 +50,8 @@ use std::collections::HashMap;
 use nbt::Blob;
 
 use crate::data_types::{
-    Attribute, BitSet, BossBarAction, DeathLocation, Particle, PlayerAbilityFlags,
-    PlayerInfoAction, PlayerPositionFlags, Recipe, Slot, SuggestionMatch,
+    Attribute, BitSet, BossBarAction, DeathLocation, EntityAnimationType, Hand, Particle,
+    PlayerAbilityFlags, PlayerInfoAction, PlayerPositionFlags, Recipe, Slot, SuggestionMatch,
 };
 
 pub trait ClientBoundPacket {
@@ -100,6 +100,10 @@ define_client_bound_protocol! {
         yaw: i8,
         pitch: i8,
     },
+    EntityAnimation, 0x04, Play => {
+        entity_id: VarInt,
+        animation: EntityAnimationType
+    },
     BossBar, 0x0B, Play => {
         uuid: u128,
         action: BossBarAction
@@ -142,6 +146,10 @@ define_client_bound_protocol! {
     UnloadChunk, 0x1E, Play => {
         x: i32,
         z: i32
+    },
+    HurtAnimation, 0x21, Play => {
+        entity_id: VarInt,
+        yaw: f32
     },
     InitializeWorldBorder, 0x22, Play => {
         x: f64,
@@ -224,6 +232,9 @@ define_client_bound_protocol! {
         yaw: i8,
         pitch: i8,
         on_ground: bool
+    },
+    SwingArm, 0x2F, Play => {
+        hand: Hand
     },
     OpenScreen, 0x30, Play => {
         window_id: VarInt,
