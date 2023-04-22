@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use battle::BattleServerHandler;
 use firework::{ClientData, ConnectionError, Server, ServerManager, ServerOptions, ServerProxy};
 use firework_protocol::Protocol;
 use firework_world::{world, World};
@@ -10,6 +11,7 @@ use std::sync::Arc;
 use tokio::sync::{Mutex, RwLock};
 use tokio_util::sync::CancellationToken;
 
+mod battle;
 mod glide;
 mod lobby_server;
 mod queue;
@@ -19,6 +21,7 @@ lazy_static! {
     static ref CANYON_GLIDE_WORLD: World = world!("./firework-world/glide/canyon", true);
     static ref CAVERN_GLIDE_WORLD: World = world!("./firework-world/glide/cavern", true);
     static ref TEMPLE_GLIDE_WORLD: World = world!("./firework-world/glide/temple", true);
+    static ref CAVERN_BATTLE_WORLD: World = world!("./firework-world/glide/temple", true);
 }
 
 #[allow(dead_code)]
@@ -107,12 +110,16 @@ struct MiniGameProxy {
 
     lobby_server: Arc<Server<LobbyServerHandler, MiniGameProxy>>,
     pub glide_queue: Mutex<Queue<MiniGameProxy, GlideServerHandler, 8>>,
+    pub battle_queue: Mutex<Queue<MiniGameProxy, BattleServerHandler, 8>>,
+    pub tumble_queue: Mutex<Queue<MiniGameProxy, BattleServerHandler, 8>>,
 }
 
 #[derive(Debug, Clone)]
 enum TransferData {
     Lobby,
     Glide { game_id: u128 },
+    Battle { game_id: u128 },
+    Tumble { game_id: u128 },
 }
 
 #[derive(Debug, Clone, Default)]
@@ -155,6 +162,26 @@ impl ServerProxy for MiniGameProxy {
                 ColorCodes::Aqua.chat_formatting(),
                 ColorCodes::Reset.chat_formatting(),
             ))),
+            battle_queue: Mutex::new(Queue::new(format!(
+                "{}F{}i{}r{}e{}w{}ork Battle{}",
+                ColorCodes::DarkRed.chat_formatting(),
+                ColorCodes::LightRed.chat_formatting(),
+                ColorCodes::Gold.chat_formatting(),
+                ColorCodes::LightYellow.chat_formatting(),
+                ColorCodes::LightGreen.chat_formatting(),
+                ColorCodes::Aqua.chat_formatting(),
+                ColorCodes::Reset.chat_formatting(),
+            ))),
+            tumble_queue: Mutex::new(Queue::new(format!(
+                "{}F{}i{}r{}e{}w{}ork Tumble{}",
+                ColorCodes::DarkRed.chat_formatting(),
+                ColorCodes::LightRed.chat_formatting(),
+                ColorCodes::Gold.chat_formatting(),
+                ColorCodes::LightYellow.chat_formatting(),
+                ColorCodes::LightGreen.chat_formatting(),
+                ColorCodes::Aqua.chat_formatting(),
+                ColorCodes::Reset.chat_formatting(),
+            ))),
             connected_players: RwLock::new(0),
         }
     }
@@ -184,6 +211,36 @@ impl ServerProxy for MiniGameProxy {
             match transfer_data {
                 TransferData::Glide { game_id } => {
                     let server = self.glide_queue.lock().await.get_server(game_id).clone();
+                    let Some(server) = server else {
+                        continue;
+                    };
+                    match server
+                        .handle_connection(self.clone(), connection.clone(), client_data.clone())
+                        .await
+                    {
+                        Ok(_) => {}
+                        Err(_err) => {
+                            break;
+                        }
+                    }
+                }
+                TransferData::Battle { game_id } => {
+                    let server = self.battle_queue.lock().await.get_server(game_id).clone();
+                    let Some(server) = server else {
+                        continue;
+                    };
+                    match server
+                        .handle_connection(self.clone(), connection.clone(), client_data.clone())
+                        .await
+                    {
+                        Ok(_) => {}
+                        Err(_err) => {
+                            break;
+                        }
+                    }
+                }
+                TransferData::Tumble { game_id } => {
+                    let server = self.tumble_queue.lock().await.get_server(game_id).clone();
                     let Some(server) = server else {
                         continue;
                     };

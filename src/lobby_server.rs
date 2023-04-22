@@ -24,10 +24,11 @@ use tokio::sync::{broadcast::Receiver, Mutex};
 use crate::{queue::QueueMessage, MiniGameProxy, TransferData, LOBBY_WORLD};
 
 #[allow(dead_code)]
+#[derive(Debug)]
 enum MiniGame {
-    Glide,
-    Tumble,
     Battle,
+    Tumble,
+    Glide,
 }
 
 pub struct QueuedPlayer {
@@ -112,9 +113,9 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
             for _ in 0..queued.receiver.len() {
                 let msg = queued.receiver.recv().await.unwrap();
                 let game = match queued.mini_game {
-                    MiniGame::Glide => "Glide",
-                    MiniGame::Tumble => "Tumble",
                     MiniGame::Battle => "Battle",
+                    MiniGame::Tumble => "Tumble",
+                    MiniGame::Glide => "Glide",
                 };
                 match msg {
                     QueueMessage::NotEnoughPlayers => client.send_system_chat_message(
@@ -172,7 +173,11 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
                         );
                     }
                     QueueMessage::Started { game_id } => {
-                        client.transfer(TransferData::Glide { game_id });
+                        client.transfer(match queued.mini_game {
+                            MiniGame::Battle => TransferData::Battle { game_id },
+                            MiniGame::Tumble => TransferData::Tumble { game_id },
+                            MiniGame::Glide => TransferData::Glide { game_id },
+                        });
                     }
                 }
             }
@@ -326,9 +331,9 @@ impl LobbyPlayerHandler {
         let mut queued = self.queued.lock().await.take();
         if let Some(queued) = queued.as_mut() {
             match queued.mini_game {
+                MiniGame::Battle => self.proxy.battle_queue.lock().await.leave_queue(uuid).await,
+                MiniGame::Tumble => self.proxy.tumble_queue.lock().await.leave_queue(uuid).await,
                 MiniGame::Glide => self.proxy.glide_queue.lock().await.leave_queue(uuid).await,
-                MiniGame::Tumble => {}
-                MiniGame::Battle => {}
             }
         }
     }
@@ -412,6 +417,14 @@ impl GuiScreen<LobbyServerHandler, MiniGameProxy> for GameMenu {
                 queue(client, &client.proxy, MiniGame::Glide).await;
                 client.close_gui();
             }
+            4 => {
+                queue(client, &client.proxy, MiniGame::Battle).await;
+                client.close_gui();
+            }
+            6 => {
+                queue(client, &client.proxy, MiniGame::Tumble).await;
+                client.close_gui();
+            }
             _ => {}
         }
 
@@ -452,7 +465,7 @@ impl GameMenu {
                         display: Some(ItemNbtDisplay {
                             name: Some(r#"{"text":"Battle Minigame","italic":"false","color":"green"}"#.to_string()),
                             lore: Some(vec![
-                                r#"{"text":"Battle your friends in an arena, getting","italic":"false","color":"gray"}"#.to_string(),
+                                r#"{"text":"Glide your friends in an arena, getting","italic":"false","color":"gray"}"#.to_string(),
                                 r#"{"text":"items to help you in the fight.","italic":"false","color":"gray"}"#.to_string(),
                                 r#"{"text":""}"#.to_string(),
                                 r#"{"text":"Click to Connect","color":"green","italic":false}"#.to_string(),
@@ -537,9 +550,9 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
                             ArgumentType::String {
                                 string_type: StringTypes::SingleWord,
                                 suggestions: Some(vec![
-                                    "glide".to_string(),
-                                    "tumble".to_string(),
                                     "battle".to_string(),
+                                    "tumble".to_string(),
+                                    "glide".to_string(),
                                 ]),
                             },
                         )
@@ -558,9 +571,9 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
                                 ArgumentType::String {
                                     string_type: StringTypes::SingleWord,
                                     suggestions: Some(vec![
-                                        "glide".to_string(),
-                                        "tumble".to_string(),
                                         "battle".to_string(),
+                                        "tumble".to_string(),
+                                        "glide".to_string(),
                                     ]),
                                 },
                             )
@@ -570,7 +583,7 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
                                 },
                             )),
                         )
-                        .set_aliases(vec!["join", "p", "queue"]),
+                        .set_aliases(vec!["join", "p", "queue", "q"]),
                 )
                 .sub_command(
                     CommandNode::literal("leave_queue")
@@ -586,6 +599,7 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
     }
     async fn on_tick(&self, _server: &Server<Self, MiniGameProxy>, proxy: Arc<MiniGameProxy>) {
         proxy.glide_queue.lock().await.update(proxy.clone()).await;
+        proxy.battle_queue.lock().await.update(proxy.clone()).await;
     }
     async fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError> {
         let mut player = Player {
@@ -652,6 +666,15 @@ async fn play(
         return
     };
     match value.as_str() {
+        "battle" => {
+            let game_id = client
+                .proxy
+                .battle_queue
+                .lock()
+                .await
+                .create_server(client.proxy.clone());
+            client.transfer(TransferData::Battle { game_id })
+        }
         "glide" => {
             let game_id = client
                 .proxy
@@ -675,7 +698,7 @@ async fn play(
 async fn queue(
     client: &Client<LobbyServerHandler, MiniGameProxy>,
     proxy: &MiniGameProxy,
-    _game: MiniGame,
+    game: MiniGame,
 ) {
     client
         .update_inventory_slot(
@@ -720,12 +743,13 @@ async fn queue(
     //     })
     //     .await;
 
-    let receiver = proxy
-        .glide_queue
-        .lock()
-        .await
-        .queue(client.client_data.uuid.clone())
-        .await;
+    let uuid = client.client_data.uuid.clone();
+
+    let receiver = match game {
+        MiniGame::Battle => proxy.battle_queue.lock().await.queue(uuid).await,
+        MiniGame::Glide => proxy.glide_queue.lock().await.queue(uuid).await,
+        MiniGame::Tumble => proxy.tumble_queue.lock().await.queue(uuid).await,
+    };
 
     let receiver = match receiver {
         Ok(receiver) => receiver,
@@ -746,7 +770,7 @@ async fn queue(
     client.handler.leave_queue(client.client_data.uuid).await;
     client.handler.queued.lock().await.replace(QueuedPlayer {
         receiver,
-        mini_game: MiniGame::Glide,
+        mini_game: game,
     });
 }
 
@@ -776,6 +800,7 @@ async fn queue_command(
         return
     };
     match value.as_str() {
+        "battle" => queue(client, proxy, MiniGame::Battle).await,
         "glide" => queue(client, proxy, MiniGame::Glide).await,
         value => client.show_chat_message(
             json!(
