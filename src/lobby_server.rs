@@ -4,7 +4,7 @@ use async_trait::async_trait;
 
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
-    commands::{Argument, ArgumentType, CommandNode, StringTypes},
+    commands::{Argument, ArgumentType, Command, CommandNode, CommandTree, StringType},
     gui::{GUIInit, GuiScreen, WindowType},
     PlayerHandler, TICKS_PER_SECOND,
 };
@@ -534,7 +534,7 @@ impl GameMenu {
 }
 
 pub struct LobbyServerHandler {
-    commands: CommandNode<Self, MiniGameProxy>,
+    commands: CommandTree<Self, MiniGameProxy>,
 }
 
 #[async_trait]
@@ -542,56 +542,52 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
     type PlayerHandler = LobbyPlayerHandler;
     fn new() -> Self {
         Self {
-            commands: CommandNode::root()
-                .sub_command(
-                    CommandNode::literal("practice").sub_command(
-                        CommandNode::argument(
-                            "game",
-                            ArgumentType::String {
-                                string_type: StringTypes::SingleWord,
-                                suggestions: Some(vec![
-                                    "battle".to_string(),
-                                    "tumble".to_string(),
-                                    "glide".to_string(),
-                                ]),
-                            },
-                        )
-                        .executable(Box::new(
-                            move |args, client, server, proxy| {
-                                Box::pin(play(args, client, server, proxy))
-                            },
-                        )),
-                    ),
-                )
-                .sub_command(
-                    CommandNode::literal("play")
-                        .sub_command(
-                            CommandNode::argument(
+            commands: CommandTree::new()
+                .register_command(
+                    Command::new("practice", "practice a minigame in a private lobby")
+                        .set_aliases(vec!["solo"])
+                        .add_node(
+                            CommandNode::server_argument(
                                 "game",
                                 ArgumentType::String {
-                                    string_type: StringTypes::SingleWord,
-                                    suggestions: Some(vec![
-                                        "battle".to_string(),
-                                        "tumble".to_string(),
-                                        "glide".to_string(),
-                                    ]),
+                                    string_type: StringType::SingleWord,
                                 },
+                                vec![
+                                    "glide".to_string(),
+                                    "battle".to_string(),
+                                    "tumble".to_string(),
+                                ],
                             )
-                            .executable(Box::new(
+                            .with_execution(Box::new(
+                                move |args, client, server, proxy| {
+                                    Box::pin(play(args, client, server, proxy))
+                                },
+                            )),
+                        ),
+                )
+                .register_command(
+                    Command::new("queue", "play a minigame online")
+                        .set_aliases(vec!["play", "join"])
+                        .add_node(
+                            CommandNode::server_argument(
+                                "game",
+                                ArgumentType::String {
+                                    string_type: StringType::SingleWord,
+                                },
+                                vec![
+                                    "glide".to_string(),
+                                    "battle".to_string(),
+                                    "tumble".to_string(),
+                                ],
+                            )
+                            .with_execution(Box::new(
                                 move |args, client, server, proxy| {
                                     Box::pin(queue_command(args, client, server, proxy))
                                 },
                             )),
-                        )
-                        .set_aliases(vec!["join", "p", "queue", "q"]),
+                        ),
                 )
-                .sub_command(
-                    CommandNode::literal("leave_queue")
-                        .executable(Box::new(move |args, client, server, proxy| {
-                            Box::pin(leave_queue_command(args, client, server, proxy))
-                        }))
-                        .set_aliases(vec!["leave", "cancel"]),
-                ),
+                .complete(),
         }
     }
     fn get_world(&self) -> &'static World {
@@ -651,7 +647,7 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
         &self,
         _server: &Server<LobbyServerHandler, MiniGameProxy>,
         _proxy: &MiniGameProxy,
-    ) -> Result<&CommandNode<LobbyServerHandler, MiniGameProxy>, ConnectionError> {
+    ) -> Result<&CommandTree<LobbyServerHandler, MiniGameProxy>, ConnectionError> {
         Ok(&self.commands)
     }
 }
@@ -662,7 +658,7 @@ async fn play(
     _server: &Server<LobbyServerHandler, MiniGameProxy>,
     _proxy: &MiniGameProxy,
 ) {
-    let Argument::String { value } = args.get(1).expect("Arg not found") else {
+    let Argument::String { value } = args.get(0).expect("Arg not found") else {
         return
     };
     match value.as_str() {
@@ -796,7 +792,7 @@ async fn queue_command(
     _server: &Server<LobbyServerHandler, MiniGameProxy>,
     proxy: &MiniGameProxy,
 ) {
-    let Argument::String { value } = args.get(1).expect("Arg not found") else {
+    let Argument::String { value } = args.get(0).expect("Arg not found") else {
         return
     };
     match value.as_str() {

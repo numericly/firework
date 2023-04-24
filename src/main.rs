@@ -312,24 +312,22 @@ async fn main() {
     .await;
 }
 
-#[tokio::test]
-async fn test_parse() {
-    use firework::commands::CommandNode;
+// #[tokio::test]
+// async fn test_parse() {
+//     use firework::commands::*;
 
-    let command_tree: CommandNode<LobbyServerHandler, MiniGameProxy> = CommandNode::root()
-        .sub_command(
-            CommandNode::literal("test")
-                .set_aliases(vec!["t", "t1"])
-                .sub_command(
-                    CommandNode::literal("test2").sub_command(CommandNode::literal("test3")),
-                ),
-        );
+//     let command_tree: CommandTree<LobbyServerHandler, MiniGameProxy> = CommandTree::new()
+//         .register_command(
+//             Command::new("test")
+//                 .set_aliases(vec!["t", "t1"])
+//                 .add_node(CommandNode::literal("test2")),
+//         );
 
-    let mut args = Vec::new();
+//     let mut buf = Vec::new();
 
-    let node = command_tree.parse("t1 test2 test3", &mut args).await;
+//     command_tree.serialize(&mut buf).await;
 
-    println!("{:?}", node);
+//     println!("{:?}", buf);
 
-    panic!();
-}
+//     panic!();
+// }

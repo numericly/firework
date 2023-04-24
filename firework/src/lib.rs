@@ -2,7 +2,7 @@ use crate::client::{Client, ClientCommand, Player};
 use crate::entities::{EntityMetadata, Pose};
 use async_trait::async_trait;
 use client::{InventorySlot, PreviousPosition};
-use commands::CommandNode;
+use commands::{CommandNode, CommandTree};
 use dashmap::{DashMap, DashSet};
 use firework_authentication::{authenticate, AuthenticationError, Profile};
 use firework_protocol::data_types::{EntityAnimationType, Hand};
@@ -804,7 +804,7 @@ where
         &self,
         server: &Server<Self, Proxy>,
         proxy: &Proxy,
-    ) -> Result<&CommandNode<Self, Proxy>, ConnectionError>;
+    ) -> Result<&CommandTree<Self, Proxy>, ConnectionError>;
     fn get_world(&self) -> &'static World;
     async fn on_load(&self, server: &Server<Self, Proxy>, proxy: Arc<Proxy>) {}
     async fn on_tick(&self, server: &Server<Self, Proxy>, proxy: Arc<Proxy>) {}

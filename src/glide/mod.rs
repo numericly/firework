@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
-    commands::{Argument, CommandNode},
+    commands::{Argument, CommandNode, CommandTree},
     entities::{EntityMetadata, Pose},
     AxisAlignedBB, AxisAlignedPlane, ConnectionError, PlayerHandler, Rotation, Server,
     ServerHandler, Vec3, TICKS_PER_SECOND,
@@ -145,7 +145,7 @@ pub struct GlideServerHandler {
     pub map: Maps,
     pub created_at: Instant,
     game_state: Mutex<GameState>,
-    commands: CommandNode<Self, MiniGameProxy>,
+    commands: CommandTree<Self, MiniGameProxy>,
 }
 
 pub struct GlidePlayerHandler {
@@ -917,11 +917,7 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
             game_state: Mutex::new(GameState::Starting {
                 ticks_until_start: 120,
             }),
-            commands: CommandNode::root().sub_command(CommandNode::literal("lobby").executable(
-                Box::new(move |args, client, server, proxy| {
-                    Box::pin(return_to_lobby(args, client, server, proxy))
-                }),
-            )),
+            commands: CommandTree::new(),
         }
     }
     fn get_world(&self) -> &'static World {
@@ -1015,7 +1011,7 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
         &self,
         _server: &Server<GlideServerHandler, MiniGameProxy>,
         _proxy: &MiniGameProxy,
-    ) -> Result<&CommandNode<Self, MiniGameProxy>, ConnectionError> {
+    ) -> Result<&CommandTree<Self, MiniGameProxy>, ConnectionError> {
         Ok(&self.commands)
     }
 }

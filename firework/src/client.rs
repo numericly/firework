@@ -1182,22 +1182,23 @@ where
                 a => println!("PlayerAction: {:?}", a),
             },
             ServerBoundPacket::CommandSuggestionsRequest(packet) => {
+                println!("{:?}", packet);
                 let root = self
                     .server
                     .handler
                     .get_commands(&self.server, &self.proxy)
                     .await?;
 
-                let suggestions = root.suggestions(packet.command.as_str(), 0).await;
+                let mut args = Vec::new();
 
-                // dbg!(&suggestions);
+                let result = root.parse(&mut args, &packet.command[1..], 1).await;
 
-                if let Some(suggestions) = suggestions {
+                if let Some(suggestions) = result.suggestions {
                     self.send_packet(CommandSuggestionsResponse {
                         transaction_id: packet.transaction_id,
                         start: VarInt::from(suggestions.start as i32),
                         length: VarInt::from(suggestions.length as i32),
-                        suggestions: suggestions.suggestions,
+                        suggestions: suggestions.matches,
                     })
                     .await?;
                 }
@@ -1224,11 +1225,12 @@ where
                     .get_commands(&self.server, &self.proxy)
                     .await?;
 
-                let result = root.execute(command.as_str(), 0, &mut Vec::new()).await;
+                let mut args = Vec::new();
 
-                match result {
+                let res = root.parse(&mut args, &command, 0).await;
+
+                match res.executable {
                     Err(err) => {
-                        // dbg!(&err);
                         self.show_chat_message(format!(
                             r##"{{"text":"/{}","color":"#AAB0BC"}}"##,
                             command
@@ -1243,14 +1245,13 @@ where
                         .to_string(),
                     )
                     }
-                    Ok(Some((exec, args))) => exec(args, &self, &self.server, &self.proxy).await,
-                    _ => {}
+                    Ok(exec) => exec(args, &self, &self.server, &self.proxy).await,
                 }
-                // dbg!(result);
+                // // dbg!(result);
 
-                self.server
-                    .handle_chat_command(&self.proxy, self, command)
-                    .await?
+                // self.server
+                //     .handle_chat_command(&self.proxy, self, command)
+                //     .await?
             }
             ServerBoundPacket::PlayerCommand(PlayerCommand {
                 entity_id,

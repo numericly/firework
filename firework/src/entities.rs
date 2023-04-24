@@ -10,7 +10,7 @@ macro_rules! define_entity_metadata_types {
         ),*
     ) => {
         macro_rules! __map_type {
-            $({ $type } => {$id});*
+            $({ $type } => {$id as i32});*
         }
     };
 }
@@ -44,14 +44,16 @@ macro_rules! define_entity_metadata {
 }
 
 define_entity_metadata_types! {
-    EntityDataFlags => 0i32,
-    Pose => 20i32,
-    DisplaySkinParts => 0i32
+    EntityDataFlags => 0,
+    f32 => 3,
+    Pose => 20,
+    DisplaySkinParts => 0
 }
 
 define_entity_metadata! {
     EntityFlags, 0 => EntityDataFlags,
     EntityPose, 6 => Pose,
+    EntityHealth, 9 => f32,
     PlayerDisplayedSkinParts, 17 => DisplaySkinParts
 }
 

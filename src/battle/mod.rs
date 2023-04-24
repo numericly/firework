@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use dashmap::DashSet;
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
-    commands::{Argument, CommandNode},
+    commands::{Argument, CommandNode, CommandTree},
     entities::{EntityMetadata, Pose},
     ConnectionError, PlayerHandler, Rotation, Server, ServerHandler, Vec3, TICKS_PER_SECOND,
 };
@@ -75,7 +75,7 @@ pub struct BattleServerHandler {
     pub map: Maps,
     pub created_at: Instant,
     game_state: Mutex<GameState>,
-    commands: CommandNode<Self, MiniGameProxy>,
+    commands: CommandTree<Self, MiniGameProxy>,
 }
 
 pub struct BattlePlayerHandler {
@@ -497,11 +497,7 @@ impl ServerHandler<MiniGameProxy> for BattleServerHandler {
             game_state: Mutex::new(GameState::Starting {
                 ticks_until_start: 120,
             }),
-            commands: CommandNode::root().sub_command(CommandNode::literal("lobby").executable(
-                Box::new(move |args, client, server, proxy| {
-                    Box::pin(return_to_lobby(args, client, server, proxy))
-                }),
-            )),
+            commands: CommandTree::new(),
         }
     }
     fn get_world(&self) -> &'static World {
@@ -617,7 +613,7 @@ impl ServerHandler<MiniGameProxy> for BattleServerHandler {
         &self,
         _server: &Server<BattleServerHandler, MiniGameProxy>,
         _proxy: &MiniGameProxy,
-    ) -> Result<&CommandNode<Self, MiniGameProxy>, ConnectionError> {
+    ) -> Result<&CommandTree<Self, MiniGameProxy>, ConnectionError> {
         Ok(&self.commands)
     }
 }
