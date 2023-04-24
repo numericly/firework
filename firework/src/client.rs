@@ -12,19 +12,20 @@ use firework_data::tags::{REGISTRY, TAGS};
 use firework_protocol::{
     client_bound::{
         BossBar, ChangeDifficulty, ClientBoundKeepAlive, ClientBoundPacket, CloseContainer,
-        CommandSuggestionsResponse, Commands, CustomSound, IdMapHolder, LoginPlay, OpenScreen,
-        ParticlePacket, PlayDisconnect, PlayerAbilities, PlayerInfo, PluginMessage, RemoveEntities,
-        RemoveInfoPlayer, Respawn, SerializePacket, SetCenterChunk, SetContainerContent,
-        SetContainerSlot, SetDefaultSpawn, SetEntityMetadata, SetEntityVelocity, SetHealth,
-        SetHeldItem, SetRecipes, SetSubtitleText, SetTags, SetTitleAnimationTimes, SetTitleText,
-        SoundEffect, SoundSource, SpawnPlayer, SynchronizePlayerPosition, SystemChatMessage,
-        TeleportEntity, UnloadChunk, UpdateAttributes, UpdateEntityHeadRotation,
-        UpdateEntityPosition, UpdateEntityPositionAndRotation, UpdateEntityRotation, VanillaSound,
+        CommandSuggestionsResponse, Commands, CustomSound, EntityAnimation, EntityEvent,
+        HurtAnimation, IdMapHolder, LoginPlay, OpenScreen, ParticlePacket, PlayDisconnect,
+        PlayerAbilities, PlayerInfo, PluginMessage, RemoveEntities, RemoveInfoPlayer, Respawn,
+        SerializePacket, SetCenterChunk, SetContainerContent, SetContainerSlot, SetDefaultSpawn,
+        SetEntityMetadata, SetEntityVelocity, SetHealth, SetHeldItem, SetRecipes, SetSubtitleText,
+        SetTags, SetTitleAnimationTimes, SetTitleText, SoundEffect, SoundSource, SpawnPlayer,
+        SynchronizePlayerPosition, SystemChatMessage, TeleportEntity, UnloadChunk,
+        UpdateAttributes, UpdateEntityHeadRotation, UpdateEntityPosition,
+        UpdateEntityPositionAndRotation, UpdateEntityRotation, VanillaSound,
     },
     data_types::{
-        AddPlayer, Attribute, BossBarAction, Hand, Particle, PlayerAbilityFlags,
-        PlayerActionStatus, PlayerCommandAction, PlayerInfoAction, PlayerPositionFlags, Slot,
-        UpdateGameMode, UpdateLatency, UpdateListed,
+        AddPlayer, Attribute, BossBarAction, EntityAnimationType, EntityEventStatus, Hand,
+        Particle, PlayerAbilityFlags, PlayerActionStatus, PlayerCommandAction, PlayerInfoAction,
+        PlayerPositionFlags, Slot, UpdateGameMode, UpdateLatency, UpdateListed,
     },
     read_specific_packet,
     server_bound::{
@@ -85,6 +86,10 @@ where
         position: Vec3,
         rotation: Rotation,
     },
+    KillPlayer {
+        entity_id: i32,
+        uuid: u128,
+    },
     SetHealth {
         health: f32,
     },
@@ -129,6 +134,18 @@ where
     UpdateAttributes {
         attributes: Vec<Attribute>,
     },
+    SendHurtAnimation {
+        entity_id: i32,
+        yaw: f32,
+    },
+    SendEntityAnimation {
+        entity_id: i32,
+        animation: EntityAnimationType,
+    },
+    SendEntityEvent {
+        entity_id: i32,
+        status: EntityEventStatus,
+    },
 }
 
 #[derive(Debug, Clone, Default)]
@@ -165,14 +182,20 @@ pub struct Player {
     pub rotation: Rotation,
     pub sneaking: bool,
     pub sprinting: bool,
+    pub first_sprinting_hit: bool,
+    pub fall_distance: f64,
 
     pub elytra_flying: bool,
 
     pub flying: bool,
     pub flying_allowed: bool,
     pub inventory: Inventory,
+
     pub health: f32,
     pub max_health: f32,
+    pub invulnerable_time: u32,  // ticks the player is invulnerable for
+    pub last_damage_amount: f32, // see https://minecraft.fandom.com/wiki/Damage#Immunity
+    pub attack_strength_ticker: u32, // ticks since last swing or block break or slot swap or whatever
 }
 
 impl Player {
@@ -742,7 +765,7 @@ where
                 if let Some(position) = &position {
                     let unsynced_entities = self.unsynced_entities.read().await;
                     if let Some(old_pos) = unsynced_entities.get(&entity_id).clone() {
-                        dbg!(old_pos, position, entity_id);
+                        // dbg!(old_pos, position, entity_id);
                         let (yaw, pitch) = previous_rotation.serialize();
                         self.send_packet(TeleportEntity {
                             entity_id: VarInt(entity_id),
@@ -1093,6 +1116,50 @@ where
                 })
                 .await?;
             }
+            ClientCommand::SendHurtAnimation { entity_id, yaw } => {
+                self.send_packet(HurtAnimation {
+                    entity_id: VarInt(entity_id),
+                    yaw,
+                })
+                .await?;
+            }
+            ClientCommand::SendEntityAnimation {
+                entity_id,
+                animation,
+            } => {
+                self.send_packet(EntityAnimation {
+                    entity_id: VarInt(entity_id),
+                    animation,
+                })
+                .await?;
+            }
+            ClientCommand::SendEntityEvent { entity_id, status } => {
+                self.send_packet(EntityEvent {
+                    entity_id,
+                    event_id: status,
+                })
+                .await?;
+            }
+            ClientCommand::KillPlayer {
+                entity_id,
+                uuid: u128,
+            } => {
+                self.send_packet(EntityEvent {
+                    entity_id,
+                    event_id: EntityEventStatus::SpawnDeathSmokeParticles,
+                })
+                .await?;
+                self.send_packet(EntityEvent {
+                    entity_id,
+                    event_id: EntityEventStatus::PlayLivingEntityDeathSoundAndAnimation,
+                })
+                .await?;
+
+                // self.send_packet(RemoveEntities {
+                //     entity_ids: vec![VarInt(entity_id)],
+                // })
+                // .await?;
+            }
         }
         Ok(None)
     }
@@ -1265,6 +1332,17 @@ where
             ServerBoundPacket::SetHeldItemServerBound(set_held_item) => {
                 let mut player = self.player.write().await;
                 player.selected_slot = set_held_item.slot as u8;
+                player.attack_strength_ticker = 0;
+            }
+            ServerBoundPacket::Interact(interact) => {
+                self.server
+                    .handle_interact(&self.proxy, self, interact)
+                    .await?;
+            }
+            ServerBoundPacket::SwingArm(swing_arm) => {
+                self.server
+                    .handle_swing(&self.proxy, self, swing_arm.arm)
+                    .await?;
             }
             ServerBoundPacket::UseItem(use_item) => {
                 let used_item_slot = {
@@ -1541,6 +1619,10 @@ where
     }
     #[allow(unused_must_use)]
     pub fn set_health(&self, health: f32) {
+        assert!(
+            health > 0.0,
+            "Health must be greater than 0, don't actually kill the client"
+        );
         self.to_client.send(ClientCommand::SetHealth { health });
     }
     #[allow(unused_must_use)]
@@ -1611,6 +1693,28 @@ where
                 value: self.player.read().await.max_health as f64,
             }],
         });
+    }
+    #[allow(unused_must_use)]
+    pub fn send_hurt_animation(&self, entity_id: i32, yaw: f32) {
+        self.to_client
+            .send(ClientCommand::SendHurtAnimation { entity_id, yaw });
+    }
+    #[allow(unused_must_use)]
+    pub fn send_entity_animation(&self, entity_id: i32, animation: EntityAnimationType) {
+        self.to_client.send(ClientCommand::SendEntityAnimation {
+            entity_id,
+            animation,
+        });
+    }
+    #[allow(unused_must_use)]
+    pub fn send_entity_event(&self, entity_id: i32, status: EntityEventStatus) {
+        self.to_client
+            .send(ClientCommand::SendEntityEvent { entity_id, status });
+    }
+    #[allow(unused_must_use)]
+    pub fn kill_player(&self, entity_id: i32, uuid: u128) {
+        self.to_client
+            .send(ClientCommand::KillPlayer { entity_id, uuid });
     }
     #[allow(unused_must_use)]
     pub fn __move_entity(

@@ -5,8 +5,9 @@ use client::{InventorySlot, PreviousPosition};
 use commands::CommandNode;
 use dashmap::{DashMap, DashSet};
 use firework_authentication::{authenticate, AuthenticationError, Profile};
+use firework_protocol::data_types::{EntityAnimationType, Hand};
 use firework_protocol::server_bound::{
-    ClickContainer, ClientInformation, EncryptionResponse, Handshake, LoginStart, Ping,
+    ClickContainer, ClientInformation, EncryptionResponse, Handshake, Interact, LoginStart, Ping,
     ServerBoundPacket,
 };
 use firework_protocol::{
@@ -250,6 +251,9 @@ impl Vec3 {
         let length = if length > max { max } else { length };
 
         self.normalize() * Vec3::scalar(length)
+    }
+    pub fn yaw(&self) -> f64 {
+        self.z.atan2(self.x)
     }
 }
 
@@ -771,6 +775,20 @@ where
     ) -> Result<Option<bool>, ConnectionError> {
         Ok(Some(sprinting))
     }
+    async fn on_interact(
+        &self,
+        client: &Client<Handler, Proxy>,
+        interact: Interact,
+    ) -> Result<(), ConnectionError> {
+        Ok(())
+    }
+    async fn on_swing_hand(
+        &self,
+        client: &Client<Handler, Proxy>,
+        hand: Hand,
+    ) -> Result<(), ConnectionError> {
+        Ok(())
+    }
 }
 
 #[async_trait]
@@ -847,6 +865,10 @@ where
     pub async fn handle_tick(&self, proxy: Arc<Proxy>) {
         self.handler.on_tick(&self, proxy.clone()).await;
         for client in self.player_list.iter() {
+            if client.player.read().await.invulnerable_time > 0 {
+                client.player.write().await.invulnerable_time -= 1;
+            }
+            client.player.write().await.attack_strength_ticker += 1;
             client.handler.on_tick(&client).await;
         }
     }
@@ -1155,6 +1177,9 @@ where
                         / Duration::from_millis(50).as_secs_f64();
 
                     let delta = position.clone() - previous_position.position.clone();
+                    if delta.y < 0. {
+                        player.fall_distance -= delta.y;
+                    }
                     player.velocity = delta * Vec3::scalar(multiplier);
                 }
                 player.previous_position = Some(PreviousPosition {
@@ -1189,6 +1214,10 @@ where
         };
 
         let on_ground = client.handler.on_on_ground(client, on_ground).await?;
+
+        if on_ground {
+            client.player.write().await.fall_distance = 0.;
+        }
 
         self.broadcast_entity_move(client, position, previous_pos, rot, previous_rot, on_ground)
             .await;
@@ -1237,9 +1266,43 @@ where
         if let Some(sprinting) = client.handler.on_sprint(client, sprinting).await? {
             let mut player = client.player.write().await;
             player.sprinting = sprinting;
+            player.first_sprinting_hit = sprinting;
             let metadata = vec![EntityMetadata::EntityFlags(player.entity_flags())];
             self.broadcast_entity_metadata_update(client, metadata, false);
         }
+        Ok(())
+    }
+    #[allow(unused_must_use)]
+    pub async fn handle_interact(
+        &self,
+        _proxy: &Proxy,
+        client: &Client<Handler, Proxy>,
+        interact: Interact,
+    ) -> Result<(), ConnectionError> {
+        client.handler.on_interact(client, interact).await?;
+        Ok(())
+    }
+    #[allow(unused_must_use)]
+    pub async fn handle_swing(
+        &self,
+        _proxy: &Proxy,
+        client: &Client<Handler, Proxy>,
+        hand: Hand,
+    ) -> Result<(), ConnectionError> {
+        client.player.write().await.attack_strength_ticker = 0;
+        for other_client in self.player_list.iter() {
+            if other_client.client_data.uuid == client.client_data.uuid {
+                continue;
+            }
+            other_client.send_entity_animation(
+                client.client_data.entity_id,
+                match hand {
+                    Hand::MainHand => EntityAnimationType::SwingMainArm,
+                    Hand::OffHand => EntityAnimationType::SwingOffhand,
+                },
+            );
+        }
+        client.handler.on_swing_hand(client, hand).await?;
         Ok(())
     }
     #[allow(unused_must_use)]

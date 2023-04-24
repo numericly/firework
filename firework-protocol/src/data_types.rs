@@ -1,3 +1,4 @@
+use byteorder::WriteBytesExt;
 use firework_authentication::ProfileProperty;
 use firework_protocol_core::{
     DeserializeError, DeserializeField, Position, SerializeField, VarInt,
@@ -561,6 +562,56 @@ pub enum BossBarDivision {
 pub enum Hand {
     MainHand,
     OffHand,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum EntityEventStatus {
+    SpawnTippedArrowParticleEffect,                 // 0
+    ResetMinecartSpawnerDelay,                      // 1
+    UseRabbitRotatedJumpingAnimation,               // 1
+    DisplayIronCrackParticlesAtEggLocation,         // 3
+    PlayLivingEntityDeathSoundAndAnimation,         // 3
+    DisplaySnowballPoofParticlesAtSnowballLocation, // 3
+    StartEvokerAttackAnimationAndSound,             // 4
+    StartHoglinAttackAnimationAndSound,             // 4
+    StartIronGolemAttackAnimationAndSound,          // 4
+    StartRavageAttackAnimation,                     // 4
+    StartWardenAttackAnimationAndSound,             // 4
+    StartZoglinAttackAnimationAndSound,             // 4
+    AbstractHorseSpawnSmokeParticles,               // 6
+    TameableAnimalSpawnSmokeParticles,              // 6
+    AbstractHorseSpawnHeartParticles,               // 7
+    TameableAnimalSpawnHeartParticles,              // 7
+    StartWolfShakingAnimation,                      // 8
+    MarkPlayerItemAsUsed,                           // 9
+    IgniteMinecartTNTWithoutSound,                  // 10
+    StartSheepGrassEatingAnimation,                 // 10
+    StartIronGolemOfferFlowerAnimation,             // 11
+    SpawnVillagerHeartParticles,                    // 12
+    SpawnVillagerAngryParticles,                    // 13
+    SpawnVillagerHappyParticles,                    // 14
+    SpawnWitchMagicParticles,                       // 15
+    PlayZombieVillagerCureSound, // 16 (why is this a thing, why not just play the sound)
+    TriggerFireworkExplosion,    // 17
+    SpawnAnimalLoveParticles,    // 18
+    SpawnAllayHeartParticles,    // 18
+    ResetSquidRotation,          // 19
+    SpawnExplosionParticles,     // 20 (used with silverfish and mob spawners)
+    PlayGuardianAttackSound,     // 21
+    // TODO not doing the rest (╯°□°）╯︵ ┻━┻
+    SpawnDeathSmokeParticles, // 60
+}
+
+impl SerializeField for EntityEventStatus {
+    fn serialize<W: Write>(&self, mut writer: W) {
+        let u8 = match self {
+            EntityEventStatus::SpawnDeathSmokeParticles => 60u8,
+            Self::PlayLivingEntityDeathSoundAndAnimation => 3u8,
+            _ => todo!(),
+        };
+        dbg!(u8);
+        writer.write_u8(u8).unwrap();
+    }
 }
 
 #[derive(Debug, PartialEq)]

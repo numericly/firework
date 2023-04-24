@@ -50,8 +50,9 @@ use std::collections::HashMap;
 use nbt::Blob;
 
 use crate::data_types::{
-    Attribute, BitSet, BossBarAction, DeathLocation, EntityAnimationType, Hand, Particle,
-    PlayerAbilityFlags, PlayerInfoAction, PlayerPositionFlags, Recipe, Slot, SuggestionMatch,
+    Attribute, BitSet, BossBarAction, DeathLocation, EntityAnimationType, EntityEventStatus, Hand,
+    Particle, PlayerAbilityFlags, PlayerInfoAction, PlayerPositionFlags, Recipe, Slot,
+    SuggestionMatch,
 };
 
 pub trait ClientBoundPacket {
@@ -142,6 +143,10 @@ define_client_bound_protocol! {
     },
     PlayDisconnect, 0x1A, Play => {
         reason: String
+    },
+    EntityEvent, 0x1C, Play => {
+        entity_id: i32,
+        event_id: EntityEventStatus
     },
     UnloadChunk, 0x1E, Play => {
         x: i32,
