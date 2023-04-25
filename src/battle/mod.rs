@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use dashmap::DashSet;
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
-    commands::{Argument, CommandNode, CommandTree},
+    commands::{Argument, Command, CommandNode, CommandTree},
     entities::{EntityMetadata, Pose},
     ConnectionError, PlayerHandler, Rotation, Server, ServerHandler, Vec3, TICKS_PER_SECOND,
 };
@@ -497,7 +497,15 @@ impl ServerHandler<MiniGameProxy> for BattleServerHandler {
             game_state: Mutex::new(GameState::Starting {
                 ticks_until_start: 120,
             }),
-            commands: CommandTree::new(),
+            commands: CommandTree::new()
+                .register_command(
+                    Command::new("lobby", "return to the main lobby")
+                        .set_aliases(vec!["hub", "l"])
+                        .with_execution(Box::new(move |args, client, server, proxy| {
+                            Box::pin(return_to_lobby(args, client, server, proxy))
+                        })),
+                )
+                .build_help_command(),
         }
     }
     fn get_world(&self) -> &'static World {

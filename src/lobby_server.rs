@@ -544,30 +544,28 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
         Self {
             commands: CommandTree::new()
                 .register_command(
-                    Command::new("practice", "practice a minigame in a private lobby")
-                        .set_aliases(vec!["solo"])
-                        .add_node(
-                            CommandNode::server_argument(
-                                "game",
-                                ArgumentType::String {
-                                    string_type: StringType::SingleWord,
-                                },
-                                vec![
-                                    "glide".to_string(),
-                                    "battle".to_string(),
-                                    "tumble".to_string(),
-                                ],
-                            )
-                            .with_execution(Box::new(
-                                move |args, client, server, proxy| {
-                                    Box::pin(play(args, client, server, proxy))
-                                },
-                            )),
-                        ),
+                    Command::new("practice", "practice a minigame in a private lobby").add_node(
+                        CommandNode::server_argument(
+                            "game",
+                            ArgumentType::String {
+                                string_type: StringType::SingleWord,
+                            },
+                            vec![
+                                "glide".to_string(),
+                                "battle".to_string(),
+                                "tumble".to_string(),
+                            ],
+                        )
+                        .with_execution(Box::new(
+                            move |args, client, server, proxy| {
+                                Box::pin(play(args, client, server, proxy))
+                            },
+                        )),
+                    ),
                 )
                 .register_command(
-                    Command::new("queue", "play a minigame online")
-                        .set_aliases(vec!["play", "join"])
+                    Command::new("play", "play a minigame online")
+                        .set_aliases(vec!["join"])
                         .add_node(
                             CommandNode::server_argument(
                                 "game",
@@ -587,7 +585,7 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
                             )),
                         ),
                 )
-                .complete(),
+                .build_help_command(),
         }
     }
     fn get_world(&self) -> &'static World {

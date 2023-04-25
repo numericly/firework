@@ -170,14 +170,18 @@ where
         self.commands.push(command);
         self
     }
-    pub fn complete(self) -> Self {
+    pub fn build_help_command(self) -> Self {
+        let mut suggestions: Vec<_> = self.commands.iter().map(|c| c.name.to_string()).collect();
+
+        suggestions.push("help".to_string());
+
         let help_command = Command::new("help", "list commands and their usages").add_node(
             CommandNode::server_argument(
                 "command",
                 ArgumentType::String {
                     string_type: StringType::SingleWord,
                 },
-                self.commands.iter().map(|c| c.name.to_string()).collect(),
+                suggestions,
             )
             .with_execution(Box::new(move |args, client, server, proxy| {
                 Box::pin(help(args, client, server, proxy))
@@ -193,14 +197,12 @@ where
             Proxy: ServerProxy + Send + Sync + 'static,
             Handler: ServerHandler<Proxy> + Send + Sync + 'static,
         {
-            let mut extra = Value::Array(Vec::new());
+            let root = server.handler.get_commands(server, proxy).await.unwrap();
+
             if let Some(arg) = args.get(0) {
                 if let Argument::String { value } = arg {
-                    println!("help for {}", value);
-
-                    let root = server.handler.get_commands(server, proxy).await.unwrap();
-
                     let command = root.commands.iter().find(|c| c.name == *value).unwrap();
+                    let mut extra = Value::Array(Vec::new());
 
                     extra.as_array_mut().unwrap().extend(vec![
                         json!({
@@ -231,15 +233,56 @@ where
                         "color": "gray"
                     }));
 
-                    // let formatted = ;
-
-                    println!("command: {:?} aliases {:?}", command.name, command.aliases);
+                    client.send_system_chat_message(
+                        json!({
+                            "text": "Help for: ",
+                            "color": "green",
+                            "extra": extra
+                        })
+                        .to_string(),
+                        false,
+                    );
+                    return;
                 }
             }
+
+            let mut extra = Value::Array(Vec::new());
+
+            for command in &root.commands {
+                extra.as_array_mut().unwrap().extend(vec![
+                    json!({
+                        "text": "\n - ",
+                        "color": "white"
+                    }),
+                    json!({
+                        "text": command.name,
+                        "color": "yellow"
+                    }),
+                ]);
+
+                if let Some(aliases) = command.aliases.as_ref() {
+                    let aliases = aliases
+                        .iter()
+                        .map(|a| a.name.to_string())
+                        .collect::<Vec<_>>()
+                        .join(", ");
+
+                    extra.as_array_mut().unwrap().push(json!({
+                        "text": format!(", aliases [{}]", aliases),
+                        "color": "dark_gray"
+                    }));
+                }
+
+                extra.as_array_mut().unwrap().push(json!({
+                    "text": format!(", {}", command.description),
+                    "color": "gray"
+                }));
+            }
+
             client.send_system_chat_message(
                 json!({
-                    "text": "Commands\n",
-                    "color": "white",
+                    "text": "List of commands:",
+                    "color": "green",
                     "extra": extra
                 })
                 .to_string(),

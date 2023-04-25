@@ -1182,7 +1182,6 @@ where
                 a => println!("PlayerAction: {:?}", a),
             },
             ServerBoundPacket::CommandSuggestionsRequest(packet) => {
-                println!("{:?}", packet);
                 let root = self
                     .server
                     .handler
