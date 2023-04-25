@@ -1,5 +1,7 @@
+use crate::{
+    MiniGameProxy, TransferData, CAVERN_BATTLE_WORLD, COVE_BATTLE_WORLD, CRUCIBLE_BATTLE_WORLD,
+};
 use async_trait::async_trait;
-
 use firework::authentication::Profile;
 use firework::data::items::{DiamondSword, EndRod, Item};
 use firework::protocol::core::VarInt;
@@ -25,8 +27,6 @@ use std::{
 };
 use tokio::sync::Mutex;
 
-use crate::{MiniGameProxy, TransferData, CAVERN_BATTLE_WORLD};
-
 mod cavern;
 
 pub struct SpawnPoint {
@@ -34,13 +34,17 @@ pub struct SpawnPoint {
     rotation: Rotation,
 }
 pub enum Maps {
+    Cove,
     Cavern,
+    Crucible,
 }
 
 impl Distribution<Maps> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Maps {
-        match rng.gen_range(0..1) {
-            0 => Maps::Cavern,
+        match rng.gen_range(0..=2) {
+            0 => Maps::Cove,
+            1 => Maps::Cavern,
+            2 => Maps::Crucible,
             _ => panic!("Invalid random number huh? (https://www.youtube.com/watch?v=4kEO7VjKRB8)"),
         }
     }
@@ -49,12 +53,16 @@ impl Distribution<Maps> for Standard {
 impl Maps {
     pub fn get_world(&self) -> &'static World {
         match self {
+            Maps::Cove => &COVE_BATTLE_WORLD,
             Maps::Cavern => &CAVERN_BATTLE_WORLD,
+            Maps::Crucible => &CRUCIBLE_BATTLE_WORLD,
         }
     }
     pub fn get_spawn_point(&self) -> &SpawnPoint {
         match self {
+            Maps::Cove => &cavern::SPAWN_POINTS[0],
             Maps::Cavern => &cavern::SPAWN_POINTS[0],
+            Maps::Crucible => &cavern::SPAWN_POINTS[0],
         }
     }
 }
@@ -77,7 +85,7 @@ pub struct BattleServerHandler {
 }
 
 pub struct BattlePlayerHandler {
-    server: Arc<Server<BattleServerHandler, MiniGameProxy>>,
+    _server: Arc<Server<BattleServerHandler, MiniGameProxy>>,
     _proxy: Arc<MiniGameProxy>,
     start_time: Mutex<Option<Instant>>,
     ticks_since_start: Mutex<u32>,
@@ -100,7 +108,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
     ) -> Self {
         Self {
             ticks_since_start: Mutex::new(0),
-            server,
+            _server: server,
             _proxy: proxy,
             recent_packets: Mutex::new(Vec::new()),
             start_time: Mutex::new(None),

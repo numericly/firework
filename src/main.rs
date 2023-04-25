@@ -21,7 +21,9 @@ lazy_static! {
     static ref CANYON_GLIDE_WORLD: World = world!("./firework-world/glide/canyon", true);
     static ref CAVERN_GLIDE_WORLD: World = world!("./firework-world/glide/cavern", true);
     static ref TEMPLE_GLIDE_WORLD: World = world!("./firework-world/glide/temple", true);
-    static ref CAVERN_BATTLE_WORLD: World = world!("./firework-world/glide/temple", true);
+    static ref COVE_BATTLE_WORLD: World = world!("./firework-world/battle/cove", true);
+    static ref CAVERN_BATTLE_WORLD: World = world!("./firework-world/battle/cavern", true);
+    static ref CRUCIBLE_BATTLE_WORLD: World = world!("./firework-world/battle/crucible", true);
 }
 
 #[allow(dead_code)]
@@ -263,34 +265,36 @@ impl ServerProxy for MiniGameProxy {
         *self.connected_players.write().await -= 1;
     }
     async fn motd(&self) -> Result<String, ConnectionError> {
+        let line1 = format!(
+            "                {}F{}i{}r{}e{}w{}ork {}Network {}[1.19.4]{}",
+            ColorCodes::DarkRed.motd_formatting(),
+            ColorCodes::LightRed.motd_formatting(),
+            ColorCodes::Gold.motd_formatting(),
+            ColorCodes::LightYellow.motd_formatting(),
+            ColorCodes::LightGreen.motd_formatting(),
+            ColorCodes::Aqua.motd_formatting(),
+            ColorCodes::White.motd_formatting(),
+            ColorCodes::LightGray.motd_formatting(),
+            ColorCodes::Reset.motd_formatting(),
+        );
+        let line2 = format!(
+            "              {}{}GLIDE {}|{}{} TUMBLE {}|{}{} BATTLE",
+            ColorCodes::LightBlue.motd_formatting(),
+            ColorCodes::Bold.motd_formatting(),
+            ColorCodes::DarkGray.motd_formatting(),
+            ColorCodes::LightGray.motd_formatting(),
+            ColorCodes::Bold.motd_formatting(),
+            ColorCodes::DarkGray.motd_formatting(),
+            ColorCodes::LightGray.motd_formatting(),
+            ColorCodes::Bold.motd_formatting(),
+        );
         let motd = format!(
             "{{\"favicon\": \"{}\", \"previewsChat\":{},\"enforcesSecureChat\":{},\"description\":{{\"text\":\"{}\n{}\"}},\"players\":{{\"max\":{},\"online\":{}}},\"version\":{{\"name\":\"{}\",\"protocol\":{}}}}}",
             include_str!("../server_image_base64.txt"),
             false,
             false,
-            format!(
-                "                {}F{}i{}r{}e{}w{}ork {}Network {}[1.19.4]{}",
-                ColorCodes::DarkRed.motd_formatting(),
-                ColorCodes::LightRed.motd_formatting(),
-                ColorCodes::Gold.motd_formatting(),
-                ColorCodes::LightYellow.motd_formatting(),
-                ColorCodes::LightGreen.motd_formatting(),
-                ColorCodes::Aqua.motd_formatting(),
-                ColorCodes::White.motd_formatting(),
-                ColorCodes::LightGray.motd_formatting(),
-                ColorCodes::Reset.motd_formatting(),
-            ),
-            format!(
-                "              {}{}GLIDE {}|{}{} TUMBLE {}|{}{} BATTLE",
-                ColorCodes::LightBlue.motd_formatting(),
-                ColorCodes::Bold.motd_formatting(),
-                ColorCodes::DarkGray.motd_formatting(),
-                ColorCodes::LightGray.motd_formatting(),
-                ColorCodes::Bold.motd_formatting(),
-                ColorCodes::DarkGray.motd_formatting(),
-                ColorCodes::LightGray.motd_formatting(),
-                ColorCodes::Bold.motd_formatting(),
-            ),
+            line1,
+            line2,
             100,
             self.connected_players.read().await,
             "1.19.4",

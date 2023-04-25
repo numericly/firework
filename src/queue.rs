@@ -69,7 +69,7 @@ where
     }
     pub async fn update(&mut self, proxy: Arc<Proxy>) {
         if self.queue.len() < 2 {
-            if self.queue.len() == 0 {
+            if self.queue.is_empty() {
                 self.state = GameState::NoPlayers;
                 return;
             }
@@ -113,7 +113,7 @@ where
         } else if percentage < 0.75 {
             time_to_start = 6 * TICKS_PER_SECOND;
         } else {
-            time_to_start = 0 * TICKS_PER_SECOND;
+            time_to_start = 0;
         }
 
         if elapsed >= time_to_start {
@@ -161,7 +161,7 @@ where
             run_server.run(proxy, run_cancel).await;
         });
 
-        self.servers.insert(game_id, (server.clone(), cancel));
+        self.servers.insert(game_id, (server, cancel));
 
         game_id
     }

@@ -388,7 +388,7 @@ impl GuiScreen<LobbyServerHandler, MiniGameProxy> for GameMenu {
                         .send_packet(SetContainerSlot {
                             window_id: window_id as i8,
                             state_id: VarInt(state_id.0 + 2),
-                            slot: slot as i16,
+                            slot,
                             item,
                         })
                         .await?;
@@ -510,14 +510,14 @@ impl GameMenu {
         slot: usize,
     ) -> Slot {
         if slot < WindowType::Generic9x1.len() {
-            self.items[slot as usize].clone()
+            self.items[slot].clone()
         } else if slot >= WindowType::Generic9x1.len() && slot < WindowType::Generic9x1.len() + 9 {
             client
                 .player
                 .read()
                 .await
                 .inventory
-                .get_main_slot_from_container(slot as usize - (WindowType::Generic9x1.len()))
+                .get_main_slot_from_container(slot - (WindowType::Generic9x1.len()))
                 .clone()
         } else if slot >= WindowType::Generic9x1.len() + 27
             && slot < WindowType::Generic9x1.len() + 27 + 9
@@ -527,7 +527,7 @@ impl GameMenu {
                 .read()
                 .await
                 .inventory
-                .get_hotbar_slot_from_container(slot as usize - (WindowType::Generic9x1.len() + 27))
+                .get_hotbar_slot_from_container(slot - (WindowType::Generic9x1.len() + 27))
                 .clone()
         } else {
             None
@@ -683,7 +683,7 @@ async fn play(
         value => client.show_chat_message(
             json!(
                 {
-                    "text": format!("error: game \"{}\" does not exist", value),
+                    "text": format!("error: game \"{value}\" does not exist"),
                 }
             )
             .to_string(),
@@ -739,7 +739,7 @@ async fn queue(
     //     })
     //     .await;
 
-    let uuid = client.client_data.uuid.clone();
+    let uuid = client.client_data.uuid;
 
     let receiver = match game {
         MiniGame::Battle => proxy.battle_queue.lock().await.queue(uuid).await,
@@ -801,7 +801,7 @@ async fn queue_command(
         value => client.show_chat_message(
             json!(
                 {
-                    "text": format!("error: game \"{}\" does not exist", value),
+                    "text": format!("error: game \"{value}\" does not exist", ),
                 }
             )
             .to_string(),
