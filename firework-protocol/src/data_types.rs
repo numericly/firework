@@ -623,9 +623,9 @@ pub enum InteractAction {
     },
     Attack,
     InteractAt {
-        hand: Hand,
         target_x: f32,
         target_y: f32,
+        hand: Hand,
         target_z: f32,
     },
 }
@@ -639,10 +639,10 @@ impl DeserializeField for InteractAction {
             }),
             1 => Ok(InteractAction::Attack),
             2 => Ok(InteractAction::InteractAt {
-                hand: Hand::deserialize(&mut reader)?,
                 target_x: f32::deserialize(&mut reader)?,
                 target_y: f32::deserialize(&mut reader)?,
                 target_z: f32::deserialize(&mut reader)?,
+                hand: Hand::deserialize(&mut reader)?,
             }),
             _ => Err(DeserializeError::InvalidVariantIndex(
                 action,
