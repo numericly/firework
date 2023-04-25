@@ -44,7 +44,7 @@ use std::{
 };
 use tokio::sync::{broadcast, Mutex, RwLock};
 
-const SERVER_RENDER_DISTANCE: i32 = 9;
+const SERVER_RENDER_DISTANCE: i32 = 12;
 
 #[derive(Debug, Clone)]
 pub enum ClientCommand<TransferData>
@@ -659,7 +659,9 @@ where
             (position.x as i32 >> 4, position.z as i32 >> 4)
         };
 
+        let start = Instant::now();
         self.move_chunk(chunk_x, chunk_z).await?;
+        println!("Chunk chunks in {:?}", start.elapsed());
 
         Ok(())
     }

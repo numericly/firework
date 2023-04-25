@@ -27,6 +27,32 @@ struct RawChunkData {
     #[serde(rename = "Status")]
     pub _status: Option<String>,
     pub sections: Vec<RawChunkSection>,
+    pub block_entities: Vec<BlockEntities>,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(tag = "id")]
+pub enum BlockEntities {
+    #[serde(rename = "minecraft:chest")]
+    Chest {
+        x: i32,
+        y: i32,
+        z: i32,
+        #[serde(rename = "Items")]
+        #[serde(default = "Vec::new")]
+        items: Vec<ContainerItemStack>,
+    },
+    #[serde(other)]
+    Unknown,
+}
+#[derive(Debug, Clone, Deserialize)]
+pub struct ContainerItemStack {
+    #[serde(rename = "id")]
+    pub item: String,
+    #[serde(rename = "Count")]
+    pub count: u8,
+    #[serde(rename = "Slot")]
+    pub slot: u8,
 }
 
 #[derive(Debug, Deserialize)]
@@ -387,42 +413,4 @@ impl<T: Palette + Debug, const CONTAINER_SIZE: usize, const MINIMUM_BITS: usize>
             }
         }
     }
-}
-
-pub mod test {
-    #[allow(unused_imports)]
-    use firework_data::blocks::{Dirt, Granite, Stone, StoneBricks};
-
-    #[allow(unused_imports)]
-    use super::*;
-
-    // #[tokio::test]
-    // async fn test_write() {
-    //     let container = {
-    //         let mut data = Vec::new();
-
-    //         for _ in 0..4096 {
-    //             data.push(rand::random::<u8>() % 5);
-    //         }
-
-    //         let palette = vec![
-    //             Block::Air(Air),
-    //             Block::Stone(Stone),
-    //             Block::Dirt(Dirt),
-    //             Block::Granite(Granite),
-    //             Block::StoneBricks(StoneBricks),
-    //         ];
-
-    //         DirectPalettedContainer::<_, 4096> {
-    //             palette,
-    //             data: Data::Single(data),
-    //         }
-    //     };
-    //     println!("Container: {:?}", container);
-
-    //     let mut packet_data = Vec::new();
-    //     container.write(&mut packet_data);
-    //     println!("Packet data: {:?}", packet_data);
-    //     // panic!("Yo")
-    // }
 }
