@@ -22,6 +22,7 @@ use firework_protocol::{
         UpdateAttributes, UpdateEntityHeadRotation, UpdateEntityPosition,
         UpdateEntityPositionAndRotation, UpdateEntityRotation, VanillaSound,
     },
+    core::{DeserializeField, Position, SerializeField, UnsizedVec, VarInt},
     data_types::{
         AddPlayer, Attribute, BossBarAction, EntityAnimationType, EntityEventStatus, Hand,
         Particle, PlayerAbilityFlags, PlayerActionStatus, PlayerCommandAction, PlayerInfoAction,
@@ -33,7 +34,6 @@ use firework_protocol::{
     },
     ConnectionState, Protocol, ProtocolError,
 };
-use firework_protocol_core::{DeserializeField, Position, SerializeField, UnsizedVec, VarInt};
 use rand::Rng;
 use serde_json::json;
 use std::collections::HashMap;
@@ -764,7 +764,7 @@ where
             } => {
                 if let Some(position) = &position {
                     let unsynced_entities = self.unsynced_entities.read().await;
-                    if let Some(old_pos) = unsynced_entities.get(&entity_id).clone() {
+                    if let Some(_old_pos) = unsynced_entities.get(&entity_id).clone() {
                         // dbg!(old_pos, position, entity_id);
                         let (yaw, pitch) = previous_rotation.serialize();
                         self.send_packet(TeleportEntity {
@@ -1142,7 +1142,7 @@ where
             }
             ClientCommand::KillPlayer {
                 entity_id,
-                uuid: u128,
+                uuid: _u128,
             } => {
                 self.send_packet(EntityEvent {
                     entity_id,

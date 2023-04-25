@@ -1,7 +1,9 @@
 use async_recursion::async_recursion;
-use firework_protocol::data_types::SuggestionMatch;
-use firework_protocol_core::{SerializeField, VarInt};
-use firework_protocol_derive::SerializeField;
+use firework_protocol::{
+    core::{SerializeField, VarInt},
+    data_types::SuggestionMatch,
+    protocol_derive::SerializeField as SerializeFieldDerive,
+};
 use futures::future::BoxFuture;
 use modular_bitfield::{bitfield, BitfieldSpecifier};
 use serde_json::{json, Value};
@@ -81,8 +83,8 @@ pub enum SuggestionsType {
     SummonableEntities,
 }
 
-#[derive(SerializeField, Debug, PartialEq, Clone)]
-#[protocol(typ = "firework_protocol_core::VarInt")]
+#[derive(SerializeFieldDerive, Debug, PartialEq, Clone)]
+#[protocol(typ = "firework_protocol::core::VarInt")]
 pub enum StringType {
     SingleWord,
     QuotablePhrase,
@@ -796,9 +798,9 @@ struct RawCommandNode {
 }
 
 impl RawCommandNode {
-    pub fn serialize<W: Write>(&self, mut writer: W) {
+    pub fn serialize<W: Write>(self, mut writer: W) {
         // Write the flags
-        self.flags.bytes[0].serialize(&mut writer);
+        self.flags.into_bytes()[0].serialize(&mut writer);
 
         // Write the child count and children
         VarInt(self.children.len() as i32).serialize(&mut writer);

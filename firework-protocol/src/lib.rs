@@ -32,6 +32,9 @@ pub mod client_bound;
 pub mod data_types;
 pub mod server_bound;
 
+pub use firework_protocol_core as core;
+pub use firework_protocol_derive as protocol_derive;
+
 #[derive(Debug, Error)]
 pub enum ProtocolError {
     #[error("client disconnected")]

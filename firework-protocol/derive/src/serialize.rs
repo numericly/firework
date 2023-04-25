@@ -42,7 +42,7 @@ fn gen_impl_enum(input: DeriveInput) -> TokenStream2 {
         match_arms.extend(match &variant.fields {
             Fields::Unit => {
                 quote! {
-                    #name::#variant_ident => firework_protocol_core::SerializeField::serialize(&<#typ as TryFrom<i32>>::try_from(#index).expect("Error converting variant identifier"), &mut writer),
+                    #name::#variant_ident => firework_protocol::core::SerializeField::serialize(&<#typ as TryFrom<i32>>::try_from(#index).expect("Error converting variant identifier"), &mut writer),
                 }
             }
             Fields::Named(fields) => {
@@ -51,7 +51,7 @@ fn gen_impl_enum(input: DeriveInput) -> TokenStream2 {
                 quote! {
                     #name::#variant_ident { #(#param_fields,)*} => 
                         {
-                            firework_protocol_core::SerializeField::serialize(&<#typ as TryFrom<i32>>::try_from(#index).expect("Error converting variant identifier"), &mut writer);
+                            firework_protocol::core::SerializeField::serialize(&<#typ as TryFrom<i32>>::try_from(#index).expect("Error converting variant identifier"), &mut writer);
                             #(
                                 #serializable_fields.serialize(&mut writer);
                             )*
@@ -73,7 +73,7 @@ fn gen_impl_enum(input: DeriveInput) -> TokenStream2 {
                 };
                 quote! {
                     #name::#variant_ident(#args_stream) => {
-                        firework_protocol_core::SerializeField::serialize(&<#typ as TryFrom<i32>>::try_from(#index).expect("Error converting variant identifier"), &mut writer);
+                        firework_protocol::core::SerializeField::serialize(&<#typ as TryFrom<i32>>::try_from(#index).expect("Error converting variant identifier"), &mut writer);
                         #(
                             #idents.serialize(&mut writer);
                         )*
@@ -84,7 +84,7 @@ fn gen_impl_enum(input: DeriveInput) -> TokenStream2 {
     }
 
     quote! {
-        impl firework_protocol_core::SerializeField for #name {
+        impl firework_protocol::core::SerializeField for #name {
             fn serialize<W: std::io::Write>(&self, mut writer: W) {
                 match self {
                     #match_arms
@@ -110,7 +110,7 @@ fn handle_named_struct(fields: FieldsNamed, name: &Ident) -> TokenStream2 {
     let field_idents = fields.named.iter().map(|field| &field.ident);
 
     quote! {
-        impl firework_protocol_core::SerializeField for #name {
+        impl firework_protocol::core::SerializeField for #name {
             fn serialize<W: std::io::Write>(&self, mut writer: W) {
                 #(
                     self.#field_idents.serialize(&mut writer);
@@ -131,7 +131,7 @@ fn handle_unnamed_struct(fields: FieldsUnnamed, name: &Ident) -> TokenStream2 {
     }
 
     quote! {
-        impl firework_protocol_core::SerializeField for #name {
+        impl firework_protocol::core::SerializeField for #name {
             fn serialize<W: std::io::Write>(&self, mut writer: W) {
                 #args_stream
             }

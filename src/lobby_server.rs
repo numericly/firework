@@ -2,6 +2,17 @@ use std::{sync::Arc, time::Instant};
 
 use async_trait::async_trait;
 
+use firework::authentication::Profile;
+use firework::data::items::{
+    Compass, DiamondShovel, Elytra, IronSword, Item, RedstoneBlock, Stick,
+};
+use firework::protocol::core::VarInt;
+use firework::protocol::{
+    client_bound::SetContainerSlot,
+    data_types::{InventoryOperationMode, ItemNbt, ItemNbtDisplay, Slot, SlotInner},
+    server_bound::ClickContainer,
+};
+use firework::world::World;
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
     commands::{Argument, ArgumentType, Command, CommandNode, CommandTree, StringType},
@@ -9,15 +20,6 @@ use firework::{
     PlayerHandler, TICKS_PER_SECOND,
 };
 use firework::{ConnectionError, Rotation, Server, ServerHandler, Vec3};
-use firework_authentication::Profile;
-use firework_data::items::{Compass, DiamondShovel, Elytra, IronSword, Item, RedstoneBlock, Stick};
-use firework_protocol::{
-    client_bound::SetContainerSlot,
-    data_types::{InventoryOperationMode, ItemNbt, ItemNbtDisplay, Slot, SlotInner},
-    server_bound::ClickContainer,
-};
-use firework_protocol_core::VarInt;
-use firework_world::World;
 use serde_json::json;
 use tokio::sync::{broadcast::Receiver, Mutex};
 

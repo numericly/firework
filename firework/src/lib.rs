@@ -2,7 +2,7 @@ use crate::client::{Client, ClientCommand, Player};
 use crate::entities::{EntityMetadata, Pose};
 use async_trait::async_trait;
 use client::{InventorySlot, PreviousPosition};
-use commands::{CommandNode, CommandTree};
+use commands::CommandTree;
 use dashmap::{DashMap, DashSet};
 use firework_authentication::{authenticate, AuthenticationError, Profile};
 use firework_protocol::data_types::{EntityAnimationType, Hand};
@@ -32,6 +32,11 @@ use tokio::task::JoinHandle;
 use tokio::time::sleep;
 use tokio::{select, task};
 use tokio_util::sync::CancellationToken;
+
+pub use firework_authentication as authentication;
+pub use firework_data as data;
+pub use firework_protocol as protocol;
+pub use firework_world as world;
 
 pub mod client;
 pub mod commands;

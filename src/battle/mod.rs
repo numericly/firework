@@ -1,27 +1,25 @@
 use async_trait::async_trait;
-use dashmap::DashSet;
-use firework::{
-    client::{Client, GameMode, InventorySlot, Player},
-    commands::{Argument, Command, CommandNode, CommandTree},
-    entities::{EntityMetadata, Pose},
-    ConnectionError, PlayerHandler, Rotation, Server, ServerHandler, Vec3, TICKS_PER_SECOND,
-};
-use firework_authentication::Profile;
-use firework_data::items::{DiamondSword, Elytra, EndRod, Item};
-use firework_protocol::{
+
+use firework::authentication::Profile;
+use firework::data::items::{DiamondSword, EndRod, Item};
+use firework::protocol::core::VarInt;
+use firework::protocol::{
     client_bound::{CustomSound, IdMapHolder, SoundSource},
     data_types::{
-        BossBarAction, BossBarColor, BossBarDivision, EntityEventStatus, InteractAction, ItemNbt,
-        SlotInner,
+        BossBarAction, BossBarColor, BossBarDivision, InteractAction, ItemNbt, SlotInner,
     },
     server_bound::Interact,
 };
-use firework_protocol_core::VarInt;
-use firework_world::World;
+use firework::world::World;
+use firework::{
+    client::{Client, GameMode, InventorySlot, Player},
+    commands::{Argument, Command, CommandTree},
+    entities::{EntityMetadata, Pose},
+    ConnectionError, PlayerHandler, Rotation, Server, ServerHandler, Vec3, TICKS_PER_SECOND,
+};
 use rand::{distributions::Standard, prelude::Distribution, Rng};
 use serde_json::json;
 use std::{
-    cmp::min,
     sync::Arc,
     time::{Duration, Instant},
 };
@@ -555,7 +553,7 @@ impl ServerHandler<MiniGameProxy> for BattleServerHandler {
                 self.start_game(server, &proxy).await;
             }
             GameState::Running {
-                start_time,
+                start_time: _,
                 initial_player_count,
             } => {
                 // TODO don't do this on every tick, instead update it when a player leaves or dies
@@ -630,7 +628,7 @@ impl BattleServerHandler {
     async fn start_game(&self, server: &Server<Self, MiniGameProxy>, _proxy: &MiniGameProxy) {
         for client in server.player_list.iter() {
             {
-                let mut player = client.player.write().await;
+                let player = client.player.write().await;
                 server.broadcast_entity_metadata_update(
                     &client,
                     vec![

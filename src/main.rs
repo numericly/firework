@@ -1,8 +1,8 @@
 use async_trait::async_trait;
 use battle::BattleServerHandler;
+use firework::protocol::Protocol;
+use firework::world::{world, World};
 use firework::{ClientData, ConnectionError, Server, ServerManager, ServerOptions, ServerProxy};
-use firework_protocol::Protocol;
-use firework_world::{world, World};
 use glide::GlideServerHandler;
 use lazy_static::lazy_static;
 use lobby_server::LobbyServerHandler;

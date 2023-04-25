@@ -1,21 +1,21 @@
 use async_trait::async_trait;
-use firework::{
-    client::{Client, GameMode, InventorySlot, Player},
-    commands::{Argument, ArgumentType, Command, CommandNode, CommandTree, StringType},
-    entities::{EntityMetadata, Pose},
-    AxisAlignedBB, AxisAlignedPlane, ConnectionError, PlayerHandler, Rotation, Server,
-    ServerHandler, Vec3, TICKS_PER_SECOND,
-};
-use firework_authentication::Profile;
-use firework_data::items::{Elytra, Item};
-use firework_protocol::{
+use firework::authentication::Profile;
+use firework::data::items::{Elytra, Item};
+use firework::protocol::core::VarInt;
+use firework::protocol::{
     client_bound::{CustomSound, IdMapHolder, SoundSource},
     data_types::{
         BossBarAction, BossBarColor, BossBarDivision, ItemNbt, Particle, Particles, SlotInner,
     },
 };
-use firework_protocol_core::VarInt;
-use firework_world::World;
+use firework::world::World;
+use firework::{
+    client::{Client, GameMode, InventorySlot, Player},
+    commands::{Argument, Command, CommandTree},
+    entities::{EntityMetadata, Pose},
+    AxisAlignedBB, AxisAlignedPlane, ConnectionError, PlayerHandler, Rotation, Server,
+    ServerHandler, Vec3, TICKS_PER_SECOND,
+};
 use rand::{distributions::Standard, prelude::Distribution, Rng};
 use serde_json::json;
 use std::{

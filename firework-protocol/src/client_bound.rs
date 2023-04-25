@@ -38,6 +38,8 @@ macro_rules! define_client_bound_protocol {
     };
 }
 
+use crate as firework_protocol;
+
 use firework_authentication::ProfileProperty;
 use firework_data::tags::VarIntList;
 use firework_data::Palette;

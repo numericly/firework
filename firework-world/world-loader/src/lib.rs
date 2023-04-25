@@ -96,7 +96,7 @@ pub fn world(input: TokenStream) -> TokenStream {
 
     quote! {
         {
-            use firework_world::{World, Region};
+            use firework::world::{World, Region};
             let world = World::new(#world_is_flat);
             #output
             world
