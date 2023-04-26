@@ -2,30 +2,36 @@ use crate::{
     MiniGameProxy, TransferData, CAVERN_BATTLE_WORLD, COVE_BATTLE_WORLD, CRUCIBLE_BATTLE_WORLD,
 };
 use async_trait::async_trait;
-use firework::authentication::Profile;
-use firework::data::items::{DiamondSword, EndRod, Item};
-use firework::protocol::core::VarInt;
-use firework::protocol::{
-    client_bound::{CustomSound, IdMapHolder, SoundSource},
-    data_types::{
-        BossBarAction, BossBarColor, BossBarDivision, InteractAction, ItemNbt, SlotInner,
-    },
-    server_bound::Interact,
-};
-use firework::world::World;
+use firework::{authentication::Profile, gui::GUIInit};
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
     commands::{Argument, Command, CommandTree},
     entities::{EntityMetadata, Pose},
     ConnectionError, PlayerHandler, Rotation, Server, ServerHandler, Vec3, TICKS_PER_SECOND,
 };
+use firework::{
+    data::items::{DiamondSword, EndRod, Item},
+    gui::GuiScreen,
+};
+use firework::{
+    gui::GUIEvent,
+    protocol::{
+        client_bound::{CustomSound, IdMapHolder, SoundSource},
+        data_types::{
+            BossBarAction, BossBarColor, BossBarDivision, InteractAction, ItemNbt, SlotInner,
+        },
+        server_bound::{ClickContainer, Interact},
+    },
+};
+use firework::{gui::WindowType, protocol::core::VarInt};
+use firework::{protocol::data_types::Slot, world::World};
 use rand::{distributions::Standard, prelude::Distribution, Rng};
 use serde_json::json;
 use std::{
     sync::Arc,
     time::{Duration, Instant},
 };
-use tokio::sync::Mutex;
+use tokio::sync::{broadcast, Mutex};
 
 mod cavern;
 
@@ -363,12 +369,9 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
 
                     // FIXME hitregs can happen if the ticks are off sync just right
                     if other_client.player.read().await.invulnerable_time == 0 {
-                        if other_client.player.read().await.health - attack_damage as f32
-                            <= 0.
-                        {
+                        if other_client.player.read().await.health - attack_damage as f32 <= 0. {
                             // "kill" the player
-                            other_client
-                                .set_health(other_client.player.read().await.max_health);
+                            other_client.set_health(other_client.player.read().await.max_health);
                             for iter_client in player_list.iter() {
                                 if iter_client.client_data.uuid == other_client.client_data.uuid {
                                     continue;
@@ -380,8 +383,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                             }
                         } else {
                             other_client.set_health(
-                                other_client.player.read().await.health
-                                    - attack_damage as f32,
+                                other_client.player.read().await.health - attack_damage as f32,
                             );
 
                             knockback(
@@ -493,8 +495,43 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
 
 impl BattlePlayerHandler {}
 
+pub struct Menu {
+    pub items: Vec<Slot>,
+    pub channel: broadcast::Sender<GUIEvent>,
+}
+
+#[async_trait]
+impl GuiScreen<BattleServerHandler, MiniGameProxy> for Menu {
+    async fn init(&self, _client: &Client<BattleServerHandler, MiniGameProxy>) -> GUIInit {
+        GUIInit {
+            title: r#"{"text":"      Minigame Selector","bold":true}"#.to_string(),
+            window_type: WindowType::Generic9x1,
+            items: self.items.clone(),
+            receiver: self.channel.subscribe(),
+        }
+    }
+    async fn handle_click(
+        &self,
+        slot: ClickContainer,
+        client: &Client<BattleServerHandler, MiniGameProxy>,
+    ) -> Result<(), ConnectionError> {
+        Ok(())
+    }
+}
+
+impl Menu {
+    pub fn new() -> Self {
+        let (sender, _) = broadcast::channel(1000);
+        Self {
+            channel: sender,
+            items: vec![None, None, None, None, None, None, None, None, None],
+        }
+    }
+}
+
 #[async_trait]
 impl ServerHandler<MiniGameProxy> for BattleServerHandler {
+    type ServerGUI = Menu;
     type PlayerHandler = BattlePlayerHandler;
     fn new() -> Self {
         Self {

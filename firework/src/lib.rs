@@ -16,6 +16,7 @@ use firework_protocol::{
 };
 use firework_protocol::{read_specific_packet, ConnectionState, Protocol, ProtocolError};
 use firework_world::World;
+use gui::GuiScreen;
 use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
 use sha1::{Digest, Sha1};
 use std::sync::Arc;
@@ -803,6 +804,7 @@ where
     Self: Sized + Send + Sync + 'static,
     Proxy: ServerProxy + Send + Sync + 'static,
 {
+    type ServerGUI: GuiScreen<Self, Proxy> + Send + Sync + 'static;
     type PlayerHandler: PlayerHandler<Self, Proxy> + Send + Sync + 'static;
     fn new() -> Self;
     async fn get_commands(

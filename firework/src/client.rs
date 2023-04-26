@@ -1,6 +1,6 @@
 use crate::{
     entities::EntityDataFlags,
-    gui::{GUIInit, GuiScreen},
+    gui::{GUIEvent, GUIInit, GuiScreen, WindowType},
     PlayerHandler,
 };
 use crate::{
@@ -99,7 +99,11 @@ where
     DisplayParticles {
         particles: Vec<Particle>,
     },
-    InitGui,
+    InitGui {
+        title: String,
+        window_type: WindowType,
+        items: Vec<Slot>,
+    },
     UpdateSlot {
         window_id: i8,
         slot: u16,
@@ -360,6 +364,15 @@ struct ActivePing {
     id: u64,
 }
 
+pub struct ClientGUI<Handler, Proxy>
+where
+    Handler: ServerHandler<Proxy> + Send + Sync + 'static,
+    Proxy: ServerProxy + Send + Sync + 'static,
+{
+    pub gui: Arc<Handler::ServerGUI>,
+    pub events: broadcast::Receiver<GUIEvent>,
+}
+
 // #[derive(Debug)]
 pub struct Client<Handler, Proxy>
 where
@@ -368,7 +381,7 @@ where
 {
     pub client_data: Arc<ClientData>,
     pub player: RwLock<Player>,
-    pub gui: RwLock<Option<Box<dyn GuiScreen<Handler, Proxy> + Send + Sync>>>,
+    pub gui: RwLock<Option<ClientGUI<Handler, Proxy>>>,
     unsynced_entities: RwLock<HashMap<i32, Vec3>>,
     to_client: broadcast::Sender<ClientCommand<Proxy::TransferData>>,
     to_client_visual: broadcast::Sender<ClientCommand<Proxy::TransferData>>,
@@ -1034,19 +1047,11 @@ where
                     self.send_packet(ParticlePacket { particle }).await?;
                 }
             }
-            ClientCommand::InitGui => {
-                let gui = self.gui.read().await;
-
-                let Some(gui) = gui.as_ref() else {
-                    return Ok(None)
-                };
-
-                let GUIInit {
-                    window_type,
-                    title,
-                    items,
-                } = gui.init(self).await?;
-
+            ClientCommand::InitGui {
+                items,
+                title,
+                window_type,
+            } => {
                 const GUI_ID: u8 = 1;
                 self.send_packet(OpenScreen {
                     window_id: VarInt::from(GUI_ID as i32),
@@ -1326,7 +1331,8 @@ where
             }
             ServerBoundPacket::ClickContainer(click) => {
                 if let Some(gui) = self.gui.read().await.as_ref() {
-                    gui.handle_click(click, self).await?;
+                    gui.gui.handle_click(click, self).await?;
+                    // gui.handle_click(click, self).await?;
                 } else {
                     self.handler.on_click_container(self, click).await?;
                 }
@@ -1570,10 +1576,19 @@ where
         Ok(())
     }
     #[allow(unused_must_use)]
-    pub async fn display_gui<T: GuiScreen<Handler, Proxy> + Send + Sync + 'static>(&self, gui: T) {
-        *self.gui.write().await = Some(Box::new(gui));
+    pub async fn display_gui(&self, gui: Arc<Handler::ServerGUI>) {
+        let init = gui.init(self).await;
 
-        self.to_client.send(ClientCommand::InitGui);
+        *self.gui.write().await = Some(ClientGUI {
+            gui,
+            events: init.receiver,
+        });
+
+        self.to_client.send(ClientCommand::InitGui {
+            items: init.items,
+            title: init.title,
+            window_type: init.window_type,
+        });
     }
     #[allow(unused_must_use)]
     pub fn close_gui(&self) {

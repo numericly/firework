@@ -1,8 +1,5 @@
-use std::{sync::Arc, time::Instant};
-
+use crate::{queue::QueueMessage, MiniGameProxy, TransferData, LOBBY_WORLD};
 use async_trait::async_trait;
-
-use firework::authentication::Profile;
 use firework::data::items::{
     Compass, DiamondShovel, Elytra, IronSword, Item, RedstoneBlock, Stick,
 };
@@ -13,6 +10,7 @@ use firework::protocol::{
     server_bound::ClickContainer,
 };
 use firework::world::World;
+use firework::{authentication::Profile, gui::GUIEvent};
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
     commands::{Argument, ArgumentType, Command, CommandNode, CommandTree, StringType},
@@ -21,9 +19,11 @@ use firework::{
 };
 use firework::{ConnectionError, Rotation, Server, ServerHandler, Vec3};
 use serde_json::json;
-use tokio::sync::{broadcast::Receiver, Mutex};
-
-use crate::{queue::QueueMessage, MiniGameProxy, TransferData, LOBBY_WORLD};
+use std::{sync::Arc, time::Instant};
+use tokio::sync::{
+    broadcast::{self, Receiver},
+    Mutex,
+};
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -237,7 +237,9 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
 
         match item.item_id.0 as u32 {
             Compass::ID => {
-                client.display_gui(GameMenu::new()).await;
+                client
+                    .display_gui(client.server.handler.game_menu.clone())
+                    .await;
             }
             RedstoneBlock::ID => {
                 leave_queue(client).await;
@@ -343,19 +345,18 @@ impl LobbyPlayerHandler {
 
 pub struct GameMenu {
     pub items: Vec<Slot>,
+    pub channel: broadcast::Sender<GUIEvent>,
 }
 
 #[async_trait]
 impl GuiScreen<LobbyServerHandler, MiniGameProxy> for GameMenu {
-    async fn init(
-        &self,
-        _client: &Client<LobbyServerHandler, MiniGameProxy>,
-    ) -> Result<GUIInit, ConnectionError> {
-        Ok(GUIInit {
+    async fn init(&self, _client: &Client<LobbyServerHandler, MiniGameProxy>) -> GUIInit {
+        GUIInit {
             title: r#"{"text":"      Minigame Selector","bold":true}"#.to_string(),
             window_type: WindowType::Generic9x1,
             items: self.items.clone(),
-        })
+            receiver: self.channel.subscribe(),
+        }
     }
     async fn handle_click(
         &self,
@@ -436,7 +437,9 @@ impl GuiScreen<LobbyServerHandler, MiniGameProxy> for GameMenu {
 
 impl GameMenu {
     pub fn new() -> Self {
+        let (sender, _) = broadcast::channel(1000);
         Self {
+            channel: sender,
             items: vec![
                 None,
                 None,
@@ -537,13 +540,16 @@ impl GameMenu {
 
 pub struct LobbyServerHandler {
     commands: CommandTree<Self, MiniGameProxy>,
+    game_menu: Arc<GameMenu>,
 }
 
 #[async_trait]
 impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
+    type ServerGUI = GameMenu;
     type PlayerHandler = LobbyPlayerHandler;
     fn new() -> Self {
         Self {
+            game_menu: Arc::new(GameMenu::new()),
             commands: CommandTree::new()
                 .register_command(
                     Command::new("practice", "practice a minigame in a private lobby").add_node(

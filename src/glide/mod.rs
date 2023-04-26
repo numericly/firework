@@ -1,14 +1,5 @@
 use async_trait::async_trait;
-use firework::authentication::Profile;
-use firework::data::items::{Elytra, Item};
-use firework::protocol::core::VarInt;
-use firework::protocol::{
-    client_bound::{CustomSound, IdMapHolder, SoundSource},
-    data_types::{
-        BossBarAction, BossBarColor, BossBarDivision, ItemNbt, Particle, Particles, SlotInner,
-    },
-};
-use firework::world::World;
+use firework::{authentication::Profile, gui::GUIEvent, protocol::server_bound::ClickContainer};
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
     commands::{Argument, Command, CommandTree},
@@ -16,16 +7,32 @@ use firework::{
     AxisAlignedBB, AxisAlignedPlane, ConnectionError, PlayerHandler, Rotation, Server,
     ServerHandler, Vec3, TICKS_PER_SECOND,
 };
+use firework::{
+    data::items::{Elytra, Item},
+    protocol::data_types::Slot,
+};
+use firework::{
+    gui::GUIInit,
+    protocol::{
+        client_bound::{CustomSound, IdMapHolder, SoundSource},
+        data_types::{
+            BossBarAction, BossBarColor, BossBarDivision, ItemNbt, Particle, Particles, SlotInner,
+        },
+    },
+};
+use firework::{gui::GuiScreen, world::World};
+use firework::{gui::WindowType, protocol::core::VarInt};
 use rand::{distributions::Standard, prelude::Distribution, Rng};
 use serde_json::json;
 use std::{
     sync::Arc,
     time::{Duration, Instant},
 };
-use tokio::sync::{Mutex, RwLock};
+use tokio::sync::{broadcast, Mutex, RwLock};
 
 use crate::{
-    MiniGameProxy, TransferData, CANYON_GLIDE_WORLD, CAVERN_GLIDE_WORLD, TEMPLE_GLIDE_WORLD,
+    lobby_server::LobbyServerHandler, MiniGameProxy, TransferData, CANYON_GLIDE_WORLD,
+    CAVERN_GLIDE_WORLD, TEMPLE_GLIDE_WORLD,
 };
 
 mod canyon;
@@ -907,8 +914,43 @@ impl GlidePlayerHandler {
     }
 }
 
+pub struct Menu {
+    pub items: Vec<Slot>,
+    pub channel: broadcast::Sender<GUIEvent>,
+}
+
+#[async_trait]
+impl GuiScreen<GlideServerHandler, MiniGameProxy> for Menu {
+    async fn init(&self, _client: &Client<GlideServerHandler, MiniGameProxy>) -> GUIInit {
+        GUIInit {
+            title: r#"{"text":"      Minigame Selector","bold":true}"#.to_string(),
+            window_type: WindowType::Generic9x1,
+            items: self.items.clone(),
+            receiver: self.channel.subscribe(),
+        }
+    }
+    async fn handle_click(
+        &self,
+        slot: ClickContainer,
+        client: &Client<GlideServerHandler, MiniGameProxy>,
+    ) -> Result<(), ConnectionError> {
+        Ok(())
+    }
+}
+
+impl Menu {
+    pub fn new() -> Self {
+        let (sender, _) = broadcast::channel(1000);
+        Self {
+            channel: sender,
+            items: vec![None, None, None, None, None, None, None, None, None],
+        }
+    }
+}
+
 #[async_trait]
 impl ServerHandler<MiniGameProxy> for GlideServerHandler {
+    type ServerGUI = Menu;
     type PlayerHandler = GlidePlayerHandler;
     fn new() -> Self {
         Self {
