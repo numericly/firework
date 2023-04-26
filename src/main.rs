@@ -309,7 +309,7 @@ async fn main() {
     std::env::set_var("RUST_BACKTRACE", "1");
 
     ServerManager::<MiniGameProxy>::run(ServerOptions {
-        encryption: true,
+        encryption: false,
         host: true,
         ..Default::default()
     })

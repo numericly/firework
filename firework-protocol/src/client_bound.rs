@@ -176,7 +176,7 @@ define_client_bound_protocol! {
         z: i32,
         heightmaps: Blob,
         data: Vec<u8>,
-        block_entities: Vec<Blob>,
+        block_entities: UnsizedVec<u8>,
         trust_edges: bool,
         sky_light_mask: BitSet,
         block_light_mask: BitSet,

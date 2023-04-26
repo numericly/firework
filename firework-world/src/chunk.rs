@@ -5,9 +5,10 @@ use firework_data::{
     Palette,
 };
 use firework_protocol::{client_bound::ChunkUpdateAndLightUpdate, data_types::BitSet};
-use firework_protocol_core::{SerializeField, VarInt};
-use nbt::{from_zlib_reader, Blob};
+use firework_protocol_core::{SerializeField, UnsizedVec, VarInt};
+use nbt::{from_zlib_reader, Blob, Value};
 use serde::Deserialize;
+use std::collections::HashMap;
 use std::{cmp, fmt::Debug, hash::Hash};
 
 #[derive(Deserialize, Debug)]
@@ -27,12 +28,12 @@ struct RawChunkData {
     #[serde(rename = "Status")]
     pub _status: Option<String>,
     pub sections: Vec<RawChunkSection>,
-    pub block_entities: Vec<BlockEntities>,
+    pub block_entities: Vec<BlockEntity>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, PartialEq)]
 #[serde(tag = "id")]
-pub enum BlockEntities {
+pub enum BlockEntity {
     #[serde(rename = "minecraft:chest")]
     Chest {
         x: i32,
@@ -45,7 +46,7 @@ pub enum BlockEntities {
     #[serde(other)]
     Unknown,
 }
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, serde::Serialize, PartialEq)]
 pub struct ContainerItemStack {
     #[serde(rename = "id")]
     pub item: String,
@@ -138,6 +139,7 @@ pub struct Chunk {
     pub last_update: i64,
     pub x: i32,
     pub z: i32,
+    pub block_entities: Vec<BlockEntity>,
     section_offset: i8,
     sections: Vec<ChunkSection>,
 }
@@ -150,10 +152,6 @@ pub struct ChunkSection {
     block_light: Option<Vec<i8>>,
     non_air_blocks: u16,
     y: i8,
-}
-
-trait Write {
-    fn write(&self, packet_data: &mut Vec<u8>);
 }
 
 impl Chunk {
@@ -216,6 +214,7 @@ impl Chunk {
             z: raw_chunk.z,
             section_offset,
             sections,
+            block_entities: raw_chunk.block_entities,
             inhabited_time: raw_chunk.inhabited_time,
             last_update: raw_chunk.last_update,
             data_version: raw_chunk.data_version,
@@ -250,12 +249,25 @@ impl Chunk {
             }
         }
 
+        let mut block_entity_buf = Vec::new();
+
+        VarInt::from(
+            self.block_entities
+                .iter()
+                .filter(|a| **a != BlockEntity::Unknown)
+                .count() as i32,
+        )
+        .serialize(&mut block_entity_buf);
+        for block_entity in &self.block_entities {
+            block_entity.serialize(&mut block_entity_buf);
+        }
+
         ChunkUpdateAndLightUpdate {
             x: self.x,
             z: self.z,
             heightmaps: Blob::new(),
             data: packet_data,
-            block_entities: Vec::new(),
+            block_entities: UnsizedVec(block_entity_buf),
             trust_edges: true,
             sky_light_mask,
             block_light_mask,
@@ -322,7 +334,7 @@ where
     }
 }
 
-impl Write for Chunk {
+impl Chunk {
     fn write(&self, packet_data: &mut Vec<u8>) {
         for section in &self.sections {
             section.write(packet_data);
@@ -330,7 +342,7 @@ impl Write for Chunk {
     }
 }
 
-impl Write for ChunkSection {
+impl ChunkSection {
     fn write(&self, mut packet_data: &mut Vec<u8>) {
         if self.block_states.is_none() {
             return;
@@ -342,8 +354,8 @@ impl Write for ChunkSection {
     }
 }
 
-impl<T: Palette + Debug, const CONTAINER_SIZE: usize, const MINIMUM_BITS: usize> Write
-    for DirectPalettedContainer<T, CONTAINER_SIZE, MINIMUM_BITS>
+impl<T: Palette + Debug, const CONTAINER_SIZE: usize, const MINIMUM_BITS: usize>
+    DirectPalettedContainer<T, CONTAINER_SIZE, MINIMUM_BITS>
 {
     fn write(&self, mut packet_data: &mut Vec<u8>) {
         match self.data {
@@ -413,4 +425,32 @@ impl<T: Palette + Debug, const CONTAINER_SIZE: usize, const MINIMUM_BITS: usize>
             }
         }
     }
+}
+
+impl BlockEntity {
+    pub fn serialize<W: std::io::Write>(&self, mut writer: W) {
+        match self {
+            BlockEntity::Chest { x, y, z, .. } => {
+                let xz_packed = (((x & 15) as u8) << 4) | (z & 15) as u8;
+                xz_packed.serialize(&mut writer);
+                (*y as i16).serialize(&mut writer);
+
+                //chest id
+                VarInt(1).serialize(&mut writer);
+
+                // chest data (null nbt)
+                0u8.serialize(&mut writer);
+            }
+            _ => {}
+        }
+    }
+}
+
+#[test]
+fn test_packing_xz() {
+    let x: i32 = -17;
+    let z: i32 = 20;
+    let xz_packed = (((x & 15) as u8) << 4) | (z & 15) as u8;
+    println!("{:08b}", xz_packed);
+    panic!()
 }
