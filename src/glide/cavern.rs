@@ -80,8 +80,8 @@ pub const BOOSTS: [Boost; 17] = [
         particle_type: super::BoostParticleType::BoostNorth,
     },
     Boost {
-        // -30 0 178, -26 3 182
-        area: AxisAlignedBB::new(BlockPos::new(-30, 0, 177), BlockPos::new(-26, 3, 182)),
+        // -30 0 178, -26 3 183
+        area: AxisAlignedBB::new(BlockPos::new(-30, 0, 178), BlockPos::new(-26, 3, 183)),
         speed: 5.,
         particle_type: super::BoostParticleType::BoostWest,
     },
