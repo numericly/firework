@@ -6,9 +6,8 @@ use firework_data::{
 };
 use firework_protocol::{client_bound::ChunkUpdateAndLightUpdate, data_types::BitSet};
 use firework_protocol_core::{SerializeField, UnsizedVec, VarInt};
-use nbt::{from_zlib_reader, Blob, Value};
+use nbt::{from_zlib_reader, Blob};
 use serde::Deserialize;
-use std::collections::HashMap;
 use std::{cmp, fmt::Debug, hash::Hash};
 
 #[derive(Deserialize, Debug)]

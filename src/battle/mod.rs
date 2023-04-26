@@ -252,7 +252,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                     return Ok(());
                 }
 
-                let KNOCKBACK_RESISTANCE = 0.;
+                let knockback_resistance = 0.;
 
                 async fn knockback(
                     client: &Client<BattleServerHandler, MiniGameProxy>,
@@ -322,7 +322,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                 let mut damage_bonus = 0.; // damage bonus from enchantments
 
                 let attack_speed = 1.6; // attack speed of a diamond sword
-                let ticker = client.player.read().await.attack_strength_ticker.clone();
+                let ticker = client.player.read().await.attack_strength_ticker;
                 let mut attack_strength_scale = (ticker as f64 + 0.5) * attack_speed / 20.;
                 if attack_strength_scale < 0. {
                     attack_strength_scale = 0.;
@@ -363,12 +363,12 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
 
                     // FIXME hitregs can happen if the ticks are off sync just right
                     if other_client.player.read().await.invulnerable_time == 0 {
-                        if other_client.player.read().await.health.clone() - attack_damage as f32
+                        if other_client.player.read().await.health - attack_damage as f32
                             <= 0.
                         {
                             // "kill" the player
                             other_client
-                                .set_health(other_client.player.read().await.max_health.clone());
+                                .set_health(other_client.player.read().await.max_health);
                             for iter_client in player_list.iter() {
                                 if iter_client.client_data.uuid == other_client.client_data.uuid {
                                     continue;
@@ -380,7 +380,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                             }
                         } else {
                             other_client.set_health(
-                                other_client.player.read().await.health.clone()
+                                other_client.player.read().await.health
                                     - attack_damage as f32,
                             );
 
@@ -389,7 +389,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                                 0.4,
                                 distance_to_hitter.x,
                                 distance_to_hitter.z,
-                                KNOCKBACK_RESISTANCE,
+                                knockback_resistance,
                             )
                             .await;
 
@@ -399,7 +399,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                                     0.5,
                                     distance_to_hitter.x,
                                     distance_to_hitter.z,
-                                    KNOCKBACK_RESISTANCE,
+                                    knockback_resistance,
                                 )
                                 .await;
                             }
@@ -580,7 +580,7 @@ impl ServerHandler<MiniGameProxy> for BattleServerHandler {
                     player.send_boss_bar_action(
                         0,
                         BossBarAction::UpdateHealth {
-                            health: player_count as f32 / initial_player_count.clone() as f32,
+                            health: player_count as f32 / *initial_player_count as f32,
                         },
                     );
                 }

@@ -289,7 +289,7 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
                         .send_packet(SetContainerSlot {
                             window_id: window_id as i8,
                             state_id: VarInt(state_id.0 + 2),
-                            slot: slot as i16,
+                            slot,
                             item,
                         })
                         .await?;

@@ -446,14 +446,14 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                     let mut boost_status = self.boost_status.write().await;
                     boost_status.replace(BoostStatus::Loft {
                         times_remaining: 4,
-                        speed: loft.speed.clone(),
+                        speed: loft.speed,
                         velocity,
                     });
                 }
                 fn smoke_particle(x: f64, y: f64, z: f64, height: f32) -> Particle {
                     const LIFETIME: f32 = 100.0; // lifetime in ticks
                     let speed = height / LIFETIME;
-                    return Particle::new(
+                    Particle::new(
                         Particles::CampfireCozySmoke,
                         true,
                         x,
@@ -464,7 +464,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                         0.,
                         speed, // blocks per tick
                         0,
-                    );
+                    )
                 }
 
                 let mut particles: Vec<Particle> = Vec::new();
@@ -489,7 +489,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                     if boost_status.is_none() {
                         boost_status.replace(BoostStatus::ArrowBoost {
                             times_remaining: BOOST_TICKS,
-                            speed: boost.speed.clone(),
+                            speed: boost.speed,
                             velocity,
                         });
                     }
@@ -520,7 +520,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                 }
 
                 fn particle(x: f64, y: f64, z: f64) -> Particle {
-                    return Particle::new(
+                    Particle::new(
                         Particles::Dust {
                             red: 1.,
                             green: 0.7,
@@ -536,7 +536,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                         0.,
                         0.,
                         1,
-                    );
+                    )
                 }
 
                 let animation_phase = (time * 0.4 * boost_direction_multiplier).rem_euclid(6.);
@@ -749,7 +749,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                 {
                     *last_damage = Instant::now();
 
-                    let health = client.player.read().await.health.clone();
+                    let health = client.player.read().await.health;
                     if health - 2.0 <= 0. {
                         client.set_health(6.);
 
@@ -890,7 +890,7 @@ impl GlidePlayerHandler {
             let mut player = client.player.write().await;
             player.elytra_flying = false;
             client.server.broadcast_entity_metadata_update(
-                &client,
+                client,
                 vec![
                     EntityMetadata::EntityFlags(player.entity_flags()),
                     EntityMetadata::EntityPose(Pose::Standing),
