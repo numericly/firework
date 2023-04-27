@@ -38,3 +38,4 @@ firework_data = { path = "../firework-data" }
 firework_world = { path = "../firework-world" }
 futures = "0.3.26"
 async-recursion = "1.0.2"
+rustrict = "0.7.4"
