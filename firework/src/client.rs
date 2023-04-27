@@ -16,17 +16,17 @@ use firework_protocol::{
         HurtAnimation, IdMapHolder, LoginPlay, OpenScreen, ParticlePacket, PlayDisconnect,
         PlayerAbilities, PlayerInfo, PluginMessage, RemoveEntities, RemoveInfoPlayer, Respawn,
         SerializePacket, SetCenterChunk, SetContainerContent, SetContainerSlot, SetDefaultSpawn,
-        SetEntityMetadata, SetEntityVelocity, SetHealth, SetHeldItem, SetRecipes, SetSubtitleText,
-        SetTags, SetTitleAnimationTimes, SetTitleText, SoundEffect, SoundSource, SpawnPlayer,
-        SynchronizePlayerPosition, SystemChatMessage, TeleportEntity, UnloadChunk,
+        SetEntityMetadata, SetEntityVelocity, SetEquipment, SetHealth, SetHeldItem, SetRecipes,
+        SetSubtitleText, SetTags, SetTitleAnimationTimes, SetTitleText, SoundEffect, SoundSource,
+        SpawnPlayer, SynchronizePlayerPosition, SystemChatMessage, TeleportEntity, UnloadChunk,
         UpdateAttributes, UpdateEntityHeadRotation, UpdateEntityPosition,
         UpdateEntityPositionAndRotation, UpdateEntityRotation, VanillaSound,
     },
     core::{DeserializeField, Position, SerializeField, UnsizedVec, VarInt},
     data_types::{
-        AddPlayer, Attribute, BossBarAction, EntityAnimationType, EntityEventStatus, Hand,
-        Particle, PlayerAbilityFlags, PlayerActionStatus, PlayerCommandAction, PlayerInfoAction,
-        PlayerPositionFlags, Slot, UpdateGameMode, UpdateLatency, UpdateListed,
+        AddPlayer, Attribute, BossBarAction, EntityAnimationType, EntityEventStatus, Equipment,
+        Hand, Particle, PlayerAbilityFlags, PlayerActionStatus, PlayerCommandAction,
+        PlayerInfoAction, PlayerPositionFlags, Slot, UpdateGameMode, UpdateLatency, UpdateListed,
     },
     read_specific_packet,
     server_bound::{
@@ -145,6 +145,10 @@ where
     SendEntityEvent {
         entity_id: i32,
         status: EntityEventStatus,
+    },
+    SetEquipment {
+        entity_id: i32,
+        equipment: Equipment,
     },
 }
 
@@ -1162,6 +1166,16 @@ where
                 // })
                 // .await?;
             }
+            ClientCommand::SetEquipment {
+                entity_id,
+                equipment,
+            } => {
+                self.send_packet(SetEquipment {
+                    entity_id: VarInt(entity_id),
+                    equipment,
+                })
+                .await?
+            }
         }
         Ok(None)
     }
@@ -1776,6 +1790,12 @@ where
 
         println!("{:?} {}", delta.clone() * Vec3::scalar(20.), multiplier);
         delta * Vec3::new(multiplier, multiplier, multiplier)
+    }
+    pub fn send_equipment(&self, entity_id: i32, equipment: Equipment) {
+        self.to_client.send(ClientCommand::SetEquipment {
+            entity_id,
+            equipment,
+        });
     }
 }
 
