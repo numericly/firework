@@ -213,6 +213,7 @@ impl Player {
 
 #[derive(Debug)]
 pub struct Inventory {
+    pub held_item: Slot,
     slots: [Slot; 46],
 }
 
@@ -220,6 +221,7 @@ impl Default for Inventory {
     fn default() -> Self {
         const EMPTY_SLOT: Slot = None;
         Inventory {
+            held_item: EMPTY_SLOT,
             slots: [EMPTY_SLOT; 46],
         }
     }
@@ -672,9 +674,7 @@ where
             (position.x as i32 >> 4, position.z as i32 >> 4)
         };
 
-        let start = Instant::now();
         self.move_chunk(chunk_x, chunk_z).await?;
-        println!("Chunk chunks in {:?}", start.elapsed());
 
         Ok(())
     }

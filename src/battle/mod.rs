@@ -2,7 +2,9 @@ use crate::{
     MiniGameProxy, TransferData, CAVERN_BATTLE_WORLD, COVE_BATTLE_WORLD, CRUCIBLE_BATTLE_WORLD,
 };
 use async_trait::async_trait;
-use firework::{authentication::Profile, gui::GUIInit};
+use firework::{
+    authentication::Profile, gui::GUIInit, protocol::data_types::InventoryOperationMode,
+};
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
     commands::{Argument, Command, CommandTree},
@@ -31,7 +33,7 @@ use std::{
     sync::Arc,
     time::{Duration, Instant},
 };
-use tokio::sync::{broadcast, Mutex};
+use tokio::sync::{broadcast, Mutex, RwLock};
 
 mod cavern;
 
@@ -186,6 +188,10 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
             .to_string(),
         );
         self.start_time.lock().await.replace(Instant::now());
+
+        let menu = Arc::new(Chest::new());
+
+        client.display_gui(menu.clone()).await;
         Ok(())
     }
     async fn on_move(
@@ -495,18 +501,18 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
 
 impl BattlePlayerHandler {}
 
-pub struct Menu {
-    pub items: Vec<Slot>,
+pub struct Chest {
+    pub items: RwLock<Vec<Slot>>,
     pub channel: broadcast::Sender<GUIEvent>,
 }
 
 #[async_trait]
-impl GuiScreen<BattleServerHandler, MiniGameProxy> for Menu {
+impl GuiScreen<BattleServerHandler, MiniGameProxy> for Chest {
     async fn init(&self, _client: &Client<BattleServerHandler, MiniGameProxy>) -> GUIInit {
         GUIInit {
-            title: r#"{"text":"      Minigame Selector","bold":true}"#.to_string(),
-            window_type: WindowType::Generic9x1,
-            items: self.items.clone(),
+            title: r#"{"text":"Chest"}"#.to_string(),
+            window_type: WindowType::Generic9x3,
+            items: self.items.read().await.clone(),
             receiver: self.channel.subscribe(),
         }
     }
@@ -515,23 +521,100 @@ impl GuiScreen<BattleServerHandler, MiniGameProxy> for Menu {
         slot: ClickContainer,
         client: &Client<BattleServerHandler, MiniGameProxy>,
     ) -> Result<(), ConnectionError> {
+        println!("clicked chest slot: {:?}", slot);
+
+        match slot.mode {
+            InventoryOperationMode::Click => {
+                let mut player = client.player.write().await;
+
+                let items = self.items.write().await;
+
+                let item = Chest::index(&items, slot.slot as usize, &player).await;
+                println!("item: {:?}", item);
+
+                if let Some(item) = item {
+                    if player.inventory.held_item.is_none() {
+                        let new_item = item.clone();
+                        drop(item);
+
+                        player.inventory.held_item = Some(new_item);
+
+                        self.set_index(slot.slot as usize, &mut player, None).await;
+
+                        println!("new item: {:?}", player.inventory.held_item);
+                        println!("new chest: {:?}", items);
+                    }
+                } else {
+                    println!("item: None");
+                }
+
+                // player.inventory.held_item
+            }
+            InventoryOperationMode::Dragging => {
+                println!("dragging chest slot: {:?}", slot);
+            }
+            _ => {}
+        }
+
         Ok(())
     }
 }
 
-impl Menu {
+impl Chest {
     pub fn new() -> Self {
         let (sender, _) = broadcast::channel(1000);
         Self {
             channel: sender,
-            items: vec![None, None, None, None, None, None, None, None, None],
+            items: RwLock::new(vec![None; 27]),
+        }
+    }
+    async fn index<'a>(items: &'a Vec<Slot>, index: usize, player: &'a Player) -> &'a Slot {
+        if index < WindowType::Generic9x3.len() {
+            &items[index]
+        } else if (index - WindowType::Generic9x3.len()) < 27 + 9 {
+            let inventory_index = index - WindowType::Generic9x3.len();
+
+            if inventory_index < 27 {
+                player.inventory.get_slot(&InventorySlot::MainInventory {
+                    slot: inventory_index,
+                })
+            } else {
+                player.inventory.get_slot(&InventorySlot::Hotbar {
+                    slot: inventory_index - 27,
+                })
+            }
+        } else {
+            &None
+        }
+    }
+    async fn set_index<'a>(&self, index: usize, player: &mut Player, item: Slot) {
+        if index < WindowType::Generic9x3.len() {
+            self.items.write().await[index] = item;
+        } else if (index - WindowType::Generic9x3.len()) < 27 + 9 {
+            let inventory_index = index - WindowType::Generic9x3.len();
+
+            if inventory_index < 27 {
+                player.inventory.set_slot(
+                    InventorySlot::MainInventory {
+                        slot: inventory_index,
+                    },
+                    item,
+                );
+            } else {
+                player.inventory.set_slot(
+                    InventorySlot::Hotbar {
+                        slot: inventory_index - 27,
+                    },
+                    item,
+                );
+            }
         }
     }
 }
 
 #[async_trait]
 impl ServerHandler<MiniGameProxy> for BattleServerHandler {
-    type ServerGUI = Menu;
+    type ServerGUI = Chest;
     type PlayerHandler = BattlePlayerHandler;
     fn new() -> Self {
         Self {

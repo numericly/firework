@@ -316,6 +316,12 @@ async fn main() {
     .await;
 }
 
+#[test]
+fn test_cast() {
+    println!("{}", -999i16 as usize);
+    panic!();
+}
+
 // #[tokio::test]
 // async fn test_parse() {
 //     use firework::commands::*;
