@@ -31,8 +31,7 @@ use std::{
 use tokio::sync::{broadcast, Mutex, RwLock};
 
 use crate::{
-    lobby_server::LobbyServerHandler, MiniGameProxy, TransferData, CANYON_GLIDE_WORLD,
-    CAVERN_GLIDE_WORLD, TEMPLE_GLIDE_WORLD,
+    MiniGameProxy, TransferData, CANYON_GLIDE_WORLD, CAVERN_GLIDE_WORLD, TEMPLE_GLIDE_WORLD,
 };
 
 mod canyon;
@@ -88,6 +87,7 @@ pub enum Maps {
 impl Distribution<Maps> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Maps {
         match rng.gen_range(0..3) {
+            _ => Maps::Canyon,
             0 => Maps::Canyon,
             1 => Maps::Cavern,
             2 => Maps::Temple,
@@ -165,6 +165,8 @@ pub struct GlideServerHandler {
 }
 
 pub struct GlidePlayerHandler {
+    last_boost: Mutex<Option<(Instant, usize)>>,
+    last_loft: Mutex<Option<(Instant, usize)>>,
     boost_status: RwLock<Option<BoostStatus>>,
     animation_frame: Mutex<u8>,
     server: Arc<Server<GlideServerHandler, MiniGameProxy>>,
@@ -190,6 +192,8 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
         proxy: Arc<MiniGameProxy>,
     ) -> Self {
         Self {
+            last_loft: Mutex::new(None),
+            last_boost: Mutex::new(None),
             boost_status: RwLock::new(None),
             animation_frame: Mutex::new(0),
             server,
@@ -266,6 +270,19 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
             .to_string(),
         );
         self.start_time.lock().await.replace(Instant::now());
+
+        {
+            let mut player = client.player.write().await;
+            player.elytra_flying = true;
+            client.server.broadcast_entity_metadata_update(
+                &client,
+                vec![
+                    EntityMetadata::EntityFlags(player.entity_flags()),
+                    EntityMetadata::EntityPose(Pose::FallFlying),
+                ],
+                true,
+            );
+        }
         Ok(())
     }
     async fn on_move(
@@ -278,7 +295,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
         let end = &pos;
 
         // check if the movement is way too fast
-        let max_velocity = 20.0;
+        let max_velocity = 10.0;
         if (end.clone() - start.clone()).length() > max_velocity {
             client.sync_position(start.clone(), None);
             client.set_velocity(
@@ -286,8 +303,8 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                     .player
                     .read()
                     .await
-                    .velocity
-                    .clamp(0., max_velocity * 0.9),
+                    .previous_velocity
+                    .clamp(0., max_velocity * 0.6),
             );
             return Ok(None);
         }
@@ -342,7 +359,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                 let velocity_speed = velocity.magnitude();
 
                 let new_direction = velocity_direction.lerp(&direction, 0.25).normalize();
-                let new_speed = velocity_speed * 0.80 + speed / BOOST_TICKS as f64;
+                let new_speed = velocity_speed * 0.92 + speed / BOOST_TICKS as f64;
 
                 let new_vec = new_direction * Vec3::scalar(new_speed);
 
@@ -366,21 +383,25 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
             if times_remaining == 0 {
                 self.boost_status.write().await.take();
             } else {
-                const HORIZONTAL_SPEED_FACTOR: f64 = 0.03;
+                const HORIZONTAL_SPEED_FACTOR: f64 = 1.015;
 
-                let horizontal_boost = Vec3::new(velocity.x, 0., velocity.z).normalize()
-                    * Vec3::scalar(HORIZONTAL_SPEED_FACTOR);
+                let horizontal_boost = Vec3::new(velocity.x, 0., velocity.z);
 
-                let new_vec = Vec3::new(
-                    velocity.x + horizontal_boost.x,
-                    velocity.y * 0.90 + speed,
-                    velocity.z + horizontal_boost.z,
-                );
+                let direction = client.player.read().await.rotation.direction().normalize();
+                let new_direction = horizontal_boost
+                    .normalize()
+                    .lerp(&direction, 0.25)
+                    .normalize();
+                let new_magnitude = horizontal_boost.magnitude() * HORIZONTAL_SPEED_FACTOR;
+
+                let new_vec = new_direction * Vec3::scalar(new_magnitude);
+
+                let new_vec = Vec3::new(new_vec.x, velocity.y * 0.90 + speed, new_vec.z);
 
                 client.set_velocity(new_vec.clone());
                 self.boost_status.write().await.replace(BoostStatus::Loft {
                     times_remaining: times_remaining - 1,
-                    speed: speed * 0.85,
+                    speed: speed * 0.92,
                     velocity: new_vec,
                 });
             }
@@ -458,12 +479,23 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                 client.send_particles(particles);
             }
 
-            for loft in map.get_lofts().iter() {
+            for (i, loft) in map.get_lofts().iter().enumerate() {
                 if loft.area.within(position.clone()) {
+                    let mut last_loft = self.last_loft.lock().await;
+
+                    if let Some((time, last_i)) = last_loft.as_ref() {
+                        if i == *last_i && time.elapsed().as_secs_f32() < 1.0 {
+                            continue;
+                        }
+                    }
+
                     let velocity = client.player.read().await.velocity.clone();
                     let mut boost_status = self.boost_status.write().await;
+
+                    last_loft.replace((Instant::now(), i));
+
                     boost_status.replace(BoostStatus::Loft {
-                        times_remaining: 4,
+                        times_remaining: 8,
                         speed: loft.speed,
                         velocity,
                     });
@@ -500,17 +532,27 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                 client.send_particles(particles);
             }
 
-            for boost in map.get_boosts().iter() {
+            for (i, boost) in map.get_boosts().iter().enumerate() {
                 if boost.area.within(position.clone()) {
-                    let velocity = client.player.read().await.velocity.clone();
                     let mut boost_status = self.boost_status.write().await;
-                    if boost_status.is_none() {
-                        boost_status.replace(BoostStatus::ArrowBoost {
-                            times_remaining: BOOST_TICKS,
-                            speed: boost.speed,
-                            velocity,
-                        });
+
+                    let mut last_boost = self.last_boost.lock().await;
+
+                    if let Some((time, last_i)) = last_boost.as_ref() {
+                        if i == *last_i && time.elapsed().as_secs_f32() < 1.0 {
+                            continue;
+                        }
                     }
+
+                    let velocity = client.player.read().await.velocity.clone();
+
+                    last_boost.replace((Instant::now(), i));
+
+                    boost_status.replace(BoostStatus::ArrowBoost {
+                        times_remaining: BOOST_TICKS,
+                        speed: boost.speed,
+                        velocity,
+                    });
                 }
                 // check if any of the dimensions are too far away from the min
                 // if so, don't bother
@@ -1166,12 +1208,12 @@ impl GlideServerHandler {
         for client in server.player_list.iter() {
             {
                 let mut player = client.player.write().await;
-                player.elytra_flying = false;
+                player.elytra_flying = true;
                 server.broadcast_entity_metadata_update(
                     &client,
                     vec![
                         EntityMetadata::EntityFlags(player.entity_flags()),
-                        EntityMetadata::EntityPose(Pose::Standing),
+                        EntityMetadata::EntityPose(Pose::FallFlying),
                     ],
                     true,
                 );
@@ -1182,7 +1224,6 @@ impl GlideServerHandler {
                     {
                         "text": "The game has started!",
                         "color": "green",
-                        "bold": true
                     }
                 )
                 .to_string(),

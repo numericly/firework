@@ -2,7 +2,7 @@ use firework::{AxisAlignedBB, AxisAlignedPlane, BlockPos, Rotation, Vec3};
 
 use super::{Boost, BoostParticleType, Checkpoint, Loft};
 
-pub const SPAWN_POSITION: Vec3 = Vec3::new(0.5, 168.0, 0.5);
+pub const SPAWN_POSITION: Vec3 = Vec3::new(0.5, 171.0, 10.5);
 
 pub const SPAWN_AREA: AxisAlignedBB = AxisAlignedBB {
     max: BlockPos { x: 4, y: 169, z: 8 },
@@ -27,7 +27,7 @@ pub const BOOSTS: [Boost; 8] = [
                 z: 307,
             },
         },
-        speed: 4.,
+        speed: 2.,
         particle_type: BoostParticleType::BoostSouth,
     },
     Boost {
@@ -43,7 +43,7 @@ pub const BOOSTS: [Boost; 8] = [
                 z: 352,
             },
         },
-        speed: 4.,
+        speed: 2.,
         particle_type: BoostParticleType::BoostSouth,
     },
     Boost {
@@ -59,7 +59,7 @@ pub const BOOSTS: [Boost; 8] = [
                 z: 607,
             },
         },
-        speed: 6.,
+        speed: 3.,
         particle_type: BoostParticleType::BoostNorth,
     },
     Boost {
@@ -75,7 +75,7 @@ pub const BOOSTS: [Boost; 8] = [
                 z: 498,
             },
         },
-        speed: 3.,
+        speed: 1.5,
         particle_type: BoostParticleType::BoostNorth,
     },
     Boost {
@@ -91,7 +91,7 @@ pub const BOOSTS: [Boost; 8] = [
                 z: 355,
             },
         },
-        speed: 4.,
+        speed: 2.,
         particle_type: BoostParticleType::BoostNorth,
     },
     Boost {
@@ -107,7 +107,7 @@ pub const BOOSTS: [Boost; 8] = [
                 z: 269,
             },
         },
-        speed: 5.,
+        speed: 2.5,
         particle_type: BoostParticleType::BoostNorth,
     },
     Boost {
@@ -123,7 +123,7 @@ pub const BOOSTS: [Boost; 8] = [
                 z: 443,
             },
         },
-        speed: 5.,
+        speed: 2.5,
         particle_type: BoostParticleType::BoostSouth,
     },
     Boost {
@@ -139,7 +139,7 @@ pub const BOOSTS: [Boost; 8] = [
                 z: 492,
             },
         },
-        speed: 4.,
+        speed: 2.,
         particle_type: BoostParticleType::BoostWest,
     },
 ];
@@ -150,7 +150,7 @@ pub const LOFTS: [Loft; 8] = [
             min: BlockPos::new(107, 43, 590),
             max: BlockPos::new(109, 48, 592),
         },
-        speed: 0.15,
+        speed: 0.1,
     },
     Loft {
         // 115 41 554, 120 49 559
@@ -158,7 +158,7 @@ pub const LOFTS: [Loft; 8] = [
             min: BlockPos::new(115, 41, 554),
             max: BlockPos::new(120, 49, 559),
         },
-        speed: 0.35,
+        speed: 0.2,
     },
     Loft {
         // 6 -33 397, 10 -21 401
@@ -166,7 +166,7 @@ pub const LOFTS: [Loft; 8] = [
             min: BlockPos::new(6, -33, 397),
             max: BlockPos::new(10, -21, 401),
         },
-        speed: 0.35,
+        speed: 0.2,
     },
     Loft {
         // -24 12 204, -21 18 207
@@ -174,7 +174,7 @@ pub const LOFTS: [Loft; 8] = [
             min: BlockPos::new(-24, 12, 204),
             max: BlockPos::new(-21, 18, 207),
         },
-        speed: 0.25,
+        speed: 0.15,
     },
     Loft {
         // -46 12 265, -42 22 269
@@ -182,7 +182,7 @@ pub const LOFTS: [Loft; 8] = [
             min: BlockPos::new(-46, 12, 265),
             max: BlockPos::new(-42, 22, 269),
         },
-        speed: 0.35,
+        speed: 0.2,
     },
     Loft {
         // -123 12 259, -120 22 262

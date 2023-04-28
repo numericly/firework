@@ -880,11 +880,7 @@ where
     pub async fn handle_tick(&self, proxy: Arc<Proxy>) {
         self.handler.on_tick(&self, proxy.clone()).await;
         for client in self.player_list.iter() {
-            if client.player.read().await.invulnerable_time > 0 {
-                client.player.write().await.invulnerable_time -= 1;
-            }
-            client.player.write().await.attack_strength_ticker += 1;
-            client.handler.on_tick(&client).await;
+            client.on_tick().await;
         }
     }
     pub async fn handle_connection(
@@ -1178,6 +1174,8 @@ where
 
                     let delta = position.clone() - previous_position.position.clone();
 
+                    player.previous_velocity = player.velocity.clone();
+
                     player.velocity = delta * Vec3::scalar(multiplier);
                 }
             }
@@ -1202,16 +1200,6 @@ where
                     time: Instant::now(),
                 });
                 player.position = position.clone();
-
-                let previous_chunk_x = previous_pos.x as i32 >> 4;
-                let previous_chunk_z = previous_pos.z as i32 >> 4;
-
-                let chunk_x = position.x as i32 >> 4;
-                let chunk_z = position.z as i32 >> 4;
-
-                if previous_chunk_x != chunk_x || previous_chunk_z != chunk_z {
-                    client.move_chunk(chunk_x, chunk_z).await?;
-                }
             };
             position
         } else {

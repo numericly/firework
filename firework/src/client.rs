@@ -1,6 +1,6 @@
 use crate::{
     entities::EntityDataFlags,
-    gui::{GUIEvent, GUIInit, GuiScreen, WindowType},
+    gui::{GUIEvent, GuiScreen, WindowType},
     PlayerHandler,
 };
 use crate::{
@@ -44,7 +44,7 @@ use std::{
 };
 use tokio::sync::{broadcast, Mutex, RwLock};
 
-const SERVER_RENDER_DISTANCE: i32 = 12;
+const SERVER_RENDER_DISTANCE: i32 = 16;
 
 #[derive(Debug, Clone)]
 pub enum ClientCommand<TransferData>
@@ -53,6 +53,11 @@ where
 {
     Transfer {
         data: TransferData,
+    },
+    MoveChunk {
+        chunk_x: i32,
+        chunk_z: i32,
+        max_time: Duration,
     },
     SyncPosition {
         position: Vec3,
@@ -184,7 +189,9 @@ pub struct Player {
 
     pub position: Vec3,
     pub previous_position: Option<PreviousPosition>,
+    pub previous_velocity: Vec3,
     pub velocity: Vec3,
+    pub syncing_position: Option<i32>,
 
     pub on_ground: bool,
     pub rotation: Rotation,
@@ -519,6 +526,7 @@ where
         Ok(())
     }
     pub(super) async fn load_world(&self) -> Result<(), ConnectionError> {
+        self.player.write().await.syncing_position = Some(1);
         self.send_packet({
             let mut buf = Vec::new();
             self.server.brand.to_string().serialize(&mut buf);
@@ -589,6 +597,7 @@ where
 
         // Unlock recipes packet
 
+        //
         self.send_packet({
             let player = self.player.read().await;
             SynchronizePlayerPosition {
@@ -598,7 +607,7 @@ where
                 yaw: player.rotation.yaw,
                 pitch: player.rotation.pitch,
                 flags: PlayerPositionFlags::new(),
-                teleport_id: VarInt(0),
+                teleport_id: VarInt(2),
             }
         })
         .await?;
@@ -608,7 +617,7 @@ where
         // Initialize world border packet
 
         self.send_packet(SetDefaultSpawn {
-            position: Position { x: 0, y: 47, z: 0 },
+            position: Position { x: 0, y: 100, z: 0 },
             yaw: 90.0,
         })
         .await?;
@@ -632,8 +641,8 @@ where
         })
         .await?;
 
-        for x in -2..=2 {
-            for z in -2..=2 {
+        for x in -1..=1 {
+            for z in -1..=1 {
                 let packet = {
                     let chunk_data = self.server.get_world().get_chunk(x, z).await?;
                     if let Some(chunk_lock) = chunk_data {
@@ -659,7 +668,7 @@ where
                 yaw: player.rotation.yaw,
                 pitch: player.rotation.pitch,
                 flags: PlayerPositionFlags::new(),
-                teleport_id: VarInt(0),
+                teleport_id: VarInt(1),
             }
         })
         .await?;
@@ -673,20 +682,43 @@ where
             )
             .await?;
         }
-        let (chunk_x, chunk_z) = {
-            let position = &self.player.read().await.position;
-            (position.x as i32 >> 4, position.z as i32 >> 4)
-        };
-
-        self.move_chunk(chunk_x, chunk_z).await?;
 
         Ok(())
     }
+    pub(super) async fn on_tick(&self) {
+        let mut player = self.player.write().await;
+
+        if player.invulnerable_time > 0 {
+            player.invulnerable_time -= 1;
+        }
+        player.attack_strength_ticker += 1;
+
+        let chunk_x = player.position.x as i32 >> 4;
+        let chunk_z = player.position.z as i32 >> 4;
+
+        drop(player);
+
+        self.to_client.send(ClientCommand::MoveChunk {
+            chunk_x,
+            chunk_z,
+            max_time: Duration::from_millis(50),
+        });
+
+        self.handler.on_tick(&self).await;
+    }
+
     pub(super) async fn handle_command(
         &self,
         command: ClientCommand<Proxy::TransferData>,
     ) -> Result<Option<Proxy::TransferData>, ConnectionError> {
         match command {
+            ClientCommand::MoveChunk {
+                chunk_x,
+                chunk_z,
+                max_time,
+            } => {
+                self.move_chunk(chunk_x, chunk_z, max_time).await?;
+            }
             ClientCommand::UpdateSlot {
                 window_id,
                 slot,
@@ -726,6 +758,7 @@ where
                 self.send_packet(BossBar { uuid, action }).await?;
             }
             ClientCommand::SyncPosition { position, rotation } => {
+                // If a flag is true, then it means that the value is relative
                 let (rotation, flags) = if let Some(rotation) = rotation {
                     let mut flags = PlayerPositionFlags::new();
                     flags.set_pitch(false);
@@ -737,13 +770,16 @@ where
                     flags.set_yaw(true);
                     (Rotation::new(0., 0.), flags)
                 };
+
+                self.player.write().await.syncing_position = Some(0);
+
                 self.send_packet(SynchronizePlayerPosition {
                     x: position.x,
                     y: position.y,
                     z: position.z,
                     yaw: rotation.yaw,
                     pitch: rotation.pitch,
-                    flags: flags,
+                    flags,
                     teleport_id: VarInt(0),
                 })
                 .await?;
@@ -757,10 +793,6 @@ where
                 let chunk_z = position.z as i32 >> 4;
 
                 self.player.write().await.position = position.clone();
-
-                if previous_chunk_x != chunk_x || previous_chunk_z != chunk_z {
-                    self.move_chunk(chunk_x, chunk_z).await?;
-                }
 
                 self.server
                     .broadcast_entity_move(
@@ -1190,6 +1222,9 @@ where
     ) -> Result<(), ConnectionError> {
         self.handler.on_server_bound_packet(self).await?;
         match packet {
+            ServerBoundPacket::ClientInformation(info) => {
+                *self.client_data.settings.write().await = Some(info);
+            }
             ServerBoundPacket::PlayerAction(action) => match action.status {
                 PlayerActionStatus::DropItem => {
                     self.handler.on_drop_item(self, false).await?;
@@ -1310,7 +1345,20 @@ where
                     _ => {}
                 }
             }
+
+            ServerBoundPacket::ConfirmTeleport(confirmation) => {
+                let mut player = self.player.write().await;
+                if let Some(pos) = player.syncing_position {
+                    if pos == confirmation.teleport_id.0 {
+                        player.syncing_position = None;
+                    }
+                }
+            }
             ServerBoundPacket::SetPlayerPositionAndRotation(pos_rot) => {
+                if self.player.read().await.syncing_position.is_some() {
+                    return Ok(());
+                }
+
                 self.server
                     .handle_position_update(
                         &self.proxy,
@@ -1322,6 +1370,10 @@ where
                     .await?;
             }
             ServerBoundPacket::SetPlayerPosition(pos) => {
+                if self.player.read().await.syncing_position.is_some() {
+                    return Ok(());
+                }
+
                 self.server
                     .handle_position_update(
                         &self.proxy,
@@ -1333,6 +1385,10 @@ where
                     .await?;
             }
             ServerBoundPacket::SetPlayerRotation(rot) => {
+                if self.player.read().await.syncing_position.is_some() {
+                    return Ok(());
+                }
+
                 self.server
                     .handle_position_update(
                         &self.proxy,
@@ -1404,6 +1460,7 @@ where
         &self,
         chunk_x: i32,
         chunk_z: i32,
+        max_time: Duration,
     ) -> Result<(), ConnectionError> {
         let mut player_loaded_chunks = self.client_data.loaded_chunks.lock().await;
 
@@ -1418,35 +1475,59 @@ where
             }
         }
 
-        self.send_packet(SetCenterChunk {
-            x: VarInt(chunk_x),
-            z: VarInt(chunk_z),
-        })
-        .await?;
+        let mut start = Instant::now();
+
+        let mut chunks_to_load = Vec::new();
 
         for x in -SERVER_RENDER_DISTANCE..=SERVER_RENDER_DISTANCE {
             for z in -SERVER_RENDER_DISTANCE..=SERVER_RENDER_DISTANCE {
                 if player_loaded_chunks.contains(&(x + chunk_x, z + chunk_z)) {
                     continue;
                 }
-                let packet = {
-                    let chunk_data = self
-                        .server
-                        .get_world()
-                        .get_chunk(x + chunk_x, z + chunk_z)
-                        .await?;
-                    if let Some(chunk_lock) = chunk_data {
-                        let chunk = chunk_lock.read().await;
-                        Some(chunk.into_packet())
-                    } else {
-                        None
-                    }
-                };
-                if let Some(packet) = packet {
-                    // dbg!(x + chunk_x, z + chunk_z);
-                    self.send_packet(packet).await?;
+                chunks_to_load.push((x, z));
+            }
+        }
+
+        if chunks_to_load.is_empty() {
+            return Ok(());
+        }
+
+        self.send_packet(SetCenterChunk {
+            x: VarInt(chunk_x),
+            z: VarInt(chunk_z),
+        })
+        .await?;
+
+        chunks_to_load.sort_by(|(x, z), (x2, z2)| {
+            let distance = (x * x + z * z) as f64;
+            let distance2 = (x2 * x2 + z2 * z2) as f64;
+            distance.partial_cmp(&distance2).unwrap()
+        });
+
+        // println!("loading {:?}", chunks_to_load);
+
+        for (x, z) in chunks_to_load {
+            let packet = {
+                let chunk_data = self
+                    .server
+                    .get_world()
+                    .get_chunk(x + chunk_x, z + chunk_z)
+                    .await?;
+                if let Some(chunk_lock) = chunk_data {
+                    let chunk = chunk_lock.read().await;
+                    Some(chunk.into_packet())
+                } else {
+                    None
                 }
-                player_loaded_chunks.insert((x + chunk_x, z + chunk_z));
+            };
+            if let Some(packet) = packet {
+                // dbg!(x + chunk_x, z + chunk_z);
+                self.send_packet(packet).await?;
+            }
+            player_loaded_chunks.insert((x + chunk_x, z + chunk_z));
+
+            if start.elapsed() > max_time {
+                return Ok(());
             }
         }
 
@@ -1806,6 +1887,7 @@ where
         println!("{:?} {}", delta.clone() * Vec3::scalar(20.), multiplier);
         delta * Vec3::new(multiplier, multiplier, multiplier)
     }
+    #[allow(unused_must_use)]
     pub fn send_equipment(&self, entity_id: i32, equipment: Equipment) {
         self.to_client.send(ClientCommand::SetEquipment {
             entity_id,
