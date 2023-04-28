@@ -141,9 +141,18 @@ impl Maps {
     }
 }
 
+#[derive(Debug, Clone)]
 enum GameState {
-    Starting { ticks_until_start: u16 },
-    Running { start_time: Instant },
+    Starting {
+        ticks_until_start: u16,
+    },
+    Running {
+        start_time: Instant,
+        finished_players: usize,
+    },
+    Finished {
+        finish_time: Instant,
+    },
 }
 
 const BOOST_TICKS: usize = 12;
@@ -283,8 +292,10 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
             return Ok(None);
         }
 
+        let game_state_lock = self.server.handler.game_state.lock().await;
         // check for passing through checkpoints
-        if let GameState::Running { start_time } = &*client.server.handler.game_state.lock().await {
+        if let GameState::Running { start_time, .. } = *game_state_lock {
+            drop(game_state_lock);
             let next = self.last_checkpoint.lock().await;
             if let Some(next_checkpoint_id) = *next {
                 let next_checkpoint = map.get_checkpoints().get(next_checkpoint_id);
@@ -298,14 +309,14 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                         if next_checkpoint_id + 1 >= map.get_checkpoints().len() {
                             self.last_checkpoint.lock().await.take();
 
-                            self.on_win(client, start_time).await;
+                            self.on_win(client, &start_time).await;
                         } else {
                             self.last_checkpoint
                                 .lock()
                                 .await
                                 .replace(next_checkpoint_id + 1);
 
-                            self.on_checkpoint(client, start_time, next_checkpoint_id)
+                            self.on_checkpoint(client, &start_time, next_checkpoint_id)
                                 .await;
                         }
                     }
@@ -687,62 +698,68 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
             }
         }
 
-        //
-        //
-        // 90% sure this code causes deadlocks
-        //
-        //
-        // // find which two checkpoints the player is between
-        // let mut checkpoints = self.checkpoints.lock().await;
-        // let mut checkpoint_index = 0;
-        // for i in 0..checkpoints.len() {
-        //     if checkpoints[i] {
-        //         checkpoint_index = i;
-        //     }
-        // }
-        // let first_checkpoint = &CANYON_CHECKPOINTS[checkpoint_index];
-        // let second_checkpoint = &CANYON_CHECKPOINTS[(checkpoint_index + 1) % checkpoints.len()];
-        // // find the center of each checkpoint
-        // let first_checkpoint_center = first_checkpoint.plane.center();
-        // let second_checkpoint_center = second_checkpoint.plane.center();
-        // // get the current position of the player
-        // let player_position = client.player.read().await.position.clone();
-        // // find the distance between the player and the center of each checkpoint
-        // let first_checkpoint_distance = first_checkpoint_center.distance(&player_position);
-        // let second_checkpoint_distance = second_checkpoint_center.distance(&player_position);
-        // // get the percentage of the way between the two checkpoints
-        // let checkpoint_percent =
-        //     first_checkpoint_distance / (first_checkpoint_distance + second_checkpoint_distance);
-        // let checkpoint_count = CANYON_CHECKPOINTS.len();
-        // // decrease dashes when there are more checkpoints to achieve a constant width
-        // let dashes_per_checkpoint = 45 / (checkpoint_count - 1) - 1;
-        // let mut checkpoint_representation = String::new();
-        // for i in 0..(checkpoint_count - 1) {
-        //     if i == checkpoint_index {
-        //         checkpoint_representation.push_str(&format!(
-        //             "||{}{}{}",
-        //             "-".repeat((checkpoint_percent * dashes_per_checkpoint as f64) as usize),
-        //             "o",
-        //             "-".repeat(((1. - checkpoint_percent) * dashes_per_checkpoint as f64) as usize)
-        //         ));
-        //     } else {
-        //         checkpoint_representation
-        //             .push_str(&format!("||{}", "-".repeat(dashes_per_checkpoint),));
-        //     }
-        // }
-        // checkpoint_representation.push_str(&format!("||"));
-        // let chat_message = format!(
-        //     "{{\"text\": \"{}\",\"bold\": true}}",
-        //     checkpoint_representation
-        // );
-        // client.send_system_chat_message(chat_message.to_string(), true);
+        let checkpoint_index = client.handler.last_checkpoint.lock().await.clone();
+
+        if let Some(checkpoint_index) = checkpoint_index {
+            let (earlier_checkpoint, later_checkpoint) = match checkpoint_index {
+                0 => (
+                    map.get_spawn_position().clone(),
+                    map.get_checkpoints()[0].plane.center(),
+                ),
+                last_checkpoint => (
+                    map.get_checkpoints()[last_checkpoint - 1].plane.center(),
+                    map.get_checkpoints()[last_checkpoint].plane.center(),
+                ),
+            };
+
+            let distance_to_earlier_checkpoint = (client.player.read().await.position.clone()
+                - earlier_checkpoint.clone())
+            .magnitude();
+            let distance_to_later_checkpoint = (client.player.read().await.position.clone()
+                - later_checkpoint.clone())
+            .magnitude();
+
+            let percent_to_later_checkpoint = (distance_to_earlier_checkpoint
+                / (distance_to_earlier_checkpoint + distance_to_later_checkpoint))
+                as f32;
+
+            client.send_boss_bar_action(
+            0,
+            BossBarAction::UpdateTitle {
+            title:json!([
+                {
+                    "text": "You are ",
+                    "color": "white"
+                },
+                {
+                    "text": format!("{:.2}%", 
+                        (client.handler.last_checkpoint.lock().await.unwrap() as f32 + percent_to_later_checkpoint) / map.get_checkpoints().len() as f32 * 100.
+                ).to_string(),
+                    "color": "gold"
+                },
+                {
+                    "text": " to the finish!",
+                    "color": "white"
+                },
+            ])
+            .to_string()}
+        );
+            client.send_boss_bar_action(
+                0,
+                BossBarAction::UpdateHealth {
+                    health: (client.handler.last_checkpoint.lock().await.unwrap() as f32
+                        + percent_to_later_checkpoint)
+                        / map.get_checkpoints().len() as f32,
+                },
+            );
+        };
     }
     async fn on_on_ground(
         &self,
         client: &Client<GlideServerHandler, MiniGameProxy>,
         on_ground: bool,
     ) -> Result<bool, ConnectionError> {
-        if let GameState::Running { .. } = &*client.server.handler.game_state.lock().await {
+        if let GameState::Running { .. } = *client.server.handler.game_state.lock().await {
             let map = &self.server.handler.map;
             let mut last_damage = client.handler.last_damage.lock().await;
 
@@ -852,6 +869,57 @@ impl GlidePlayerHandler {
         client: &Client<GlideServerHandler, MiniGameProxy>,
         start_time: &Instant,
     ) {
+        let mut game_state = self.server.handler.game_state.lock().await;
+        if let GameState::Running {
+            mut finished_players,
+            ..
+        } = *game_state
+        {
+            finished_players += 1;
+            if finished_players == self.server.player_list.len() {
+                *game_state = GameState::Finished {
+                    finish_time: Instant::now(),
+                };
+                for client in self.server.player_list.iter() {
+                    client.send_boss_bar_action(0, BossBarAction::Remove);
+                    client.send_system_chat_message(
+                        json!([
+                            {
+                                "text": "Game Finished!",
+                                "color": "green",
+                            },
+                            {
+                                "text": "\n",
+                                "color": "white",
+                            },
+                            {
+                                "text": "Leaderboard: (TODO actual functionality)",
+                                "color": "gold",
+                            },
+                            {
+                                "text": "\n",
+                                "color": "white",
+                            },
+                            {
+                                "text": "1. ",
+                                "color": "gold",
+                            },
+                            {
+                                "text": format!(
+                                    "{} - {}",
+                                    client.player.read().await.profile.name,
+                                    format_duration(start_time.elapsed())
+                                ),
+                                "color": "yellow",
+                            }
+                        ])
+                        .to_string(),
+                        false,
+                    );
+                }
+            }
+        }
+        drop(game_state);
         client.show_chat_message(
             json!(
                 {
@@ -910,7 +978,21 @@ impl GlidePlayerHandler {
 
         client.set_max_health(20.).await;
 
-        client.set_health(20.)
+        client.set_health(20.);
+
+        client.send_boss_bar_action(
+            0,
+            BossBarAction::UpdateTitle {
+                title: json!({
+                    "text":
+                        format!(
+                            "Completed race in {}",
+                            format_duration(start_time.elapsed())
+                        )
+                })
+                .to_string(),
+            },
+        );
     }
 }
 
@@ -974,15 +1056,19 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
         self.map.get_world()
     }
     async fn on_tick(&self, server: &Server<Self, MiniGameProxy>, proxy: Arc<MiniGameProxy>) {
-        if self.created_at.elapsed().as_millis() / 50 >= 200 && server.player_list.len() == 0 {
+        if self.created_at.elapsed().as_millis() / 1000 * TICKS_PER_SECOND as u128 >= 200
+            && server.player_list.len() == 0
+        {
             proxy.glide_queue.lock().await.remove_server(server.id);
         }
+
         let mut game_state = self.game_state.lock().await;
-        match &*game_state {
+
+        match *game_state {
+            // OK
             GameState::Starting { ticks_until_start } => {
-                if *ticks_until_start != 0 {
-                    if *ticks_until_start % TICKS_PER_SECOND as u16 == 0
-                        && *ticks_until_start <= 100
+                if ticks_until_start != 0 {
+                    if ticks_until_start % TICKS_PER_SECOND as u16 == 0 && ticks_until_start <= 100
                     {
                         server.broadcast_chat(
                             json!([
@@ -991,7 +1077,7 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
                                   "color": "yellow"
                                 },
                                 {
-                                  "text": format!("{}", *ticks_until_start / 20),
+                                  "text": format!("{}", ticks_until_start / 20),
                                   "color": "green"
                                 },
                                 {
@@ -1009,25 +1095,34 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
                 }
                 *game_state = GameState::Running {
                     start_time: Instant::now(),
+                    finished_players: 0,
                 };
 
                 drop(game_state);
 
                 self.start_game(server, &proxy).await;
             }
-            GameState::Running { start_time } => {
+            GameState::Running {
+                start_time,
+                finished_players,
+            } => {
                 let time_elapsed = format_duration(start_time.elapsed());
 
                 for player in server.player_list.iter() {
-                    player.send_boss_bar_action(
-                        0,
-                        BossBarAction::UpdateTitle {
-                            title: json!({
-                                "text": format!("Time elapsed: {}", time_elapsed),
-                            })
-                            .to_string(),
-                        },
+                    player.send_system_chat_message(
+                        json!({
+                            "text": format!("Time elapsed: {}", time_elapsed),
+                        })
+                        .to_string(),
+                        true,
                     )
+                }
+            }
+            GameState::Finished { finish_time } => {
+                if finish_time.elapsed().as_millis() > 10000 {
+                    for client in server.player_list.iter() {
+                        client.transfer(TransferData::Lobby);
+                    }
                 }
             }
         }
@@ -1101,10 +1196,10 @@ impl GlideServerHandler {
                 0,
                 BossBarAction::Add {
                     title: json!({
-                        "text": "Time elapsed: 0:00.000",
+                        "text": "",
                     })
                     .to_string(),
-                    health: 1.0,
+                    health: 0.,
                     color: BossBarColor::Green,
                     division: BossBarDivision::NoDivisions,
                     flags: 0,

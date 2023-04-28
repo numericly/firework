@@ -651,3 +651,45 @@ impl DeserializeField for InteractAction {
         }
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct Equipment {
+    pub equipment: Vec<EquipmentEntry>,
+}
+
+#[derive(Debug, Clone)]
+pub struct EquipmentEntry {
+    pub slot: EquipmentSlot,
+    pub item: Slot,
+}
+
+#[derive(Debug, Clone)]
+
+pub enum EquipmentSlot {
+    MainHand,
+    OffHand,
+    Boots,
+    Leggings,
+    Chestplate,
+    Helmet,
+}
+
+impl SerializeField for Equipment {
+    fn serialize<W: Write>(&self, mut writer: W) {
+        for (i, equipment) in self.equipment.iter().enumerate() {
+            let mut slot: u8 = match &equipment.slot {
+                EquipmentSlot::MainHand => 0,
+                EquipmentSlot::OffHand => 1,
+                EquipmentSlot::Boots => 2,
+                EquipmentSlot::Leggings => 3,
+                EquipmentSlot::Chestplate => 4,
+                EquipmentSlot::Helmet => 5,
+            };
+            if i != self.equipment.len() - 1 {
+                slot |= 0b1000_0000;
+            }
+            slot.serialize(&mut writer);
+            equipment.item.serialize(&mut writer);
+        }
+    }
+}

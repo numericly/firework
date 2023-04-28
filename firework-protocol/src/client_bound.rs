@@ -54,7 +54,7 @@ use nbt::Blob;
 use crate::data_types::{
     Attribute, BitSet, BossBarAction, DeathLocation, EntityAnimationType, EntityEventStatus, Hand,
     Particle, PlayerAbilityFlags, PlayerInfoAction, PlayerPositionFlags, Recipe, Slot,
-    SuggestionMatch,
+    SuggestionMatch, Equipment,
 };
 
 pub trait ClientBoundPacket {
@@ -317,8 +317,7 @@ define_client_bound_protocol! {
     // Source: https://wiki.vg/Protocol#Set_Equipment
     SetEquipment, 0x55, Play => {
         entity_id: VarInt,
-        slot: u8,
-        item: Slot
+        equipment: Equipment
     },
     SetHealth, 0x57, Play => {
         health: f32,

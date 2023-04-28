@@ -34,6 +34,8 @@ use tokio::time::sleep;
 use tokio::{select, task};
 use tokio_util::sync::CancellationToken;
 
+use rustrict::{Censor, Type};
+
 pub use firework_authentication as authentication;
 pub use firework_data as data;
 pub use firework_protocol as protocol;
@@ -709,7 +711,13 @@ where
         chat: String,
     ) -> Result<Option<String>, ConnectionError> {
         let name = &client.player.read().await.profile.name;
-        Ok(Some(format!(r#"{{ "text": "<{}> {}"}}"#, name, chat)))
+
+        let (censored, analysis) = Censor::from_str(&chat)
+            .with_censor_threshold(Type::SEVERE | Type::OFFENSIVE)
+            .with_censor_replacement('*')
+            .censor_and_analyze();
+
+        Ok(Some(format!(r#"{{ "text": "<{}> {}"}}"#, name, censored)))
     }
     async fn on_use_item(
         &self,
