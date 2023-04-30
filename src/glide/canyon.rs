@@ -107,7 +107,7 @@ pub const BOOSTS: [Boost; 8] = [
                 z: 269,
             },
         },
-        speed: 2.5,
+        speed: 2.2,
         particle_type: BoostParticleType::BoostNorth,
     },
     Boost {
@@ -172,9 +172,9 @@ pub const LOFTS: [Loft; 8] = [
         // -24 12 204, -21 18 207
         area: AxisAlignedBB {
             min: BlockPos::new(-24, 12, 204),
-            max: BlockPos::new(-21, 18, 207),
+            max: BlockPos::new(-21, 22, 207),
         },
-        speed: 0.15,
+        speed: 0.2,
     },
     Loft {
         // -46 12 265, -42 22 269
@@ -190,7 +190,7 @@ pub const LOFTS: [Loft; 8] = [
             min: BlockPos::new(-123, 12, 259),
             max: BlockPos::new(-120, 22, 262),
         },
-        speed: 0.35,
+        speed: 0.1,
     },
     Loft {
         // -76 29 281, -74 42 283
@@ -198,7 +198,7 @@ pub const LOFTS: [Loft; 8] = [
             min: BlockPos::new(-76, 29, 281),
             max: BlockPos::new(-74, 42, 283),
         },
-        speed: 0.35,
+        speed: 0.25,
     },
     Loft {
         // 12 99 302, 15 109 305
@@ -206,7 +206,7 @@ pub const LOFTS: [Loft; 8] = [
             min: BlockPos::new(12, 99, 302),
             max: BlockPos::new(15, 109, 305),
         },
-        speed: 0.35,
+        speed: 0.2,
     },
 ];
 
