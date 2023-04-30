@@ -87,7 +87,7 @@ pub enum Maps {
 impl Distribution<Maps> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Maps {
         match rng.gen_range(0..3) {
-            _ => Maps::Canyon,
+            _ => Maps::Cavern,
             0 => Maps::Canyon,
             1 => Maps::Cavern,
             2 => Maps::Temple,

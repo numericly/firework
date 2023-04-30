@@ -1,7 +1,7 @@
 use super::{Boost, Checkpoint, Loft};
 use firework::{AxisAlignedBB, BlockPos, Rotation, Vec3};
 
-pub const SPAWN_POSITION: Vec3 = Vec3::new(0.5, 144.0, 0.5);
+pub const SPAWN_POSITION: Vec3 = Vec3::new(0.5, 148.0, 7.5);
 
 pub const SPAWN_AREA: AxisAlignedBB = AxisAlignedBB {
     max: BlockPos { x: 7, y: 146, z: 5 },
