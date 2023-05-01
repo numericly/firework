@@ -620,6 +620,15 @@ where
                 if let Some(next_data) = next_data {
                     if suggestions.contains(&data.to_string()) {
                         arguments.push(parser.parse(data));
+
+                        let new_index = index + data.len() as i32 + 1;
+
+                        for child in &self.children {
+                            let result = child.parse(arguments, next_data, new_index).await;
+                            if result.executable.is_ok() || result.suggestions.is_some() {
+                                return result;
+                            }
+                        }
                     } else {
                         return ParseResult {
                             executable: Err(CommandError::NotInSuggestions {

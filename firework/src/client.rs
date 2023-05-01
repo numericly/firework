@@ -20,7 +20,7 @@ use firework_protocol::{
         SetSubtitleText, SetTags, SetTitleAnimationTimes, SetTitleText, SoundEffect, SoundSource,
         SpawnPlayer, SynchronizePlayerPosition, SystemChatMessage, TeleportEntity, UnloadChunk,
         UpdateAttributes, UpdateEntityHeadRotation, UpdateEntityPosition,
-        UpdateEntityPositionAndRotation, UpdateEntityRotation, VanillaSound,
+        UpdateEntityPositionAndRotation, UpdateEntityRotation, UpdateTime, VanillaSound,
     },
     core::{DeserializeField, Position, SerializeField, UnsizedVec, VarInt},
     data_types::{
@@ -662,6 +662,12 @@ where
             }
         }
 
+        self.send_packet(UpdateTime {
+            world_age: 0,
+            time_of_day: 1000,
+        })
+        .await?;
+
         self.send_packet({
             let player = self.player.read().await;
             SynchronizePlayerPosition {
@@ -704,7 +710,7 @@ where
         self.to_client.send(ClientCommand::MoveChunk {
             chunk_x,
             chunk_z,
-            max_time: Duration::from_millis(50),
+            max_time: Duration::from_millis(49),
         });
 
         self.handler.on_tick(&self).await;

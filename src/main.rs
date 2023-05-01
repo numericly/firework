@@ -206,6 +206,8 @@ impl ServerProxy for MiniGameProxy {
                 .handle_connection(self.clone(), connection.clone(), client_data.clone())
                 .await;
 
+            println!("result: {:?}", result);
+
             let Ok(transfer_data) = result else {
                 break;
             };
@@ -309,7 +311,7 @@ async fn main() {
     std::env::set_var("RUST_BACKTRACE", "1");
 
     ServerManager::<MiniGameProxy>::run(ServerOptions {
-        encryption: true,
+        encryption: false,
         host: true,
         ..Default::default()
     })

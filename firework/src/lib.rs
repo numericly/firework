@@ -17,6 +17,7 @@ use firework_protocol::{
 use firework_protocol::{read_specific_packet, ConnectionState, Protocol, ProtocolError};
 use firework_world::World;
 use gui::GuiScreen;
+use protocol::client_bound::UpdateTime;
 use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
 use sha1::{Digest, Sha1};
 use std::sync::Arc;
@@ -898,10 +899,10 @@ where
             .await?;
 
         let (to_client_sender, to_client_receiver) =
-            broadcast::channel::<ClientCommand<Proxy::TransferData>>(100);
+            broadcast::channel::<ClientCommand<Proxy::TransferData>>(1024);
 
         let (to_client_visual_sender, to_client_visual_receiver) =
-            broadcast::channel::<ClientCommand<Proxy::TransferData>>(100);
+            broadcast::channel::<ClientCommand<Proxy::TransferData>>(2048);
 
         // generate client
         let uuid = player.uuid.clone();
@@ -1066,10 +1067,16 @@ where
 
             loop {
                 select! {
-                    _ = sleep(Duration::from_secs(1)) => {
+                    _ = sleep(Duration::from_secs(8)) => {
+
+                        client.send_packet(UpdateTime {
+                            world_age: 0,
+                            time_of_day: 1000,
+                        }).await?;
+
                         if !client.ping().await? {
                             missed_pings += 1;
-                            if missed_pings >= 15 {
+                            if missed_pings >= 2 {
                                 return Err(ConnectionError::ClientTimedOut)
                             }
                             println!("Missed ping: {}", missed_pings);

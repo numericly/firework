@@ -52,9 +52,9 @@ use std::collections::HashMap;
 use nbt::Blob;
 
 use crate::data_types::{
-    Attribute, BitSet, BossBarAction, DeathLocation, EntityAnimationType, EntityEventStatus, Hand,
-    Particle, PlayerAbilityFlags, PlayerInfoAction, PlayerPositionFlags, Recipe, Slot,
-    SuggestionMatch, Equipment,
+    Attribute, BitSet, BossBarAction, DeathLocation, EntityAnimationType, EntityEventStatus,
+    Equipment, Hand, Particle, PlayerAbilityFlags, PlayerInfoAction, PlayerPositionFlags, Recipe,
+    Slot, SuggestionMatch,
 };
 
 pub trait ClientBoundPacket {
@@ -326,6 +326,10 @@ define_client_bound_protocol! {
     },
     SetSubtitleText, 0x5D, Play => {
         subtitle: String // TODO: Chat
+    },
+    UpdateTime, 0x5E, Play => {
+        world_age: i64,
+        time_of_day: i64
     },
     SetTitleText, 0x5F, Play => {
         title: String // TODO: Chat
