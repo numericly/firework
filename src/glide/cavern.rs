@@ -80,8 +80,8 @@ pub const BOOSTS: [Boost; 17] = [
         particle_type: super::BoostParticleType::BoostNorth,
     },
     Boost {
-        // -30 0 178, -26 3 183
-        area: AxisAlignedBB::new(BlockPos::new(-30, 0, 178), BlockPos::new(-26, 3, 183)),
+        // -30 0 178, -25 5 183
+        area: AxisAlignedBB::new(BlockPos::new(-30, 0, 178), BlockPos::new(-25, 5, 183)),
         speed: 5.,
         particle_type: super::BoostParticleType::BoostWest,
     },
@@ -416,4 +416,8 @@ pub const CHECKPOINTS: [Checkpoint; 9] = [
         spawn_position: Vec3::new(220., -40., 61.),
         spawn_rotation: Rotation::new(-90., -30.),
     },
+];
+
+pub const AUTHOR_TIMES: [f32; 9] = [
+    9.167, 19.865, 31.115, 35.465, 43.360, 58.715, 74.015, 81.867, 90.316,
 ];

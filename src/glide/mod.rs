@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use firework::data::items::RabbitHide;
 use firework::{authentication::Profile, gui::GUIEvent, protocol::server_bound::ClickContainer};
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
@@ -33,6 +34,8 @@ use tokio::sync::{broadcast, Mutex, RwLock};
 use crate::{
     MiniGameProxy, TransferData, CANYON_GLIDE_WORLD, CAVERN_GLIDE_WORLD, TEMPLE_GLIDE_WORLD,
 };
+
+use self::canyon::AUTHOR_TIMES;
 
 mod canyon;
 mod cavern;
@@ -75,7 +78,6 @@ pub enum BoostParticleType {
     BoostWest,
     BoostNorth,
     BoostSouth,
-    Smoke,
 }
 
 pub enum Maps {
@@ -87,7 +89,6 @@ pub enum Maps {
 impl Distribution<Maps> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Maps {
         match rng.gen_range(0..3) {
-            _ => Maps::Cavern,
             0 => Maps::Canyon,
             1 => Maps::Cavern,
             2 => Maps::Temple,
@@ -139,6 +140,13 @@ impl Maps {
             Maps::Temple => &temple::SPAWN_POSITION,
         }
     }
+    pub fn get_author_times(&self) -> &'static [f32] {
+        match self {
+            Maps::Canyon => &canyon::AUTHOR_TIMES,
+            Maps::Cavern => &cavern::AUTHOR_TIMES,
+            Maps::Temple => &temple::AUTHOR_TIMES,
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -168,7 +176,7 @@ pub struct GlidePlayerHandler {
     last_boost: Mutex<Option<(Instant, usize)>>,
     last_loft: Mutex<Option<(Instant, usize)>>,
     boost_status: RwLock<Option<BoostStatus>>,
-    animation_frame: Mutex<u8>,
+    animation_frame: Mutex<i32>,
     server: Arc<Server<GlideServerHandler, MiniGameProxy>>,
     _proxy: Arc<MiniGameProxy>,
     last_checkpoint: Mutex<Option<usize>>,
@@ -409,61 +417,15 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
 
         let map = &self.server.handler.map;
 
+        let mut particles: Vec<Particle> = Vec::new();
+        let mut animation_frame_lock = self.animation_frame.lock().await;
+        let animation_frame = *animation_frame_lock;
+        *animation_frame_lock = animation_frame.wrapping_add(1);
+        drop(animation_frame_lock);
         {
-            const PARTICLE_DENSITY: i32 = 2;
-            let time = client.server.handler.created_at.elapsed().as_secs_f32();
             let position = client.player.read().await.position.clone();
 
             for checkpoint in map.get_checkpoints().iter() {
-                fn checkpoint_particle_box(
-                    x1: f64,
-                    y1: f64,
-                    z1: f64,
-                    x2: f64,
-                    y2: f64,
-                    z2: f64,
-                ) -> Vec<Particle> {
-                    let mut particles = Vec::new();
-
-                    // sadly the particle system is based around gaussian distributions, so here's a hack to
-                    // make the particles look like a box
-
-                    // add one because we want to include a minimum of 1 segment in each dimension
-                    let count_x = (x2 - x1).abs() as i32 / 12 + 1;
-                    let count_y = (y2 - y1).abs() as i32 / 12 + 1;
-                    let count_z = (z2 - z1).abs() as i32 / 12 + 1;
-
-                    let segment_width = (x2 - x1).abs() / count_x as f64;
-                    let segment_height = (y2 - y1).abs() / count_y as f64;
-                    let segment_depth = (z2 - z1).abs() / count_z as f64;
-
-                    for x in 0..count_x {
-                        for y in 0..count_y {
-                            for z in 0..count_z {
-                                if (x + y + z) % 2 == 0 {
-                                    continue;
-                                }
-                                let x = x1 + (x as f64 + 0.5) * segment_width;
-                                let y = y1 + (y as f64 + 0.5) * segment_height;
-                                let z = z1 + (z as f64 + 0.5) * segment_depth;
-                                particles.push(Particle::new(
-                                    Particles::EndRod,
-                                    true,
-                                    x,
-                                    y,
-                                    z,
-                                    (segment_width / 2.) as f32,
-                                    (segment_height / 2.) as f32,
-                                    (segment_depth / 2.) as f32,
-                                    0.0,
-                                    3,
-                                ));
-                            }
-                        }
-                    }
-                    particles
-                }
-
                 let (min, max) = checkpoint.plane.to_cartesian_pair();
 
                 let center = checkpoint.plane.center();
@@ -475,8 +437,42 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                     continue;
                 }
 
-                let particles = checkpoint_particle_box(min.x, min.y, min.z, max.x, max.y, max.z);
-                client.send_particles(particles);
+                // sadly the particle system is based around gaussian distributions, so here's a hack to
+                // make the particles look like a box
+
+                // add one because we want to include a minimum of 1 segment in each dimension
+                let count_x = (max.x - min.x).abs() as i32 / 12 + 1;
+                let count_y = (max.y - min.y).abs() as i32 / 12 + 1;
+                let count_z = (max.z - min.z).abs() as i32 / 12 + 1;
+
+                let segment_width = (max.x - min.x).abs() / count_x as f64;
+                let segment_height = (max.y - min.y).abs() / count_y as f64;
+                let segment_depth = (max.z - min.z).abs() / count_z as f64;
+
+                for x in 0..count_x {
+                    for y in 0..count_y {
+                        for z in 0..count_z {
+                            if (x + y + z + animation_frame) % 10 != 0 {
+                                continue;
+                            }
+                            let x = min.x + (x as f64 + 0.5) * segment_width;
+                            let y = min.y + (y as f64 + 0.5) * segment_height;
+                            let z = min.z + (z as f64 + 0.5) * segment_depth;
+                            particles.push(Particle::new(
+                                Particles::EndRod,
+                                true,
+                                x,
+                                y,
+                                z,
+                                (segment_width / 2.) as f32,
+                                (segment_height / 2.) as f32,
+                                (segment_depth / 2.) as f32,
+                                0.0,
+                                20,
+                            ));
+                        }
+                    }
+                }
             }
 
             for (i, loft) in map.get_lofts().iter().enumerate() {
@@ -500,36 +496,34 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                         velocity,
                     });
                 }
-                fn smoke_particle(x: f64, y: f64, z: f64, height: f32) -> Particle {
-                    const LIFETIME: f32 = 100.0; // lifetime in ticks
-                    let speed = height / LIFETIME;
-                    Particle::new(
-                        Particles::CampfireCozySmoke,
-                        true,
-                        x,
-                        y,
-                        z,
-                        0.,
-                        1.,
-                        0.,
-                        speed, // blocks per tick
-                        0,
-                    )
+
+                if (loft.area.min.x as f64 - position.x).abs() > 100.
+                    || (loft.area.min.y as f64 - position.y).abs() > 100.
+                    || (loft.area.min.z as f64 - position.z).abs() > 100.
+                {
+                    continue;
                 }
 
-                let mut particles: Vec<Particle> = Vec::new();
-
-                for _ in 0..2 {
-                    let x = loft.area.min.x as f64
-                        + (loft.area.max.x as f64 - loft.area.min.x as f64) * rand::random::<f64>();
-                    let y = loft.area.min.y as f64;
-                    let height = loft.area.max.y as f32 - loft.area.min.y as f32;
-                    let z = loft.area.min.z as f64
-                        + (loft.area.max.z as f64 - loft.area.min.z as f64) * rand::random::<f64>();
-                    particles.push(smoke_particle(x, y, z, height));
-                }
-
-                client.send_particles(particles);
+                let x = loft.area.min.x as f64
+                    + (loft.area.max.x as f64 - loft.area.min.x as f64) * rand::random::<f64>();
+                let y = loft.area.min.y as f64;
+                let height = loft.area.max.y as f32 - loft.area.min.y as f32;
+                let z = loft.area.min.z as f64
+                    + (loft.area.max.z as f64 - loft.area.min.z as f64) * rand::random::<f64>();
+                const LIFETIME: f32 = 100.0; // lifetime in ticks
+                let speed = height / LIFETIME;
+                particles.push(Particle::new(
+                    Particles::CampfireCozySmoke,
+                    true,
+                    x,
+                    y,
+                    z,
+                    0.,
+                    1.,
+                    0.,
+                    speed, // blocks per tick
+                    0,
+                ));
             }
 
             for (i, boost) in map.get_boosts().iter().enumerate() {
@@ -562,32 +556,80 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                 {
                     continue;
                 }
-                let boost_direction_multiplier;
-                let mut particles = Vec::new();
-                let middle_x = (boost.area.max.x + boost.area.min.x) as f32 / 2.;
-                let middle_y = (boost.area.max.y + boost.area.min.y) as f32 / 2.;
-                let middle_z = (boost.area.max.z + boost.area.min.z) as f32 / 2.;
-                if [
-                    BoostParticleType::BoostSouth,
-                    BoostParticleType::BoostEast,
-                    BoostParticleType::Smoke,
-                ]
-                .contains(&boost.particle_type)
-                {
-                    boost_direction_multiplier = 1.;
-                } else {
-                    boost_direction_multiplier = -1.;
+
+                // we define the depth as the direction the boost is pointing
+                // so we can use the same code for both directions
+                // the width is perpendicular to the depth
+
+                let depth = match boost.particle_type {
+                    BoostParticleType::BoostNorth | BoostParticleType::BoostSouth => {
+                        boost.area.max.z as f64 - boost.area.min.z as f64
+                    }
+                    BoostParticleType::BoostEast | BoostParticleType::BoostWest => {
+                        boost.area.max.x as f64 - boost.area.min.x as f64
+                    }
+                };
+
+                let chevron_count = depth as usize / 3;
+
+                // the x and z coords in this vector get swapped depending on the direction of the boost
+                // or become negative if the boost is pointing in the negative direction
+                let mut particle_positions: Vec<Vec3> = Vec::new();
+
+                for chevron in 0..chevron_count {
+                    // x is along "width", z is along "depth".
+                    // all are in 0-1 range throughout this loop
+
+                    // top
+                    let random_x = rand::random::<f64>();
+                    let min_depth = chevron as f64 / chevron_count as f64;
+                    let max_depth = (chevron + 1) as f64 / chevron_count as f64;
+                    let z = (random_x - 0.5).abs() * 2. * (max_depth - min_depth) + min_depth;
+
+                    particle_positions.push(Vec3::new(random_x, 1., z));
+
+                    // sides
+                    let random_y = rand::random::<f64>();
+                    let z = (random_y - 0.5).abs() * 2. * (max_depth - min_depth) + min_depth;
+
+                    particle_positions.push(Vec3::new(0., random_y, z));
+                    particle_positions.push(Vec3::new(1., random_y, z));
                 }
 
-                fn particle(x: f64, y: f64, z: f64) -> Particle {
-                    Particle::new(
+                if boost.particle_type == BoostParticleType::BoostSouth
+                    || boost.particle_type == BoostParticleType::BoostEast
+                {
+                    for position in &mut particle_positions {
+                        position.z = 1. - position.z;
+                    }
+                }
+
+                if boost.particle_type == BoostParticleType::BoostEast
+                    || boost.particle_type == BoostParticleType::BoostWest
+                {
+                    for position in &mut particle_positions {
+                        let temp = position.x;
+                        position.x = position.z;
+                        position.z = temp;
+                    }
+                }
+
+                for particle_position in particle_positions {
+                    let x = boost.area.min.x as f64
+                        + (boost.area.max.x as f64 - boost.area.min.x as f64) * particle_position.x;
+                    let y = boost.area.min.y as f64
+                        + (boost.area.max.y as f64 - boost.area.min.y as f64) * particle_position.y;
+                    let z = boost.area.min.z as f64
+                        + (boost.area.max.z as f64 - boost.area.min.z as f64) * particle_position.z;
+
+                    particles.push(Particle::new(
                         Particles::Dust {
                             red: 1.,
                             green: 0.7,
                             blue: 0.,
                             scale: 3.,
                         },
-                        false,
+                        true,
                         x,
                         y,
                         z,
@@ -595,151 +637,13 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                         0.,
                         0.,
                         0.,
-                        1,
-                    )
-                }
-
-                let animation_phase = (time * 0.4 * boost_direction_multiplier).rem_euclid(6.);
-
-                if boost.particle_type == BoostParticleType::Smoke {
-                } else if [BoostParticleType::BoostSouth, BoostParticleType::BoostNorth]
-                    .contains(&boost.particle_type)
-                {
-                    // each chevron is 6 blocks long
-                    // loop through the amount of chevrons
-                    for chevron_number in 0..=((boost.area.max.z - boost.area.min.z) / 6) {
-                        // loop through the amount of particles in each chevron
-                        // first, draw the top chevrons
-                        for particle_number in
-                            0..=((boost.area.max.x - boost.area.min.x) * PARTICLE_DENSITY)
-                        {
-                            let particle_x = boost.area.min.x as f32
-                                + particle_number as f32 / PARTICLE_DENSITY as f32;
-                            let particle_y = boost.area.max.y as f32;
-                            let particle_z = boost.area.min.z as f32
-                                + chevron_number as f32 * 6.
-                                + animation_phase;
-                            // offset the z based on the distance to the center of x (45deg angle)
-                            let particle_z = particle_z
-                                - (particle_x - middle_x).abs() * boost_direction_multiplier;
-                            // bounds check
-                            if particle_z > boost.area.max.z as f32
-                                || particle_z < boost.area.min.z as f32
-                            {
-                                continue;
-                            }
-                            particles.push(particle(
-                                particle_x as f64,
-                                particle_y as f64,
-                                particle_z as f64,
-                            ));
-                        }
-                        //then, draw the left and right chevrons
-                        for particle_number in
-                            0..=((boost.area.max.y - boost.area.min.y) * PARTICLE_DENSITY)
-                        {
-                            let particle_x = boost.area.min.x as f32;
-                            let particle_y = boost.area.min.y as f32
-                                + particle_number as f32 / PARTICLE_DENSITY as f32;
-                            let particle_z = boost.area.min.z as f32
-                                + chevron_number as f32 * 6.
-                                + animation_phase;
-                            // offset the z based on the distance to the center of x (45deg angle)
-                            let particle_z = particle_z
-                                - (particle_y - middle_y).abs() * boost_direction_multiplier;
-                            // bounds check
-                            if particle_z > boost.area.max.z as f32
-                                || particle_z < boost.area.min.z as f32
-                            {
-                                continue;
-                            }
-                            particles.push(particle(
-                                particle_x as f64,
-                                particle_y as f64,
-                                particle_z as f64,
-                            ));
-                            let particle_x = boost.area.max.x as f32;
-                            particles.push(particle(
-                                particle_x as f64,
-                                particle_y as f64,
-                                particle_z as f64,
-                            ));
-                        }
-                    }
-                } else {
-                    for chevron_number in 0..=((boost.area.max.x - boost.area.min.x) / 6) {
-                        // loop through the amount of particles in each chevron
-                        // first, draw the top chevrons
-                        for particle_number in
-                            0..=((boost.area.max.z - boost.area.min.z) * PARTICLE_DENSITY)
-                        {
-                            let particle_x = boost.area.min.x as f32
-                                + chevron_number as f32 * 6.
-                                + animation_phase;
-                            let particle_y = boost.area.max.y as f32;
-                            let particle_z = boost.area.min.z as f32
-                                + particle_number as f32 / PARTICLE_DENSITY as f32;
-                            // offset the z based on the distance to the center of x (45deg angle)
-                            let particle_x = particle_x
-                                - (particle_z - middle_z).abs() * boost_direction_multiplier;
-                            // bounds check
-                            if particle_x > boost.area.max.x as f32
-                                || particle_x < boost.area.min.x as f32
-                            {
-                                continue;
-                            }
-                            particles.push(particle(
-                                particle_x as f64,
-                                particle_y as f64,
-                                particle_z as f64,
-                            ));
-                        }
-                        //then, draw the left and right chevrons
-                        for particle_number in
-                            0..=((boost.area.max.y - boost.area.min.y) * PARTICLE_DENSITY)
-                        {
-                            let particle_x = boost.area.min.x as f32
-                                + chevron_number as f32 * 6.
-                                + animation_phase;
-                            let particle_y = boost.area.min.y as f32
-                                + particle_number as f32 / PARTICLE_DENSITY as f32;
-                            let particle_z = boost.area.min.z as f32;
-                            // offset the z based on the distance to the center of x (45deg angle)
-                            let particle_x = particle_x
-                                - (particle_y - middle_y).abs() * boost_direction_multiplier;
-                            // bounds check
-                            if particle_x > boost.area.max.x as f32
-                                || particle_x < boost.area.min.x as f32
-                            {
-                                continue;
-                            }
-                            particles.push(particle(
-                                particle_x as f64,
-                                particle_y as f64,
-                                particle_z as f64,
-                            ));
-                            let particle_z = boost.area.max.z as f32;
-                            particles.push(particle(
-                                particle_x as f64,
-                                particle_y as f64,
-                                particle_z as f64,
-                            ));
-                        }
-                    }
-                }
-
-                // send the particles to the client
-
-                let mut animation_frame = self.animation_frame.lock().await;
-                if *animation_frame == 5 {
-                    client.send_particles(particles);
-                    *animation_frame = 0;
-                } else {
-                    *animation_frame += 1;
+                        4,
+                    ));
                 }
             }
         }
 
+        client.send_particles(particles);
         let checkpoint_index = client.handler.last_checkpoint.lock().await.clone();
 
         if let Some(checkpoint_index) = checkpoint_index {
@@ -765,35 +669,45 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                 / (distance_to_earlier_checkpoint + distance_to_later_checkpoint))
                 as f32;
 
-            client.send_boss_bar_action(
-            0,
-            BossBarAction::UpdateTitle {
-            title:json!([
-                {
-                    "text": "You are ",
-                    "color": "white"
-                },
-                {
-                    "text": format!("{:.2}%", 
-                        (client.handler.last_checkpoint.lock().await.unwrap() as f32 + percent_to_later_checkpoint) / map.get_checkpoints().len() as f32 * 100.
-                ).to_string(),
-                    "color": "gold"
-                },
-                {
-                    "text": " to the finish!",
-                    "color": "white"
-                },
-            ])
-            .to_string()}
-        );
+            let mut percentage = 0.;
+            let last_checkpoint = client.handler.last_checkpoint.lock().await.unwrap();
+            let total_author_time = map.get_author_times().iter().sum::<f32>();
+            for (i, author_time) in map
+                .get_author_times()
+                .iter()
+                .map(|f| f / total_author_time)
+                .enumerate()
+            {
+                if last_checkpoint > i {
+                    percentage += author_time;
+                } else if last_checkpoint == i {
+                    percentage += percent_to_later_checkpoint * author_time;
+                }
+            }
+
             client.send_boss_bar_action(
                 0,
-                BossBarAction::UpdateHealth {
-                    health: (client.handler.last_checkpoint.lock().await.unwrap() as f32
-                        + percent_to_later_checkpoint)
-                        / map.get_checkpoints().len() as f32,
+                BossBarAction::UpdateTitle {
+                    title: json!([
+                        {
+                            "text": "You are ",
+                            "color": "white"
+                        },
+                        {
+                            "text": format!("{:.2}%",
+                                percentage * 100.
+                        ).to_string(),
+                            "color": "gold"
+                        },
+                        {
+                            "text": " to the finish!",
+                            "color": "white"
+                        }
+                    ])
+                    .to_string(),
                 },
             );
+            client.send_boss_bar_action(0, BossBarAction::UpdateHealth { health: percentage });
         };
     }
     async fn on_on_ground(
@@ -877,16 +791,22 @@ impl GlidePlayerHandler {
         &self,
         client: &Client<GlideServerHandler, MiniGameProxy>,
         start_time: &Instant,
-        check_point_id: usize,
+        checkpoint_id: usize,
     ) {
+        let elapsed = start_time.elapsed();
+        println!(
+            "Checkpoint {} in {}",
+            checkpoint_id + 1,
+            format_duration(elapsed)
+        );
         client.send_title(
             "{\"text\":\"Checkpoint\"}".to_string(),
             json!({
                 "text":
                     format!(
                         "Reached Checkpoint {} in {}",
-                        check_point_id + 1,
-                        format_duration(start_time.elapsed())
+                        checkpoint_id + 1,
+                        format_duration(elapsed)
                     )
             })
             .to_string(),
@@ -918,6 +838,7 @@ impl GlidePlayerHandler {
         } = *game_state
         {
             finished_players += 1;
+            client.send_boss_bar_action(0, BossBarAction::UpdateHealth { health: 1. });
             if finished_players == self.server.player_list.len() {
                 *game_state = GameState::Finished {
                     finish_time: Instant::now(),

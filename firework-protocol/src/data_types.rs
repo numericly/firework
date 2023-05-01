@@ -79,6 +79,12 @@ impl SerializeField for BitSet {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Particles {
+    Block {
+        block_state: i32,
+    },
+    BlockMarker {
+        block_state: i32,
+    },
     Dust {
         red: f32,
         green: f32,
@@ -90,6 +96,8 @@ pub enum Particles {
     CampfireSignalSmoke,
     EndRod,
     Firework,
+    Flame,
+    CrimsonSpore,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -138,16 +146,15 @@ impl SerializeField for Particle {
     fn serialize<W: Write>(&self, mut writer: W) {
         #[allow(unused_variables)]
         VarInt::from(match self.particle {
-            Particles::Dust {
-                red,
-                green,
-                blue,
-                scale,
-            } => 14,
+            Particles::Block { .. } => 2,
+            Particles::BlockMarker { .. } => 3,
+            Particles::Dust { .. } => 14,
             Particles::CampfireCozySmoke => 67,
             Particles::CampfireSignalSmoke => 68,
             Particles::EndRod => 20,
             Particles::Firework => 26,
+            Particles::Flame => 28,
+            Particles::CrimsonSpore => 75,
         })
         .serialize(&mut writer);
 
@@ -173,6 +180,12 @@ impl SerializeField for Particle {
                 green.serialize(&mut writer);
                 blue.serialize(&mut writer);
                 scale.serialize(&mut writer);
+            }
+            Particles::Block { block_state } => {
+                VarInt(block_state).serialize(&mut writer);
+            }
+            Particles::BlockMarker { block_state } => {
+                VarInt(block_state).serialize(&mut writer);
             }
             _ => {}
         }

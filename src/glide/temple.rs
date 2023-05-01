@@ -106,7 +106,7 @@ pub const BOOSTS: [Boost; 10] = [
     },
 ];
 
-pub const LOFTS: [Loft; 22] = [
+pub const LOFTS: [Loft; 24] = [
     Loft {
         // 25 125 158, 28 135 161
         area: AxisAlignedBB {
@@ -284,6 +284,22 @@ pub const LOFTS: [Loft; 22] = [
         },
         speed: 0.25,
     },
+    Loft {
+        // -10 88 364, -7 94 367
+        area: AxisAlignedBB {
+            min: BlockPos::new(-10, 88, 364),
+            max: BlockPos::new(-7, 94, 367),
+        },
+        speed: 0.25,
+    },
+    Loft {
+        // -15 93 386, -12 99 389
+        area: AxisAlignedBB {
+            min: BlockPos::new(-15, 93, 386),
+            max: BlockPos::new(-12, 99, 389),
+        },
+        speed: 0.25,
+    },
 ];
 
 pub const CHECKPOINTS: [Checkpoint; 10] = [
@@ -378,4 +394,8 @@ pub const CHECKPOINTS: [Checkpoint; 10] = [
         spawn_position: Vec3::new(197.5, -51., 499.5),
         spawn_rotation: Rotation::new(-90., 40.),
     },
+];
+
+pub const AUTHOR_TIMES: [f32; 10] = [
+    9.167, 19.865, 31.115, 35.465, 43.360, 58.715, 74.015, 81.867, 90.316, 95.316,
 ];

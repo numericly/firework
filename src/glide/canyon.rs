@@ -285,3 +285,7 @@ pub const CHECKPOINTS: [Checkpoint; 9] = [
         spawn_rotation: Rotation::new(0., 27.),
     },
 ];
+
+pub const AUTHOR_TIMES: [f32; 9] = [
+    8.511, 10.298, 11.847, 3.898, 6.656, 14.799, 10.302, 4.949, 8.350,
+];
