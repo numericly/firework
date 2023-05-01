@@ -140,6 +140,9 @@ where
     SetFlying {
         flying: bool,
     },
+    SetAllowFlight {
+        allow_flight: bool,
+    },
     UpdateAttributes {
         attributes: Vec<Attribute>,
     },
@@ -712,6 +715,9 @@ where
         command: ClientCommand<Proxy::TransferData>,
     ) -> Result<Option<Proxy::TransferData>, ConnectionError> {
         match command {
+            ClientCommand::SetAllowFlight { allow_flight } => {
+                self.player.write().await.flying_allowed = allow_flight;
+            }
             ClientCommand::MoveChunk {
                 chunk_x,
                 chunk_z,
@@ -745,10 +751,11 @@ where
             }
             ClientCommand::SetFlying { flying } => {
                 self.player.write().await.flying = flying;
+                self.player.write().await.flying_allowed = flying;
                 self.send_packet(PlayerAbilities {
                     flags: PlayerAbilityFlags::new()
                         .with_flying(flying)
-                        .with_allow_flying(self.player.read().await.flying_allowed),
+                        .with_allow_flying(flying),
                     flying_speed: 0.05,
                     walking_speed: 0.1,
                 })
@@ -785,12 +792,6 @@ where
                 .await?;
 
                 let previous_position = self.player.read().await.position.clone();
-
-                let previous_chunk_x = previous_position.x as i32 >> 4;
-                let previous_chunk_z = previous_position.z as i32 >> 4;
-
-                let chunk_x = position.x as i32 >> 4;
-                let chunk_z = position.z as i32 >> 4;
 
                 self.player.write().await.position = position.clone();
 

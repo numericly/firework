@@ -1,5 +1,9 @@
 use async_trait::async_trait;
-use firework::{authentication::Profile, gui::GUIEvent, protocol::server_bound::ClickContainer};
+use firework::{
+    authentication::Profile,
+    gui::GUIEvent,
+    protocol::{data_types::Enchantment, server_bound::ClickContainer},
+};
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
     commands::{Argument, Command, CommandTree},
@@ -428,10 +432,12 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
 
                 let center = checkpoint.plane.center();
 
-                if (center.x - position.x).abs() > 100.
-                    || (center.y - position.y).abs() > 100.
-                    || (center.z - position.z).abs() > 100.
-                {
+                let distance = ((center.x - position.x).abs().powi(2)
+                    + (center.y - position.y).abs().powi(2)
+                    + (center.z - position.z).abs().powi(2))
+                .sqrt();
+
+                if distance > 100. {
                     continue;
                 }
 
@@ -495,10 +501,12 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                     });
                 }
 
-                if (loft.area.min.x as f64 - position.x).abs() > 100.
-                    || (loft.area.min.y as f64 - position.y).abs() > 100.
-                    || (loft.area.min.z as f64 - position.z).abs() > 100.
-                {
+                let distance = ((loft.area.min.x as f64 - position.x).abs().powi(2)
+                    + (loft.area.min.y as f64 - position.y).abs().powi(2)
+                    + (loft.area.min.z as f64 - position.z).abs().powi(2))
+                .sqrt();
+
+                if distance > 100. {
                     continue;
                 }
 
@@ -774,7 +782,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                             1.,
                         );
                         // client.send_hurt(client.client_data.entity_id, 0.);
-                        // client.set_health(health - 2.);
+                        client.set_health(health - 2.);
                     }
                 }
             }
@@ -954,6 +962,15 @@ impl GlidePlayerHandler {
                 .to_string(),
             },
         );
+
+        client.send_boss_bar_action(0, BossBarAction::UpdateHealth { health: 1. });
+        client.send_boss_bar_action(
+            0,
+            BossBarAction::UpdateStyle {
+                color: BossBarColor::Green,
+                division: BossBarDivision::NoDivisions,
+            },
+        );
     }
 }
 
@@ -1093,7 +1110,7 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
             position: self.map.get_spawn_position().clone(),
             max_health: 6.0,
             health: 6.0,
-            flying_allowed: true,
+            flying_allowed: false,
             gamemode: GameMode::Adventure,
             profile,
             uuid,
@@ -1106,6 +1123,10 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
                 item_id: VarInt(Elytra::ID as i32),
                 item_count: 1,
                 nbt: ItemNbt {
+                    enchantments: Some(vec![Enchantment {
+                        id: "minecraft:binding_curse".to_string(),
+                        level: 1,
+                    }]),
                     ..Default::default()
                 },
             }),
@@ -1160,7 +1181,7 @@ impl GlideServerHandler {
                     })
                     .to_string(),
                     health: 0.,
-                    color: BossBarColor::Green,
+                    color: BossBarColor::Blue,
                     division: BossBarDivision::NoDivisions,
                     flags: 0,
                 },

@@ -210,6 +210,16 @@ pub struct PlayerAbilityFlags {
 #[derive(Debug, Default, serde::Serialize, PartialEq, serde::Deserialize, Clone)]
 pub struct ItemNbt {
     pub display: Option<ItemNbtDisplay>,
+    #[serde(rename = "Enchantments")]
+    pub enchantments: Option<Vec<Enchantment>>,
+}
+
+#[derive(Debug, serde::Serialize, PartialEq, serde::Deserialize, Clone)]
+pub struct Enchantment {
+    #[serde(rename = "id")]
+    pub id: String,
+    #[serde(rename = "lvl")]
+    pub level: i16,
 }
 
 #[derive(Debug, Default, serde::Serialize, PartialEq, serde::Deserialize, Clone)]

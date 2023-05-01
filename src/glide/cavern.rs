@@ -34,7 +34,7 @@ pub const BOOSTS: [Boost; 17] = [
     Boost {
         // 249 59 89, 254 64 97
         area: AxisAlignedBB::new(BlockPos::new(249, 59, 89), BlockPos::new(254, 64, 97)),
-        speed: 3.,
+        speed: 2.5,
         particle_type: super::BoostParticleType::BoostSouth,
     },
     Boost {
@@ -100,19 +100,19 @@ pub const BOOSTS: [Boost; 17] = [
     Boost {
         // 0 29 -9, 5 34 -1
         area: AxisAlignedBB::new(BlockPos::new(0, 29, -9), BlockPos::new(5, 34, -1)),
-        speed: 3.,
+        speed: 2.5,
         particle_type: super::BoostParticleType::BoostNorth,
     },
     Boost {
         // 34 13 -38, 39 18 -30
         area: AxisAlignedBB::new(BlockPos::new(34, 13, -38), BlockPos::new(39, 18, -30)),
-        speed: 3.5,
+        speed: 3.,
         particle_type: super::BoostParticleType::BoostSouth,
     },
     Boost {
         // 51 7 -36, 56 12 -28
         area: AxisAlignedBB::new(BlockPos::new(51, 7, -36), BlockPos::new(56, 12, -28)),
-        speed: 3.5,
+        speed: 3.,
         particle_type: super::BoostParticleType::BoostSouth,
     },
 ];
@@ -149,7 +149,7 @@ pub const LOFTS: [Loft; 26] = [
             min: BlockPos::new(172, 45, 107),
             max: BlockPos::new(175, 54, 110),
         },
-        speed: 0.2,
+        speed: 0.3,
     },
     Loft {
         area: AxisAlignedBB {
@@ -157,7 +157,7 @@ pub const LOFTS: [Loft; 26] = [
             min: BlockPos::new(166, 45, 113),
             max: BlockPos::new(169, 54, 116),
         },
-        speed: 0.2,
+        speed: 0.3,
     },
     Loft {
         area: AxisAlignedBB {
@@ -165,7 +165,7 @@ pub const LOFTS: [Loft; 26] = [
             min: BlockPos::new(172, 46, 113),
             max: BlockPos::new(175, 54, 116),
         },
-        speed: 0.2,
+        speed: 0.3,
     },
     Loft {
         area: AxisAlignedBB {
@@ -173,7 +173,7 @@ pub const LOFTS: [Loft; 26] = [
             min: BlockPos::new(184, 42, 192),
             max: BlockPos::new(187, 52, 195),
         },
-        speed: 0.2,
+        speed: 0.3,
     },
     Loft {
         area: AxisAlignedBB {
@@ -333,27 +333,27 @@ pub const CHECKPOINTS: [Checkpoint; 9] = [
     Checkpoint {
         // 54.5 96 155.5, 54.5 123 178.5
         plane: firework::AxisAlignedPlane::X {
-            min: Vec3::new(54.5, 96., 155.5),
+            min: Vec3::new(54.5, 85., 155.5),
             max: Vec3::new(54.5, 123., 178.5),
         },
-        spawn_position: Vec3::new(43., 118., 163.),
-        spawn_rotation: Rotation::new(-76.4, 29.4),
+        spawn_position: Vec3::new(47.5, 108., 167.5),
+        spawn_rotation: Rotation::new(-90., 10.),
     },
     Checkpoint {
         plane: firework::AxisAlignedPlane::Z {
             min: Vec3::new(288., 69., 127.5),
             max: Vec3::new(310., 91., 127.5),
         },
-        spawn_position: Vec3::new(292., 81., 147.5),
-        spawn_rotation: Rotation::new(-180., 33.),
+        spawn_position: Vec3::new(294.5, 81., 147.5),
+        spawn_rotation: Rotation::new(180., 10.),
     },
     Checkpoint {
         plane: firework::AxisAlignedPlane::Z {
             min: Vec3::new(152., 60., 157.5),
             max: Vec3::new(164., 75., 157.5),
         },
-        spawn_position: Vec3::new(162., 69., 133.),
-        spawn_rotation: Rotation::new(16., 33.),
+        spawn_position: Vec3::new(158.5, 69., 134.5),
+        spawn_rotation: Rotation::new(0., 10.),
     },
     Checkpoint {
         // 179.5 26 62.5, 199.5 62 62.5
@@ -361,8 +361,8 @@ pub const CHECKPOINTS: [Checkpoint; 9] = [
             min: Vec3::new(179.5, 26., 62.5),
             max: Vec3::new(199.5, 62., 62.5),
         },
-        spawn_position: Vec3::new(189., 50., 74.),
-        spawn_rotation: Rotation::new(-180., 52.),
+        spawn_position: Vec3::new(189., 60., 70.),
+        spawn_rotation: Rotation::new(-180., 10.),
     },
     Checkpoint {
         // 111 -6 26.5, 96 14 26.5
@@ -370,8 +370,8 @@ pub const CHECKPOINTS: [Checkpoint; 9] = [
             min: Vec3::new(96., -6., 26.5),
             max: Vec3::new(111., 14., 26.5),
         },
-        spawn_position: Vec3::new(103., 2., 24.),
-        spawn_rotation: Rotation::new(0., 30.),
+        spawn_position: Vec3::new(103., 4., 20.),
+        spawn_rotation: Rotation::new(0., 10.),
     },
     Checkpoint {
         // 81 12 132.5, 67 36 132.5
@@ -379,8 +379,8 @@ pub const CHECKPOINTS: [Checkpoint; 9] = [
             min: Vec3::new(67., 12., 132.5),
             max: Vec3::new(81., 36., 132.5),
         },
-        spawn_position: Vec3::new(75., 27., 130.),
-        spawn_rotation: Rotation::new(6.6, 47.),
+        spawn_position: Vec3::new(72.5, 23., 126.),
+        spawn_rotation: Rotation::new(0., 10.),
     },
     // TODO those crazy checkpoints
     Checkpoint {
@@ -394,8 +394,8 @@ pub const CHECKPOINTS: [Checkpoint; 9] = [
         },
         // thus, the spawn position can only be for one of them
         // i chose a spot on the top one arbitrarily
-        spawn_position: Vec3::new(4., 37., -30.),
-        spawn_rotation: Rotation::new(-169., 55.),
+        spawn_position: Vec3::new(2.5, 37., -24.5),
+        spawn_rotation: Rotation::new(180., 15.),
     },
     Checkpoint {
         // 47.5 16 75, 47.5 16 47
@@ -403,8 +403,8 @@ pub const CHECKPOINTS: [Checkpoint; 9] = [
             min: Vec3::new(47.5, 12., 47.),
             max: Vec3::new(47.5, 50., 75.),
         },
-        spawn_position: Vec3::new(43., 27., 53.),
-        spawn_rotation: Rotation::new(-72., 50.),
+        spawn_position: Vec3::new(38.5, 26., 61.5),
+        spawn_rotation: Rotation::new(-90., 10.),
     },
     Checkpoint {
         // finish line
@@ -419,5 +419,5 @@ pub const CHECKPOINTS: [Checkpoint; 9] = [
 ];
 
 pub const AUTHOR_TIMES: [f32; 9] = [
-    9.167, 19.865, 31.115, 35.465, 43.360, 58.715, 74.015, 81.867, 90.316,
+    9.534, 8.742, 7.398, 6.011, 6.151, 4.500, 14.144, 8.398, 8.398,
 ];

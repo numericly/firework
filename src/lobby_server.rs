@@ -460,6 +460,7 @@ impl GameMenu {
                                 ],"text":""}"#.to_string()
                             ]),
                         }),
+                        ..Default::default()
                     },
                 }),
                 None,
@@ -480,6 +481,7 @@ impl GameMenu {
                                     ],"text":""}"#.to_string()
                             ]),
                         }),
+                        ..Default::default()
                     },
                 }),
                 None,
@@ -500,6 +502,7 @@ impl GameMenu {
                                     ],"text":""}"#.to_string()
                             ]),
                         }),
+                        ..Default::default()
                     },
                 }),
                 None,
@@ -628,6 +631,7 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
                         ),
                         lore: None,
                     }),
+                    ..Default::default()
                 },
             }),
         );
@@ -644,6 +648,7 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
                         ),
                         lore: None,
                     }),
+                    ..Default::default()
                 },
             }),
         );
@@ -715,6 +720,7 @@ async fn queue(
                         ),
                         lore: None,
                     }),
+                    ..Default::default()
                 },
             }),
         )
