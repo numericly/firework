@@ -173,9 +173,7 @@ where
         self
     }
     pub fn build_help_command(self) -> Self {
-        let mut suggestions: Vec<_> = self.commands.iter().map(|c| c.name.to_string()).collect();
-
-        suggestions.push("help".to_string());
+        let suggestions: Vec<_> = self.commands.iter().map(|c| c.name.to_string()).collect();
 
         let help_command = Command::new("help", "list commands and their usages").add_node(
             CommandNode::server_argument(

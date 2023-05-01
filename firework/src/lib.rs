@@ -462,7 +462,10 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                     let server = cloned_server.clone();
                     #[allow(unused_must_use)]
                     tokio::task::spawn(async move {
-                        server.handle_connection(socket_addr, connection).await;
+                        let err = server.handle_connection(socket_addr, connection).await;
+                        if err.is_err() {
+                            println!("{:?}", err);
+                        }
                     });
                 }
             }

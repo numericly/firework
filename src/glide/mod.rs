@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use firework::data::items::RabbitHide;
 use firework::{authentication::Profile, gui::GUIEvent, protocol::server_bound::ClickContainer};
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
@@ -34,8 +33,6 @@ use tokio::sync::{broadcast, Mutex, RwLock};
 use crate::{
     MiniGameProxy, TransferData, CANYON_GLIDE_WORLD, CAVERN_GLIDE_WORLD, TEMPLE_GLIDE_WORLD,
 };
-
-use self::canyon::AUTHOR_TIMES;
 
 mod canyon;
 mod cavern;
@@ -89,6 +86,7 @@ pub enum Maps {
 impl Distribution<Maps> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Maps {
         match rng.gen_range(0..3) {
+            _ => Maps::Cavern,
             0 => Maps::Canyon,
             1 => Maps::Cavern,
             2 => Maps::Temple,
@@ -391,7 +389,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
             if times_remaining == 0 {
                 self.boost_status.write().await.take();
             } else {
-                const HORIZONTAL_SPEED_FACTOR: f64 = 1.015;
+                const HORIZONTAL_SPEED_FACTOR: f64 = 1.008;
 
                 let horizontal_boost = Vec3::new(velocity.x, 0., velocity.z);
 
@@ -1002,7 +1000,7 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
             map: rand::random(),
             created_at: Instant::now(),
             game_state: Mutex::new(GameState::Starting {
-                ticks_until_start: 120,
+                ticks_until_start: 65,
             }),
             commands: CommandTree::new()
                 .register_command(
