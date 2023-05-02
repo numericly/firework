@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use firework::gui::WindowType;
 use firework::{
     authentication::Profile,
     gui::GUIEvent,
@@ -11,21 +12,18 @@ use firework::{
     AxisAlignedBB, AxisAlignedPlane, ConnectionError, PlayerHandler, Rotation, Server,
     ServerHandler, Vec3, TICKS_PER_SECOND,
 };
-use firework::{
-    data::items::{Elytra, Item},
-    protocol::data_types::Slot,
-};
+use firework::{data::items::Item, protocol::data_types::ItemStack};
 use firework::{
     gui::GUIInit,
     protocol::{
         client_bound::{CustomSound, IdMapHolder, SoundSource},
         data_types::{
-            BossBarAction, BossBarColor, BossBarDivision, ItemNbt, Particle, Particles, SlotInner,
+            BossBarAction, BossBarColor, BossBarDivision, ItemNbt, Particle, Particles,
+            StackContents,
         },
     },
 };
 use firework::{gui::GuiScreen, world::World};
-use firework::{gui::WindowType, protocol::core::VarInt};
 use rand::{distributions::Standard, prelude::Distribution, Rng};
 use serde_json::json;
 use std::{
@@ -90,7 +88,7 @@ pub enum Maps {
 impl Distribution<Maps> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Maps {
         match rng.gen_range(0..3) {
-            _ => Maps::Cavern,
+            _ => Maps::Temple,
             0 => Maps::Canyon,
             1 => Maps::Cavern,
             2 => Maps::Temple,
@@ -975,7 +973,7 @@ impl GlidePlayerHandler {
 }
 
 pub struct Menu {
-    pub items: Vec<Slot>,
+    pub items: Vec<ItemStack>,
     pub channel: broadcast::Sender<GUIEvent>,
 }
 
@@ -1110,7 +1108,7 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
             position: self.map.get_spawn_position().clone(),
             max_health: 6.0,
             health: 6.0,
-            flying_allowed: false,
+            flying_allowed: true,
             gamemode: GameMode::Adventure,
             profile,
             uuid,
@@ -1119,8 +1117,8 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
 
         player.inventory.set_slot(
             InventorySlot::Chestplate,
-            Some(SlotInner {
-                item_id: VarInt(Elytra::ID as i32),
+            Some(StackContents {
+                item_id: Item::Elytra,
                 item_count: 1,
                 nbt: ItemNbt {
                     enchantments: Some(vec![Enchantment {

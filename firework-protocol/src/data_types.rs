@@ -2,6 +2,7 @@ use crate as firework_protocol;
 
 use byteorder::WriteBytesExt;
 use firework_authentication::ProfileProperty;
+use firework_data::items::Item;
 use firework_protocol_core::{
     DeserializeError, DeserializeField, Position, SerializeField, VarInt,
 };
@@ -453,12 +454,12 @@ pub struct UpdateLatency {
 }
 
 #[derive(Debug, PartialEq, SerializeField, Clone, DeserializeField)]
-pub struct SlotInner {
-    pub item_id: VarInt,
+pub struct StackContents {
+    pub item_id: Item,
     pub item_count: u8,
     pub nbt: ItemNbt,
 }
-pub type Slot = Option<SlotInner>;
+pub type ItemStack = Option<StackContents>;
 
 impl SerializeField for DeathLocation {
     fn serialize<W: Write>(&self, mut writer: W) {
@@ -501,7 +502,7 @@ pub enum InventoryOperationMode {
 #[derive(Debug, PartialEq, DeserializeField)]
 pub struct SlotUpdate {
     pub slot_number: i16,
-    pub slot_value: Slot,
+    pub slot_value: ItemStack,
 }
 
 impl SerializeField for DisplaySkinParts {
@@ -683,7 +684,7 @@ pub struct Equipment {
 #[derive(Debug, Clone)]
 pub struct EquipmentEntry {
     pub slot: EquipmentSlot,
-    pub item: Slot,
+    pub item: ItemStack,
 }
 
 #[derive(Debug, Clone)]

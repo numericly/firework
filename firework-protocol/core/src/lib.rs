@@ -9,6 +9,9 @@ pub enum DeserializeError {
     #[error("invalid packet ID 0x{id:02x?} for state {state}")]
     InvalidPacketID { id: i32, state: u8 },
 
+    #[error("invalid item ID {0}")]
+    InvalidItemID(i32),
+
     #[error("could not deserialize VarInt because it is greater than 5 bytes")]
     VarIntTooLong,
 
@@ -113,8 +116,20 @@ mod deserializer {
 
     use crate::{DeserializeError, DeserializeField, Position, SerializeField, UnsizedVec, VarInt};
     use byteorder::ReadBytesExt;
+    use firework_data::items::Item;
     use nbt::Blob;
     use std::io::Read;
+
+    impl DeserializeField for Item {
+        fn deserialize<R: Read>(mut reader: R) -> Result<Self, DeserializeError> {
+            let id = VarInt::deserialize(&mut reader)?.0;
+            if id < 0 {
+                return Err(DeserializeError::InvalidItemID(id));
+            };
+
+            Ok(Item::from_id(id as u32).ok_or_else(|| DeserializeError::InvalidItemID(id))?)
+        }
+    }
 
     impl DeserializeField for Position {
         fn deserialize<R: Read>(mut reader: R) -> Result<Self, DeserializeError> {
@@ -295,10 +310,16 @@ mod serializer {
     use std::{collections::HashMap, io::Write};
 
     use byteorder::{BigEndian, WriteBytesExt};
-    use firework_data::tags::VarIntList;
+    use firework_data::{items::Item, tags::VarIntList};
     use nbt::Blob;
 
     use crate::{Position, SerializeField, UnsizedVec, VarInt};
+
+    impl SerializeField for Item {
+        fn serialize<W: Write>(&self, writer: W) {
+            VarInt::from(self.get_id() as i32).serialize(writer);
+        }
+    }
 
     impl SerializeField for Position {
         fn serialize<W: Write>(&self, writer: W) {

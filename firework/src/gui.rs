@@ -3,16 +3,23 @@ use crate::{
     {ConnectionError, ServerHandler, ServerProxy},
 };
 use async_trait::async_trait;
-use firework_protocol::{data_types::Slot, server_bound::ClickContainer};
+use firework_protocol::{data_types::ItemStack, server_bound::ClickContainer};
 use tokio::sync::broadcast;
 
 #[derive(Debug, Clone)]
-pub enum GUIEvent {}
+pub enum GUIEvent {
+    SetSlot {
+        slot: usize,
+        item: ItemStack,
+        setter: u128,
+        state_id: i32,
+    },
+}
 
 pub struct GUIInit {
     pub title: String,
     pub window_type: WindowType,
-    pub items: Vec<Slot>,
+    pub items: Vec<ItemStack>,
     pub receiver: broadcast::Receiver<GUIEvent>,
 }
 

@@ -1,12 +1,8 @@
 use crate::{queue::QueueMessage, MiniGameProxy, TransferData, LOBBY_WORLD};
 use async_trait::async_trait;
-use firework::data::items::{
-    Compass, DiamondShovel, Elytra, IronSword, Item, RedstoneBlock, Stick,
-};
-use firework::protocol::core::VarInt;
 use firework::protocol::{
     client_bound::SetContainerSlot,
-    data_types::{InventoryOperationMode, ItemNbt, ItemNbtDisplay, Slot, SlotInner},
+    data_types::{InventoryOperationMode, ItemNbt, ItemNbtDisplay, ItemStack, StackContents},
     server_bound::ClickContainer,
 };
 use firework::world::World;
@@ -17,6 +13,7 @@ use firework::{
     gui::{GUIInit, GuiScreen, WindowType},
     PlayerHandler, TICKS_PER_SECOND,
 };
+use firework::{data::items::Item, protocol::core::VarInt};
 use firework::{ConnectionError, Rotation, Server, ServerHandler, Vec3};
 use serde_json::json;
 use std::{sync::Arc, time::Instant};
@@ -228,20 +225,20 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
     async fn on_use_item(
         &self,
         client: &Client<LobbyServerHandler, MiniGameProxy>,
-        item: Slot,
+        item: ItemStack,
         _slot_id: InventorySlot,
     ) -> Result<(), ConnectionError> {
         let Some(item) = item else {
             return Ok(())
         };
 
-        match item.item_id.0 as u32 {
-            Compass::ID => {
+        match item.item_id {
+            Item::Compass => {
                 client
                     .display_gui(client.server.handler.game_menu.clone())
                     .await;
             }
-            RedstoneBlock::ID => {
+            Item::RedstoneBlock => {
                 leave_queue(client).await;
             }
             _ => return Ok(()),
@@ -344,7 +341,7 @@ impl LobbyPlayerHandler {
 }
 
 pub struct GameMenu {
-    pub items: Vec<Slot>,
+    pub items: Vec<ItemStack>,
     pub channel: broadcast::Sender<GUIEvent>,
 }
 
@@ -443,8 +440,8 @@ impl GameMenu {
             items: vec![
                 None,
                 None,
-                Some(SlotInner {
-                    item_id: VarInt(Elytra::ID.try_into().unwrap()), // elytra
+                Some(StackContents {
+                    item_id: Item::Elytra, // elytra
                     item_count: 1,
                     nbt: ItemNbt {
                         display: Some(ItemNbtDisplay {
@@ -464,8 +461,8 @@ impl GameMenu {
                     },
                 }),
                 None,
-                Some(SlotInner {
-                    item_id: VarInt(IronSword::ID.try_into().unwrap()), // iron sword
+                Some(StackContents {
+                    item_id: Item::IronSword, // iron sword
                     item_count: 1,
                     nbt: ItemNbt {
                         display: Some(ItemNbtDisplay {
@@ -485,8 +482,8 @@ impl GameMenu {
                     },
                 }),
                 None,
-                Some(SlotInner {
-                    item_id: VarInt(DiamondShovel::ID.try_into().unwrap()), // diamond shovel
+                Some(StackContents {
+                    item_id: Item::DiamondShovel, // diamond shovel
                     item_count: 1,
                     nbt: ItemNbt {
                         display: Some(ItemNbtDisplay {
@@ -514,7 +511,7 @@ impl GameMenu {
         &self,
         client: &Client<LobbyServerHandler, MiniGameProxy>,
         slot: usize,
-    ) -> Slot {
+    ) -> ItemStack {
         if slot < WindowType::Generic9x1.len() {
             self.items[slot].clone()
         } else if slot >= WindowType::Generic9x1.len() && slot < WindowType::Generic9x1.len() + 9 {
@@ -620,8 +617,8 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
 
         player.inventory.set_slot(
             InventorySlot::Hotbar { slot: 0 },
-            Some(SlotInner {
-                item_id: VarInt(Compass::ID as i32),
+            Some(StackContents {
+                item_id: Item::Compass,
                 item_count: 1,
                 nbt: ItemNbt {
                     display: Some(ItemNbtDisplay {
@@ -638,8 +635,8 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
 
         player.inventory.set_slot(
             InventorySlot::Hotbar { slot: 1 },
-            Some(SlotInner {
-                item_id: VarInt(Stick::ID as i32),
+            Some(StackContents {
+                item_id: Item::Stick,
                 item_count: 1,
                 nbt: ItemNbt {
                     display: Some(ItemNbtDisplay {
@@ -710,8 +707,8 @@ async fn queue(
     client
         .update_inventory_slot(
             InventorySlot::Hotbar { slot: 8 },
-            Some(SlotInner {
-                item_id: VarInt(RedstoneBlock::ID as i32),
+            Some(StackContents {
+                item_id: Item::RedstoneBlock,
                 item_count: 1,
                 nbt: ItemNbt {
                     display: Some(ItemNbtDisplay {

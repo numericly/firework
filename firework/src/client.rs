@@ -25,8 +25,8 @@ use firework_protocol::{
     core::{DeserializeField, Position, SerializeField, UnsizedVec, VarInt},
     data_types::{
         AddPlayer, Attribute, BossBarAction, EntityAnimationType, EntityEventStatus, Equipment,
-        Hand, Particle, PlayerAbilityFlags, PlayerActionStatus, PlayerCommandAction,
-        PlayerInfoAction, PlayerPositionFlags, Slot, UpdateGameMode, UpdateLatency, UpdateListed,
+        Hand, ItemStack, Particle, PlayerAbilityFlags, PlayerActionStatus, PlayerCommandAction,
+        PlayerInfoAction, PlayerPositionFlags, UpdateGameMode, UpdateLatency, UpdateListed,
     },
     read_specific_packet,
     server_bound::{
@@ -107,12 +107,13 @@ where
     InitGui {
         title: String,
         window_type: WindowType,
-        items: Vec<Slot>,
+        items: Vec<ItemStack>,
     },
     UpdateSlot {
         window_id: i8,
         slot: u16,
-        item: Slot,
+        item: ItemStack,
+        state_id: i32,
     },
     CloseGui,
     SendTitle {
@@ -227,13 +228,13 @@ impl Player {
 
 #[derive(Debug)]
 pub struct Inventory {
-    pub held_item: Slot,
-    slots: [Slot; 46],
+    pub held_item: ItemStack,
+    slots: [ItemStack; 46],
 }
 
 impl Default for Inventory {
     fn default() -> Self {
-        const EMPTY_SLOT: Slot = None;
+        const EMPTY_SLOT: ItemStack = None;
         Inventory {
             held_item: EMPTY_SLOT,
             slots: [EMPTY_SLOT; 46],
@@ -317,7 +318,7 @@ impl Inventory {
     const HOTBAR_OFFSET: usize = 36;
     const OFFHAND_OFFSET: usize = 45;
     const MAIN_INVENTORY_OFFSET: usize = 9;
-    pub fn get_slot(&self, slot: &InventorySlot) -> &Slot {
+    pub fn get_slot(&self, slot: &InventorySlot) -> &ItemStack {
         match slot {
             InventorySlot::Helmet => &self.slots[Self::ARMOR_OFFSET],
             InventorySlot::Chestplate => &self.slots[Self::ARMOR_OFFSET + 1],
@@ -339,17 +340,17 @@ impl Inventory {
             }
         }
     }
-    pub fn get_hotbar_slot_from_container(&self, slot: usize) -> &Slot {
+    pub fn get_hotbar_slot_from_container(&self, slot: usize) -> &ItemStack {
         const HOTBAR_OFFSET: usize = 36;
         assert!(slot < 9);
         &self.slots[slot + HOTBAR_OFFSET]
     }
-    pub fn get_main_slot_from_container(&self, slot: usize) -> &Slot {
+    pub fn get_main_slot_from_container(&self, slot: usize) -> &ItemStack {
         const MAIN_OFFSET: usize = 0;
         assert!(slot < 36);
         &self.slots[slot + MAIN_OFFSET]
     }
-    pub fn set_slot(&mut self, slot: InventorySlot, item: Slot) {
+    pub fn set_slot(&mut self, slot: InventorySlot, item: ItemStack) {
         match slot {
             InventorySlot::Helmet => self.slots[Self::ARMOR_OFFSET] = item,
             InventorySlot::Chestplate => self.slots[Self::ARMOR_OFFSET + 1] = item,
@@ -713,6 +714,31 @@ where
             max_time: Duration::from_millis(49),
         });
 
+        if let Some(gui) = &mut *self.gui.write().await {
+            for _ in 0..gui.events.len() {
+                let event = gui.events.recv().await.unwrap();
+
+                match event {
+                    GUIEvent::SetSlot {
+                        slot,
+                        item,
+                        setter,
+                        state_id,
+                    } => {
+                        if self.player.read().await.uuid == setter {
+                            continue;
+                        }
+                        self.to_client.send(ClientCommand::UpdateSlot {
+                            window_id: 1,
+                            slot: slot as u16,
+                            item,
+                            state_id,
+                        });
+                    }
+                }
+            }
+        }
+
         self.handler.on_tick(&self).await;
     }
 
@@ -735,12 +761,13 @@ where
                 window_id,
                 slot,
                 item,
+                state_id,
             } => {
                 self.send_packet(SetContainerSlot {
                     window_id,
                     slot: slot as i16,
                     item,
-                    state_id: VarInt(0),
+                    state_id: VarInt(state_id),
                 })
                 .await?;
             }
@@ -1511,8 +1538,6 @@ where
             distance.partial_cmp(&distance2).unwrap()
         });
 
-        // println!("loading {:?}", chunks_to_load);
-
         for (x, z) in chunks_to_load {
             let packet = {
                 let chunk_data = self
@@ -1697,7 +1722,7 @@ where
         self.to_client.send(ClientCommand::CloseGui);
     }
     #[allow(unused_must_use)]
-    pub async fn update_inventory_slot(&self, slot: InventorySlot, item: Slot) {
+    pub async fn update_inventory_slot(&self, slot: InventorySlot, item: ItemStack) {
         self.player
             .write()
             .await
@@ -1708,6 +1733,7 @@ where
             slot: slot.value() as u16,
             item,
             window_id: 0,
+            state_id: 0,
         });
     }
     #[allow(unused_must_use)]

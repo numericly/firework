@@ -22,17 +22,12 @@ pub fn build_items() {
     println!("cargo:error={:#?}", items);
     let mut items_rs = TokenStream2::new();
 
-    let start = std::time::Instant::now();
-    items_rs.extend(quote! {
-        pub trait Item {
-            const ID: u32;
-            const NAME: &'static str;
-            const DISPLAY_NAME: &'static str;
-            const STACK_SIZE: u32 = 64u32;
-        }
-    });
-
-    let mut item_struct_idents = HashMap::new();
+    let mut item_enum_inner = TokenStream2::new();
+    let mut get_id_inner = TokenStream2::new();
+    let mut get_name_inner = TokenStream2::new();
+    let mut get_display_name_inner = TokenStream2::new();
+    let mut get_stack_size_inner = TokenStream2::new();
+    let mut from_item_id_inner = TokenStream2::new();
 
     for item in &items {
         let item_ident = Ident::new_raw(
@@ -40,10 +35,8 @@ pub fn build_items() {
             proc_macro2::Span::call_site(),
         );
 
-        item_struct_idents.insert(item.name.clone(), item_ident.clone());
-
-        items_rs.extend(quote! {
-            pub struct #item_ident;
+        item_enum_inner.extend(quote! {
+            #item_ident,
         });
 
         let Item {
@@ -53,65 +46,60 @@ pub fn build_items() {
             stack_size,
         } = item;
 
-        let stack_size = if *stack_size == 64 {
-            quote! {}
-        } else {
-            quote! { const STACK_SIZE: u32 = #stack_size; }
-        };
-
-        items_rs.extend(quote! {
-            impl Item for #item_ident {
-                const ID: u32 = #id;
-                const NAME: &'static str = #name;
-                const DISPLAY_NAME: &'static str = #display_name;
-                #stack_size
-            }
-        });
-    }
-
-    let mut enum_inner = TokenStream2::new();
-    for item in &items {
-        let item_ident = item_struct_idents.get(&item.name).unwrap();
-        let variant_ident = Ident::new(
-            item.name.to_case(Case::Pascal).as_str(),
-            proc_macro2::Span::call_site(),
-        );
-
-        enum_inner.extend(quote! {
-            #variant_ident (#item_ident),
-        });
-    }
-    items_rs.extend(quote! {
-        pub enum Items {
-            #enum_inner
-        }
-    });
-
-    let mut get_id_inner = TokenStream2::new();
-    for item in &items {
-        let item_ident = item_struct_idents.get(&item.name).unwrap();
-        let variant_ident = Ident::new(
-            item.name.to_case(Case::Pascal).as_str(),
-            proc_macro2::Span::call_site(),
-        );
-
         get_id_inner.extend(quote! {
-            Self::#variant_ident(_) => #item_ident::ID,
+            Self::#item_ident => #id,
+        });
+        get_name_inner.extend(quote! {
+            Self::#item_ident => #name,
+        });
+        get_display_name_inner.extend(quote! {
+            Self::#item_ident => #display_name,
+        });
+        get_stack_size_inner.extend(quote! {
+            Self::#item_ident => #stack_size,
+        });
+        from_item_id_inner.extend(quote! {
+            #id => Some(Self::#item_ident),
         });
     }
 
     items_rs.extend(quote! {
-        impl Items {
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+        pub enum Item {
+            #item_enum_inner
+        }
+
+        impl Item {
             pub fn get_id(&self) -> u32 {
                 match self {
                     #get_id_inner
+                }
+            }
+            pub fn get_name(&self) -> &str {
+                match self {
+                    #get_name_inner
+                }
+            }
+            pub fn get_display_name(&self) -> &str {
+                match self {
+                    #get_display_name_inner
+                }
+            }
+            pub fn get_stack_size(&self) -> u32 {
+                match self {
+                    #get_stack_size_inner
+                }
+            }
+            pub fn from_id(id: u32) -> Option<Self> {
+                match id {
+                    #from_item_id_inner
+                    _ => None
                 }
             }
         }
     });
 
     let output = RustFmt::default().format_str(items_rs.to_string()).unwrap();
-    eprintln!("Time = {:#?}", start.elapsed());
 
     // panic!();
     fs::write("./src/items.rs", output).expect("Unable to write items.rs");

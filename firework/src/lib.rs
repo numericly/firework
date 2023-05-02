@@ -12,7 +12,7 @@ use firework_protocol::server_bound::{
 };
 use firework_protocol::{
     client_bound::{EncryptionRequest, LoginDisconnect, LoginSuccess, Pong, ServerStatus},
-    data_types::Slot,
+    data_types::ItemStack,
 };
 use firework_protocol::{read_specific_packet, ConnectionState, Protocol, ProtocolError};
 use firework_world::World;
@@ -726,7 +726,7 @@ where
     async fn on_use_item(
         &self,
         client: &Client<Handler, Proxy>,
-        item: Slot,
+        item: ItemStack,
         slot_id: InventorySlot,
     ) -> Result<(), ConnectionError> {
         Ok(())
@@ -1079,7 +1079,6 @@ where
                             if missed_pings >= 2 {
                                 return Err(ConnectionError::ClientTimedOut)
                             }
-                            println!("Missed ping: {}", missed_pings);
                         } else {
                             missed_pings = 0;
                         }

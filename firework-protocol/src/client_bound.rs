@@ -53,8 +53,8 @@ use nbt::Blob;
 
 use crate::data_types::{
     Attribute, BitSet, BossBarAction, DeathLocation, EntityAnimationType, EntityEventStatus,
-    Equipment, Hand, Particle, PlayerAbilityFlags, PlayerInfoAction, PlayerPositionFlags, Recipe,
-    Slot, SuggestionMatch,
+    Equipment, Hand, ItemStack, Particle, PlayerAbilityFlags, PlayerInfoAction,
+    PlayerPositionFlags, Recipe, SuggestionMatch,
 };
 
 pub trait ClientBoundPacket {
@@ -130,14 +130,14 @@ define_client_bound_protocol! {
     SetContainerContent, 0x12, Play => {
         window_id: u8,
         state_id: VarInt,
-        items: Vec<Slot>,
-        held_item: Slot
+        items: Vec<ItemStack>,
+        held_item: ItemStack
     },
     SetContainerSlot, 0x14, Play => {
         window_id: i8,
         state_id: VarInt,
         slot: i16,
-        item: Slot
+        item: ItemStack
     },
     PluginMessage, 0x17, Play => {
         channel: String,
