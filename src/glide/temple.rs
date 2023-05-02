@@ -20,7 +20,7 @@ pub const BOOSTS: [Boost; 10] = [
             min: BlockPos::new(9, 95, 265),
             max: BlockPos::new(14, 100, 273),
         },
-        speed: 3.,
+        speed: 2.85,
         particle_type: BoostParticleType::BoostNorth,
     },
     Boost {
@@ -29,7 +29,7 @@ pub const BOOSTS: [Boost; 10] = [
             min: BlockPos::new(-17, 70, 262),
             max: BlockPos::new(-12, 75, 270),
         },
-        speed: 3.,
+        speed: 2.85,
         particle_type: BoostParticleType::BoostSouth,
     },
     Boost {
@@ -38,7 +38,7 @@ pub const BOOSTS: [Boost; 10] = [
             min: BlockPos::new(30, 70, 258),
             max: BlockPos::new(35, 75, 266),
         },
-        speed: 3.,
+        speed: 2.85,
         particle_type: BoostParticleType::BoostSouth,
     },
     Boost {
@@ -47,7 +47,7 @@ pub const BOOSTS: [Boost; 10] = [
             min: BlockPos::new(19, 74, 424),
             max: BlockPos::new(27, 79, 429),
         },
-        speed: 3.,
+        speed: 2.85,
         particle_type: BoostParticleType::BoostWest,
     },
     Boost {
@@ -56,7 +56,7 @@ pub const BOOSTS: [Boost; 10] = [
             min: BlockPos::new(24, 71, 465),
             max: BlockPos::new(32, 76, 470),
         },
-        speed: 3.,
+        speed: 2.85,
         particle_type: BoostParticleType::BoostEast,
     },
     Boost {
@@ -65,7 +65,7 @@ pub const BOOSTS: [Boost; 10] = [
             min: BlockPos::new(107, 79, 408),
             max: BlockPos::new(115, 84, 413),
         },
-        speed: 3.,
+        speed: 2.85,
         particle_type: BoostParticleType::BoostEast,
     },
     Boost {
@@ -74,7 +74,7 @@ pub const BOOSTS: [Boost; 10] = [
             min: BlockPos::new(214, 55, 417),
             max: BlockPos::new(222, 60, 422),
         },
-        speed: 3.,
+        speed: 2.85,
         particle_type: BoostParticleType::BoostWest,
     },
     Boost {
@@ -83,7 +83,7 @@ pub const BOOSTS: [Boost; 10] = [
             min: BlockPos::new(178, 50, 389),
             max: BlockPos::new(183, 55, 397),
         },
-        speed: 3.,
+        speed: 2.85,
         particle_type: BoostParticleType::BoostNorth,
     },
     Boost {
@@ -92,7 +92,7 @@ pub const BOOSTS: [Boost; 10] = [
             min: BlockPos::new(188, -26, 176),
             max: BlockPos::new(193, -21, 184),
         },
-        speed: 4.,
+        speed: 2.85,
         particle_type: BoostParticleType::BoostSouth,
     },
     Boost {
@@ -101,7 +101,7 @@ pub const BOOSTS: [Boost; 10] = [
             min: BlockPos::new(188, -39, 301),
             max: BlockPos::new(193, -34, 309),
         },
-        speed: 4.,
+        speed: 2.85,
         particle_type: BoostParticleType::BoostSouth,
     },
 ];
@@ -113,7 +113,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(25, 125, 158),
             max: BlockPos::new(28, 135, 161),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
     Loft {
         // positively massive
@@ -122,7 +122,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(-10, 66, 323),
             max: BlockPos::new(29, 79, 335),
         },
-        speed: 0.25,
+        speed: 0.3,
     },
     Loft {
         // -6 72 438, -3 82 441
@@ -130,7 +130,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(-6, 72, 438),
             max: BlockPos::new(-3, 82, 441),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
     Loft {
         // 87 72 466, 90 82 469
@@ -138,7 +138,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(87, 72, 466),
             max: BlockPos::new(90, 82, 469),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
     Loft {
         // 87 72 471, 90 82 474
@@ -146,7 +146,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(87, 72, 471),
             max: BlockPos::new(90, 82, 474),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
     Loft {
         // 97 74 464, 100 84 467
@@ -154,7 +154,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(97, 74, 464),
             max: BlockPos::new(100, 84, 467),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
     Loft {
         // 101 74 468, 104 84 471
@@ -162,7 +162,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(101, 74, 468),
             max: BlockPos::new(104, 84, 471),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
     Loft {
         // 98 79 453, 101 89 456
@@ -170,7 +170,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(98, 79, 453),
             max: BlockPos::new(101, 89, 456),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
     Loft {
         // 103 80 453, 106 90 456
@@ -178,7 +178,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(103, 80, 453),
             max: BlockPos::new(106, 90, 456),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
     Loft {
         // 140 77 402, 143 83 405
@@ -186,7 +186,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(140, 77, 402),
             max: BlockPos::new(143, 83, 405),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
     Loft {
         // 140 77 416, 143 83 419
@@ -194,7 +194,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(140, 77, 416),
             max: BlockPos::new(143, 83, 419),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
     Loft {
         // 156 86 442, 159 92 445
@@ -202,7 +202,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(156, 86, 442),
             max: BlockPos::new(159, 92, 445),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
     Loft {
         // 221 76 431, 224 82 434
@@ -210,7 +210,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(221, 76, 431),
             max: BlockPos::new(224, 82, 434),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
     Loft {
         // 221 77 387, 224, 83, 390
@@ -218,7 +218,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(221, 77, 387),
             max: BlockPos::new(224, 83, 390),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
     Loft {
         // 179 81 409, 182 86 412
@@ -226,7 +226,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(179, 81, 409),
             max: BlockPos::new(182, 86, 412),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
     Loft {
         // 169 41 317, 172 50 320
@@ -234,7 +234,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(169, 41, 317),
             max: BlockPos::new(172, 50, 320),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
     Loft {
         // 192 53 271, 195 62 274
@@ -242,7 +242,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(192, 53, 271),
             max: BlockPos::new(195, 62, 274),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
     Loft {
         // 168 40 262, 171 49 265
@@ -250,7 +250,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(168, 40, 262),
             max: BlockPos::new(171, 49, 265),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
     Loft {
         // 163 65 224, 166 74 227
@@ -258,7 +258,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(163, 65, 224),
             max: BlockPos::new(166, 74, 227),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
     Loft {
         // 182 29 222, 185 38 225
@@ -266,7 +266,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(182, 29, 222),
             max: BlockPos::new(185, 38, 225),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
     Loft {
         // 191 39 184, 194 48 187
@@ -274,7 +274,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(191, 39, 184),
             max: BlockPos::new(194, 48, 187),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
     Loft {
         // 182 20 174, 185 29 177
@@ -282,7 +282,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(182, 20, 174),
             max: BlockPos::new(185, 29, 177),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
     Loft {
         // -10 88 364, -7 94 367
@@ -290,7 +290,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(-10, 88, 364),
             max: BlockPos::new(-7, 94, 367),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
     Loft {
         // -15 93 386, -12 99 389
@@ -298,7 +298,7 @@ pub const LOFTS: [Loft; 24] = [
             min: BlockPos::new(-15, 93, 386),
             max: BlockPos::new(-12, 99, 389),
         },
-        speed: 0.25,
+        speed: 0.2,
     },
 ];
 
@@ -310,7 +310,7 @@ pub const CHECKPOINTS: [Checkpoint; 10] = [
             max: Vec3::new(52.0, 150.0, 249.5),
         },
         spawn_position: Vec3::new(4.5, 143., 233.5),
-        spawn_rotation: Rotation::new(0., 35.),
+        spawn_rotation: Rotation::new(0., 10.),
     },
     Checkpoint {
         // -9 68 303.5, 26 89 303.5
@@ -319,7 +319,7 @@ pub const CHECKPOINTS: [Checkpoint; 10] = [
             max: Vec3::new(26.0, 89.0, 303.5),
         },
         spawn_position: Vec3::new(10., 79., 302.),
-        spawn_rotation: Rotation::new(0., 35.),
+        spawn_rotation: Rotation::new(0., 10.),
     },
     Checkpoint {
         // 29.5 70 459, 29.5 89 474
@@ -328,7 +328,7 @@ pub const CHECKPOINTS: [Checkpoint; 10] = [
             max: Vec3::new(29.5, 89.0, 474.0),
         },
         spawn_position: Vec3::new(20.5, 78.5, 467.5),
-        spawn_rotation: Rotation::new(-85., 37.5),
+        spawn_rotation: Rotation::new(-90., 10.),
     },
     Checkpoint {
         // 120.5 77 401.5, 120.5 98 419.5
@@ -337,7 +337,7 @@ pub const CHECKPOINTS: [Checkpoint; 10] = [
             max: Vec3::new(120.5, 98.0, 419.5),
         },
         spawn_position: Vec3::new(103., 88., 411.),
-        spawn_rotation: Rotation::new(-90., 35.),
+        spawn_rotation: Rotation::new(-90., 10.),
     },
     Checkpoint {
         // 229.5 76 382, 229.5 109 439
@@ -346,7 +346,7 @@ pub const CHECKPOINTS: [Checkpoint; 10] = [
             max: Vec3::new(229.5, 109.0, 439.0),
         },
         spawn_position: Vec3::new(195., 111., 411.),
-        spawn_rotation: Rotation::new(-90., 53.),
+        spawn_rotation: Rotation::new(-90., 10.),
     },
     Checkpoint {
         // 174 49 389.5, 187 70 389.5
@@ -364,7 +364,7 @@ pub const CHECKPOINTS: [Checkpoint; 10] = [
             max: Vec3::new(191.0, 59.0, 135.5),
         },
         spawn_position: Vec3::new(180., 56., 149.5),
-        spawn_rotation: Rotation::new(180., 40.),
+        spawn_rotation: Rotation::new(180., 10.),
     },
     Checkpoint {
         // 169 -26 148.5, 209 12 148.5
@@ -373,7 +373,7 @@ pub const CHECKPOINTS: [Checkpoint; 10] = [
             max: Vec3::new(209.0, 12.0, 148.5),
         },
         spawn_position: Vec3::new(189., -2., 142.5),
-        spawn_rotation: Rotation::new(0., 40.),
+        spawn_rotation: Rotation::new(0., 10.),
     },
     Checkpoint {
         // 170 -36 387.5, 208 7 387.5
@@ -382,7 +382,7 @@ pub const CHECKPOINTS: [Checkpoint; 10] = [
             max: Vec3::new(208.0, 7.0, 387.5),
         },
         spawn_position: Vec3::new(195., -2., 391.5),
-        spawn_rotation: Rotation::new(0., 40.),
+        spawn_rotation: Rotation::new(0., 10.),
     },
     Checkpoint {
         // 191 -56 506, 204 -46 506
@@ -392,7 +392,7 @@ pub const CHECKPOINTS: [Checkpoint; 10] = [
             max: Vec3::new(204.0, -46.0, 506.0),
         },
         spawn_position: Vec3::new(197.5, -51., 499.5),
-        spawn_rotation: Rotation::new(-90., 40.),
+        spawn_rotation: Rotation::new(-90., 10.),
     },
 ];
 
