@@ -8,12 +8,12 @@ use serde::Deserialize;
 
 #[derive(Deserialize, Debug, Clone)]
 struct Item {
-    id: u32,
+    id: i32,
     name: String,
     #[serde(rename = "displayName")]
     display_name: String,
     #[serde(rename = "stackSize")]
-    stack_size: u32,
+    stack_size: usize,
 }
 
 pub fn build_items() {
@@ -70,7 +70,7 @@ pub fn build_items() {
         }
 
         impl Item {
-            pub fn get_id(&self) -> u32 {
+            pub fn get_id(&self) -> i32 {
                 match self {
                     #get_id_inner
                 }
@@ -85,12 +85,12 @@ pub fn build_items() {
                     #get_display_name_inner
                 }
             }
-            pub fn get_stack_size(&self) -> u32 {
+            pub fn get_stack_size(&self) -> usize {
                 match self {
                     #get_stack_size_inner
                 }
             }
-            pub fn from_id(id: u32) -> Option<Self> {
+            pub fn from_id(id: i32) -> Option<Self> {
                 match id {
                     #from_item_id_inner
                     _ => None

@@ -127,7 +127,7 @@ mod deserializer {
                 return Err(DeserializeError::InvalidItemID(id));
             };
 
-            Ok(Item::from_id(id as u32).ok_or_else(|| DeserializeError::InvalidItemID(id))?)
+            Ok(Item::from_id(id).ok_or_else(|| DeserializeError::InvalidItemID(id))?)
         }
     }
 
