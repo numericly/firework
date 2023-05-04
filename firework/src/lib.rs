@@ -17,7 +17,7 @@ use firework_protocol::{
 use firework_protocol::{read_specific_packet, ConnectionState, Protocol, ProtocolError};
 use firework_world::World;
 use gui::GuiScreen;
-use protocol::client_bound::UpdateTime;
+use protocol::{client_bound::UpdateTime, core::Position};
 use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
 use sha1::{Digest, Sha1};
 use std::sync::Arc;
@@ -728,6 +728,7 @@ where
         client: &Client<Handler, Proxy>,
         item: ItemStack,
         slot_id: InventorySlot,
+        location: Option<Position>,
     ) -> Result<(), ConnectionError> {
         Ok(())
     }

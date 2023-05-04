@@ -67,7 +67,7 @@ pub enum WindowType {
 }
 
 impl WindowType {
-    pub fn len(&self) -> usize {
+    pub const fn len(&self) -> usize {
         match self {
             WindowType::Generic9x1 => 9,
             WindowType::Generic9x2 => 18,

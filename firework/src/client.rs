@@ -111,7 +111,7 @@ where
     },
     UpdateSlot {
         window_id: i8,
-        slot: u16,
+        slot: i16,
         item: ItemStack,
         state_id: i32,
     },
@@ -269,7 +269,7 @@ impl InventorySlot {
     pub fn value(&self) -> usize {
         match self {
             InventorySlot::Hotbar { slot } => Self::HOTBAR_OFFSET + slot,
-            InventorySlot::MainInventory { slot } => Self::HOTBAR_OFFSET + 9 + slot,
+            InventorySlot::MainInventory { slot } => Self::MAIN_INVENTORY_OFFSET + slot,
             InventorySlot::CraftingGrid { slot } => Self::CRAFTING_OFFSET + 1 + slot,
             InventorySlot::CraftingResult => Self::CRAFTING_OFFSET,
             InventorySlot::Offhand => Self::OFFHAND_OFFSET,
@@ -277,6 +277,13 @@ impl InventorySlot {
             InventorySlot::Leggings => Self::ARMOR_OFFSET + 2,
             InventorySlot::Chestplate => Self::ARMOR_OFFSET + 1,
             InventorySlot::Helmet => Self::ARMOR_OFFSET,
+        }
+    }
+    pub fn from_gui_index(value: usize) -> Option<Self> {
+        match value {
+            v if v < 27 => Some(InventorySlot::MainInventory { slot: v }),
+            v if v >= 27 && v <= 36 => Some(InventorySlot::Hotbar { slot: v - 27 }),
+            _ => None,
         }
     }
     pub fn from_value(value: usize) -> Option<Self> {
@@ -337,6 +344,28 @@ impl Inventory {
             InventorySlot::MainInventory { slot } => {
                 assert!(*slot < 27);
                 &self.slots[Self::MAIN_INVENTORY_OFFSET + slot]
+            }
+        }
+    }
+    pub fn get_slot_mut(&mut self, slot: &InventorySlot) -> &mut ItemStack {
+        match slot {
+            InventorySlot::Helmet => &mut self.slots[Self::ARMOR_OFFSET],
+            InventorySlot::Chestplate => &mut self.slots[Self::ARMOR_OFFSET + 1],
+            InventorySlot::Leggings => &mut self.slots[Self::ARMOR_OFFSET + 2],
+            InventorySlot::Boots => &mut self.slots[Self::ARMOR_OFFSET + 3],
+            InventorySlot::CraftingResult => &mut self.slots[Self::CRAFTING_OFFSET],
+            InventorySlot::Offhand => &mut self.slots[Self::OFFHAND_OFFSET],
+            InventorySlot::CraftingGrid { slot } => {
+                assert!(*slot < 4);
+                &mut self.slots[Self::CRAFTING_OFFSET + slot + 1]
+            }
+            InventorySlot::Hotbar { slot } => {
+                assert!(*slot < 9);
+                &mut self.slots[Self::HOTBAR_OFFSET + slot]
+            }
+            InventorySlot::MainInventory { slot } => {
+                assert!(*slot < 27);
+                &mut self.slots[Self::MAIN_INVENTORY_OFFSET + slot]
             }
         }
     }
@@ -708,12 +737,6 @@ where
 
         drop(player);
 
-        self.to_client.send(ClientCommand::MoveChunk {
-            chunk_x,
-            chunk_z,
-            max_time: Duration::from_millis(49),
-        });
-
         if let Some(gui) = &mut *self.gui.write().await {
             for _ in 0..gui.events.len() {
                 let event = gui.events.recv().await.unwrap();
@@ -730,7 +753,7 @@ where
                         }
                         self.to_client.send(ClientCommand::UpdateSlot {
                             window_id: 1,
-                            slot: slot as u16,
+                            slot: slot as i16,
                             item,
                             state_id,
                         });
@@ -740,6 +763,12 @@ where
         }
 
         self.handler.on_tick(&self).await;
+
+        self.to_client.send(ClientCommand::MoveChunk {
+            chunk_x,
+            chunk_z,
+            max_time: Duration::from_millis(50),
+        });
     }
 
     pub(super) async fn handle_command(
@@ -765,7 +794,7 @@ where
             } => {
                 self.send_packet(SetContainerSlot {
                     window_id,
-                    slot: slot as i16,
+                    slot,
                     item,
                     state_id: VarInt(state_id),
                 })
@@ -1478,7 +1507,32 @@ where
                 };
 
                 self.handler
-                    .on_use_item(self, used_item, used_item_slot)
+                    .on_use_item(self, used_item, used_item_slot, None)
+                    .await?;
+            }
+            ServerBoundPacket::UseItemOn(packet) => {
+                let used_item_slot = {
+                    match packet.arm {
+                        Hand::MainHand => {
+                            let player = self.player.read().await;
+                            InventorySlot::Hotbar {
+                                slot: player.selected_slot as usize,
+                            }
+                        }
+                        Hand::OffHand => InventorySlot::Offhand,
+                    }
+                };
+
+                let used_item = {
+                    let player_read = self.player.read().await;
+                    match player_read.inventory.get_slot(&used_item_slot) {
+                        Some(item) => Some(item.clone()),
+                        None => None,
+                    }
+                };
+
+                self.handler
+                    .on_use_item(self, used_item, used_item_slot, Some(packet.location))
                     .await?;
             }
             ServerBoundPacket::CloseContainerServerBound(container) => {
@@ -1509,7 +1563,7 @@ where
             }
         }
 
-        let mut start = Instant::now();
+        let start = Instant::now();
 
         let mut chunks_to_load = Vec::new();
 
@@ -1538,6 +1592,9 @@ where
             distance.partial_cmp(&distance2).unwrap()
         });
 
+        let loading_start = Instant::now();
+        let mut loaded = 0;
+
         for (x, z) in chunks_to_load {
             let packet = {
                 let chunk_data = self
@@ -1545,6 +1602,9 @@ where
                     .get_world()
                     .get_chunk(x + chunk_x, z + chunk_z)
                     .await?;
+
+                loaded += 1;
+
                 if let Some(chunk_lock) = chunk_data {
                     let chunk = chunk_lock.read().await;
                     Some(chunk.into_packet())
@@ -1558,7 +1618,7 @@ where
             }
             player_loaded_chunks.insert((x + chunk_x, z + chunk_z));
 
-            if start.elapsed() > max_time {
+            if start.elapsed() + loading_start.elapsed() / loaded > max_time {
                 return Ok(());
             }
         }
@@ -1730,9 +1790,18 @@ where
             .set_slot(slot.clone(), item.clone());
 
         self.to_client.send(ClientCommand::UpdateSlot {
-            slot: slot.value() as u16,
+            slot: slot.value() as i16,
             item,
             window_id: 0,
+            state_id: 0,
+        });
+    }
+    #[allow(unused_must_use)]
+    pub fn update_slot(&self, slot: i16, item: ItemStack, window_id: i8) {
+        self.to_client.send(ClientCommand::UpdateSlot {
+            slot,
+            item,
+            window_id,
             state_id: 0,
         });
     }

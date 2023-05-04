@@ -455,10 +455,33 @@ pub struct UpdateLatency {
 
 #[derive(Debug, PartialEq, SerializeField, Clone, DeserializeField)]
 pub struct StackContents {
-    pub item_id: Item,
-    pub item_count: u8,
+    pub id: Item,
+    pub count: u8,
     pub nbt: ItemNbt,
 }
+
+impl StackContents {
+    /// attempts combine two stacks and returns the remainder
+    pub fn stack_item(&mut self, other_stack: &StackContents) -> Option<StackContents> {
+        if self.id == other_stack.id && self.nbt == other_stack.nbt {
+            let new_count = self.count as usize + other_stack.count as usize;
+            if new_count > self.id.get_stack_size() {
+                self.count = self.id.get_stack_size() as u8;
+                Some(StackContents {
+                    id: other_stack.id,
+                    count: (new_count - self.id.get_stack_size()) as u8,
+                    nbt: other_stack.nbt.clone(),
+                })
+            } else {
+                self.count = new_count as u8;
+                None
+            }
+        } else {
+            Some(other_stack.clone())
+        }
+    }
+}
+
 pub type ItemStack = Option<StackContents>;
 
 impl SerializeField for DeathLocation {

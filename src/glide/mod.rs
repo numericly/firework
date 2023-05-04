@@ -1118,8 +1118,8 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
         player.inventory.set_slot(
             InventorySlot::Chestplate,
             Some(StackContents {
-                item_id: Item::Elytra,
-                item_count: 1,
+                id: Item::Elytra,
+                count: 1,
                 nbt: ItemNbt {
                     enchantments: Some(vec![Enchantment {
                         id: "minecraft:binding_curse".to_string(),
