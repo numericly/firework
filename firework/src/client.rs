@@ -1386,15 +1386,17 @@ where
                 }
             }
             ClientCommand::ClearScoreboard => {
-                for line in self.scoreboard.lock().await.iter() {
-                    if let Some(line) = line {
+                let mut scoreboard_lock = self.scoreboard.lock().await;
+                for (i, value) in scoreboard_lock.iter_mut().enumerate() {
+                    if let Some(value) = value {
                         self.update_score(
-                            line.clone(),
+                            value.clone(),
                             ScoreAction::Remove {
                                 objective_name: "leaderboard_id".to_string(),
                             },
                         );
                     }
+                    *value = None;
                 }
             }
         }
@@ -2139,6 +2141,7 @@ where
     }
     #[allow(unused_must_use)]
     pub fn update_score(&self, entity_name: String, action: ScoreAction) {
+        // println!("update score {} {:?}", entity_name, action);
         self.to_client.send(ClientCommand::UpdateScore {
             entity_name,
             action,

@@ -1192,27 +1192,21 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
 
                 let mut leaderboard_lines: Vec<(PlayerFinishedState, String)> = Vec::new();
 
-                for client in server.player_list.iter() {
-                    if let Some(finished_state) = finished_states_lock.get(&client.client_data.uuid)
-                    {
-                        let string_message = match finished_state {
-                            (name, PlayerFinishedState::Finished { finish_time }) => {
-                                format!(
-                                    "§7{} finished in §b{}",
-                                    name,
-                                    format_duration(&finish_time)
-                                )
-                            }
-                            (name, PlayerFinishedState::InProgress { percentage }) => {
-                                format!("§7{}: §b{:.2}%", name, percentage * 100.0)
-                            }
-                            (name, PlayerFinishedState::DNF) => {
-                                format!("§7{}: §cDNF", name)
-                            }
-                        };
-                        leaderboard_lines.push((finished_state.1.clone(), string_message));
-                    }
+                for (_uuid, finished_state) in finished_states_lock.iter() {
+                    let string_message = match finished_state {
+                        (name, PlayerFinishedState::Finished { finish_time }) => {
+                            format!("§7{}: §b{}", name, format_duration(&finish_time))
+                        }
+                        (name, PlayerFinishedState::InProgress { percentage }) => {
+                            format!("§7{}: §b{:.2}%", name, percentage * 100.0)
+                        }
+                        (name, PlayerFinishedState::DNF) => {
+                            format!("§7{}: §cDNF", name)
+                        }
+                    };
+                    leaderboard_lines.push((finished_state.1.clone(), string_message));
                 }
+
                 drop(finished_states_lock);
 
                 leaderboard_lines
