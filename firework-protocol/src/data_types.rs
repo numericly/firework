@@ -740,3 +740,36 @@ impl SerializeField for Equipment {
         }
     }
 }
+
+#[derive(Debug, PartialEq, SerializeField, Clone)]
+#[protocol(typ = "firework_protocol::core::VarInt")]
+pub enum ObjectiveAction {
+    Create {
+        objective_value: String,
+        objective_type: ObjectiveType,
+    },
+    Remove,
+    Update {
+        objective_value: String,
+        objective_type: ObjectiveType,
+    },
+}
+
+#[derive(Debug, PartialEq, SerializeField, Clone)]
+#[protocol(typ = "firework_protocol::core::VarInt")]
+pub enum ObjectiveType {
+    Integer,
+    Hearts,
+}
+
+#[derive(Debug, PartialEq, SerializeField, Clone)]
+#[protocol(typ = "firework_protocol::core::VarInt")]
+pub enum ScoreAction {
+    CreateOrUpdate {
+        objective_name: String,
+        value: VarInt,
+    },
+    Remove {
+        objective_name: String,
+    },
+}

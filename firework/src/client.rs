@@ -12,21 +12,23 @@ use firework_data::tags::{REGISTRY, TAGS};
 use firework_protocol::{
     client_bound::{
         BossBar, ChangeDifficulty, ClientBoundKeepAlive, ClientBoundPacket, CloseContainer,
-        CommandSuggestionsResponse, Commands, CustomSound, EntityAnimation, EntityEvent,
-        HurtAnimation, IdMapHolder, LoginPlay, OpenScreen, ParticlePacket, PlayDisconnect,
-        PlayerAbilities, PlayerInfo, PluginMessage, RemoveEntities, RemoveInfoPlayer, Respawn,
-        SerializePacket, SetCenterChunk, SetContainerContent, SetContainerSlot, SetDefaultSpawn,
-        SetEntityMetadata, SetEntityVelocity, SetEquipment, SetHealth, SetHeldItem, SetRecipes,
-        SetSubtitleText, SetTags, SetTitleAnimationTimes, SetTitleText, SoundEffect, SoundSource,
-        SpawnPlayer, SynchronizePlayerPosition, SystemChatMessage, TeleportEntity, UnloadChunk,
-        UpdateAttributes, UpdateEntityHeadRotation, UpdateEntityPosition,
-        UpdateEntityPositionAndRotation, UpdateEntityRotation, UpdateTime, VanillaSound,
+        CommandSuggestionsResponse, Commands, CustomSound, DisplayObjective, EntityAnimation,
+        EntityEvent, HurtAnimation, IdMapHolder, LoginPlay, OpenScreen, ParticlePacket,
+        PlayDisconnect, PlayerAbilities, PlayerInfo, PluginMessage, RemoveEntities,
+        RemoveInfoPlayer, Respawn, SerializePacket, SetCenterChunk, SetContainerContent,
+        SetContainerSlot, SetDefaultSpawn, SetEntityMetadata, SetEntityVelocity, SetEquipment,
+        SetHealth, SetHeldItem, SetRecipes, SetSubtitleText, SetTags, SetTitleAnimationTimes,
+        SetTitleText, SoundEffect, SoundSource, SpawnPlayer, SynchronizePlayerPosition,
+        SystemChatMessage, TeleportEntity, UnloadChunk, UpdateAttributes, UpdateEntityHeadRotation,
+        UpdateEntityPosition, UpdateEntityPositionAndRotation, UpdateEntityRotation,
+        UpdateObjectives, UpdateScore, UpdateTime, VanillaSound,
     },
     core::{DeserializeField, Position, SerializeField, UnsizedVec, VarInt},
     data_types::{
         AddPlayer, Attribute, BossBarAction, EntityAnimationType, EntityEventStatus, Equipment,
-        Hand, ItemStack, Particle, PlayerAbilityFlags, PlayerActionStatus, PlayerCommandAction,
-        PlayerInfoAction, PlayerPositionFlags, UpdateGameMode, UpdateLatency, UpdateListed,
+        Hand, ItemStack, ObjectiveAction, Particle, PlayerAbilityFlags, PlayerActionStatus,
+        PlayerCommandAction, PlayerInfoAction, PlayerPositionFlags, ScoreAction, UpdateGameMode,
+        UpdateLatency, UpdateListed,
     },
     read_specific_packet,
     server_bound::{
@@ -163,6 +165,23 @@ where
         entity_id: i32,
         equipment: Equipment,
     },
+    ShowScoreboard {
+        position: i8,
+        objective_name: String,
+    },
+    UpdateObjective {
+        objective_name: String,
+        action: ObjectiveAction,
+    },
+    UpdateScore {
+        entity_name: String,
+        action: ScoreAction,
+    },
+    UpdateScoreboardLine {
+        line: usize,
+        value: String,
+    },
+    ClearScoreboard,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -428,6 +447,7 @@ where
     pub client_data: Arc<ClientData>,
     pub player: RwLock<Player>,
     pub gui: RwLock<Option<ClientGUI<Handler, Proxy>>>,
+    pub scoreboard: Mutex<Vec<Option<String>>>,
     unsynced_entities: RwLock<HashMap<i32, Vec3>>,
     to_client: broadcast::Sender<ClientCommand<Proxy::TransferData>>,
     to_client_visual: broadcast::Sender<ClientCommand<Proxy::TransferData>>,
@@ -461,6 +481,7 @@ where
             unsynced_entities: RwLock::new(HashMap::new()),
             to_client_visual,
             gui: RwLock::new(None),
+            scoreboard: Mutex::new(Vec::new()),
             player: RwLock::new(player),
             active_pings: Mutex::new(Vec::new()),
             server: server.clone(),
@@ -1276,6 +1297,108 @@ where
                 })
                 .await?
             }
+            ClientCommand::ShowScoreboard {
+                position,
+                objective_name,
+            } => {
+                self.send_packet(DisplayObjective {
+                    position,
+                    objective_name,
+                })
+                .await?
+            }
+            ClientCommand::UpdateObjective {
+                objective_name,
+                action,
+            } => {
+                self.send_packet(UpdateObjectives {
+                    action,
+                    objective_name,
+                })
+                .await?
+            }
+            ClientCommand::UpdateScore {
+                entity_name,
+                action,
+            } => {
+                self.send_packet(UpdateScore {
+                    entity_name,
+                    action,
+                })
+                .await?
+            }
+            ClientCommand::UpdateScoreboardLine { line, value } => {
+                let mut scoreboard = self.scoreboard.lock().await;
+
+                if line >= scoreboard.len() {
+                    scoreboard.resize(line + 1, None);
+                    self.update_score(
+                        value.clone(),
+                        ScoreAction::CreateOrUpdate {
+                            objective_name: "leaderboard_id".to_string(),
+                            value: VarInt(line as i32),
+                        },
+                    );
+                } else {
+                    let old_value = scoreboard[line].clone();
+                    if let Some(old_value) = old_value {
+                        if old_value != value {
+                            self.update_score(
+                                old_value.clone(),
+                                ScoreAction::Remove {
+                                    objective_name: "leaderboard_id".to_string(),
+                                },
+                            );
+                            self.update_score(
+                                value.clone(),
+                                ScoreAction::CreateOrUpdate {
+                                    objective_name: "leaderboard_id".to_string(),
+                                    value: VarInt(line as i32),
+                                },
+                            );
+                            for i in 0..scoreboard.len() {
+                                if i == line {
+                                    continue;
+                                }
+                                let scoreboard_entry = &scoreboard[i];
+                                if &Some(value.clone()) == scoreboard_entry {
+                                    scoreboard[i] = None;
+                                }
+                            }
+                        }
+                    } else {
+                        self.update_score(
+                            value.clone(),
+                            ScoreAction::CreateOrUpdate {
+                                objective_name: "leaderboard_id".to_string(),
+                                value: VarInt(line as i32),
+                            },
+                        );
+                    }
+                    for i in 0..scoreboard.len() {
+                        if i == line {
+                            continue;
+                        }
+                        let scoreboard_entry = &scoreboard[i];
+                        if &Some(value.clone()) == scoreboard_entry {
+                            scoreboard[i] = None;
+                        }
+                    }
+                    scoreboard[line] = Some(value);
+                }
+            }
+            ClientCommand::ClearScoreboard => {
+                for line in self.scoreboard.lock().await.iter() {
+                    if let Some(line) = line {
+                        self.update_score(
+                            line.clone(),
+                            ScoreAction::Remove {
+                                objective_name: "leaderboard_id".to_string(),
+                            },
+                        );
+                    }
+                }
+            }
         }
         Ok(None)
     }
@@ -1995,6 +2118,32 @@ where
             entity_id,
             equipment,
         });
+    }
+    #[allow(unused_must_use)]
+    pub fn show_scoreboard(&self, position: i8, objective_name: String) {
+        self.to_client.send(ClientCommand::ShowScoreboard {
+            position,
+            objective_name,
+        });
+    }
+    #[allow(unused_must_use)]
+    pub fn update_objectives(&self, objective_name: String, action: ObjectiveAction) {
+        self.to_client.send(ClientCommand::UpdateObjective {
+            objective_name,
+            action,
+        });
+    }
+    #[allow(unused_must_use)]
+    pub fn update_score(&self, entity_name: String, action: ScoreAction) {
+        self.to_client.send(ClientCommand::UpdateScore {
+            entity_name,
+            action,
+        });
+    }
+    #[allow(unused_must_use)]
+    pub fn set_scoreboard_line(&self, line: usize, value: String) {
+        self.to_client
+            .send(ClientCommand::UpdateScoreboardLine { line, value });
     }
 }
 
