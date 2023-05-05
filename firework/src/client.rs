@@ -2149,6 +2149,10 @@ where
         self.to_client
             .send(ClientCommand::UpdateScoreboardLine { line, value });
     }
+    #[allow(unused_must_use)]
+    pub fn clear_scoreboard(&self) {
+        self.to_client.send(ClientCommand::ClearScoreboard);
+    }
 }
 
 mod internal {}

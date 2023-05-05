@@ -900,7 +900,7 @@ where
             .await?;
 
         let (to_client_sender, to_client_receiver) =
-            broadcast::channel::<ClientCommand<Proxy::TransferData>>(1024);
+            broadcast::channel::<ClientCommand<Proxy::TransferData>>(2048);
 
         let (to_client_visual_sender, to_client_visual_receiver) =
             broadcast::channel::<ClientCommand<Proxy::TransferData>>(2048);

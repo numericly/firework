@@ -170,17 +170,17 @@ impl PartialOrd for PlayerFinishedState {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         match (self, other) {
             (PlayerFinishedState::DNF, PlayerFinishedState::DNF) => Some(std::cmp::Ordering::Equal),
-            (PlayerFinishedState::DNF, _) => Some(std::cmp::Ordering::Less),
-            (_, PlayerFinishedState::DNF) => Some(std::cmp::Ordering::Greater),
+            (PlayerFinishedState::DNF, _) => Some(std::cmp::Ordering::Greater),
+            (_, PlayerFinishedState::DNF) => Some(std::cmp::Ordering::Less),
             (
                 PlayerFinishedState::InProgress { percentage: p1 },
                 PlayerFinishedState::InProgress { percentage: p2 },
             ) => p2.partial_cmp(p1), // there is a better way to reverse comparisons but shhhhhh
             (PlayerFinishedState::InProgress { .. }, PlayerFinishedState::Finished { .. }) => {
-                Some(std::cmp::Ordering::Less)
+                Some(std::cmp::Ordering::Greater)
             }
             (PlayerFinishedState::Finished { .. }, PlayerFinishedState::InProgress { .. }) => {
-                Some(std::cmp::Ordering::Greater)
+                Some(std::cmp::Ordering::Less)
             }
             (
                 PlayerFinishedState::Finished { finish_time: t1 },
@@ -270,31 +270,32 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
     ) -> Result<(), ConnectionError> {
         println!("{} transferred", client.client_data.profile.name);
         client.send_boss_bar_action(0, BossBarAction::Remove);
-        // let finished_states_lock = self.server.handler.player_finished_states.lock().await;
-        // finished_states_lock.insert(
-        //     client.client_data.uuid,
-        //     (
-        //         client.client_data.profile.name.clone(),
-        //         PlayerFinishedState::DNF,
-        //     ),
-        // );
+        client.clear_scoreboard();
+        let mut finished_states_lock = self.server.handler.player_finished_states.lock().await;
+        finished_states_lock.insert(
+            client.client_data.uuid,
+            (
+                client.client_data.profile.name.clone(),
+                PlayerFinishedState::DNF,
+            ),
+        );
         Ok(())
     }
-    // async fn on_leave(
-    //     &self,
-    //     client: &Client<GlideServerHandler, MiniGameProxy>,
-    // ) -> Result<(), ConnectionError> {
-    //     println!("{} left", client.client_data.profile.name);
-    //     // let finished_states_lock = self.server.handler.player_finished_states.lock().await;
-    //     // finished_states_lock.insert(
-    //     //     client.client_data.uuid,
-    //     //     (
-    //     //         client.client_data.profile.name.clone(),
-    //     //         PlayerFinishedState::DNF,
-    //     //     ),
-    //     // );
-    //     Ok(())
-    // }
+    async fn on_leave(
+        &self,
+        client: &Client<GlideServerHandler, MiniGameProxy>,
+    ) -> Result<(), ConnectionError> {
+        println!("{} left", client.client_data.profile.name);
+        let mut finished_states_lock = self.server.handler.player_finished_states.lock().await;
+        finished_states_lock.insert(
+            client.client_data.uuid,
+            (
+                client.client_data.profile.name.clone(),
+                PlayerFinishedState::DNF,
+            ),
+        );
+        Ok(())
+    }
 
     async fn on_post_load(
         &self,
@@ -905,27 +906,24 @@ impl GlidePlayerHandler {
         if let GameState::Running { start_time } = *game_state {
             let elapsed = start_time.elapsed();
             client.send_boss_bar_action(0, BossBarAction::UpdateHealth { health: 1. });
-            // let finished_states_lock = self.server.handler.player_finished_states.lock().await;
-            // finished_states_lock.insert(
-            //     client.client_data.uuid,
-            //     (
-            //         client.client_data.profile.name.clone(),
-            //         PlayerFinishedState::Finished {
-            //             finish_time: elapsed,
-            //         },
-            //     ),
-            // );
-            // let flying_players = finished_states_lock.iter().fold(0, |acc, e| {
-            //     acc + match e.1 {
-            //         PlayerFinishedState::InProgress { .. } => 1,
-            //         _ => 0,
-            //     }
-            // });
+            let mut finished_states_lock = self.server.handler.player_finished_states.lock().await;
+            finished_states_lock.insert(
+                client.client_data.uuid,
+                (
+                    client.client_data.profile.name.clone(),
+                    PlayerFinishedState::Finished {
+                        finish_time: elapsed,
+                    },
+                ),
+            );
+            let flying_players = finished_states_lock.iter().fold(0, |acc, e| {
+                acc + match e.1 .1 {
+                    PlayerFinishedState::InProgress { .. } => 1,
+                    _ => 0,
+                }
+            });
 
-            // drop(finished_states_lock);
-
-            let flying_players = 1;
-            // FIXME
+            drop(finished_states_lock);
 
             if flying_players == 0 {
                 *game_state = GameState::Finished {
@@ -968,6 +966,7 @@ impl GlidePlayerHandler {
                         .to_string(),
                         false,
                     );
+                    client.clear_scoreboard();
                 }
             }
         }
@@ -1198,13 +1197,17 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
                     {
                         let string_message = match finished_state {
                             (name, PlayerFinishedState::Finished { finish_time }) => {
-                                format!("{} finished in {}", name, format_duration(&finish_time))
+                                format!(
+                                    "§7{} finished in §b{}",
+                                    name,
+                                    format_duration(&finish_time)
+                                )
                             }
                             (name, PlayerFinishedState::InProgress { percentage }) => {
-                                format!("{}: {:.2}%", name, percentage * 100.0)
+                                format!("§7{}: §b{:.2}%", name, percentage * 100.0)
                             }
                             (name, PlayerFinishedState::DNF) => {
-                                format!("{}: DNF", name)
+                                format!("§7{}: §cDNF", name)
                             }
                         };
                         leaderboard_lines.push((finished_state.1.clone(), string_message));
@@ -1297,17 +1300,17 @@ impl GlideServerHandler {
                         {
                             "text": " >> ",
                             "italic": false,
-                            "color": "black"
+                            "color": "dark_aqua"
                         },
                         {
-                            "text": "POSITION",
-                            "color": "gold",
+                            "text": "Firework",
+                            "color": "aqua",
                             "bold": true
                         },
                         {
                             "text": " << ",
                             "italic": false,
-                            "color": "black"
+                            "color": "dark_aqua"
                         },
                     ])
                     .to_string(),
@@ -1348,7 +1351,6 @@ impl GlideServerHandler {
                 },
             );
 
-            println!("getting lock 2");
             let mut finished_states_lock = server.handler.player_finished_states.lock().await;
             finished_states_lock.insert(
                 client.client_data.uuid,
@@ -1358,7 +1360,6 @@ impl GlideServerHandler {
                 ),
             );
             drop(finished_states_lock);
-            println!("dropped lock 2");
         }
     }
 }
