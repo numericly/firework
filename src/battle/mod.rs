@@ -219,7 +219,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
         // check if the movement is way too fast
         let max_velocity = 20.0;
         if (end.clone() - start.clone()).length() > max_velocity {
-            client.sync_position(start.clone(), None);
+            client.sync_position(start.clone(), None).await;
             client.set_velocity(
                 client
                     .player
@@ -1225,10 +1225,12 @@ impl BattleServerHandler {
                 )
                 .to_string(),
             );
-            client.sync_position(
-                self.map.get_spawn_point().position.clone(),
-                Some(Rotation::new(0., 0.)),
-            );
+            client
+                .sync_position(
+                    self.map.get_spawn_point().position.clone(),
+                    Some(Rotation::new(0., 0.)),
+                )
+                .await;
 
             client.send_boss_bar_action(
                 0,

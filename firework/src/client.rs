@@ -861,8 +861,6 @@ where
                     (Rotation::new(0., 0.), flags)
                 };
 
-                self.player.write().await.syncing_position = Some(0);
-
                 self.send_packet(SynchronizePlayerPosition {
                     x: position.x,
                     y: position.y,
@@ -1946,7 +1944,13 @@ where
         });
     }
     #[allow(unused_must_use)]
-    pub fn sync_position(&self, position: Vec3, rotation: Option<Rotation>) {
+    pub async fn sync_position(&self, position: Vec3, rotation: Option<Rotation>) {
+        self.player.write().await.position = position.clone();
+        self.player.write().await.previous_position = Some(PreviousPosition {
+            position: position.clone(),
+            time: Instant::now(),
+        });
+        self.player.write().await.syncing_position = Some(0);
         self.to_client
             .send(ClientCommand::SyncPosition { position, rotation });
     }

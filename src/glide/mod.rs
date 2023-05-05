@@ -91,7 +91,7 @@ pub enum Maps {
 impl Distribution<Maps> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Maps {
         match rng.gen_range(0..3) {
-            _ => Maps::Temple,
+            // _ => Maps::Temple,
             0 => Maps::Canyon,
             1 => Maps::Cavern,
             2 => Maps::Temple,
@@ -360,7 +360,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
         // check if the movement is way too fast
         let max_velocity = 10.0;
         if (end.clone() - start.clone()).length() > max_velocity {
-            client.sync_position(start.clone(), None);
+            client.sync_position(start.clone(), None).await;
             client.set_velocity(
                 client
                     .player
@@ -751,20 +751,25 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                         if checkpoint != 0 {
                             let checkpoint = map.get_checkpoints().get(checkpoint - 1);
                             if let Some(checkpoint) = checkpoint {
-                                client.sync_position(
-                                    checkpoint.spawn_position.clone(),
-                                    Some(checkpoint.spawn_rotation.clone()),
-                                );
+                                client
+                                    .sync_position(
+                                        checkpoint.spawn_position.clone(),
+                                        Some(checkpoint.spawn_rotation.clone()),
+                                    )
+                                    .await;
 
+                                self.boost_status.write().await.take();
                                 client.set_velocity(Vec3::scalar(0.));
                                 return Ok(on_ground);
                             }
                         }
 
-                        client.sync_position(
-                            map.get_spawn_position().clone(),
-                            Some(Rotation::new(0., 0.)),
-                        );
+                        client
+                            .sync_position(
+                                map.get_spawn_position().clone(),
+                                Some(Rotation::new(0., 0.)),
+                            )
+                            .await;
 
                         client.send_sound(
                             IdMapHolder::Direct(CustomSound {
@@ -777,6 +782,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                             1.,
                         );
 
+                        self.boost_status.write().await.take();
                         client.set_velocity(Vec3::scalar(0.));
                     } else {
                         client.send_sound(
@@ -1321,10 +1327,12 @@ impl GlideServerHandler {
                 )
                 .to_string(),
             );
-            client.sync_position(
-                self.map.get_spawn_position().clone(),
-                Some(Rotation::new(0., 0.)),
-            );
+            client
+                .sync_position(
+                    self.map.get_spawn_position().clone(),
+                    Some(Rotation::new(0., 0.)),
+                )
+                .await;
 
             client.send_boss_bar_action(
                 0,
