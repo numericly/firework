@@ -871,21 +871,6 @@ where
                     teleport_id: VarInt(0),
                 })
                 .await?;
-
-                let previous_position = self.player.read().await.position.clone();
-
-                self.player.write().await.position = position.clone();
-
-                self.server
-                    .broadcast_entity_move(
-                        &self,
-                        Some(position),
-                        previous_position,
-                        None,
-                        rotation,
-                        false,
-                    )
-                    .await;
             }
             ClientCommand::MoveEntity {
                 entity_id,
@@ -1945,12 +1930,30 @@ where
     }
     #[allow(unused_must_use)]
     pub async fn sync_position(&self, position: Vec3, rotation: Option<Rotation>) {
-        self.player.write().await.position = position.clone();
-        self.player.write().await.previous_position = Some(PreviousPosition {
+        let mut player = self.player.write().await;
+
+        let previous_position = player.position.clone();
+        let previous_rotation = player.rotation.clone();
+
+        player.previous_position = Some(PreviousPosition {
             position: position.clone(),
             time: Instant::now(),
         });
-        self.player.write().await.syncing_position = Some(0);
+        player.syncing_position = Some(0);
+        player.position = position.clone();
+
+        drop(player);
+
+        self.server
+            .broadcast_entity_move(
+                &self,
+                Some(position.clone()),
+                previous_position,
+                rotation.clone(),
+                previous_rotation,
+                false,
+            )
+            .await;
         self.to_client
             .send(ClientCommand::SyncPosition { position, rotation });
     }
