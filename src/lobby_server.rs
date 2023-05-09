@@ -87,24 +87,6 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
             client.player.read().await.profile.name
         ));
 
-        // warning only crashes if less than 35.2 terabytes of memory allocated
-        // let values: Vec<u8> = vec![0; 128 * 128];
-        // for i in 0..=i32::MAX {
-        //     client
-        //         .send_packet(MapData {
-        //             map_id: VarInt(i),
-        //             scale: 1,
-        //             locked: false,
-        //             icons: None,
-        //             columns: 128,
-        //             rows: 128,
-        //             offset_x: 0,
-        //             offset_z: 0,
-        //             data: values.clone(),
-        //         })
-        //         .await?;
-        // }
-
         Ok(())
     }
     async fn on_tick(&self, client: &Client<LobbyServerHandler, MiniGameProxy>) {
