@@ -1001,8 +1001,15 @@ where
 
                                 client.handler.on_transfer(&client).await?;
 
-                                for _ in 0..to_client_receiver.len() {
+                                while to_client_receiver.len() > 0 {
                                     let command = to_client_receiver.recv().await;
+                                    #[allow(unused_must_use)]
+                                    if let Ok(command) = command {
+                                        client.handle_command(command).await;
+                                    }
+                                }
+                                while to_client_visual_receiver.len() > 0 {
+                                    let command = to_client_visual_receiver.recv().await;
                                     #[allow(unused_must_use)]
                                     if let Ok(command) = command {
                                         client.handle_command(command).await;
