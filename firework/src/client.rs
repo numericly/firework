@@ -185,9 +185,6 @@ where
         value: String,
     },
     ClearScoreboard,
-    Hurt {
-        damage: DamageType,
-    },
 }
 
 #[derive(Debug, Clone, Default)]
@@ -1412,23 +1409,6 @@ where
                         );
                     }
                     *value = None;
-                }
-            }
-            ClientCommand::Hurt { damage } => {
-                let mut protection = 0;
-                let mut toughness = 0;
-                let mut amount = match damage {
-                    DamageType::Default { amount } => amount,
-                    DamageType::Explosion { amount } => amount,
-                    DamageType::Fire { amount } => amount,
-                    DamageType::Fall { amount } => amount,
-                    DamageType::Projectile { amount } => amount,
-                };
-
-                {
-                    let player_lock = self.player.read().await;
-
-                    if let Some(boots) = player_lock.inventory.get_slot(&InventorySlot::Boots) {};
                 }
             }
         }

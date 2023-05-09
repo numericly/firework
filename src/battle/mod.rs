@@ -2,6 +2,7 @@ use crate::{
     MiniGameProxy, TransferData, CAVERN_BATTLE_WORLD, COVE_BATTLE_WORLD, CRUCIBLE_BATTLE_WORLD,
 };
 use async_trait::async_trait;
+use firework::client::DamageType;
 use firework::gui::WindowType;
 use firework::{
     authentication::Profile, data::items::Item, gui::GUIInit,
@@ -94,7 +95,7 @@ pub struct BattleServerHandler {
 }
 
 pub struct BattlePlayerHandler {
-    _server: Arc<Server<BattleServerHandler, MiniGameProxy>>,
+    server: Arc<Server<BattleServerHandler, MiniGameProxy>>,
     _proxy: Arc<MiniGameProxy>,
     start_time: Mutex<Option<Instant>>,
     ticks_since_start: Mutex<u32>,
@@ -117,7 +118,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
     ) -> Self {
         Self {
             ticks_since_start: Mutex::new(0),
-            _server: server,
+            server: server,
             _proxy: proxy,
             recent_packets: Mutex::new(Vec::new()),
             start_time: Mutex::new(None),
@@ -313,37 +314,6 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                     - other_client.player.read().await.rotation.yaw as f64
                     + 180.;
 
-                // float attack_damage = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
-                // float damage_bonus;
-                // if (p_36347_ instanceof LivingEntity) { // this is like for smite and bane of arthropods and stuff i think
-                //     damage_bonus = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), ((LivingEntity)p_36347_).getMobType());
-                // } else {
-                //     damage_bonus = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), MobType.UNDEFINED);
-                // }
-
-                // float attack_strength_scale = Mth.clamp(((float)this.attackStrengthTicker + 0.5F) * this.getAttributeValue(Attributes.ATTACK_SPEED) / 20.0F, 0.0F, 1.0F);
-                // attack_damage *= 0.2F + attack_strength_scale * attack_strength_scale * 0.8F;
-                // damage_bonus *= attack_strength_scale;
-                // this.resetAttackStrengthTicker();
-                // if (attack_damage > 0.0F || damage_bonus > 0.0F) {
-                //     boolean is_strong_hit = attack_strength_scale > 0.9F;
-                //     boolean is_knockback_hit = false;
-                //     int i = 0;
-                //     i += EnchantmentHelper.getKnockbackBonus(this);
-                //     if (this.isSprinting() && is_strong_hit) {
-                //         this.level.playSound((Player)null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, this.getSoundSource(), 1.0F, 1.0F);
-                //         ++i;
-                //         is_knockback_hit = true;
-                //     }
-
-                //     boolean is_falling = is_strong_hit && this.fallDistance > 0.0F && !this.onGround && !this.onClimbable() && !this.isInWater() && !this.hasEffect(MobEffects.BLINDNESS) && !this.isPassenger() && p_36347_ instanceof LivingEntity;
-                //     is_critical_hit = is_falling && !this.isSprinting();
-                //     if (is_critical_hit) {
-                //         attack_damage *= 1.5F;
-                //     }
-
-                //     attack_damage += damage_bonus;
-
                 let mut attack_damage = 1.;
                 let mut attack_speed = 4.;
                 let mut damage_bonus = 0.; // damage bonus from enchantments
@@ -400,6 +370,10 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                     if blocked_by_shield {
                         attack_damage = 0.;
                     }
+
+                    // other_client.hurt(DamageType::Default {
+                    //     amount: attack_damage,
+                    // });
 
                     // FIXME hitregs can happen if the ticks are off sync just right
                     if other_client.player.read().await.invulnerable_time == 0 {
@@ -488,16 +462,17 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                                           "color": "yellow"
                                         },
                                         {
-                                          "text": format!("{}", if is_critical_hit {
-                                                "minecraft:entity.player.attack.crit"
-                                            } else if is_knockback_hit {
-                                                "minecraft:entity.player.attack.knockback"
-                                            } else if is_strong_hit {
-                                                "minecraft:entity.player.attack.strong"
-                                            } else {
-                                                "minecraft:entity.player.attack.weak"
+                                            "text": format!("{}",
+                                                if is_critical_hit {
+                                                    "minecraft:entity.player.attack.crit"
+                                                } else if is_knockback_hit {
+                                                    "minecraft:entity.player.attack.knockback"
+                                                } else if is_strong_hit {
+                                                    "minecraft:entity.player.attack.strong"
+                                                } else {
+                                                    "minecraft:entity.player.attack.weak"
                                             }),
-                                          "color": "green"
+                                            "color": "green"
                                         },
                                     ])
                                     .to_string(),
@@ -527,7 +502,67 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
     }
 }
 
-impl BattlePlayerHandler {}
+impl BattlePlayerHandler {
+    async fn hurt(&self, client: &Client<BattleServerHandler, MiniGameProxy>, damage: DamageType) {
+        for client in self.server.player_list.iter() {
+            println!("client named {}", client.client_data.profile.name);
+        }
+        let mut defense = 0;
+        let mut toughness = 0;
+        let mut amount = match damage {
+            DamageType::Default { amount } => amount,
+            DamageType::Explosion { amount } => amount,
+            DamageType::Fire { amount } => amount,
+            DamageType::Fall { amount } => amount,
+            DamageType::Projectile { amount } => amount,
+        };
+
+        {
+            let mut player_lock = client.player.write().await;
+
+            if let Some(helmet) = player_lock.inventory.get_slot_mut(&InventorySlot::Helmet) {
+                defense += helmet.id.get_armor_defense().unwrap_or(0);
+                toughness += helmet.id.get_armor_toughness().unwrap_or(0);
+            };
+            if let Some(chestplate) = player_lock
+                .inventory
+                .get_slot_mut(&InventorySlot::Chestplate)
+            {
+                defense += chestplate.id.get_armor_defense().unwrap_or(0);
+                toughness += chestplate.id.get_armor_toughness().unwrap_or(0);
+            };
+            if let Some(leggings) = player_lock.inventory.get_slot_mut(&InventorySlot::Leggings) {
+                defense += leggings.id.get_armor_defense().unwrap_or(0);
+                toughness += leggings.id.get_armor_toughness().unwrap_or(0);
+            };
+            if let Some(boots) = player_lock.inventory.get_slot_mut(&InventorySlot::Boots) {
+                defense += boots.id.get_armor_defense().unwrap_or(0);
+                toughness += boots.id.get_armor_toughness().unwrap_or(0);
+            };
+        }
+
+        dbg!(defense, toughness);
+
+        let f = 2. + toughness as f32 / 4.;
+        let f1 = (defense as f32 - amount / f)
+            .max(defense as f32 * 0.2)
+            .min(20.);
+        amount *= 1. - f1 / 25.;
+
+        let protection = 0.;
+        amount *= 1. - protection / 25.;
+
+        let get_absorption_amount = 0.;
+        let damage_after_absorption = (amount - get_absorption_amount).max(0.);
+        let new_absorption_amount = get_absorption_amount - amount + damage_after_absorption;
+
+        {
+            let mut player_lock = client.player.write().await;
+            player_lock.invulnerable_time = 10;
+            client.set_health(player_lock.health - damage_after_absorption);
+        }
+    }
+}
 
 pub struct Chest {
     pub items: RwLock<Vec<ItemStack>>,
