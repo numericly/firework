@@ -8,7 +8,10 @@ use crate::{
     {ClientData, ConnectionError, Rotation, Server, ServerHandler, ServerProxy, Vec3},
 };
 use firework_authentication::Profile;
-use firework_data::tags::{REGISTRY, TAGS};
+use firework_data::{
+    blocks::DamagedAnvil,
+    tags::{REGISTRY, TAGS},
+};
 use firework_protocol::{
     client_bound::{
         BossBar, ChangeDifficulty, ClientBoundKeepAlive, ClientBoundPacket, CloseContainer,
@@ -182,6 +185,9 @@ where
         value: String,
     },
     ClearScoreboard,
+    Hurt {
+        damage: DamageType,
+    },
 }
 
 #[derive(Debug, Clone, Default)]
@@ -198,6 +204,15 @@ pub enum GameMode {
 pub struct PreviousPosition {
     pub position: Vec3,
     pub time: Instant,
+}
+
+#[derive(Debug, Clone)]
+pub enum DamageType {
+    Default { amount: f32 },
+    Fall { amount: f32 },
+    Fire { amount: f32 },
+    Explosion { amount: f32 },
+    Projectile { amount: f32 },
 }
 
 #[derive(Debug, Default)]
@@ -1397,6 +1412,23 @@ where
                         );
                     }
                     *value = None;
+                }
+            }
+            ClientCommand::Hurt { damage } => {
+                let mut protection = 0;
+                let mut toughness = 0;
+                let mut amount = match damage {
+                    DamageType::Default { amount } => amount,
+                    DamageType::Explosion { amount } => amount,
+                    DamageType::Fire { amount } => amount,
+                    DamageType::Fall { amount } => amount,
+                    DamageType::Projectile { amount } => amount,
+                };
+
+                {
+                    let player_lock = self.player.read().await;
+
+                    if let Some(boots) = player_lock.inventory.get_slot(&InventorySlot::Boots) {};
                 }
             }
         }

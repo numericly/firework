@@ -2,6 +2,7 @@ use crate::{
     MiniGameProxy, TransferData, CAVERN_BATTLE_WORLD, COVE_BATTLE_WORLD, CRUCIBLE_BATTLE_WORLD,
 };
 use async_trait::async_trait;
+use firework::gui::WindowType;
 use firework::{
     authentication::Profile, data::items::Item, gui::GUIInit,
     protocol::data_types::InventoryOperationMode,
@@ -23,7 +24,6 @@ use firework::{
     },
 };
 use firework::{gui::GuiScreen, protocol::core::Position};
-use firework::{gui::WindowType, protocol::core::VarInt};
 use firework::{protocol::data_types::ItemStack, world::World};
 use rand::{distributions::Standard, prelude::Distribution, Rng};
 use serde_json::json;
@@ -344,12 +344,26 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
 
                 //     attack_damage += damage_bonus;
 
-                let mut attack_damage = 7.; // damage of a diamond sword
+                let mut attack_damage = 1.;
+                let mut attack_speed = 4.;
                 let mut damage_bonus = 0.; // damage bonus from enchantments
-
-                let attack_speed = 1.6; // attack speed of a diamond sword
-                let ticker = client.player.read().await.attack_strength_ticker;
-                let mut attack_strength_scale = (ticker as f64 + 0.5) * attack_speed / 20.;
+                let ticker;
+                {
+                    let player = client.player.read().await;
+                    if let Some(held_item) = player.inventory.get_slot(&InventorySlot::Hotbar {
+                        slot: player.selected_slot as usize,
+                    }) {
+                        let id = held_item.id;
+                        if let Some(damage) = id.get_attack_damage() {
+                            attack_damage = damage;
+                        }
+                        if let Some(speed) = id.get_attack_speed() {
+                            attack_speed = speed;
+                        }
+                    }
+                    ticker = player.attack_strength_ticker;
+                }
+                let mut attack_strength_scale = (ticker as f32 + 0.5) * attack_speed / 20.;
                 if attack_strength_scale < 0. {
                     attack_strength_scale = 0.;
                 } else if attack_strength_scale > 1. {
@@ -1188,6 +1202,66 @@ impl ServerHandler<MiniGameProxy> for BattleServerHandler {
                 },
             }),
         );
+        player.inventory.set_slot(
+            InventorySlot::Hotbar { slot: 1 },
+            Some(StackContents {
+                id: Item::GoldenSword,
+                count: 1,
+                nbt: ItemNbt {
+                    ..Default::default()
+                },
+            }),
+        );
+        player.inventory.set_slot(
+            InventorySlot::Hotbar { slot: 2 },
+            Some(StackContents {
+                id: Item::StoneAxe,
+                count: 1,
+                nbt: ItemNbt {
+                    ..Default::default()
+                },
+            }),
+        );
+        // player.inventory.set_slot(
+        //     InventorySlot::Hotbar { slot: 1 },
+        //     Some(StackContents {
+        //         id: Item::DiamondHelmet,
+        //         count: 1,
+        //         nbt: ItemNbt {
+        //             ..Default::default()
+        //         },
+        //     }),
+        // );
+        // player.inventory.set_slot(
+        //     InventorySlot::Hotbar { slot: 2 },
+        //     Some(StackContents {
+        //         id: Item::DiamondChestplate,
+        //         count: 1,
+        //         nbt: ItemNbt {
+        //             ..Default::default()
+        //         },
+        //     }),
+        // );
+        // player.inventory.set_slot(
+        //     InventorySlot::Hotbar { slot: 3 },
+        //     Some(StackContents {
+        //         id: Item::DiamondLeggings,
+        //         count: 1,
+        //         nbt: ItemNbt {
+        //             ..Default::default()
+        //         },
+        //     }),
+        // );
+        // player.inventory.set_slot(
+        //     InventorySlot::Hotbar { slot: 4 },
+        //     Some(StackContents {
+        //         id: Item::DiamondBoots,
+        //         count: 1,
+        //         nbt: ItemNbt {
+        //             ..Default::default()
+        //         },
+        //     }),
+        // );
 
         Ok(player)
     }
