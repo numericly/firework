@@ -1384,7 +1384,7 @@ where
             }
             ClientCommand::ClearScoreboard => {
                 let mut scoreboard_lock = self.scoreboard.lock().await;
-                for (i, value) in scoreboard_lock.iter_mut().enumerate() {
+                for value in scoreboard_lock.iter_mut() {
                     if let Some(value) = value {
                         self.update_score(
                             value.clone(),

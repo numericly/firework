@@ -4,6 +4,7 @@ use crate::{
 use async_trait::async_trait;
 use firework::client::DamageType;
 use firework::gui::WindowType;
+use firework::protocol::data_types::Enchantment;
 use firework::{
     authentication::Profile, data::items::Item, gui::GUIInit,
     protocol::data_types::InventoryOperationMode,
@@ -371,10 +372,6 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                         attack_damage = 0.;
                     }
 
-                    // other_client.hurt(DamageType::Default {
-                    //     amount: attack_damage,
-                    // });
-
                     // FIXME hitregs can happen if the ticks are off sync just right
                     if other_client.player.read().await.invulnerable_time == 0 {
                         if other_client.player.read().await.health - attack_damage as f32 <= 0. {
@@ -390,6 +387,55 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                                 );
                             }
                         } else {
+                            let mut defense = 0;
+                            let mut toughness = 0;
+
+                            {
+                                let mut player_lock = other_client.player.write().await;
+
+                                if let Some(helmet) =
+                                    player_lock.inventory.get_slot_mut(&InventorySlot::Helmet)
+                                {
+                                    defense += helmet.id.get_armor_defense().unwrap_or(0);
+                                    toughness += helmet.id.get_armor_toughness().unwrap_or(0);
+                                };
+                                if let Some(chestplate) = player_lock
+                                    .inventory
+                                    .get_slot_mut(&InventorySlot::Chestplate)
+                                {
+                                    defense += chestplate.id.get_armor_defense().unwrap_or(0);
+                                    toughness += chestplate.id.get_armor_toughness().unwrap_or(0);
+                                };
+                                if let Some(leggings) =
+                                    player_lock.inventory.get_slot_mut(&InventorySlot::Leggings)
+                                {
+                                    defense += leggings.id.get_armor_defense().unwrap_or(0);
+                                    toughness += leggings.id.get_armor_toughness().unwrap_or(0);
+                                };
+                                if let Some(boots) =
+                                    player_lock.inventory.get_slot_mut(&InventorySlot::Boots)
+                                {
+                                    defense += boots.id.get_armor_defense().unwrap_or(0);
+                                    toughness += boots.id.get_armor_toughness().unwrap_or(0);
+                                };
+                            }
+
+                            dbg!(defense, toughness);
+
+                            let f = 2. + toughness as f32 / 4.;
+                            let f1 = (defense as f32 - attack_damage / f)
+                                .max(defense as f32 * 0.2)
+                                .min(20.);
+                            attack_damage *= 1. - f1 / 25.;
+
+                            let protection = 0.;
+                            attack_damage *= 1. - protection / 25.;
+
+                            let get_absorption_amount = 0.;
+                            let damage_after_absorption =
+                                (attack_damage - get_absorption_amount).max(0.);
+                            let _new_absorption_amount =
+                                get_absorption_amount - attack_damage + damage_after_absorption;
                             other_client.set_health(
                                 other_client.player.read().await.health - attack_damage as f32,
                             );
@@ -642,67 +688,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
     }
 }
 
-impl BattlePlayerHandler {
-    async fn hurt(&self, client: &Client<BattleServerHandler, MiniGameProxy>, damage: DamageType) {
-        for client in self.server.player_list.iter() {
-            println!("client named {}", client.client_data.profile.name);
-        }
-        let mut defense = 0;
-        let mut toughness = 0;
-        let mut amount = match damage {
-            DamageType::Default { amount } => amount,
-            DamageType::Explosion { amount } => amount,
-            DamageType::Fire { amount } => amount,
-            DamageType::Fall { amount } => amount,
-            DamageType::Projectile { amount } => amount,
-        };
-
-        {
-            let mut player_lock = client.player.write().await;
-
-            if let Some(helmet) = player_lock.inventory.get_slot_mut(&InventorySlot::Helmet) {
-                defense += helmet.id.get_armor_defense().unwrap_or(0);
-                toughness += helmet.id.get_armor_toughness().unwrap_or(0);
-            };
-            if let Some(chestplate) = player_lock
-                .inventory
-                .get_slot_mut(&InventorySlot::Chestplate)
-            {
-                defense += chestplate.id.get_armor_defense().unwrap_or(0);
-                toughness += chestplate.id.get_armor_toughness().unwrap_or(0);
-            };
-            if let Some(leggings) = player_lock.inventory.get_slot_mut(&InventorySlot::Leggings) {
-                defense += leggings.id.get_armor_defense().unwrap_or(0);
-                toughness += leggings.id.get_armor_toughness().unwrap_or(0);
-            };
-            if let Some(boots) = player_lock.inventory.get_slot_mut(&InventorySlot::Boots) {
-                defense += boots.id.get_armor_defense().unwrap_or(0);
-                toughness += boots.id.get_armor_toughness().unwrap_or(0);
-            };
-        }
-
-        dbg!(defense, toughness);
-
-        let f = 2. + toughness as f32 / 4.;
-        let f1 = (defense as f32 - amount / f)
-            .max(defense as f32 * 0.2)
-            .min(20.);
-        amount *= 1. - f1 / 25.;
-
-        let protection = 0.;
-        amount *= 1. - protection / 25.;
-
-        let get_absorption_amount = 0.;
-        let damage_after_absorption = (amount - get_absorption_amount).max(0.);
-        let new_absorption_amount = get_absorption_amount - amount + damage_after_absorption;
-
-        {
-            let mut player_lock = client.player.write().await;
-            player_lock.invulnerable_time = 10;
-            client.set_health(player_lock.health - damage_after_absorption);
-        }
-    }
-}
+impl BattlePlayerHandler {}
 
 pub struct Chest {
     pub items: RwLock<Vec<ItemStack>>,
@@ -1450,46 +1436,50 @@ impl ServerHandler<MiniGameProxy> for BattleServerHandler {
                 },
             }),
         );
-        // player.inventory.set_slot(
-        //     InventorySlot::Hotbar { slot: 1 },
-        //     Some(StackContents {
-        //         id: Item::DiamondHelmet,
-        //         count: 1,
-        //         nbt: ItemNbt {
-        //             ..Default::default()
-        //         },
-        //     }),
-        // );
-        // player.inventory.set_slot(
-        //     InventorySlot::Hotbar { slot: 2 },
-        //     Some(StackContents {
-        //         id: Item::DiamondChestplate,
-        //         count: 1,
-        //         nbt: ItemNbt {
-        //             ..Default::default()
-        //         },
-        //     }),
-        // );
-        // player.inventory.set_slot(
-        //     InventorySlot::Hotbar { slot: 3 },
-        //     Some(StackContents {
-        //         id: Item::DiamondLeggings,
-        //         count: 1,
-        //         nbt: ItemNbt {
-        //             ..Default::default()
-        //         },
-        //     }),
-        // );
-        // player.inventory.set_slot(
-        //     InventorySlot::Hotbar { slot: 4 },
-        //     Some(StackContents {
-        //         id: Item::DiamondBoots,
-        //         count: 1,
-        //         nbt: ItemNbt {
-        //             ..Default::default()
-        //         },
-        //     }),
-        // );
+        player.inventory.set_slot(
+            InventorySlot::Hotbar { slot: 3 },
+            Some(StackContents {
+                id: Item::DiamondHelmet,
+                count: 1,
+                nbt: ItemNbt {
+                    ..Default::default()
+                },
+            }),
+        );
+        player.inventory.set_slot(
+            InventorySlot::Hotbar { slot: 4 },
+            Some(StackContents {
+                id: Item::DiamondChestplate,
+                count: 1,
+                nbt: ItemNbt {
+                    ..Default::default()
+                },
+            }),
+        );
+        player.inventory.set_slot(
+            InventorySlot::Hotbar { slot: 5 },
+            Some(StackContents {
+                id: Item::DiamondLeggings,
+                count: 1,
+                nbt: ItemNbt {
+                    enchantments: Some(Vec::from([Enchantment {
+                        id: "minecraft:protection".to_string(),
+                        level: 4,
+                    }])),
+                    display: None,
+                },
+            }),
+        );
+        player.inventory.set_slot(
+            InventorySlot::Hotbar { slot: 6 },
+            Some(StackContents {
+                id: Item::DiamondBoots,
+                count: 1,
+                nbt: ItemNbt {
+                    ..Default::default()
+                },
+            }),
+        );
 
         Ok(player)
     }
