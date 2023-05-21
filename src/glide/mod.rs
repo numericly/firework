@@ -1,5 +1,7 @@
 use async_trait::async_trait;
+use dashmap::DashMap;
 use firework::gui::WindowType;
+use firework::protocol::data_types::{ObjectiveAction, ObjectiveType};
 use firework::{
     authentication::Profile,
     gui::GUIEvent,
@@ -26,6 +28,7 @@ use firework::{
 use firework::{gui::GuiScreen, world::World};
 use rand::{distributions::Standard, prelude::Distribution, Rng};
 use serde_json::json;
+use std::collections::HashMap;
 use std::{
     sync::Arc,
     time::{Duration, Instant},
@@ -150,16 +153,40 @@ impl Maps {
 
 #[derive(Debug, Clone)]
 enum GameState {
-    Starting {
-        ticks_until_start: u16,
-    },
-    Running {
-        start_time: Instant,
-        finished_players: usize,
-    },
-    Finished {
-        finish_time: Instant,
-    },
+    Starting { ticks_until_start: u16 },
+    Running { start_time: Instant },
+    Finished { finish_time: Instant },
+}
+
+#[derive(PartialEq, Clone, Debug)]
+enum PlayerFinishedState {
+    DNF,
+    InProgress { percentage: f32 },
+    Finished { finish_time: Duration },
+}
+
+impl PartialOrd for PlayerFinishedState {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        match (self, other) {
+            (PlayerFinishedState::DNF, PlayerFinishedState::DNF) => Some(std::cmp::Ordering::Equal),
+            (PlayerFinishedState::DNF, _) => Some(std::cmp::Ordering::Greater),
+            (_, PlayerFinishedState::DNF) => Some(std::cmp::Ordering::Less),
+            (
+                PlayerFinishedState::InProgress { percentage: p1 },
+                PlayerFinishedState::InProgress { percentage: p2 },
+            ) => p2.partial_cmp(p1), // there is a better way to reverse comparisons but shhhhhh
+            (PlayerFinishedState::InProgress { .. }, PlayerFinishedState::Finished { .. }) => {
+                Some(std::cmp::Ordering::Greater)
+            }
+            (PlayerFinishedState::Finished { .. }, PlayerFinishedState::InProgress { .. }) => {
+                Some(std::cmp::Ordering::Less)
+            }
+            (
+                PlayerFinishedState::Finished { finish_time: t1 },
+                PlayerFinishedState::Finished { finish_time: t2 },
+            ) => t1.partial_cmp(t2),
+        }
+    }
 }
 
 const BOOST_TICKS: usize = 12;
@@ -168,6 +195,7 @@ pub struct GlideServerHandler {
     pub map: Maps,
     pub created_at: Instant,
     game_state: Mutex<GameState>,
+    player_finished_states: Mutex<HashMap<u128, (String, PlayerFinishedState)>>,
     commands: CommandTree<Self, MiniGameProxy>,
 }
 
@@ -184,7 +212,7 @@ pub struct GlidePlayerHandler {
     recent_packets: Mutex<Vec<Instant>>,
 }
 
-fn format_duration(dur: Duration) -> String {
+fn format_duration(&dur: &Duration) -> String {
     let secs = dur.as_millis();
     let mins = secs / 1000 / 60;
     let millis = secs % 1000;
@@ -239,9 +267,35 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
         &self,
         client: &Client<GlideServerHandler, MiniGameProxy>,
     ) -> Result<(), ConnectionError> {
+        println!("{} transferred", client.client_data.profile.name);
         client.send_boss_bar_action(0, BossBarAction::Remove);
+        client.clear_scoreboard();
+        let mut finished_states_lock = self.server.handler.player_finished_states.lock().await;
+        finished_states_lock.insert(
+            client.client_data.uuid,
+            (
+                client.client_data.profile.name.clone(),
+                PlayerFinishedState::DNF,
+            ),
+        );
         Ok(())
     }
+    async fn on_leave(
+        &self,
+        client: &Client<GlideServerHandler, MiniGameProxy>,
+    ) -> Result<(), ConnectionError> {
+        println!("{} left", client.client_data.profile.name);
+        let mut finished_states_lock = self.server.handler.player_finished_states.lock().await;
+        finished_states_lock.insert(
+            client.client_data.uuid,
+            (
+                client.client_data.profile.name.clone(),
+                PlayerFinishedState::DNF,
+            ),
+        );
+        Ok(())
+    }
+
     async fn on_post_load(
         &self,
         client: &Client<GlideServerHandler, MiniGameProxy>,
@@ -276,7 +330,9 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
               ])
             .to_string(),
         );
-        self.start_time.lock().await.replace(Instant::now());
+        let mut start_time = self.start_time.lock().await;
+        start_time.replace(Instant::now());
+        drop(start_time);
 
         {
             let mut player = client.player.write().await;
@@ -304,7 +360,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
         // check if the movement is way too fast
         let max_velocity = 10.0;
         if (end.clone() - start.clone()).length() > max_velocity {
-            client.sync_position(start.clone(), None);
+            client.sync_position(start.clone(), None).await;
             client.set_velocity(
                 client
                     .player
@@ -320,25 +376,21 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
         // check for passing through checkpoints
         if let GameState::Running { start_time, .. } = *game_state_lock {
             drop(game_state_lock);
-            let next = self.last_checkpoint.lock().await;
+            let mut next = self.last_checkpoint.lock().await;
             if let Some(next_checkpoint_id) = *next {
                 let next_checkpoint = map.get_checkpoints().get(next_checkpoint_id);
 
                 if let Some(next_checkpoint) = next_checkpoint {
                     // The client reached the next checkpoint
                     if next_checkpoint.plane.intersects(start, end) {
-                        drop(next);
                         drop(start);
 
                         if next_checkpoint_id + 1 >= map.get_checkpoints().len() {
-                            self.last_checkpoint.lock().await.take();
+                            next.take();
 
                             self.on_win(client, &start_time).await;
                         } else {
-                            self.last_checkpoint
-                                .lock()
-                                .await
-                                .replace(next_checkpoint_id + 1);
+                            next.replace(next_checkpoint_id + 1);
 
                             self.on_checkpoint(client, &start_time, next_checkpoint_id)
                                 .await;
@@ -647,6 +699,119 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
         }
 
         client.send_particles(particles);
+        let percentage = client.handler.get_race_percentage(client, map).await;
+        client.send_boss_bar_action(
+            0,
+            BossBarAction::UpdateTitle {
+                title: json!([
+                    {
+                        "text": "You are ",
+                        "color": "white"
+                    },
+                    {
+                        "text": format!("{:.2}%",
+                            percentage * 100.
+                    ).to_string(),
+                        "color": "gold"
+                    },
+                    {
+                        "text": " to the finish!",
+                        "color": "white"
+                    }
+                ])
+                .to_string(),
+            },
+        );
+        client.send_boss_bar_action(0, BossBarAction::UpdateHealth { health: percentage });
+    }
+    async fn on_on_ground(
+        &self,
+        client: &Client<GlideServerHandler, MiniGameProxy>,
+        on_ground: bool,
+    ) -> Result<bool, ConnectionError> {
+        if let GameState::Running { .. } = *client.server.handler.game_state.lock().await {
+            let map = &self.server.handler.map;
+            let mut last_damage = client.handler.last_damage.lock().await;
+
+            let next = client.handler.last_checkpoint.lock().await;
+            if let Some(checkpoint) = *next {
+                if on_ground
+                    && last_damage.elapsed().as_millis() > 500
+                    && !map
+                        .get_spawn_area()
+                        .within(client.player.read().await.position.clone())
+                {
+                    *last_damage = Instant::now();
+
+                    let health = client.player.read().await.health;
+                    if health - 2.0 <= 0. {
+                        client.set_health(6.);
+
+                        // If they haven't reached a checkpoint yet, spawn them at the start
+                        if checkpoint != 0 {
+                            let checkpoint = map.get_checkpoints().get(checkpoint - 1);
+                            if let Some(checkpoint) = checkpoint {
+                                client
+                                    .sync_position(
+                                        checkpoint.spawn_position.clone(),
+                                        Some(checkpoint.spawn_rotation.clone()),
+                                    )
+                                    .await;
+
+                                self.boost_status.write().await.take();
+                                client.set_velocity(Vec3::scalar(0.));
+                                return Ok(on_ground);
+                            }
+                        }
+
+                        client
+                            .sync_position(
+                                map.get_spawn_position().clone(),
+                                Some(Rotation::new(0., 0.)),
+                            )
+                            .await;
+
+                        client.send_sound(
+                            IdMapHolder::Direct(CustomSound {
+                                resource_location: "minecraft:entity.player.death".to_string(),
+                                range: None,
+                            }),
+                            SoundSource::Player,
+                            client.player.read().await.position.clone(),
+                            1.,
+                            1.,
+                        );
+
+                        self.boost_status.write().await.take();
+                        client.set_velocity(Vec3::scalar(0.));
+                    } else {
+                        client.send_sound(
+                            IdMapHolder::Direct(CustomSound {
+                                resource_location: "minecraft:entity.player.hurt".to_string(),
+                                range: None,
+                            }),
+                            SoundSource::Player,
+                            client.player.read().await.position.clone(),
+                            1.,
+                            1.,
+                        );
+                        // client.send_hurt(client.client_data.entity_id, 0.);
+                        client.set_health(health - 2.);
+                    }
+                }
+            }
+        }
+
+        Ok(on_ground)
+    }
+}
+
+impl GlidePlayerHandler {
+    async fn get_race_percentage(
+        &self,
+        client: &Client<GlideServerHandler, MiniGameProxy>,
+        map: &Maps,
+    ) -> f32 {
         let checkpoint_index = client.handler.last_checkpoint.lock().await.clone();
 
         if let Some(checkpoint_index) = checkpoint_index {
@@ -688,108 +853,10 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                 }
             }
 
-            client.send_boss_bar_action(
-                0,
-                BossBarAction::UpdateTitle {
-                    title: json!([
-                        {
-                            "text": "You are ",
-                            "color": "white"
-                        },
-                        {
-                            "text": format!("{:.2}%",
-                                percentage * 100.
-                        ).to_string(),
-                            "color": "gold"
-                        },
-                        {
-                            "text": " to the finish!",
-                            "color": "white"
-                        }
-                    ])
-                    .to_string(),
-                },
-            );
-            client.send_boss_bar_action(0, BossBarAction::UpdateHealth { health: percentage });
+            return percentage;
         };
+        0.
     }
-    async fn on_on_ground(
-        &self,
-        client: &Client<GlideServerHandler, MiniGameProxy>,
-        on_ground: bool,
-    ) -> Result<bool, ConnectionError> {
-        if let GameState::Running { .. } = *client.server.handler.game_state.lock().await {
-            let map = &self.server.handler.map;
-            let mut last_damage = client.handler.last_damage.lock().await;
-
-            let next = client.handler.last_checkpoint.lock().await;
-            if let Some(checkpoint) = *next {
-                if on_ground
-                    && last_damage.elapsed().as_millis() > 500
-                    && !map
-                        .get_spawn_area()
-                        .within(client.player.read().await.position.clone())
-                {
-                    *last_damage = Instant::now();
-
-                    let health = client.player.read().await.health;
-                    if health - 2.0 <= 0. {
-                        client.set_health(6.);
-
-                        // If they haven't reached a checkpoint yet, spawn them at the start
-                        if checkpoint != 0 {
-                            let checkpoint = map.get_checkpoints().get(checkpoint - 1);
-                            if let Some(checkpoint) = checkpoint {
-                                client.sync_position(
-                                    checkpoint.spawn_position.clone(),
-                                    Some(checkpoint.spawn_rotation.clone()),
-                                );
-
-                                client.set_velocity(Vec3::scalar(0.));
-                                return Ok(on_ground);
-                            }
-                        }
-
-                        client.sync_position(
-                            map.get_spawn_position().clone(),
-                            Some(Rotation::new(0., 0.)),
-                        );
-
-                        client.send_sound(
-                            IdMapHolder::Direct(CustomSound {
-                                resource_location: "minecraft:entity.player.death".to_string(),
-                                range: None,
-                            }),
-                            SoundSource::Player,
-                            client.player.read().await.position.clone(),
-                            1.,
-                            1.,
-                        );
-
-                        client.set_velocity(Vec3::scalar(0.));
-                    } else {
-                        client.send_sound(
-                            IdMapHolder::Direct(CustomSound {
-                                resource_location: "minecraft:entity.player.hurt".to_string(),
-                                range: None,
-                            }),
-                            SoundSource::Player,
-                            client.player.read().await.position.clone(),
-                            1.,
-                            1.,
-                        );
-                        // client.send_hurt(client.client_data.entity_id, 0.);
-                        client.set_health(health - 2.);
-                    }
-                }
-            }
-        }
-
-        Ok(on_ground)
-    }
-}
-
-impl GlidePlayerHandler {
     async fn on_checkpoint(
         &self,
         client: &Client<GlideServerHandler, MiniGameProxy>,
@@ -800,7 +867,7 @@ impl GlidePlayerHandler {
         println!(
             "Checkpoint {} in {}",
             checkpoint_id + 1,
-            format_duration(elapsed)
+            format_duration(&elapsed)
         );
         client.send_title(
             "{\"text\":\"Checkpoint\"}".to_string(),
@@ -809,7 +876,7 @@ impl GlidePlayerHandler {
                     format!(
                         "Reached Checkpoint {} in {}",
                         checkpoint_id + 1,
-                        format_duration(elapsed)
+                        format_duration(&elapsed)
                     )
             })
             .to_string(),
@@ -835,17 +902,33 @@ impl GlidePlayerHandler {
         start_time: &Instant,
     ) {
         let mut game_state = self.server.handler.game_state.lock().await;
-        if let GameState::Running {
-            mut finished_players,
-            ..
-        } = *game_state
-        {
-            finished_players += 1;
+        if let GameState::Running { start_time } = *game_state {
+            let elapsed = start_time.elapsed();
             client.send_boss_bar_action(0, BossBarAction::UpdateHealth { health: 1. });
-            if finished_players == self.server.player_list.len() {
+            let mut finished_states_lock = self.server.handler.player_finished_states.lock().await;
+            finished_states_lock.insert(
+                client.client_data.uuid,
+                (
+                    client.client_data.profile.name.clone(),
+                    PlayerFinishedState::Finished {
+                        finish_time: elapsed,
+                    },
+                ),
+            );
+            let flying_players = finished_states_lock.iter().fold(0, |acc, e| {
+                acc + match e.1 .1 {
+                    PlayerFinishedState::InProgress { .. } => 1,
+                    _ => 0,
+                }
+            });
+
+            drop(finished_states_lock);
+
+            if flying_players == 0 {
                 *game_state = GameState::Finished {
                     finish_time: Instant::now(),
                 };
+                drop(game_state);
                 for client in self.server.player_list.iter() {
                     client.send_boss_bar_action(0, BossBarAction::Remove);
                     client.send_system_chat_message(
@@ -874,7 +957,7 @@ impl GlidePlayerHandler {
                                 "text": format!(
                                     "{} - {}",
                                     client.player.read().await.profile.name,
-                                    format_duration(start_time.elapsed())
+                                    format_duration(&start_time.elapsed())
                                 ),
                                 "color": "yellow",
                             }
@@ -882,16 +965,16 @@ impl GlidePlayerHandler {
                         .to_string(),
                         false,
                     );
+                    client.clear_scoreboard();
                 }
             }
         }
-        drop(game_state);
         client.show_chat_message(
             json!(
                 {
                     "text": format!(
                         "Completed race in {}",
-                        format_duration(start_time.elapsed())
+                        format_duration(&start_time.elapsed())
                     ),
                     "color": "green",
                 }
@@ -907,7 +990,7 @@ impl GlidePlayerHandler {
                 "text":
                     format!(
                         "Completed race in {}",
-                        format_duration(start_time.elapsed())
+                        format_duration(&start_time.elapsed())
                     )
             })
             .to_string(),
@@ -953,7 +1036,7 @@ impl GlidePlayerHandler {
                     "text":
                         format!(
                             "Completed race in {}",
-                            format_duration(start_time.elapsed())
+                            format_duration(&start_time.elapsed())
                         )
                 })
                 .to_string(),
@@ -1016,6 +1099,7 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
             game_state: Mutex::new(GameState::Starting {
                 ticks_until_start: 65,
             }),
+            player_finished_states: Mutex::new(HashMap::with_capacity(8)),
             commands: CommandTree::new()
                 .register_command(
                     Command::new("lobby", "return to the main lobby")
@@ -1070,27 +1154,74 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
                 }
                 *game_state = GameState::Running {
                     start_time: Instant::now(),
-                    finished_players: 0,
                 };
 
                 drop(game_state);
 
                 self.start_game(server, &proxy).await;
             }
-            GameState::Running {
-                start_time,
-                finished_players,
-            } => {
-                let time_elapsed = format_duration(start_time.elapsed());
+            GameState::Running { start_time } => {
+                let time_elapsed = format_duration(&start_time.elapsed());
 
-                for player in server.player_list.iter() {
-                    player.send_system_chat_message(
+                let map = &server.handler.map;
+
+                let mut finished_states_lock = server.handler.player_finished_states.lock().await;
+                for client in server.player_list.iter() {
+                    if let Some(finished_state) = finished_states_lock.get(&client.client_data.uuid)
+                    {
+                        match finished_state.1 {
+                            PlayerFinishedState::InProgress { .. } => {
+                                finished_states_lock.insert(
+                                    client.client_data.uuid,
+                                    (
+                                        client.client_data.profile.name.clone(),
+                                        PlayerFinishedState::InProgress {
+                                            percentage: client
+                                                .handler
+                                                .get_race_percentage(&client, map)
+                                                .await,
+                                        },
+                                    ),
+                                );
+                            }
+                            _ => (),
+                        }
+                    }
+                }
+
+                let mut leaderboard_lines: Vec<(PlayerFinishedState, String)> = Vec::new();
+
+                for (_uuid, finished_state) in finished_states_lock.iter() {
+                    let string_message = match finished_state {
+                        (name, PlayerFinishedState::Finished { finish_time }) => {
+                            format!("§7{}: §b{}", name, format_duration(&finish_time))
+                        }
+                        (name, PlayerFinishedState::InProgress { percentage }) => {
+                            format!("§7{}: §b{:.2}%", name, percentage * 100.0)
+                        }
+                        (name, PlayerFinishedState::DNF) => {
+                            format!("§7{}: §cDNF", name)
+                        }
+                    };
+                    leaderboard_lines.push((finished_state.1.clone(), string_message));
+                }
+
+                drop(finished_states_lock);
+
+                leaderboard_lines
+                    .sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal)); // reverse it in a really scuffed way, just swap a and b
+
+                for client in server.player_list.iter() {
+                    client.send_system_chat_message(
                         json!({
                             "text": format!("Time elapsed: {}", time_elapsed),
                         })
                         .to_string(),
                         true,
-                    )
+                    );
+                    for (i, leaderboard_line) in leaderboard_lines.iter().enumerate() {
+                        client.set_scoreboard_line(i, leaderboard_line.1.clone());
+                    }
                 }
             }
             GameState::Finished { finish_time } => {
@@ -1117,8 +1248,8 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
         player.inventory.set_slot(
             InventorySlot::Chestplate,
             Some(StackContents {
-                item_id: Item::Elytra,
-                item_count: 1,
+                id: Item::Elytra,
+                count: 1,
                 nbt: ItemNbt {
                     enchantments: Some(vec![Enchantment {
                         id: "minecraft:binding_curse".to_string(),
@@ -1155,6 +1286,33 @@ impl GlideServerHandler {
                     true,
                 );
             }
+            client.update_objectives(
+                "leaderboard_id".to_string(),
+                ObjectiveAction::Create {
+                    objective_value: json!([
+                        {
+                            "text": " >> ",
+                            "italic": false,
+                            "color": "dark_aqua"
+                        },
+                        {
+                            "text": "Firework",
+                            "color": "aqua",
+                            "bold": true
+                        },
+                        {
+                            "text": " << ",
+                            "italic": false,
+                            "color": "dark_aqua"
+                        },
+                    ])
+                    .to_string(),
+                    objective_type: ObjectiveType::Integer,
+                },
+            );
+
+            client.show_scoreboard(1, "leaderboard_id".to_string());
+
             client.set_health(6.);
             client.show_chat_message(
                 json!(
@@ -1165,10 +1323,12 @@ impl GlideServerHandler {
                 )
                 .to_string(),
             );
-            client.sync_position(
-                self.map.get_spawn_position().clone(),
-                Some(Rotation::new(0., 0.)),
-            );
+            client
+                .sync_position(
+                    self.map.get_spawn_position().clone(),
+                    Some(Rotation::new(0., 0.)),
+                )
+                .await;
 
             client.send_boss_bar_action(
                 0,
@@ -1182,7 +1342,17 @@ impl GlideServerHandler {
                     division: BossBarDivision::NoDivisions,
                     flags: 0,
                 },
-            )
+            );
+
+            let mut finished_states_lock = server.handler.player_finished_states.lock().await;
+            finished_states_lock.insert(
+                client.client_data.uuid,
+                (
+                    client.client_data.profile.name.clone(),
+                    PlayerFinishedState::InProgress { percentage: 0. },
+                ),
+            );
+            drop(finished_states_lock);
         }
     }
 }

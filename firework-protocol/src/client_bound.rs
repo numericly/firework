@@ -53,8 +53,8 @@ use nbt::Blob;
 
 use crate::data_types::{
     Attribute, BitSet, BossBarAction, DeathLocation, EntityAnimationType, EntityEventStatus,
-    Equipment, Hand, ItemStack, Particle, PlayerAbilityFlags, PlayerInfoAction,
-    PlayerPositionFlags, Recipe, SuggestionMatch,
+    Equipment, Hand, ItemStack, ObjectiveAction, Particle, PlayerAbilityFlags, PlayerInfoAction,
+    PlayerPositionFlags, Recipe, ScoreAction, SuggestionMatch,
 };
 
 pub trait ClientBoundPacket {
@@ -303,6 +303,10 @@ define_client_bound_protocol! {
         position: Position,
         yaw: f32
     },
+    DisplayObjective, 0x51, Play => {
+        position: i8,
+        objective_name: String,
+    },
     SetEntityMetadata, 0x52, Play => {
         entity_id: VarInt,
         metadata: UnsizedVec<u8>
@@ -323,6 +327,14 @@ define_client_bound_protocol! {
         health: f32,
         food: VarInt,
         food_saturation: f32
+    },
+    UpdateObjectives, 0x58, Play => {
+        objective_name: String,
+        action: ObjectiveAction,
+    },
+    UpdateScore, 0x5B, Play => {
+        entity_name: String,
+        action: ScoreAction,
     },
     SetSubtitleText, 0x5D, Play => {
         subtitle: String // TODO: Chat

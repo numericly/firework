@@ -44,7 +44,7 @@ impl From<VarInt> for i32 {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub struct Position {
     pub x: i32,
     pub y: i16,

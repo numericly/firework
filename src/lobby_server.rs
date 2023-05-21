@@ -2,6 +2,7 @@ use crate::{queue::QueueMessage, MiniGameProxy, TransferData, LOBBY_WORLD};
 use async_trait::async_trait;
 use firework::protocol::{
     client_bound::SetContainerSlot,
+    core::Position,
     data_types::{InventoryOperationMode, ItemNbt, ItemNbtDisplay, ItemStack, StackContents},
     server_bound::ClickContainer,
 };
@@ -85,24 +86,6 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
             r#"{{"text": "{} joined the lobby","color":"yellow"}}"#,
             client.player.read().await.profile.name
         ));
-
-        // warning only crashes if less than 35.2 terabytes of memory allocated
-        // let values: Vec<u8> = vec![0; 128 * 128];
-        // for i in 0..=i32::MAX {
-        //     client
-        //         .send_packet(MapData {
-        //             map_id: VarInt(i),
-        //             scale: 1,
-        //             locked: false,
-        //             icons: None,
-        //             columns: 128,
-        //             rows: 128,
-        //             offset_x: 0,
-        //             offset_z: 0,
-        //             data: values.clone(),
-        //         })
-        //         .await?;
-        // }
 
         Ok(())
     }
@@ -227,12 +210,13 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
         client: &Client<LobbyServerHandler, MiniGameProxy>,
         item: ItemStack,
         _slot_id: InventorySlot,
+        _location: Option<Position>,
     ) -> Result<(), ConnectionError> {
         let Some(item) = item else {
             return Ok(())
         };
 
-        match item.item_id {
+        match item.id {
             Item::Compass => {
                 client
                     .display_gui(client.server.handler.game_menu.clone())
@@ -441,8 +425,8 @@ impl GameMenu {
                 None,
                 None,
                 Some(StackContents {
-                    item_id: Item::Elytra, // elytra
-                    item_count: 1,
+                    id: Item::Elytra, // elytra
+                    count: 1,
                     nbt: ItemNbt {
                         display: Some(ItemNbtDisplay {
                             name: Some(r#"{"text":"Glide Minigame","italic":"false","color":"green"}"#.to_string()),
@@ -462,8 +446,8 @@ impl GameMenu {
                 }),
                 None,
                 Some(StackContents {
-                    item_id: Item::IronSword, // iron sword
-                    item_count: 1,
+                    id: Item::IronSword, // iron sword
+                    count: 1,
                     nbt: ItemNbt {
                         display: Some(ItemNbtDisplay {
                             name: Some(r#"{"text":"Battle Minigame","italic":"false","color":"green"}"#.to_string()),
@@ -483,8 +467,8 @@ impl GameMenu {
                 }),
                 None,
                 Some(StackContents {
-                    item_id: Item::DiamondShovel, // diamond shovel
-                    item_count: 1,
+                    id: Item::DiamondShovel, // diamond shovel
+                    count: 1,
                     nbt: ItemNbt {
                         display: Some(ItemNbtDisplay {
                             name: Some(r#"{"text":"Tumble Minigame","italic":"false","color":"green"}"#.to_string()),
@@ -618,8 +602,8 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
         player.inventory.set_slot(
             InventorySlot::Hotbar { slot: 0 },
             Some(StackContents {
-                item_id: Item::Compass,
-                item_count: 1,
+                id: Item::Compass,
+                count: 1,
                 nbt: ItemNbt {
                     display: Some(ItemNbtDisplay {
                         name: Some(
@@ -636,8 +620,8 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
         player.inventory.set_slot(
             InventorySlot::Hotbar { slot: 1 },
             Some(StackContents {
-                item_id: Item::Stick,
-                item_count: 1,
+                id: Item::Stick,
+                count: 1,
                 nbt: ItemNbt {
                     display: Some(ItemNbtDisplay {
                         name: Some(
@@ -708,8 +692,8 @@ async fn queue(
         .update_inventory_slot(
             InventorySlot::Hotbar { slot: 8 },
             Some(StackContents {
-                item_id: Item::RedstoneBlock,
-                item_count: 1,
+                id: Item::RedstoneBlock,
+                count: 1,
                 nbt: ItemNbt {
                     display: Some(ItemNbtDisplay {
                         name: Some(

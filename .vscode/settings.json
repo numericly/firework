@@ -33,6 +33,7 @@
     "Illusioner",
     "keystream",
     "knockback",
+    "leaderboard",
     "lerp",
     "levelup",
     "mapref",
@@ -93,5 +94,9 @@
   "workbench.colorCustomizations": {
     "minimap.background": "#00000000",
     "scrollbar.shadow": "#00000000"
-  }
+  },
+  "rust-analyzer.linkedProjects": [
+    "./firework-data/Cargo.toml",
+    "./Cargo.toml"
+  ]
 }

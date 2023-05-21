@@ -2,7 +2,9 @@ use crate::{
     MiniGameProxy, TransferData, CAVERN_BATTLE_WORLD, COVE_BATTLE_WORLD, CRUCIBLE_BATTLE_WORLD,
 };
 use async_trait::async_trait;
-use firework::gui::GuiScreen;
+use firework::client::DamageType;
+use firework::gui::WindowType;
+use firework::protocol::data_types::{Enchantment, Equipment, EquipmentEntry, EquipmentSlot};
 use firework::{
     authentication::Profile, data::items::Item, gui::GUIInit,
     protocol::data_types::InventoryOperationMode,
@@ -23,10 +25,11 @@ use firework::{
         server_bound::{ClickContainer, Interact},
     },
 };
-use firework::{gui::WindowType, protocol::core::VarInt};
+use firework::{gui::GuiScreen, protocol::core::Position};
 use firework::{protocol::data_types::ItemStack, world::World};
 use rand::{distributions::Standard, prelude::Distribution, Rng};
 use serde_json::json;
+use std::collections::HashMap;
 use std::{
     sync::Arc,
     time::{Duration, Instant},
@@ -48,6 +51,7 @@ pub enum Maps {
 impl Distribution<Maps> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Maps {
         match rng.gen_range(0..=2) {
+            _ => Maps::Cavern,
             0 => Maps::Cove,
             1 => Maps::Cavern,
             2 => Maps::Crucible,
@@ -88,15 +92,25 @@ pub struct BattleServerHandler {
     pub created_at: Instant,
     game_state: Mutex<GameState>,
     commands: CommandTree<Self, MiniGameProxy>,
-    chest: Arc<Chest>,
+    chests: HashMap<Position, Arc<Chest>>,
 }
 
 pub struct BattlePlayerHandler {
-    _server: Arc<Server<BattleServerHandler, MiniGameProxy>>,
+    server: Arc<Server<BattleServerHandler, MiniGameProxy>>,
     _proxy: Arc<MiniGameProxy>,
     start_time: Mutex<Option<Instant>>,
     ticks_since_start: Mutex<u32>,
     recent_packets: Mutex<Vec<Instant>>,
+    equipment: Mutex<EquipmentStorage>,
+}
+
+struct EquipmentStorage {
+    main_hand: ItemStack,
+    off_hand: ItemStack,
+    head: ItemStack,
+    chest: ItemStack,
+    legs: ItemStack,
+    feet: ItemStack,
 }
 
 fn format_duration(dur: Duration) -> String {
@@ -115,11 +129,35 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
     ) -> Self {
         Self {
             ticks_since_start: Mutex::new(0),
-            _server: server,
+            server: server,
             _proxy: proxy,
             recent_packets: Mutex::new(Vec::new()),
             start_time: Mutex::new(None),
+            equipment: Mutex::new(EquipmentStorage {
+                main_hand: None,
+                off_hand: None,
+                head: None,
+                chest: None,
+                legs: None,
+                feet: None,
+            }),
         }
+    }
+    async fn on_use_item(
+        &self,
+        client: &Client<BattleServerHandler, MiniGameProxy>,
+        item: ItemStack,
+        slot_id: InventorySlot,
+        location: Option<Position>,
+    ) -> Result<(), ConnectionError> {
+        if let Some(location) = location {
+            let chest = client.server.handler.chests.get(&location);
+
+            if let Some(chest) = chest {
+                client.display_gui(chest.clone()).await;
+            }
+        }
+        Ok(())
     }
     async fn on_server_bound_packet(
         &self,
@@ -188,7 +226,6 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
         );
         self.start_time.lock().await.replace(Instant::now());
 
-        client.display_gui(self._server.handler.chest.clone()).await;
         Ok(())
     }
     async fn on_move(
@@ -202,7 +239,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
         // check if the movement is way too fast
         let max_velocity = 20.0;
         if (end.clone() - start.clone()).length() > max_velocity {
-            client.sync_position(start.clone(), None);
+            client.sync_position(start.clone(), None).await;
             client.set_velocity(
                 client
                     .player
@@ -296,43 +333,26 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                     - other_client.player.read().await.rotation.yaw as f64
                     + 180.;
 
-                // float attack_damage = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
-                // float damage_bonus;
-                // if (p_36347_ instanceof LivingEntity) { // this is like for smite and bane of arthropods and stuff i think
-                //     damage_bonus = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), ((LivingEntity)p_36347_).getMobType());
-                // } else {
-                //     damage_bonus = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), MobType.UNDEFINED);
-                // }
-
-                // float attack_strength_scale = Mth.clamp(((float)this.attackStrengthTicker + 0.5F) * this.getAttributeValue(Attributes.ATTACK_SPEED) / 20.0F, 0.0F, 1.0F);
-                // attack_damage *= 0.2F + attack_strength_scale * attack_strength_scale * 0.8F;
-                // damage_bonus *= attack_strength_scale;
-                // this.resetAttackStrengthTicker();
-                // if (attack_damage > 0.0F || damage_bonus > 0.0F) {
-                //     boolean is_strong_hit = attack_strength_scale > 0.9F;
-                //     boolean is_knockback_hit = false;
-                //     int i = 0;
-                //     i += EnchantmentHelper.getKnockbackBonus(this);
-                //     if (this.isSprinting() && is_strong_hit) {
-                //         this.level.playSound((Player)null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_KNOCKBACK, this.getSoundSource(), 1.0F, 1.0F);
-                //         ++i;
-                //         is_knockback_hit = true;
-                //     }
-
-                //     boolean is_falling = is_strong_hit && this.fallDistance > 0.0F && !this.onGround && !this.onClimbable() && !this.isInWater() && !this.hasEffect(MobEffects.BLINDNESS) && !this.isPassenger() && p_36347_ instanceof LivingEntity;
-                //     is_critical_hit = is_falling && !this.isSprinting();
-                //     if (is_critical_hit) {
-                //         attack_damage *= 1.5F;
-                //     }
-
-                //     attack_damage += damage_bonus;
-
-                let mut attack_damage = 7.; // damage of a diamond sword
+                let mut attack_damage = 1.;
+                let mut attack_speed = 4.;
                 let mut damage_bonus = 0.; // damage bonus from enchantments
-
-                let attack_speed = 1.6; // attack speed of a diamond sword
-                let ticker = client.player.read().await.attack_strength_ticker;
-                let mut attack_strength_scale = (ticker as f64 + 0.5) * attack_speed / 20.;
+                let ticker;
+                {
+                    let player = client.player.read().await;
+                    if let Some(held_item) = player.inventory.get_slot(&InventorySlot::Hotbar {
+                        slot: player.selected_slot as usize,
+                    }) {
+                        let id = held_item.id;
+                        if let Some(damage) = id.get_attack_damage() {
+                            attack_damage = damage;
+                        }
+                        if let Some(speed) = id.get_attack_speed() {
+                            attack_speed = speed;
+                        }
+                    }
+                    ticker = player.attack_strength_ticker;
+                }
+                let mut attack_strength_scale = (ticker as f32 + 0.5) * attack_speed / 20.;
                 if attack_strength_scale < 0. {
                     attack_strength_scale = 0.;
                 } else if attack_strength_scale > 1. {
@@ -385,6 +405,55 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                                 );
                             }
                         } else {
+                            let mut defense = 0;
+                            let mut toughness = 0;
+
+                            {
+                                let mut player_lock = other_client.player.write().await;
+
+                                if let Some(helmet) =
+                                    player_lock.inventory.get_slot_mut(&InventorySlot::Helmet)
+                                {
+                                    defense += helmet.id.get_armor_defense().unwrap_or(0);
+                                    toughness += helmet.id.get_armor_toughness().unwrap_or(0);
+                                };
+                                if let Some(chestplate) = player_lock
+                                    .inventory
+                                    .get_slot_mut(&InventorySlot::Chestplate)
+                                {
+                                    defense += chestplate.id.get_armor_defense().unwrap_or(0);
+                                    toughness += chestplate.id.get_armor_toughness().unwrap_or(0);
+                                };
+                                if let Some(leggings) =
+                                    player_lock.inventory.get_slot_mut(&InventorySlot::Leggings)
+                                {
+                                    defense += leggings.id.get_armor_defense().unwrap_or(0);
+                                    toughness += leggings.id.get_armor_toughness().unwrap_or(0);
+                                };
+                                if let Some(boots) =
+                                    player_lock.inventory.get_slot_mut(&InventorySlot::Boots)
+                                {
+                                    defense += boots.id.get_armor_defense().unwrap_or(0);
+                                    toughness += boots.id.get_armor_toughness().unwrap_or(0);
+                                };
+                            }
+
+                            dbg!(defense, toughness);
+
+                            let f = 2. + toughness as f32 / 4.;
+                            let f1 = (defense as f32 - attack_damage / f)
+                                .max(defense as f32 * 0.2)
+                                .min(20.);
+                            attack_damage *= 1. - f1 / 25.;
+
+                            let protection = 0.;
+                            attack_damage *= 1. - protection / 25.;
+
+                            let get_absorption_amount = 0.;
+                            let damage_after_absorption =
+                                (attack_damage - get_absorption_amount).max(0.);
+                            let _new_absorption_amount =
+                                get_absorption_amount - attack_damage + damage_after_absorption;
                             other_client.set_health(
                                 other_client.player.read().await.health - attack_damage as f32,
                             );
@@ -457,16 +526,17 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                                           "color": "yellow"
                                         },
                                         {
-                                          "text": format!("{}", if is_critical_hit {
-                                                "minecraft:entity.player.attack.crit"
-                                            } else if is_knockback_hit {
-                                                "minecraft:entity.player.attack.knockback"
-                                            } else if is_strong_hit {
-                                                "minecraft:entity.player.attack.strong"
-                                            } else {
-                                                "minecraft:entity.player.attack.weak"
+                                            "text": format!("{}",
+                                                if is_critical_hit {
+                                                    "minecraft:entity.player.attack.crit"
+                                                } else if is_knockback_hit {
+                                                    "minecraft:entity.player.attack.knockback"
+                                                } else if is_strong_hit {
+                                                    "minecraft:entity.player.attack.strong"
+                                                } else {
+                                                    "minecraft:entity.player.attack.weak"
                                             }),
-                                          "color": "green"
+                                            "color": "green"
                                         },
                                     ])
                                     .to_string(),
@@ -494,6 +564,213 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
 
         Ok(())
     }
+    async fn on_click_container(
+        &self,
+        client: &Client<BattleServerHandler, MiniGameProxy>,
+        click: ClickContainer,
+    ) -> Result<(), ConnectionError> {
+        // println!("click: {:?}", click);
+
+        let action = InventoryAction::from_slot_click(click.mode, click.slot, click.button as u8);
+
+        let Some(action) = action else {
+            return Ok(());
+        };
+
+        let mut player = client.player.write().await;
+
+        match action {
+            InventoryAction::Click { slot, button } => {
+                let slot = InventorySlot::from_value(slot).unwrap();
+                if let Some(held_item) = player.inventory.held_item.take() {
+                    let item = player.inventory.get_slot_mut(&slot);
+                    match item {
+                        Some(item_content) => {
+                            let remainder = item_content.stack_item(&held_item);
+                            // self.set_index(&items, slot, client.client_data.uuid).await;
+
+                            player.inventory.held_item = remainder;
+                        }
+                        None => {
+                            *item = Some(held_item);
+                            // self.set_index(&items, slot, client.client_data.uuid).await;
+                        }
+                    }
+                } else {
+                    let item = player.inventory.get_slot_mut(&slot);
+                    if let Some(item_content) = item.take() {
+                        player.inventory.held_item = Some(item_content);
+                        // self.set_index(&items, slot, client.client_data.uuid).await;
+                    }
+                }
+            }
+            InventoryAction::Drag { slot, button } => {
+                let slot = InventorySlot::from_value(slot).unwrap();
+                if let Some(held_item) = player.inventory.held_item.take() {
+                    let item = player.inventory.get_slot_mut(&slot);
+
+                    if let Some(item) = item {
+                        let remainder = item.stack_item(&held_item);
+
+                        // self.set_index(&items, slot, client.client_data.uuid).await;
+
+                        player.inventory.held_item = remainder;
+                    } else {
+                        *item = Some(held_item);
+                        // self.set_index(&items, slot, client.client_data.uuid).await;
+                    }
+                }
+            }
+            InventoryAction::ShiftClick { slot } => {
+                let slot = InventorySlot::from_value(slot).unwrap();
+
+                let stacking_item = player.inventory.get_slot_mut(&slot).take();
+
+                let Some(mut stacking_item) = stacking_item else {
+                    return Ok(());
+                };
+
+                if let InventorySlot::MainInventory { .. } = slot {
+                    for already_stacked in 0..2 {
+                        for i in 0..9 {
+                            if let Some(hot_bar_item) = player
+                                .inventory
+                                .get_slot_mut(&InventorySlot::Hotbar { slot: i })
+                                .as_mut()
+                            {
+                                let remainder = hot_bar_item.stack_item(&stacking_item);
+                                if let Some(item) = remainder {
+                                    stacking_item = item;
+                                } else {
+                                    // self.set_index(&items, slot, client.client_data.uuid).await;
+                                    return Ok(());
+                                }
+                            } else if already_stacked == 1 {
+                                // self.set_index(&items, slot, client.client_data.uuid).await;
+                                player
+                                    .inventory
+                                    .get_slot_mut(&InventorySlot::Hotbar { slot: i })
+                                    .replace(stacking_item);
+                                return Ok(());
+                            }
+                        }
+                    }
+
+                    player.inventory.get_slot_mut(&slot).replace(stacking_item);
+
+                    // self.set_index(&items, slot, client.client_data.uuid).await;
+                } else {
+                    for already_stacked in 0..2 {
+                        for i in 0..27 {
+                            if let Some(inventory_item) = player
+                                .inventory
+                                .get_slot_mut(&InventorySlot::MainInventory { slot: i })
+                                .as_mut()
+                            {
+                                let remainder = inventory_item.stack_item(&stacking_item);
+                                if let Some(item) = remainder {
+                                    stacking_item = item;
+                                } else {
+                                    // self.set_index(&items, slot, client.client_data.uuid).await;
+                                    return Ok(());
+                                }
+                            } else if already_stacked == 1 {
+                                // self.set_index(&items, slot, client.client_data.uuid).await;
+                                player
+                                    .inventory
+                                    .get_slot_mut(&InventorySlot::MainInventory { slot: i })
+                                    .replace(stacking_item);
+                                return Ok(());
+                            }
+                        }
+                    }
+
+                    player.inventory.get_slot_mut(&slot).replace(stacking_item);
+                }
+            }
+            InventoryAction::SwapItem { from, to } => {
+                let from_slot = InventorySlot::from_value(from).unwrap();
+
+                let from_item = player.inventory.get_slot_mut(&from_slot).take();
+                let to_item = player.inventory.get_slot_mut(&to).take();
+
+                *player.inventory.get_slot_mut(&to) = from_item;
+                *player.inventory.get_slot_mut(&from_slot) = to_item;
+            }
+            _ => {
+                println!("action: {:?}", action);
+            }
+        }
+
+        // update the held item, offhand, and armor slots
+
+        let mut equipment = self.equipment.lock().await;
+        let mut equipment_diff = Vec::new();
+
+        if player.inventory.get_slot(&InventorySlot::Hotbar {
+            slot: player.selected_slot as usize,
+        }) != &equipment.main_hand
+        {
+            equipment_diff.push(Equipment {
+                equipment: vec![EquipmentEntry {
+                    slot: EquipmentSlot::MainHand,
+                    item: player
+                        .inventory
+                        .get_slot(&InventorySlot::Hotbar {
+                            slot: player.selected_slot as usize,
+                        })
+                        .clone(),
+                }],
+            });
+        }
+        if player.inventory.get_slot(&InventorySlot::Offhand) != &equipment.off_hand {
+            equipment_diff.push(Equipment {
+                equipment: vec![EquipmentEntry {
+                    slot: EquipmentSlot::OffHand,
+                    item: player.inventory.get_slot(&InventorySlot::Offhand).clone(),
+                }],
+            });
+        }
+        if player.inventory.get_slot(&InventorySlot::Helmet) != &equipment.head {
+            equipment_diff.push(Equipment {
+                equipment: vec![EquipmentEntry {
+                    slot: EquipmentSlot::Helmet,
+                    item: player.inventory.get_slot(&InventorySlot::Helmet).clone(),
+                }],
+            });
+        }
+        if player.inventory.get_slot(&InventorySlot::Chestplate) != &equipment.chest {
+            equipment_diff.push(Equipment {
+                equipment: vec![EquipmentEntry {
+                    slot: EquipmentSlot::Chestplate,
+                    item: player
+                        .inventory
+                        .get_slot(&InventorySlot::Chestplate)
+                        .clone(),
+                }],
+            });
+        }
+        if player.inventory.get_slot(&InventorySlot::Leggings) != &equipment.legs {
+            equipment_diff.push(Equipment {
+                equipment: vec![EquipmentEntry {
+                    slot: EquipmentSlot::Leggings,
+                    item: player.inventory.get_slot(&InventorySlot::Leggings).clone(),
+                }],
+            });
+        }
+        if player.inventory.get_slot(&InventorySlot::Boots) != &equipment.feet {
+            equipment_diff.push(Equipment {
+                equipment: vec![EquipmentEntry {
+                    slot: EquipmentSlot::Boots,
+                    item: player.inventory.get_slot(&InventorySlot::Boots).clone(),
+                }],
+            });
+        }
+
+        dbg!(&equipment_diff);
+
+        Ok(())
+    }
 }
 
 impl BattlePlayerHandler {}
@@ -505,83 +782,79 @@ pub struct Chest {
 }
 
 #[derive(Debug, Clone)]
+enum Button {
+    Left,
+    Right,
+    Middle,
+}
+
+#[derive(Debug, Clone)]
 enum InventoryAction {
-    LeftClick { slot: usize },
-    RightClick { slot: usize },
-    LeftClickDrop,
-    RightClickDrop,
+    Click { slot: usize, button: Button },
+    ClickDrop { stack: bool },
     ShiftClick { slot: usize },
-    SwapItemHotbar { from: usize, to: usize },
-    SwapItemOffhand { from: usize },
-    MiddleClick { slot: usize }, //what
-    DropItem { slot: usize },
-    DropItemStack { slot: usize },
-    LeftMouseDragStart,
-    RightMouseDragStart,
-    MiddleMouseDragStart,
-    LeftMouseDrag { slot: usize },
-    RightMouseDrag { slot: usize },
-    MiddleMouseDrag { slot: usize }, // what
-    LeftMouseDragEnd,
-    RightMouseDragEnd,
-    MiddleMouseDragEnd, // what
+    SwapItem { from: usize, to: InventorySlot },
+    DropItem { slot: usize, stack: bool },
+    DragStart { button: Button },
+    Drag { slot: usize, button: Button },
+    DragEnd { button: Button },
     DoubleClick { slot: usize },
 }
 
 impl InventoryAction {
-    pub fn from_slot_click(
+    pub fn from_slot_click_gui(
         container_size: usize,
         mode: InventoryOperationMode,
         slot: i16,
         button: u8,
     ) -> Option<Self> {
         match (mode, slot, button) {
-            (InventoryOperationMode::Click, slot, button)
-                if (button == 0 || button == 1)
-                    && slot >= 0
-                    && slot < container_size as i16 + 36 =>
+            (InventoryOperationMode::Click, slot, 0 | 1)
+                if slot >= 0 && slot < container_size as i16 + 36 =>
             {
-                Some(match button {
-                    0 => InventoryAction::LeftClick {
-                        slot: slot as usize,
+                Some(InventoryAction::Click {
+                    slot: slot as usize,
+                    button: if button == 0 {
+                        Button::Left
+                    } else {
+                        Button::Right
                     },
-                    1 => InventoryAction::RightClick {
-                        slot: slot as usize,
-                    },
-                    _ => unreachable!(),
                 })
             }
-            (InventoryOperationMode::Click, -999, 0) => Some(InventoryAction::LeftClickDrop),
-            (InventoryOperationMode::Click, -999, 1) => Some(InventoryAction::RightClickDrop),
-            (InventoryOperationMode::ShiftClick, slot, button)
-                if (button == 0 || button == 1)
-                    && slot >= 0
-                    && slot < container_size as i16 + 36 =>
+            (InventoryOperationMode::Click, -999 | -1, 0 | 1) => {
+                Some(InventoryAction::ClickDrop { stack: button == 0 })
+            }
+            (InventoryOperationMode::ShiftClick, slot, 0 | 1)
+                if slot >= 0 && slot < container_size as i16 + 36 =>
             {
                 Some(InventoryAction::ShiftClick {
                     slot: slot as usize,
                 })
             }
-            (InventoryOperationMode::MiddleClick, slot, button)
-                if (button == 2) && slot >= 0 && slot < container_size as i16 + 36 =>
+            (InventoryOperationMode::MiddleClick, slot, 2)
+                if slot >= 0 && slot < container_size as i16 + 36 =>
             {
-                Some(InventoryAction::MiddleClick {
+                Some(InventoryAction::Click {
                     slot: slot as usize,
+                    button: Button::Middle,
                 })
             }
             (InventoryOperationMode::NumberKey, slot, button)
                 if button <= 8 && slot >= 0 && slot < container_size as i16 + 36 =>
             {
-                Some(InventoryAction::SwapItemHotbar {
+                Some(InventoryAction::SwapItem {
                     from: slot as usize,
-                    to: button as usize,
+                    to: InventorySlot::Hotbar {
+                        slot: button as usize,
+                    },
                 })
             }
             (InventoryOperationMode::NumberKey, slot, 40)
                 if slot >= 0 && slot < container_size as i16 + 36 =>
             {
-                Some(InventoryAction::SwapItemOffhand {
+                Some(InventoryAction::SwapItem {
                     from: slot as usize,
+                    to: InventorySlot::Offhand,
                 })
             }
             (InventoryOperationMode::Drop, slot, button)
@@ -592,47 +865,54 @@ impl InventoryAction {
                 Some(match button {
                     0 => InventoryAction::DropItem {
                         slot: slot as usize,
+                        stack: false,
                     },
-                    1 => InventoryAction::DropItemStack {
+                    1 => InventoryAction::DropItem {
                         slot: slot as usize,
+                        stack: true,
                     },
                     _ => unreachable!(),
                 })
             }
-            (InventoryOperationMode::Drop, -999, 0) => Some(InventoryAction::LeftClickDrop),
-            (InventoryOperationMode::Drop, -999, 1) => Some(InventoryAction::RightClickDrop),
-            (InventoryOperationMode::Dragging, -999, 0) => {
-                Some(InventoryAction::LeftMouseDragStart)
+            (InventoryOperationMode::Drop, -999, 0) => {
+                Some(InventoryAction::ClickDrop { stack: false })
             }
-            (InventoryOperationMode::Dragging, -999, 4) => {
-                Some(InventoryAction::RightMouseDragStart)
+            (InventoryOperationMode::Drop, -999, 1) => {
+                Some(InventoryAction::ClickDrop { stack: true })
             }
-            (InventoryOperationMode::Dragging, -999, 8) => {
-                Some(InventoryAction::MiddleMouseDragStart)
-            }
+            (InventoryOperationMode::Dragging, -999, 0) => Some(InventoryAction::DragStart {
+                button: Button::Left,
+            }),
+            (InventoryOperationMode::Dragging, -999, 4) => Some(InventoryAction::DragStart {
+                button: Button::Right,
+            }),
+            (InventoryOperationMode::Dragging, -999, 8) => Some(InventoryAction::DragStart {
+                button: Button::Middle,
+            }),
             (InventoryOperationMode::Dragging, slot, button)
                 if (button == 1 || button == 5 || button == 9)
                     && slot >= 0
                     && slot < container_size as i16 + 36 =>
             {
-                Some(match button {
-                    1 => InventoryAction::LeftMouseDrag {
-                        slot: slot as usize,
+                Some(InventoryAction::Drag {
+                    button: match button {
+                        1 => Button::Left,
+                        5 => Button::Right,
+                        9 => Button::Middle,
+                        _ => unreachable!(),
                     },
-                    5 => InventoryAction::RightMouseDrag {
-                        slot: slot as usize,
-                    },
-                    9 => InventoryAction::MiddleMouseDrag {
-                        slot: slot as usize,
-                    },
-                    _ => unreachable!(),
+                    slot: slot as usize,
                 })
             }
-            (InventoryOperationMode::Dragging, -999, 2) => Some(InventoryAction::LeftMouseDragEnd),
-            (InventoryOperationMode::Dragging, -999, 6) => Some(InventoryAction::RightMouseDragEnd),
-            (InventoryOperationMode::Dragging, -999, 10) => {
-                Some(InventoryAction::MiddleMouseDragEnd)
-            }
+            (InventoryOperationMode::Dragging, -999, 2) => Some(InventoryAction::DragEnd {
+                button: Button::Left,
+            }),
+            (InventoryOperationMode::Dragging, -999, 6) => Some(InventoryAction::DragEnd {
+                button: Button::Right,
+            }),
+            (InventoryOperationMode::Dragging, -999, 10) => Some(InventoryAction::DragEnd {
+                button: Button::Middle,
+            }),
             (InventoryOperationMode::DoubleClick, slot, 0)
                 if slot >= 0 && slot < container_size as i16 + 36 =>
             {
@@ -642,6 +922,107 @@ impl InventoryAction {
             }
             (mode, slot, button) => {
                 println!("unknown {:?}, {}, {}", mode, slot, button);
+                None
+            }
+        }
+    }
+    pub fn from_slot_click(mode: InventoryOperationMode, slot: i16, button: u8) -> Option<Self> {
+        let slot_parsed = InventorySlot::from_value(slot as usize);
+        match (mode, slot, button, slot_parsed) {
+            (InventoryOperationMode::Click, slot, 0 | 1, Some(_)) => Some(InventoryAction::Click {
+                slot: slot as usize,
+                button: if button == 0 {
+                    Button::Left
+                } else {
+                    Button::Right
+                },
+            }),
+            (InventoryOperationMode::Click, -999 | -1, 0 | 1, _) => {
+                Some(InventoryAction::ClickDrop { stack: button == 0 })
+            }
+            (InventoryOperationMode::ShiftClick, slot, 0 | 1, Some(_)) => {
+                Some(InventoryAction::ShiftClick {
+                    slot: slot as usize,
+                })
+            }
+            (InventoryOperationMode::MiddleClick, slot, 2, Some(_)) => {
+                Some(InventoryAction::Click {
+                    slot: slot as usize,
+                    button: Button::Middle,
+                })
+            }
+            (InventoryOperationMode::NumberKey, slot, button, Some(_))
+                if button <= 8 && slot >= 0 =>
+            {
+                Some(InventoryAction::SwapItem {
+                    from: slot as usize,
+                    to: InventorySlot::Hotbar {
+                        slot: button as usize,
+                    },
+                })
+            }
+            (InventoryOperationMode::NumberKey, slot, 40, Some(_)) => {
+                Some(InventoryAction::SwapItem {
+                    from: slot as usize,
+                    to: InventorySlot::Offhand,
+                })
+            }
+            (InventoryOperationMode::Drop, slot, 0 | 1, Some(_)) => Some(match button {
+                0 => InventoryAction::DropItem {
+                    slot: slot as usize,
+                    stack: false,
+                },
+                1 => InventoryAction::DropItem {
+                    slot: slot as usize,
+                    stack: true,
+                },
+                _ => unreachable!(),
+            }),
+            (InventoryOperationMode::Drop, -999, 0, _) => {
+                Some(InventoryAction::ClickDrop { stack: false })
+            }
+            (InventoryOperationMode::Drop, -999, 1, _) => {
+                Some(InventoryAction::ClickDrop { stack: true })
+            }
+            (InventoryOperationMode::Dragging, -999, 0, _) => Some(InventoryAction::DragStart {
+                button: Button::Left,
+            }),
+            (InventoryOperationMode::Dragging, -999, 4, _) => Some(InventoryAction::DragStart {
+                button: Button::Right,
+            }),
+            (InventoryOperationMode::Dragging, -999, 8, _) => Some(InventoryAction::DragStart {
+                button: Button::Middle,
+            }),
+            (InventoryOperationMode::Dragging, slot, 1 | 5 | 9, Some(_)) => {
+                Some(InventoryAction::Drag {
+                    button: match button {
+                        1 => Button::Left,
+                        5 => Button::Right,
+                        9 => Button::Middle,
+                        _ => unreachable!(),
+                    },
+                    slot: slot as usize,
+                })
+            }
+            (InventoryOperationMode::Dragging, -999, 2, _) => Some(InventoryAction::DragEnd {
+                button: Button::Left,
+            }),
+            (InventoryOperationMode::Dragging, -999, 6, _) => Some(InventoryAction::DragEnd {
+                button: Button::Right,
+            }),
+            (InventoryOperationMode::Dragging, -999, 10, _) => Some(InventoryAction::DragEnd {
+                button: Button::Middle,
+            }),
+            (InventoryOperationMode::DoubleClick, slot, 0, Some(_)) => {
+                Some(InventoryAction::DoubleClick {
+                    slot: slot as usize,
+                })
+            }
+            (mode, slot, button, slot_parsed) => {
+                println!(
+                    "unknown {:?}, {}, {}, {:?}",
+                    mode, slot, button, slot_parsed
+                );
                 None
             }
         }
@@ -663,56 +1044,8 @@ impl GuiScreen<BattleServerHandler, MiniGameProxy> for Chest {
         slot: ClickContainer,
         client: &Client<BattleServerHandler, MiniGameProxy>,
     ) -> Result<(), ConnectionError> {
-        // match slot.mode {
-        //     InventoryOperationMode::Click => {
-        //         let slot_idx = slot.slot as usize;
-        //         let mut player = client.player.write().await;
-        //         let mut items = self.items.write().await;
-        //         let item = Chest::index(&items, slot_idx, &player).await;
-        //         if let Some(item) = item {
-        //             if player.inventory.held_item.is_none() {
-        //                 let new_item = item.clone();
-        //                 drop(item);
-        //                 Chest::set_index(&mut items, slot_idx, &mut player, None).await;
-        //                 player.inventory.held_item = Some(new_item);
-        //                 if slot_idx < 27 {
-        //                     self.channel
-        //                         .send(GUIEvent::SetSlot {
-        //                             slot: slot_idx,
-        //                             item: None,
-        //                         })
-        //                         .unwrap();
-        //                 }
-        //                 println!("new item: {:?}", player.inventory.held_item);
-        //                 println!("new chest: {:?}", items);
-        //             }
-        //         } else {
-        //         }
-        //         // player.inventory.held_item
-        //     }
-        //     InventoryOperationMode::Dragging => {
-        //         if slot.slot == -999 {
-        //             println!("dragging from cursor");
-        //             return Ok(());
-        //         }
-        //         let slot_idx = slot.slot as usize;
-        //         let mut player = client.player.write().await;
-        //         let Some(held_item) = player.inventory.held_item.take() else {
-        //             return Ok(());
-        //         };
-        //         let mut items = self.items.write().await;
-        //         let item = Chest::index(&items, slot_idx, &player).await;
-        //         if item.is_none() && slot_idx < 27 {
-        //             drop(item);
-        //             Chest::set_index(&mut items, slot_idx, &mut player, Some(held_item)).await;
-        //         }
-        //         println!("new item: {:?}", player.inventory.held_item);
-        //         println!("new chest: {:?}", items);
-        //     }
-        //     _ => {}
-        // }
-
-        let action = InventoryAction::from_slot_click(27, slot.mode, slot.slot, slot.button as u8);
+        let action =
+            InventoryAction::from_slot_click_gui(9 * 3, slot.mode, slot.slot, slot.button as u8);
 
         let Some(action) = action else {
             // None = unknown action
@@ -725,51 +1058,183 @@ impl GuiScreen<BattleServerHandler, MiniGameProxy> for Chest {
         let mut items = self.items.write().await;
 
         match action {
-            InventoryAction::LeftClick { slot } => {
-                if let Some(held_item) = player.inventory.held_item.take() {
-                    let item = self.index(&items, slot, &player).await;
+            InventoryAction::SwapItem { from, to } => {
+                let from_item = self.index_mut(&mut items, from, &mut player).await.take();
 
+                let Some(from_item) = from_item else {
+                    *self.index_mut(&mut items, from, &mut player).await = player.inventory.get_slot_mut(&to).take();
+
+                    if from < 27 {
+                        self.set_index(&items, from, client.client_data.uuid).await;
+                    }
+                    return Ok(());
+                };
+
+                let to_item = player.inventory.get_slot_mut(&to);
+
+                let old_to_item = to_item.replace(from_item);
+
+                *self.index_mut(&mut items, from, &mut player).await = old_to_item;
+
+                if from < 27 {
+                    self.set_index(&items, from, client.client_data.uuid).await;
+                }
+            }
+            InventoryAction::Click { slot, button } => {
+                if let Some(held_item) = player.inventory.held_item.take() {
+                    let item = self.index_mut(&mut items, slot, &mut player).await;
                     match item {
-                        // Some(item) if item.item_id == held_item.item_id => {
-                        //     let new_count = item.item_count + held_item.item_count;
-                        //     println!("item: {:?}", item);
-                        // }
-                        // Some(item) if item.item_id != held_item.item_id => {
-                        //     player.inventory.held_item = None;
-                        //     Chest::set_index(&mut items, slot, &mut player, Some(held_item)).await;
-                        // }
-                        None => {
-                            player.inventory.held_item = None;
-                            self.set_index(&mut items, slot, &mut player, Some(held_item))
-                                .await;
+                        Some(item_content) => {
+                            let remainder = item_content.stack_item(&held_item);
+                            self.set_index(&items, slot, client.client_data.uuid).await;
+
+                            player.inventory.held_item = remainder;
                         }
-                        _ => {
-                            panic!("cannot swap items or merge items")
+                        None => {
+                            *item = Some(held_item);
+                            self.set_index(&items, slot, client.client_data.uuid).await;
                         }
                     }
                 } else {
-                    let item = self.index(&items, slot, &player).await;
-
-                    if let Some(item) = item {
-                        let new_item = item.clone();
-                        self.set_index(&mut items, slot, &mut player, None).await;
-                        player.inventory.held_item = Some(new_item);
+                    let item = self.index_mut(&mut items, slot, &mut player).await;
+                    if let Some(item_content) = item.take() {
+                        player.inventory.held_item = Some(item_content);
+                        self.set_index(&items, slot, client.client_data.uuid).await;
                     }
                 }
             }
-            InventoryAction::LeftMouseDrag { slot } => {
+            InventoryAction::Drag { slot, button } => {
                 if let Some(held_item) = player.inventory.held_item.take() {
-                    let item = self.index(&items, slot, &player).await;
+                    let item = self.index_mut(&mut items, slot, &mut player).await;
 
-                    if item.is_none() {
-                        self.set_index(&mut items, slot, &mut player, Some(held_item))
-                            .await;
+                    if let Some(item) = item {
+                        let remainder = item.stack_item(&held_item);
+
+                        self.set_index(&items, slot, client.client_data.uuid).await;
+
+                        player.inventory.held_item = remainder;
+                    } else {
+                        *item = Some(held_item);
+                        self.set_index(&items, slot, client.client_data.uuid).await;
                     }
                 }
+            }
+            InventoryAction::ShiftClick { slot } => {
+                if slot < 27 {
+                    let stacking_item = items[slot].take();
+
+                    let Some(mut stacking_item) = stacking_item else {
+                        return Ok(());
+                    };
+
+                    for i in (0..9).rev() {
+                        if let Some(hot_bar_item) = player
+                            .inventory
+                            .get_slot_mut(&InventorySlot::Hotbar { slot: i })
+                            .as_mut()
+                        {
+                            let remainder = hot_bar_item.stack_item(&stacking_item);
+                            if let Some(item) = remainder {
+                                stacking_item = item;
+                            } else {
+                                self.set_index(&items, slot, client.client_data.uuid).await;
+                                return Ok(());
+                            }
+                        } else {
+                            self.set_index(&items, slot, client.client_data.uuid).await;
+                            player
+                                .inventory
+                                .get_slot_mut(&InventorySlot::Hotbar { slot: i })
+                                .replace(stacking_item);
+                            return Ok(());
+                        }
+                    }
+
+                    for i in 0..27 {
+                        if let Some(hot_bar_item) = player
+                            .inventory
+                            .get_slot_mut(&InventorySlot::MainInventory { slot: i })
+                            .as_mut()
+                        {
+                            let remainder = hot_bar_item.stack_item(&stacking_item);
+                            if let Some(item) = remainder {
+                                stacking_item = item;
+                            } else {
+                                self.set_index(&items, slot, client.client_data.uuid).await;
+                                return Ok(());
+                            }
+                        } else {
+                            self.set_index(&items, slot, client.client_data.uuid).await;
+                            player
+                                .inventory
+                                .get_slot_mut(&InventorySlot::MainInventory { slot: i })
+                                .replace(stacking_item);
+                            return Ok(());
+                        }
+                    }
+
+                    items[slot] = Some(stacking_item);
+
+                    self.set_index(&items, slot, client.client_data.uuid).await;
+                } else {
+                    let item = if slot < 27 + 27 {
+                        player
+                            .inventory
+                            .get_slot_mut(&InventorySlot::MainInventory { slot: slot - 27 })
+                    } else {
+                        player.inventory.get_slot_mut(&InventorySlot::Hotbar {
+                            slot: slot - 27 - 27,
+                        })
+                    };
+                    let stacking_item = item.take();
+
+                    let Some(mut stacking_item) = stacking_item else {
+                            return Ok(());
+                        };
+
+                    for i in 0..27 {
+                        if let Some(hot_bar_item) = &mut items[i] {
+                            let remainder = hot_bar_item.stack_item(&stacking_item);
+
+                            self.set_index(&items, i, client.client_data.uuid).await;
+
+                            if let Some(item) = remainder {
+                                stacking_item = item;
+                            } else {
+                                return Ok(());
+                            }
+                        } else {
+                            items[i] = Some(stacking_item);
+
+                            self.set_index(&items, i, client.client_data.uuid).await;
+
+                            return Ok(());
+                        }
+                    }
+                }
+            }
+            InventoryAction::ClickDrop { stack } => {
+                client.update_slot(-1, player.inventory.held_item.clone(), -1);
             }
             action => {
                 // println!("unhandled action: {:?}", action);
             }
+        }
+
+        let mut valid_state = true;
+        for item_stack in slot.slots {
+            let slot_idx = item_stack.slot_number as usize;
+            let item = self.index_mut(&mut items, slot_idx, &mut player).await;
+
+            if *item != item_stack.slot_value {
+                valid_state = false;
+                client.update_slot(slot_idx as i16, item.clone(), 1);
+            }
+        }
+
+        if !valid_state {
+            client.update_slot(-1, player.inventory.held_item.clone(), -1);
+            return Ok(());
         }
 
         // println!("player {:?}", player.inventory);
@@ -788,67 +1253,43 @@ impl Chest {
             items: RwLock::new(vec![None; 27]),
         }
     }
-    async fn index<'a>(
-        &self,
-        items: &'a Vec<ItemStack>,
-        index: usize,
-        player: &'a Player,
-    ) -> &'a ItemStack {
-        if index < WindowType::Generic9x3.len() {
-            &items[index]
-        } else if (index - WindowType::Generic9x3.len()) < 27 + 9 {
-            let inventory_index = index - WindowType::Generic9x3.len();
-
-            if inventory_index < 27 {
-                player.inventory.get_slot(&InventorySlot::MainInventory {
-                    slot: inventory_index,
-                })
-            } else {
-                player.inventory.get_slot(&InventorySlot::Hotbar {
-                    slot: inventory_index - 27,
-                })
-            }
-        } else {
-            &None
-        }
-    }
-    async fn set_index<'a>(
+    async fn index_mut<'a>(
         &self,
         items: &'a mut Vec<ItemStack>,
         index: usize,
-        player: &mut Player,
-        item: ItemStack,
-    ) {
+        player: &'a mut Player,
+    ) -> &'a mut ItemStack {
         if index < WindowType::Generic9x3.len() {
-            items[index] = item.clone();
+            &mut items[index]
+        } else {
+            assert!((index - WindowType::Generic9x3.len()) < 27 + 9);
+            let inventory_index = index - WindowType::Generic9x3.len();
+
+            if inventory_index < 27 {
+                player
+                    .inventory
+                    .get_slot_mut(&InventorySlot::MainInventory {
+                        slot: inventory_index,
+                    })
+            } else {
+                player.inventory.get_slot_mut(&InventorySlot::Hotbar {
+                    slot: inventory_index - 27,
+                })
+            }
+        }
+    }
+    async fn set_index(&self, items: &Vec<ItemStack>, index: usize, uuid: u128) {
+        if index < WindowType::Generic9x3.len() {
             let mut state_id = self.state_id.write().await;
             *state_id += 1;
             self.channel
                 .send(GUIEvent::SetSlot {
                     slot: index,
-                    item,
-                    setter: player.uuid,
+                    item: items[index].clone(),
                     state_id: *state_id,
+                    setter: uuid,
                 })
                 .unwrap();
-        } else if (index - WindowType::Generic9x3.len()) < 27 + 9 {
-            let inventory_index = index - WindowType::Generic9x3.len();
-
-            if inventory_index < 27 {
-                player.inventory.set_slot(
-                    InventorySlot::MainInventory {
-                        slot: inventory_index,
-                    },
-                    item,
-                );
-            } else {
-                player.inventory.set_slot(
-                    InventorySlot::Hotbar {
-                        slot: inventory_index - 27,
-                    },
-                    item,
-                );
-            }
         }
     }
 }
@@ -859,7 +1300,85 @@ impl ServerHandler<MiniGameProxy> for BattleServerHandler {
     type PlayerHandler = BattlePlayerHandler;
     fn new() -> Self {
         Self {
-            chest: Arc::new(Chest::new()),
+            chests: {
+                let mut map = HashMap::new();
+                map.insert(Position { x: 1, y: 99, z: 1 }, Arc::new(Chest::new()));
+                map.insert(Position { x: 1, y: 99, z: -1 }, Arc::new(Chest::new()));
+                map.insert(
+                    Position {
+                        x: -1,
+                        y: 99,
+                        z: -1,
+                    },
+                    Arc::new(Chest::new()),
+                );
+                map.insert(Position { x: -1, y: 99, z: 1 }, Arc::new(Chest::new()));
+                map.insert(
+                    Position {
+                        x: -28,
+                        y: 110,
+                        z: 17,
+                    },
+                    Arc::new(Chest::new()),
+                );
+                map.insert(
+                    Position {
+                        x: 0,
+                        y: 108,
+                        z: 36,
+                    },
+                    Arc::new(Chest::new()),
+                );
+                map.insert(
+                    Position {
+                        x: 8,
+                        y: 117,
+                        z: 28,
+                    },
+                    Arc::new(Chest::new()),
+                );
+                map.insert(
+                    Position {
+                        x: 29,
+                        y: 115,
+                        z: 1,
+                    },
+                    Arc::new(Chest::new()),
+                );
+                map.insert(
+                    Position {
+                        x: 24,
+                        y: 109,
+                        z: -20,
+                    },
+                    Arc::new(Chest::new()),
+                );
+                map.insert(
+                    Position {
+                        x: 0,
+                        y: 108,
+                        z: -30,
+                    },
+                    Arc::new(Chest::new()),
+                );
+                map.insert(
+                    Position {
+                        x: -20,
+                        y: 111,
+                        z: -15,
+                    },
+                    Arc::new(Chest::new()),
+                );
+                map.insert(
+                    Position {
+                        x: 12,
+                        y: 116,
+                        z: 0,
+                    },
+                    Arc::new(Chest::new()),
+                );
+                map
+            },
             map: rand::random(),
             created_at: Instant::now(),
             game_state: Mutex::new(GameState::Starting {
@@ -964,8 +1483,8 @@ impl ServerHandler<MiniGameProxy> for BattleServerHandler {
         player.inventory.set_slot(
             InventorySlot::Helmet,
             Some(StackContents {
-                item_id: Item::EndRod,
-                item_count: 1,
+                id: Item::EndRod,
+                count: 1,
                 nbt: ItemNbt {
                     ..Default::default()
                 },
@@ -975,8 +1494,72 @@ impl ServerHandler<MiniGameProxy> for BattleServerHandler {
         player.inventory.set_slot(
             InventorySlot::Hotbar { slot: 0 },
             Some(StackContents {
-                item_id: Item::DiamondSword,
-                item_count: 1,
+                id: Item::DiamondSword,
+                count: 1,
+                nbt: ItemNbt {
+                    ..Default::default()
+                },
+            }),
+        );
+        player.inventory.set_slot(
+            InventorySlot::Hotbar { slot: 1 },
+            Some(StackContents {
+                id: Item::GoldenSword,
+                count: 1,
+                nbt: ItemNbt {
+                    ..Default::default()
+                },
+            }),
+        );
+        player.inventory.set_slot(
+            InventorySlot::Hotbar { slot: 2 },
+            Some(StackContents {
+                id: Item::StoneAxe,
+                count: 1,
+                nbt: ItemNbt {
+                    ..Default::default()
+                },
+            }),
+        );
+        player.inventory.set_slot(
+            InventorySlot::Hotbar { slot: 3 },
+            Some(StackContents {
+                id: Item::DiamondHelmet,
+                count: 1,
+                nbt: ItemNbt {
+                    ..Default::default()
+                },
+            }),
+        );
+        player.inventory.set_slot(
+            InventorySlot::Hotbar { slot: 4 },
+            Some(StackContents {
+                id: Item::DiamondChestplate,
+                count: 1,
+                nbt: ItemNbt {
+                    ..Default::default()
+                },
+            }),
+        );
+        player.inventory.set_slot(
+            InventorySlot::Hotbar { slot: 5 },
+            Some(StackContents {
+                id: Item::DiamondLeggings,
+                count: 1,
+                nbt: ItemNbt {
+                    enchantments: Some(Vec::from([Enchantment {
+                        id: "minecraft:protection".to_string(),
+                        level: 4,
+                    }])),
+                    display: None,
+                },
+            }),
+        );
+        player.inventory.set_slot(
+            InventorySlot::Hotbar { slot: 6 },
+            Some(StackContents {
+                id: Item::DiamondBoots,
+                count: 1,
                 nbt: ItemNbt {
                     ..Default::default()
                 },
@@ -1019,10 +1602,12 @@ impl BattleServerHandler {
                 )
                 .to_string(),
             );
-            client.sync_position(
-                self.map.get_spawn_point().position.clone(),
-                Some(Rotation::new(0., 0.)),
-            );
+            client
+                .sync_position(
+                    self.map.get_spawn_point().position.clone(),
+                    Some(Rotation::new(0., 0.)),
+                )
+                .await;
 
             client.send_boss_bar_action(
                 0,

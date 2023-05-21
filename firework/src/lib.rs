@@ -17,7 +17,7 @@ use firework_protocol::{
 use firework_protocol::{read_specific_packet, ConnectionState, Protocol, ProtocolError};
 use firework_world::World;
 use gui::GuiScreen;
-use protocol::client_bound::UpdateTime;
+use protocol::{client_bound::UpdateTime, core::Position};
 use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
 use sha1::{Digest, Sha1};
 use std::sync::Arc;
@@ -728,6 +728,7 @@ where
         client: &Client<Handler, Proxy>,
         item: ItemStack,
         slot_id: InventorySlot,
+        location: Option<Position>,
     ) -> Result<(), ConnectionError> {
         Ok(())
     }
@@ -899,7 +900,7 @@ where
             .await?;
 
         let (to_client_sender, to_client_receiver) =
-            broadcast::channel::<ClientCommand<Proxy::TransferData>>(1024);
+            broadcast::channel::<ClientCommand<Proxy::TransferData>>(2048);
 
         let (to_client_visual_sender, to_client_visual_receiver) =
             broadcast::channel::<ClientCommand<Proxy::TransferData>>(2048);
@@ -1000,8 +1001,15 @@ where
 
                                 client.handler.on_transfer(&client).await?;
 
-                                for _ in 0..to_client_receiver.len() {
+                                while to_client_receiver.len() > 0 {
                                     let command = to_client_receiver.recv().await;
+                                    #[allow(unused_must_use)]
+                                    if let Ok(command) = command {
+                                        client.handle_command(command).await;
+                                    }
+                                }
+                                while to_client_visual_receiver.len() > 0 {
+                                    let command = to_client_visual_receiver.recv().await;
                                     #[allow(unused_must_use)]
                                     if let Ok(command) = command {
                                         client.handle_command(command).await;
