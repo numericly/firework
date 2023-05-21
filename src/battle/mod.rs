@@ -279,6 +279,14 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
     ) -> Result<(), ConnectionError> {
         match interact.action {
             InteractAction::Attack => {
+                match *self.server.handler.game_state.lock().await {
+                    GameState::Running { start_time, .. } => {
+                        if start_time.elapsed().as_secs() < 15 {
+                            return Ok(());
+                        }
+                    }
+                    _ => {}
+                }
                 let player_list = &client.server.player_list;
 
                 // find the player with the index of the entity in the player list
@@ -518,29 +526,6 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                                     other_client.player.read().await.position.clone(),
                                     1.,
                                     1.,
-                                );
-                                iter_client.send_system_chat_message(
-                                    json!([
-                                        {
-                                          "text": "The hit type is ",
-                                          "color": "yellow"
-                                        },
-                                        {
-                                            "text": format!("{}",
-                                                if is_critical_hit {
-                                                    "minecraft:entity.player.attack.crit"
-                                                } else if is_knockback_hit {
-                                                    "minecraft:entity.player.attack.knockback"
-                                                } else if is_strong_hit {
-                                                    "minecraft:entity.player.attack.strong"
-                                                } else {
-                                                    "minecraft:entity.player.attack.weak"
-                                            }),
-                                            "color": "green"
-                                        },
-                                    ])
-                                    .to_string(),
-                                    false,
                                 );
                             }
                         }
@@ -1442,14 +1427,15 @@ impl ServerHandler<MiniGameProxy> for BattleServerHandler {
                 self.start_game(server, &proxy).await;
             }
             GameState::Running {
-                start_time: _,
+                start_time,
                 initial_player_count,
             } => {
-                // TODO don't do this on every tick, instead update it when a player leaves or dies
-                let player_count = server.player_list.len();
+                if start_time.elapsed().as_secs() >= 15 {
+                    // TODO don't do this on every tick, instead update it when a player leaves or dies
+                    let player_count = server.player_list.len();
 
-                for player in server.player_list.iter() {
-                    player.send_boss_bar_action(
+                    for player in server.player_list.iter() {
+                        player.send_boss_bar_action(
                         0,
                         BossBarAction::UpdateTitle {
                             title: json!({
@@ -1458,12 +1444,34 @@ impl ServerHandler<MiniGameProxy> for BattleServerHandler {
                             .to_string(),
                         },
                     );
-                    player.send_boss_bar_action(
+                        player.send_boss_bar_action(
+                            0,
+                            BossBarAction::UpdateHealth {
+                                health: player_count as f32 / *initial_player_count as f32,
+                            },
+                        );
+                    }
+                } else {
+                    // TODO don't do this on every tick, instead update it when a player leaves or dies
+                    let player_count = server.player_list.len();
+
+                    for player in server.player_list.iter() {
+                        player.send_boss_bar_action(
                         0,
-                        BossBarAction::UpdateHealth {
-                            health: player_count as f32 / *initial_player_count as f32,
+                        BossBarAction::UpdateTitle {
+                            title: json!({
+                                "text": format!("{} seconds left in grace period", 15 - start_time.elapsed().as_secs()),
+                            })
+                            .to_string(),
                         },
                     );
+                        player.send_boss_bar_action(
+                            0,
+                            BossBarAction::UpdateHealth {
+                                health: 1.0 - start_time.elapsed().as_millis() as f32 / 15000.,
+                            },
+                        );
+                    }
                 }
             }
         }
