@@ -4,7 +4,7 @@ use crate::{
 use async_trait::async_trait;
 use firework::client::DamageType;
 use firework::gui::WindowType;
-use firework::protocol::data_types::Enchantment;
+use firework::protocol::data_types::{Enchantment, Equipment, EquipmentEntry, EquipmentSlot};
 use firework::{
     authentication::Profile, data::items::Item, gui::GUIInit,
     protocol::data_types::InventoryOperationMode,
@@ -101,6 +101,16 @@ pub struct BattlePlayerHandler {
     start_time: Mutex<Option<Instant>>,
     ticks_since_start: Mutex<u32>,
     recent_packets: Mutex<Vec<Instant>>,
+    equipment: Mutex<EquipmentStorage>,
+}
+
+struct EquipmentStorage {
+    main_hand: ItemStack,
+    off_hand: ItemStack,
+    head: ItemStack,
+    chest: ItemStack,
+    legs: ItemStack,
+    feet: ItemStack,
 }
 
 fn format_duration(dur: Duration) -> String {
@@ -123,6 +133,14 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
             _proxy: proxy,
             recent_packets: Mutex::new(Vec::new()),
             start_time: Mutex::new(None),
+            equipment: Mutex::new(EquipmentStorage {
+                main_hand: None,
+                off_hand: None,
+                head: None,
+                chest: None,
+                legs: None,
+                feet: None,
+            }),
         }
     }
     async fn on_use_item(
@@ -684,6 +702,73 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
             }
         }
 
+        // update the held item, offhand, and armor slots
+
+        let mut equipment = self.equipment.lock().await;
+        let mut equipment_diff = Vec::new();
+
+        if player.inventory.get_slot(&InventorySlot::Hotbar {
+            slot: player.selected_slot as usize,
+        }) != &equipment.main_hand
+        {
+            equipment_diff.push(Equipment {
+                equipment: vec![EquipmentEntry {
+                    slot: EquipmentSlot::MainHand,
+                    item: player
+                        .inventory
+                        .get_slot(&InventorySlot::Hotbar {
+                            slot: player.selected_slot as usize,
+                        })
+                        .clone(),
+                }],
+            });
+        }
+        if player.inventory.get_slot(&InventorySlot::Offhand) != &equipment.off_hand {
+            equipment_diff.push(Equipment {
+                equipment: vec![EquipmentEntry {
+                    slot: EquipmentSlot::OffHand,
+                    item: player.inventory.get_slot(&InventorySlot::Offhand).clone(),
+                }],
+            });
+        }
+        if player.inventory.get_slot(&InventorySlot::Helmet) != &equipment.head {
+            equipment_diff.push(Equipment {
+                equipment: vec![EquipmentEntry {
+                    slot: EquipmentSlot::Helmet,
+                    item: player.inventory.get_slot(&InventorySlot::Helmet).clone(),
+                }],
+            });
+        }
+        if player.inventory.get_slot(&InventorySlot::Chestplate) != &equipment.chest {
+            equipment_diff.push(Equipment {
+                equipment: vec![EquipmentEntry {
+                    slot: EquipmentSlot::Chestplate,
+                    item: player
+                        .inventory
+                        .get_slot(&InventorySlot::Chestplate)
+                        .clone(),
+                }],
+            });
+        }
+        if player.inventory.get_slot(&InventorySlot::Leggings) != &equipment.legs {
+            equipment_diff.push(Equipment {
+                equipment: vec![EquipmentEntry {
+                    slot: EquipmentSlot::Leggings,
+                    item: player.inventory.get_slot(&InventorySlot::Leggings).clone(),
+                }],
+            });
+        }
+        if player.inventory.get_slot(&InventorySlot::Boots) != &equipment.feet {
+            equipment_diff.push(Equipment {
+                equipment: vec![EquipmentEntry {
+                    slot: EquipmentSlot::Boots,
+                    item: player.inventory.get_slot(&InventorySlot::Boots).clone(),
+                }],
+            });
+        }
+
+        dbg!(&equipment_diff);
+
         Ok(())
     }
 }
@@ -960,7 +1045,7 @@ impl GuiScreen<BattleServerHandler, MiniGameProxy> for Chest {
         client: &Client<BattleServerHandler, MiniGameProxy>,
     ) -> Result<(), ConnectionError> {
         let action =
-            InventoryAction::from_slot_click_gui(27, slot.mode, slot.slot, slot.button as u8);
+            InventoryAction::from_slot_click_gui(9 * 3, slot.mode, slot.slot, slot.button as u8);
 
         let Some(action) = action else {
             // None = unknown action
