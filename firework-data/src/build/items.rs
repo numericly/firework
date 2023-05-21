@@ -18,6 +18,29 @@ impl<T: ToTokens> ToTokens for QuoteOption<T> {
 }
 
 #[derive(Deserialize, Debug, Clone)]
+pub enum ArmorPart {
+    #[serde(rename = "helmet")]
+    Helmet,
+    #[serde(rename = "chestplate")]
+    Chestplate,
+    #[serde(rename = "leggings")]
+    Leggings,
+    #[serde(rename = "boots")]
+    Boots,
+}
+
+impl ToTokens for ArmorPart {
+    fn to_tokens(&self, tokens: &mut TokenStream2) {
+        tokens.append_all(match self {
+            Self::Helmet => quote! { ArmorPart::Helmet },
+            Self::Chestplate => quote! { ArmorPart::Chestplate },
+            Self::Leggings => quote! { ArmorPart::Leggings },
+            Self::Boots => quote! { ArmorPart::Boots },
+        });
+    }
+}
+
+#[derive(Deserialize, Debug, Clone)]
 struct Item {
     id: i32,
     name: String,
@@ -33,6 +56,7 @@ struct Item {
     armor_defense: Option<i32>,
     #[serde(rename = "armorToughness")]
     armor_toughness: Option<i32>,
+    armor_part: Option<ArmorPart>,
 }
 
 pub fn build_items() {
@@ -50,6 +74,7 @@ pub fn build_items() {
     let mut get_attack_speed_inner = TokenStream2::new();
     let mut get_armor_defense_inner = TokenStream2::new();
     let mut get_armor_toughness_inner = TokenStream2::new();
+    let mut get_armor_part_inner = TokenStream2::new();
     let mut from_item_id_inner = TokenStream2::new();
 
     for item in &items {
@@ -71,12 +96,14 @@ pub fn build_items() {
             attack_speed,
             armor_defense,
             armor_toughness,
+            armor_part,
         } = item;
 
         let attack_damage = QuoteOption(*attack_damage);
         let attack_speed = QuoteOption(*attack_speed);
         let armor_defense = QuoteOption(*armor_defense);
         let armor_toughness = QuoteOption(*armor_toughness);
+        let armor_part = QuoteOption(armor_part.clone());
 
         get_id_inner.extend(quote! {
             Self::#item_ident => #id,
@@ -102,12 +129,24 @@ pub fn build_items() {
         get_armor_toughness_inner.extend(quote! {
             Self::#item_ident => #armor_toughness,
         });
+        get_armor_part_inner.extend(quote! {
+            Self::#item_ident => #armor_part,
+        });
         from_item_id_inner.extend(quote! {
             #id => Some(Self::#item_ident),
         });
     }
 
     items_rs.extend(quote! {
+
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+        pub enum ArmorPart {
+            Helmet,
+            Chestplate,
+            Leggings,
+            Boots,
+        }
+
         #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
         pub enum Item {
             #item_enum_inner
@@ -141,6 +180,11 @@ pub fn build_items() {
                 }
             }
             // dude sorry about build times 💀 i like doubled the data crate
+            pub fn get_armor_part(&self) -> Option<ArmorPart> {
+                match self {
+                    #get_armor_part_inner
+                }
+            }
             pub fn get_attack_damage(&self) -> Option<f32> {
                 match self {
                     #get_attack_damage_inner

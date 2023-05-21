@@ -4523,6 +4523,7 @@
   {
     "id": 752,
     "name": "turtle_helmet",
+    "armor_part": "helmet",
     "displayName": "Turtle Shell",
     "stackSize": 1,
     "enchantCategories": [
@@ -5083,6 +5084,7 @@
   {
     "id": 812,
     "name": "leather_helmet",
+    "armor_part": "helmet",
     "displayName": "Leather Cap",
     "stackSize": 1,
     "enchantCategories": [
@@ -5099,6 +5101,7 @@
   {
     "id": 813,
     "name": "leather_chestplate",
+    "armor_part": "chestplate",
     "displayName": "Leather Tunic",
     "stackSize": 1,
     "enchantCategories": [
@@ -5115,6 +5118,7 @@
   {
     "id": 814,
     "name": "leather_leggings",
+    "armor_part": "leggings",
     "displayName": "Leather Pants",
     "stackSize": 1,
     "enchantCategories": [
@@ -5131,6 +5135,7 @@
   {
     "id": 815,
     "name": "leather_boots",
+    "armor_part": "boots",
     "displayName": "Leather Boots",
     "stackSize": 1,
     "enchantCategories": [
@@ -5147,6 +5152,7 @@
   {
     "id": 816,
     "name": "chainmail_helmet",
+    "armor_part": "helmet",
     "displayName": "Chainmail Helmet",
     "stackSize": 1,
     "enchantCategories": [
@@ -5163,6 +5169,7 @@
   {
     "id": 817,
     "name": "chainmail_chestplate",
+    "armor_part": "chestplate",
     "displayName": "Chainmail Chestplate",
     "stackSize": 1,
     "enchantCategories": [
@@ -5179,6 +5186,7 @@
   {
     "id": 818,
     "name": "chainmail_leggings",
+    "armor_part": "leggings",
     "displayName": "Chainmail Leggings",
     "stackSize": 1,
     "enchantCategories": [
@@ -5195,6 +5203,7 @@
   {
     "id": 819,
     "name": "chainmail_boots",
+    "armor_part": "boots",
     "displayName": "Chainmail Boots",
     "stackSize": 1,
     "enchantCategories": [
@@ -5211,6 +5220,7 @@
   {
     "id": 820,
     "name": "iron_helmet",
+    "armor_part": "helmet",
     "displayName": "Iron Helmet",
     "stackSize": 1,
     "enchantCategories": [
@@ -5227,6 +5237,7 @@
   {
     "id": 821,
     "name": "iron_chestplate",
+    "armor_part": "chestplate",
     "displayName": "Iron Chestplate",
     "stackSize": 1,
     "enchantCategories": [
@@ -5243,6 +5254,7 @@
   {
     "id": 822,
     "name": "iron_leggings",
+    "armor_part": "leggings",
     "displayName": "Iron Leggings",
     "stackSize": 1,
     "enchantCategories": [
@@ -5259,6 +5271,7 @@
   {
     "id": 823,
     "name": "iron_boots",
+    "armor_part": "boots",
     "displayName": "Iron Boots",
     "stackSize": 1,
     "enchantCategories": [
@@ -5275,6 +5288,7 @@
   {
     "id": 824,
     "name": "diamond_helmet",
+    "armor_part": "helmet",
     "displayName": "Diamond Helmet",
     "stackSize": 1,
     "enchantCategories": [
@@ -5292,6 +5306,7 @@
   {
     "id": 825,
     "name": "diamond_chestplate",
+    "armor_part": "chestplate",
     "displayName": "Diamond Chestplate",
     "stackSize": 1,
     "enchantCategories": [
@@ -5309,6 +5324,7 @@
   {
     "id": 826,
     "name": "diamond_leggings",
+    "armor_part": "leggings",
     "displayName": "Diamond Leggings",
     "stackSize": 1,
     "enchantCategories": [
@@ -5326,6 +5342,7 @@
   {
     "id": 827,
     "name": "diamond_boots",
+    "armor_part": "boots",
     "displayName": "Diamond Boots",
     "stackSize": 1,
     "enchantCategories": [
@@ -5343,6 +5360,7 @@
   {
     "id": 828,
     "name": "golden_helmet",
+    "armor_part": "helmet",
     "displayName": "Golden Helmet",
     "stackSize": 1,
     "enchantCategories": [
@@ -5359,6 +5377,7 @@
   {
     "id": 829,
     "name": "golden_chestplate",
+    "armor_part": "chestplate",
     "displayName": "Golden Chestplate",
     "stackSize": 1,
     "enchantCategories": [
@@ -5375,6 +5394,7 @@
   {
     "id": 830,
     "name": "golden_leggings",
+    "armor_part": "leggings",
     "displayName": "Golden Leggings",
     "stackSize": 1,
     "enchantCategories": [
@@ -5391,6 +5411,7 @@
   {
     "id": 831,
     "name": "golden_boots",
+    "armor_part": "boots",
     "displayName": "Golden Boots",
     "stackSize": 1,
     "enchantCategories": [
@@ -5407,6 +5428,7 @@
   {
     "id": 832,
     "name": "netherite_helmet",
+    "armor_part": "helmet",
     "displayName": "Netherite Helmet",
     "stackSize": 1,
     "enchantCategories": [
@@ -5424,6 +5446,7 @@
   {
     "id": 833,
     "name": "netherite_chestplate",
+    "armor_part": "chestplate",
     "displayName": "Netherite Chestplate",
     "stackSize": 1,
     "enchantCategories": [
@@ -5441,6 +5464,7 @@
   {
     "id": 834,
     "name": "netherite_leggings",
+    "armor_part": "leggings",
     "displayName": "Netherite Leggings",
     "stackSize": 1,
     "enchantCategories": [
@@ -5458,6 +5482,7 @@
   {
     "id": 835,
     "name": "netherite_boots",
+    "armor_part": "boots",
     "displayName": "Netherite Boots",
     "stackSize": 1,
     "enchantCategories": [
