@@ -268,27 +268,33 @@ impl ServerProxy for MiniGameProxy {
     }
     async fn motd(&self) -> Result<String, ConnectionError> {
         let line1 = format!(
-            "                {}F{}i{}r{}e{}w{}ork {}Network {}[1.19.4]{}",
+            "                {}F{}i{}r{}e{}w{}o{}r{}k {}N{}e{}t{}w{}o{}r{}k {}[1.19.4]{}",
             ColorCodes::DarkRed.motd_formatting(),
             ColorCodes::LightRed.motd_formatting(),
             ColorCodes::Gold.motd_formatting(),
             ColorCodes::LightYellow.motd_formatting(),
             ColorCodes::LightGreen.motd_formatting(),
             ColorCodes::Aqua.motd_formatting(),
-            ColorCodes::White.motd_formatting(),
+            ColorCodes::LightBlue.motd_formatting(),
+            ColorCodes::DarkBlue.motd_formatting(),
+            ColorCodes::DarkRed.motd_formatting(),
+            ColorCodes::LightRed.motd_formatting(),
+            ColorCodes::Gold.motd_formatting(),
+            ColorCodes::LightYellow.motd_formatting(),
+            ColorCodes::LightGreen.motd_formatting(),
+            ColorCodes::Aqua.motd_formatting(),
+            ColorCodes::LightBlue.motd_formatting(),
             ColorCodes::LightGray.motd_formatting(),
             ColorCodes::Reset.motd_formatting(),
         );
         let line2 = format!(
-            "              {}{}GLIDE {}|{}{} TUMBLE {}|{}{} BATTLE",
-            ColorCodes::LightBlue.motd_formatting(),
+            "        {}{}GLIDE MINIGAME {}-{}{} BATTLE MINIGAME{}",
+            ColorCodes::Gold.motd_formatting(),
             ColorCodes::Bold.motd_formatting(),
-            ColorCodes::DarkGray.motd_formatting(),
             ColorCodes::LightGray.motd_formatting(),
+            ColorCodes::Aqua.motd_formatting(),
             ColorCodes::Bold.motd_formatting(),
-            ColorCodes::DarkGray.motd_formatting(),
-            ColorCodes::LightGray.motd_formatting(),
-            ColorCodes::Bold.motd_formatting(),
+            ColorCodes::Reset.motd_formatting(),
         );
         let motd = format!(
             "{{\"favicon\": \"{}\", \"previewsChat\":{},\"enforcesSecureChat\":{},\"description\":{{\"text\":\"{}\n{}\"}},\"players\":{{\"max\":{},\"online\":{}}},\"version\":{{\"name\":\"{}\",\"protocol\":{}}}}}",
@@ -297,7 +303,7 @@ impl ServerProxy for MiniGameProxy {
             false,
             line1,
             line2,
-            100,
+            1000,
             self.connected_players.read().await,
             "1.19.4",
             762,
@@ -311,7 +317,7 @@ async fn main() {
     std::env::set_var("RUST_BACKTRACE", "1");
 
     ServerManager::<MiniGameProxy>::run(ServerOptions {
-        encryption: true,
+        encryption: false,
         host: true,
         ..Default::default()
     })
