@@ -36,11 +36,23 @@ use std::{
 };
 use tokio::sync::{broadcast, Mutex, RwLock};
 
-mod cavern;
+use self::loot::generate_chest_loot;
 
+mod cavern;
+mod cove;
+mod crucible;
+
+mod loot;
+
+#[derive(Clone)]
 pub struct SpawnPoint {
     position: Vec3,
     rotation: Rotation,
+}
+pub struct ChestPosition {
+    x: i32,
+    y: i32,
+    z: i32,
 }
 pub enum Maps {
     Cove,
@@ -51,7 +63,6 @@ pub enum Maps {
 impl Distribution<Maps> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Maps {
         match rng.gen_range(0..=2) {
-            _ => Maps::Cavern,
             0 => Maps::Cove,
             1 => Maps::Cavern,
             2 => Maps::Crucible,
@@ -68,11 +79,18 @@ impl Maps {
             Maps::Crucible => &CRUCIBLE_BATTLE_WORLD,
         }
     }
-    pub fn get_spawn_point(&self) -> &SpawnPoint {
+    pub fn get_spawn_point(&self, index: usize) -> &SpawnPoint {
         match self {
-            Maps::Cove => &cavern::SPAWN_POINTS[0],
-            Maps::Cavern => &cavern::SPAWN_POINTS[0],
-            Maps::Crucible => &cavern::SPAWN_POINTS[0],
+            Maps::Cove => &cove::SPAWN_POINTS[index],
+            Maps::Cavern => &cavern::SPAWN_POINTS[index],
+            Maps::Crucible => &crucible::SPAWN_POINTS[index],
+        }
+    }
+    pub fn get_chests(&self) -> &'static [ChestPosition] {
+        match self {
+            Maps::Cove => &cove::CHESTS,
+            Maps::Cavern => &cavern::CHESTS,
+            Maps::Crucible => &crucible::CHESTS,
         }
     }
 }
@@ -101,6 +119,7 @@ pub struct BattlePlayerHandler {
     start_time: Mutex<Option<Instant>>,
     ticks_since_start: Mutex<u32>,
     recent_packets: Mutex<Vec<Instant>>,
+    spawn_point: SpawnPoint,
     equipment: Mutex<EquipmentStorage>,
 }
 
@@ -127,11 +146,13 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
         server: Arc<Server<BattleServerHandler, MiniGameProxy>>,
         proxy: Arc<MiniGameProxy>,
     ) -> Self {
+        let spawn_point = server.handler.map.get_spawn_point(0).clone();
         Self {
             ticks_since_start: Mutex::new(0),
             server: server,
             _proxy: proxy,
             recent_packets: Mutex::new(Vec::new()),
+            spawn_point,
             start_time: Mutex::new(None),
             equipment: Mutex::new(EquipmentStorage {
                 main_hand: None,
@@ -381,11 +402,6 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                         && client.player.read().await.fall_distance > 0.
                         && !client.player.read().await.on_ground
                         && !client.player.read().await.sprinting;
-                    // && !client.player.read().await.on_climbable
-                    // && !client.player.read().await.in_water
-                    // && !client.player.read().await.has_effect(Effect::Blindness)
-                    // && !client.player.read().await.is_passenger
-                    // && other_client.player.read().await.is_living();
                     if is_critical_hit {
                         attack_damage *= 1.5;
                     }
@@ -1284,87 +1300,27 @@ impl ServerHandler<MiniGameProxy> for BattleServerHandler {
     type ServerGUI = Chest;
     type PlayerHandler = BattlePlayerHandler;
     fn new() -> Self {
+        let map: Maps = rand::random();
         Self {
             chests: {
-                let mut map = HashMap::new();
-                map.insert(Position { x: 1, y: 99, z: 1 }, Arc::new(Chest::new()));
-                map.insert(Position { x: 1, y: 99, z: -1 }, Arc::new(Chest::new()));
-                map.insert(
-                    Position {
-                        x: -1,
-                        y: 99,
-                        z: -1,
-                    },
-                    Arc::new(Chest::new()),
-                );
-                map.insert(Position { x: -1, y: 99, z: 1 }, Arc::new(Chest::new()));
-                map.insert(
-                    Position {
-                        x: -28,
-                        y: 110,
-                        z: 17,
-                    },
-                    Arc::new(Chest::new()),
-                );
-                map.insert(
-                    Position {
-                        x: 0,
-                        y: 108,
-                        z: 36,
-                    },
-                    Arc::new(Chest::new()),
-                );
-                map.insert(
-                    Position {
-                        x: 8,
-                        y: 117,
-                        z: 28,
-                    },
-                    Arc::new(Chest::new()),
-                );
-                map.insert(
-                    Position {
-                        x: 29,
-                        y: 115,
-                        z: 1,
-                    },
-                    Arc::new(Chest::new()),
-                );
-                map.insert(
-                    Position {
-                        x: 24,
-                        y: 109,
-                        z: -20,
-                    },
-                    Arc::new(Chest::new()),
-                );
-                map.insert(
-                    Position {
-                        x: 0,
-                        y: 108,
-                        z: -30,
-                    },
-                    Arc::new(Chest::new()),
-                );
-                map.insert(
-                    Position {
-                        x: -20,
-                        y: 111,
-                        z: -15,
-                    },
-                    Arc::new(Chest::new()),
-                );
-                map.insert(
-                    Position {
-                        x: 12,
-                        y: 116,
-                        z: 0,
-                    },
-                    Arc::new(Chest::new()),
-                );
-                map
+                let mut chests = HashMap::new();
+                for chest in map.get_chests() {
+                    chests.insert(
+                        Position {
+                            x: chest.x,
+                            y: chest.y as i16,
+                            z: chest.z,
+                        },
+                        Arc::new(Chest {
+                            state_id: RwLock::new(0),
+                            channel: broadcast::channel(1024).0,
+                            items: RwLock::new(generate_chest_loot(5)),
+                        }),
+                    );
+                }
+                chests
             },
-            map: rand::random(),
+            map,
             created_at: Instant::now(),
             game_state: Mutex::new(GameState::Starting {
                 ticks_until_start: 120,
@@ -1415,6 +1371,11 @@ impl ServerHandler<MiniGameProxy> for BattleServerHandler {
                     *game_state = GameState::Starting {
                         ticks_until_start: ticks_until_start - 1,
                     };
+                    for client in server.player_list.iter() {
+                        client
+                            .sync_position(client.handler.spawn_point.position.clone(), None)
+                            .await;
+                    }
                     return;
                 }
                 *game_state = GameState::Running {
@@ -1477,8 +1438,10 @@ impl ServerHandler<MiniGameProxy> for BattleServerHandler {
         }
     }
     async fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError> {
+        let spawn_point = self.map.get_spawn_point(0);
         let mut player = Player {
-            position: self.map.get_spawn_point().position.clone(),
+            position: spawn_point.position.clone(),
+            rotation: spawn_point.rotation.clone(),
             max_health: 20.,
             health: 20.,
             flying_allowed: false,
@@ -1612,7 +1575,7 @@ impl BattleServerHandler {
             );
             client
                 .sync_position(
-                    self.map.get_spawn_point().position.clone(),
+                    self.map.get_spawn_point(0).position.clone(),
                     Some(Rotation::new(0., 0.)),
                 )
                 .await;
