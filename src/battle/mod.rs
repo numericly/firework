@@ -321,7 +321,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
         let mut ticks_since_start = client.handler.ticks_since_start.lock().await;
         *ticks_since_start += 1;
 
-        if *ticks_since_start % 5 == 0 {
+        if *ticks_since_start % 20 == 0 {
             let player = client.player.read().await;
             if player.health + 1. <= player.max_health {
                 client.set_health(player.health + 1.);
