@@ -165,7 +165,7 @@ impl AxisAlignedPlane {
 
         // if the intersection is behind the starting position, it doesn't count
         // likewise, if the intersection is beyond the end of the ray, it doesn't count
-        if time < 0.0 || time > 1.0 {
+        if !(0.0..=1.0).contains(&time) {
             return false;
         }
         let intersection = starting_position.clone() + delta * Vec3::scalar(time);
@@ -577,12 +577,12 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                             u128::from_be_bytes(uuid_bytes)
                         };
 
-                        let profile = Profile {
+                        
+                        Profile {
                             id: format!("{:x}", uuid),
                             name: client_username,
                             ..Default::default()
-                        };
-                        profile
+                        }
                     };
 
                     connection.enable_compression(0).await?;
@@ -590,7 +590,7 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                     let uuid = u128::from_str_radix(&profile.id, 16)?;
 
                     let login_success = LoginSuccess {
-                        uuid: uuid.clone(),
+                        uuid,
                         username: profile.name.clone(),
                         properties: profile.properties.clone(),
                     };
@@ -612,7 +612,7 @@ impl<T: ServerProxy + std::marker::Send + std::marker::Sync + 'static> ServerMan
                 let client_data = ClientData {
                     loaded_chunks: Mutex::new(HashSet::new()),
                     has_connected: RwLock::new(false),
-                    entity_id: entity_id.clone(),
+                    entity_id,
                     uuid,
                     profile,
                     settings: RwLock::new(None),
@@ -893,7 +893,7 @@ where
         }
     }
     pub async fn handle_tick(&self, proxy: Arc<Proxy>) {
-        self.handler.on_tick(&self, proxy.clone()).await;
+        self.handler.on_tick(self, proxy.clone()).await;
         for client in self.player_list.iter() {
             client.on_tick().await;
         }
@@ -916,7 +916,7 @@ where
             broadcast::channel::<ClientCommand<Proxy::TransferData>>(2048);
 
         // generate client
-        let uuid = player.uuid.clone();
+        let uuid = player.uuid;
         let client = {
             let client = Client::new(
                 self.clone(),
@@ -941,14 +941,14 @@ where
             }
 
             self.player_list
-                .insert(client.client_data.uuid.clone(), client);
+                .insert(client.client_data.uuid, client);
 
-            let client = self
+            
+
+            self
                 .player_list
                 .get(&uuid)
-                .ok_or(ConnectionError::ClientNotInPlayerList)?;
-
-            client
+                .ok_or(ConnectionError::ClientNotInPlayerList)?
         };
 
         let status = self
@@ -985,7 +985,7 @@ where
         client.handler.on_pre_load(client).await?;
         client.load_world().await?;
         client.handler.on_post_load(client).await?;
-        self.broadcast_player_join(&client).await;
+        self.broadcast_player_join(client).await;
 
         self.handler
             .on_client_connected(&self, &proxy, client)
@@ -1011,14 +1011,14 @@ where
 
                                 client.handler.on_transfer(&client).await?;
 
-                                while to_client_receiver.len() > 0 {
+                                while !to_client_receiver.is_empty() {
                                     let command = to_client_receiver.recv().await;
                                     #[allow(unused_must_use)]
                                     if let Ok(command) = command {
                                         client.handle_command(command).await;
                                     }
                                 }
-                                while to_client_visual_receiver.len() > 0 {
+                                while !to_client_visual_receiver.is_empty() {
                                     let command = to_client_visual_receiver.recv().await;
                                     #[allow(unused_must_use)]
                                     if let Ok(command) = command {
@@ -1155,7 +1155,7 @@ where
             }
         };
 
-        client.handler.on_leave(&client).await?;
+        client.handler.on_leave(client).await?;
 
         if let Ok(err) = result {
             err
@@ -1174,7 +1174,7 @@ where
             // Set health 0
             const SHOW_RESPAWN_SCREEN: bool = false;
             if !SHOW_RESPAWN_SCREEN {
-                let max_health = client.player.read().await.max_health.clone();
+                let max_health = client.player.read().await.max_health;
                 client.set_health(max_health);
             }
         }
@@ -1216,7 +1216,7 @@ where
                     let multiplier = previous_position.time.elapsed().as_secs_f64()
                         / Duration::from_millis(50).as_secs_f64();
 
-                    let delta = position.clone() - previous_position.position.clone();
+                    let delta = position - previous_position.position.clone();
 
                     player.previous_velocity = player.velocity.clone();
 

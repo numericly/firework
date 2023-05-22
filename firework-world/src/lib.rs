@@ -91,10 +91,7 @@ impl World {
         self.get_chunk(x >> 4, z >> 4).await
     }
     pub fn get_region(&self, x: i32, z: i32) -> Result<Option<Arc<Region>>, WorldError> {
-        Ok(match self.regions.get(&(x, z)) {
-            Some(region) => Some(region.clone()),
-            None => None,
-        })
+        Ok(self.regions.get(&(x, z)).map(|region| region.clone()))
     }
     pub fn add_region<R: Read>(&self, x: i32, z: i32, reader: R) {
         let region = Arc::new(Region::deserialize(reader).expect("Failed to deserialize region"));

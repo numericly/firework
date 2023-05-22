@@ -3,12 +3,12 @@ use crate::{
 };
 use async_trait::async_trait;
 use firework::gui::WindowType;
-use firework::protocol::data_types::{Enchantment, Equipment, EquipmentEntry, EquipmentSlot};
+use firework::protocol::data_types::{Equipment, EquipmentEntry, EquipmentSlot};
 use firework::{
-    authentication::Profile, data::items::Item, gui::GUIInit,
+    authentication::Profile, gui::GUIInit,
     protocol::data_types::InventoryOperationMode,
 };
-use firework::{client::DamageType, data::items::ArmorPart};
+use firework::{data::items::ArmorPart};
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
     commands::{Argument, Command, CommandTree},
@@ -20,7 +20,7 @@ use firework::{
     protocol::{
         client_bound::{CustomSound, IdMapHolder, SoundSource},
         data_types::{
-            BossBarAction, BossBarColor, BossBarDivision, InteractAction, ItemNbt, StackContents,
+            BossBarAction, BossBarColor, BossBarDivision, InteractAction,
         },
         server_bound::{ClickContainer, Interact},
     },
@@ -152,7 +152,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
         let spawn_point = server.handler.map.get_spawn_point(0).clone();
         Self {
             ticks_since_start: Mutex::new(0),
-            server: server,
+            server,
             _proxy: proxy,
             recent_packets: Mutex::new(Vec::new()),
             spawn_point,
@@ -459,7 +459,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
 
                     // FIXME hitregs can happen if the ticks are off sync just right
                     if other_client.player.read().await.invulnerable_time == 0 {
-                        if other_client.player.read().await.health - attack_damage as f32 <= 0. {
+                        if other_client.player.read().await.health - attack_damage <= 0. {
                             for iter_client in player_list.iter() {
                                 if iter_client.client_data.uuid == other_client.client_data.uuid {
                                     continue;
@@ -544,7 +544,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                             let _new_absorption_amount =
                                 get_absorption_amount - attack_damage + damage_after_absorption;
                             other_client.set_health(
-                                other_client.player.read().await.health - attack_damage as f32,
+                                other_client.player.read().await.health - attack_damage,
                             );
 
                             knockback(
@@ -569,7 +569,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
 
                             {
                                 let mut other_player = other_client.player.write().await;
-                                other_player.last_damage_amount = attack_damage as f32;
+                                other_player.last_damage_amount = attack_damage;
                                 other_player.invulnerable_time = 10;
                             }
 
@@ -646,7 +646,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
         let mut player = client.player.write().await;
 
         match action {
-            InventoryAction::Click { slot, button } => {
+            InventoryAction::Click { slot, button: _ } => {
                 let slot = InventorySlot::from_value(slot).unwrap();
                 if let Some(held_item) = player.inventory.held_item.take() {
                     let item = player.inventory.get_slot_mut(&slot);
@@ -670,7 +670,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                     }
                 }
             }
-            InventoryAction::Drag { slot, button } => {
+            InventoryAction::Drag { slot, button: _ } => {
                 let slot = InventorySlot::from_value(slot).unwrap();
                 if let Some(held_item) = player.inventory.held_item.take() {
                     let item = player.inventory.get_slot_mut(&slot);
@@ -873,7 +873,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                 .clone();
         }
 
-        if equipment_diff.len() > 0 {
+        if !equipment_diff.is_empty() {
             for iter_client in client.server.player_list.iter() {
                 iter_client.send_equipment(
                     // what the fuck have i just done (i will fix it later (no i won't))
@@ -881,8 +881,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                     Equipment {
                         equipment: equipment_diff
                             .iter()
-                            .map(|e| e.equipment.clone())
-                            .flatten()
+                            .flat_map(|e| e.equipment.clone())
                             .collect::<Vec<_>>(),
                     },
                 );
@@ -972,7 +971,7 @@ impl BattlePlayerHandler {
             equipment.feet = player.inventory.get_slot(&InventorySlot::Boots).clone();
         }
 
-        if equipment_diff.len() > 0 {
+        if !equipment_diff.is_empty() {
             for iter_client in client.server.player_list.iter() {
                 iter_client.send_equipment(
                     // what the fuck have i just done (i will fix it later (no i won't))
@@ -980,8 +979,7 @@ impl BattlePlayerHandler {
                     Equipment {
                         equipment: equipment_diff
                             .iter()
-                            .map(|e| e.equipment.clone())
-                            .flatten()
+                            .flat_map(|e| e.equipment.clone())
                             .collect::<Vec<_>>(),
                     },
                 );
@@ -1296,7 +1294,7 @@ impl GuiScreen<BattleServerHandler, MiniGameProxy> for Chest {
                     self.set_index(&items, from, client.client_data.uuid).await;
                 }
             }
-            InventoryAction::Click { slot, button } => {
+            InventoryAction::Click { slot, button: _ } => {
                 if let Some(held_item) = player.inventory.held_item.take() {
                     let item = self.index_mut(&mut items, slot, &mut player).await;
                     match item {
@@ -1319,7 +1317,7 @@ impl GuiScreen<BattleServerHandler, MiniGameProxy> for Chest {
                     }
                 }
             }
-            InventoryAction::Drag { slot, button } => {
+            InventoryAction::Drag { slot, button: _ } => {
                 if let Some(held_item) = player.inventory.held_item.take() {
                     let item = self.index_mut(&mut items, slot, &mut player).await;
 
@@ -1452,10 +1450,10 @@ impl GuiScreen<BattleServerHandler, MiniGameProxy> for Chest {
                     }
                 }
             }
-            InventoryAction::ClickDrop { stack } => {
+            InventoryAction::ClickDrop { stack: _ } => {
                 client.update_slot(-1, player.inventory.held_item.clone(), -1);
             }
-            action => {
+            _action => {
                 // println!("unhandled action: {:?}", action);
             }
         }
@@ -1685,7 +1683,7 @@ impl ServerHandler<MiniGameProxy> for BattleServerHandler {
                     }
                 } else {
                     // TODO don't do this on every tick, instead update it when a player leaves or dies
-                    let player_count = server.player_list.len();
+                    let _player_count = server.player_list.len();
 
                     for player in server.player_list.iter() {
                         player.send_boss_bar_action(
@@ -1717,7 +1715,7 @@ impl ServerHandler<MiniGameProxy> for BattleServerHandler {
     }
     async fn load_player(&self, profile: Profile, uuid: u128) -> Result<Player, ConnectionError> {
         let spawn_point = self.map.get_spawn_point(0);
-        let mut player = Player {
+        let player = Player {
             position: spawn_point.position.clone(),
             rotation: spawn_point.rotation.clone(),
             max_health: 20.,

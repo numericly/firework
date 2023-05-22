@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use dashmap::DashMap;
 use firework::gui::WindowType;
 use firework::protocol::data_types::{ObjectiveAction, ObjectiveType};
 use firework::{
@@ -335,7 +334,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                                             match state {
                                                 PlayerFinishedState::Finished {
                                                     finish_time,
-                                                } => format_duration(&finish_time),
+                                                } => format_duration(finish_time),
                                                 PlayerFinishedState::DNF => "DNF".to_string(),
                                                 PlayerFinishedState::InProgress { .. } => {
                                                     "DNF".to_string()
@@ -422,7 +421,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                                             match state {
                                                 PlayerFinishedState::Finished {
                                                     finish_time,
-                                                } => format_duration(&finish_time),
+                                                } => format_duration(finish_time),
                                                 PlayerFinishedState::DNF => "DNF".to_string(),
                                                 PlayerFinishedState::InProgress { .. } => {
                                                     "DNF".to_string()
@@ -487,7 +486,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
             let mut player = client.player.write().await;
             player.elytra_flying = true;
             client.server.broadcast_entity_metadata_update(
-                &client,
+                client,
                 vec![
                     EntityMetadata::EntityFlags(player.entity_flags()),
                     EntityMetadata::EntityPose(Pose::FallFlying),
@@ -812,9 +811,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                     || boost.particle_type == BoostParticleType::BoostWest
                 {
                     for position in &mut particle_positions {
-                        let temp = position.x;
-                        position.x = position.z;
-                        position.z = temp;
+                        std::mem::swap(&mut position.x, &mut position.z);
                     }
                 }
 
@@ -860,7 +857,7 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                     {
                         "text": format!("{:.2}%",
                             percentage * 100.
-                    ).to_string(),
+                    ),
                         "color": "gold"
                     },
                     {
@@ -961,7 +958,7 @@ impl GlidePlayerHandler {
         client: &Client<GlideServerHandler, MiniGameProxy>,
         map: &Maps,
     ) -> f32 {
-        let checkpoint_index = client.handler.last_checkpoint.lock().await.clone();
+        let checkpoint_index = *client.handler.last_checkpoint.lock().await;
 
         if let Some(checkpoint_index) = checkpoint_index {
             let (earlier_checkpoint, later_checkpoint) = match checkpoint_index {
@@ -1121,7 +1118,7 @@ impl GlidePlayerHandler {
                                                 match state {
                                                     PlayerFinishedState::Finished {
                                                         finish_time,
-                                                    } => format_duration(&finish_time),
+                                                    } => format_duration(finish_time),
                                                     PlayerFinishedState::DNF => "DNF".to_string(),
                                                     PlayerFinishedState::InProgress { .. } => {
                                                         "DNF".to_string()
@@ -1244,8 +1241,8 @@ impl GuiScreen<GlideServerHandler, MiniGameProxy> for Menu {
     }
     async fn handle_click(
         &self,
-        slot: ClickContainer,
-        client: &Client<GlideServerHandler, MiniGameProxy>,
+        _slot: ClickContainer,
+        _client: &Client<GlideServerHandler, MiniGameProxy>,
     ) -> Result<(), ConnectionError> {
         Ok(())
     }
@@ -1367,7 +1364,7 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
                 for (_uuid, finished_state) in finished_states_lock.iter() {
                     let string_message = match finished_state {
                         (name, PlayerFinishedState::Finished { finish_time }) => {
-                            format!("§7{}: §b{}", name, format_duration(&finish_time))
+                            format!("§7{}: §b{}", name, format_duration(finish_time))
                         }
                         (name, PlayerFinishedState::InProgress { percentage }) => {
                             format!("§7{}: §b{:.2}%", name, percentage * 100.0)

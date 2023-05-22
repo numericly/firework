@@ -216,8 +216,6 @@ impl ServerProxy for MiniGameProxy {
                 .handle_connection(self.clone(), connection.clone(), client_data.clone())
                 .await;
 
-            println!("result: {:?}", result);
-
             let Ok(transfer_data) = result else {
                 break;
             };

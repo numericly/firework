@@ -107,10 +107,10 @@ where
 
                 new_data.push(value_index as u8);
             }
-            return DirectPalettedContainer {
+            DirectPalettedContainer {
                 palette: self.palette,
                 data: Data::Single(new_data),
-            };
+            }
         } else {
             dbg!(&self.palette.len());
             let mut new_data = Vec::with_capacity(CONTAINER_SIZE);
@@ -123,10 +123,10 @@ where
 
                 new_data.push(value_index as u16);
             }
-            return DirectPalettedContainer {
+            DirectPalettedContainer {
                 palette: self.palette,
                 data: Data::Double(new_data),
-            };
+            }
         }
     }
 }
@@ -173,17 +173,9 @@ impl Chunk {
                 section_offset = y
             }
             let block_states: Option<DirectPalettedContainer<Block, 4096, 4>> =
-                if let Some(block_states) = block_states {
-                    Some(block_states.into())
-                } else {
-                    None
-                };
+                block_states.map(|block_states| block_states.into());
 
-            let biomes = if let Some(biomes) = biomes {
-                Some(biomes.into())
-            } else {
-                None
-            };
+            let biomes = biomes.map(|biomes| biomes.into());
 
             let non_air_blocks = if let Some(block_data) = &block_states {
                 let mut non_air_blocks = 0u16;
@@ -315,7 +307,7 @@ where
                 if self.palette.len() != 1 {
                     panic!("Palette length is not 1");
                 }
-                return Some(&self.palette[0]);
+                Some(&self.palette[0])
             }
             Data::Single(ref data) => {
                 let Some(palette_index) = data.get(index) else {
@@ -348,8 +340,8 @@ impl ChunkSection {
         }
         self.non_air_blocks.serialize(&mut packet_data);
 
-        self.block_states.as_ref().unwrap().write(&mut packet_data);
-        self.biomes.as_ref().unwrap().write(&mut packet_data);
+        self.block_states.as_ref().unwrap().write(packet_data);
+        self.biomes.as_ref().unwrap().write(packet_data);
     }
 }
 

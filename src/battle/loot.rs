@@ -57,7 +57,7 @@ const WEAPON_LOOT: [Item; 25] = [
     Item::DiamondHoe,
 ];
 
-pub fn generate_chest_loot(items: i32) -> Vec<Option<StackContents>> {
+pub fn generate_chest_loot(_items: i32) -> Vec<Option<StackContents>> {
     let mut chest_contents = vec![None; 27];
     for _ in 0..4 {
         if !chest_contents.contains(&None) {

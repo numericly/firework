@@ -319,30 +319,30 @@ impl InventorySlot {
     pub fn from_gui_index(value: usize) -> Option<Self> {
         match value {
             v if v < 27 => Some(InventorySlot::MainInventory { slot: v }),
-            v if v >= 27 && v <= 36 => Some(InventorySlot::Hotbar { slot: v - 27 }),
+            v if (27..=36).contains(&v) => Some(InventorySlot::Hotbar { slot: v - 27 }),
             _ => None,
         }
     }
     pub fn from_value(value: usize) -> Option<Self> {
         match value {
-            v if v >= Self::HOTBAR_OFFSET && v < Self::HOTBAR_OFFSET + 9 => {
+            v if (Self::HOTBAR_OFFSET..Self::HOTBAR_OFFSET + 9).contains(&v) => {
                 Some(InventorySlot::Hotbar {
                     slot: v - Self::HOTBAR_OFFSET,
                 })
             }
-            v if v >= Self::MAIN_INVENTORY_OFFSET && v < Self::MAIN_INVENTORY_OFFSET + 27 => {
+            v if (Self::MAIN_INVENTORY_OFFSET..Self::MAIN_INVENTORY_OFFSET + 27).contains(&v) => {
                 Some(InventorySlot::MainInventory {
                     slot: v - Self::MAIN_INVENTORY_OFFSET,
                 })
             }
-            v if v >= Self::CRAFTING_OFFSET + 1 && v < Self::CRAFTING_OFFSET + 5 => {
+            v if (Self::CRAFTING_OFFSET + 1..Self::CRAFTING_OFFSET + 5).contains(&v) => {
                 Some(InventorySlot::CraftingGrid {
                     slot: v - Self::CRAFTING_OFFSET - 1,
                 })
             }
             v if v == Self::CRAFTING_OFFSET => Some(InventorySlot::CraftingResult),
             v if v == Self::OFFHAND_OFFSET => Some(InventorySlot::Offhand),
-            v if v >= Self::ARMOR_OFFSET && v < Self::ARMOR_OFFSET + 4 => {
+            v if (Self::ARMOR_OFFSET..Self::ARMOR_OFFSET + 4).contains(&v) => {
                 match v - Self::ARMOR_OFFSET {
                     0 => Some(InventorySlot::Helmet),
                     1 => Some(InventorySlot::Chestplate),
@@ -504,7 +504,7 @@ where
             active_pings: Mutex::new(Vec::new()),
             server: server.clone(),
             proxy: proxy.clone(),
-            handler: Handler::PlayerHandler::new(server.clone(), proxy.clone()),
+            handler: Handler::PlayerHandler::new(server, proxy),
         }
     }
     pub(super) async fn connection_state(&self) -> ConnectionState {
@@ -592,7 +592,7 @@ where
             read_specific_packet!(self.connection.as_ref(), PluginMessageServerBound).await?;
 
         let client_brand = String::deserialize(&mut client_brand_packet.data.0.as_slice())
-            .map_err(|deserialize_error| ProtocolError::from(deserialize_error))?;
+            .map_err(ProtocolError::from)?;
 
         *self.client_data.brand.write().await = Some(client_brand);
         Ok(())
@@ -638,7 +638,7 @@ where
         .await?;
 
         self.send_packet(SetHealth {
-            health: self.player.read().await.health as f32,
+            health: self.player.read().await.health,
             food: VarInt(20),
             food_saturation: 5.0,
         })
@@ -757,7 +757,7 @@ where
             self.update_entity_metadata(
                 self.client_data.entity_id,
                 vec![EntityMetadata::PlayerDisplayedSkinParts(
-                    information.displayed_skin_parts.clone(),
+                    information.displayed_skin_parts,
                 )],
             )
             .await?;
@@ -803,7 +803,7 @@ where
             }
         }
 
-        self.handler.on_tick(&self).await;
+        self.handler.on_tick(self).await;
 
         self.to_client.send(ClientCommand::MoveChunk {
             chunk_x,
@@ -902,7 +902,7 @@ where
             } => {
                 if let Some(position) = &position {
                     let unsynced_entities = self.unsynced_entities.read().await;
-                    if let Some(_old_pos) = unsynced_entities.get(&entity_id).clone() {
+                    if let Some(_old_pos) = unsynced_entities.get(&entity_id) {
                         // dbg!(old_pos, position, entity_id);
                         let (yaw, pitch) = previous_rotation.serialize();
                         self.send_packet(TeleportEntity {
@@ -1098,7 +1098,7 @@ where
                     self.update_entity_metadata(
                         client_data.entity_id,
                         vec![EntityMetadata::PlayerDisplayedSkinParts(
-                            information.displayed_skin_parts.clone(),
+                            information.displayed_skin_parts,
                         )],
                     )
                     .await?;
@@ -1148,7 +1148,7 @@ where
                 return Ok(Some(data));
             }
             ClientCommand::SetHealth { health } => {
-                self.player.write().await.health = health.clone();
+                self.player.write().await.health = health;
                 self.send_packet(SetHealth {
                     health,
                     food: VarInt(20),
@@ -1347,7 +1347,7 @@ where
                     if let Some(old_value) = old_value {
                         if old_value != value {
                             self.update_score(
-                                old_value.clone(),
+                                old_value,
                                 ScoreAction::Remove {
                                     objective_name: "leaderboard_id".to_string(),
                                 },
@@ -1484,14 +1484,14 @@ where
                         self.show_chat_message(
                         json!(
                             {
-                                "text": format!("help: {}, type /help for a list of commands", err.to_string()),
+                                "text": format!("help: {}, type /help for a list of commands", err),
                                 "color": "#E96A70"
                             }
                         )
                         .to_string(),
                     )
                     }
-                    Ok(exec) => exec(args, &self, &self.server, &self.proxy).await,
+                    Ok(exec) => exec(args, self, &self.server, &self.proxy).await,
                 }
                 // // dbg!(result);
 
@@ -1631,10 +1631,7 @@ where
 
                 let used_item = {
                     let player_read = self.player.read().await;
-                    match player_read.inventory.get_slot(&used_item_slot) {
-                        Some(item) => Some(item.clone()),
-                        None => None,
-                    }
+                    player_read.inventory.get_slot(&used_item_slot).as_ref().cloned()
                 };
 
                 self.handler
@@ -1656,10 +1653,7 @@ where
 
                 let used_item = {
                     let player_read = self.player.read().await;
-                    match player_read.inventory.get_slot(&used_item_slot) {
-                        Some(item) => Some(item.clone()),
-                        None => None,
-                    }
+                    player_read.inventory.get_slot(&used_item_slot).as_ref().cloned()
                 };
 
                 self.handler
@@ -1875,7 +1869,7 @@ where
                     vec![
                         EntityMetadata::EntityFlags(client.player.read().await.entity_flags()),
                         EntityMetadata::PlayerDisplayedSkinParts(
-                            information.displayed_skin_parts.clone(),
+                            information.displayed_skin_parts,
                         ),
                     ],
                 )
@@ -1971,7 +1965,7 @@ where
 
         self.server
             .broadcast_entity_move(
-                &self,
+                self,
                 Some(position.clone()),
                 previous_position,
                 rotation.clone(),

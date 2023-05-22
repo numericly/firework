@@ -55,7 +55,7 @@ fn hash_server(server_id: &str, shared_secret: &[u8], pub_key: &[u8]) -> String 
     let mut hash = Sha1::new();
 
     hash.update(server_id.as_bytes());
-    hash.update(&shared_secret);
+    hash.update(shared_secret);
     hash.update(pub_key);
 
     let formatted = BigInt::from_signed_bytes_be(hash.finalize().as_slice());

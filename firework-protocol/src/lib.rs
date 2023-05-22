@@ -165,7 +165,7 @@ impl Protocol {
 
                 let decompressed =
                     decompress_to_vec_zlib(&buffer[packet_data.position() as usize..])
-                        .map_err(|err| ProtocolError::DecompressError(err))?;
+                        .map_err(ProtocolError::DecompressError)?;
 
                 return Ok(decompressed);
             }
@@ -211,7 +211,7 @@ impl Protocol {
             if err.kind() == ErrorKind::BrokenPipe {
                 ProtocolError::ClientDisconnect
             } else {
-                ProtocolError::WriteError(err).into()
+                ProtocolError::WriteError(err)
             }
         })
     }

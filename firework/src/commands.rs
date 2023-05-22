@@ -350,7 +350,7 @@ where
                 match (&command.execution, next_data) {
                     (Some(execution), None) => {
                         return ParseResult {
-                            executable: Ok(&execution),
+                            executable: Ok(execution),
                             suggestions: None,
                         };
                     }
@@ -575,13 +575,11 @@ where
                                 return result;
                             }
                         }
-                    } else {
-                        if let Some(execution) = &self.execution {
-                            return ParseResult {
-                                executable: Ok(execution),
-                                suggestions: None,
-                            };
-                        }
+                    } else if let Some(execution) = &self.execution {
+                        return ParseResult {
+                            executable: Ok(execution),
+                            suggestions: None,
+                        };
                     }
                     return ParseResult {
                         executable: Err(CommandError::NotExecutable),
@@ -749,7 +747,7 @@ where
 }
 
 fn read_word(input: &str) -> (&str, Option<&str>) {
-    if let Some((word, next_data)) = input.split_once(" ") {
+    if let Some((word, next_data)) = input.split_once(' ') {
         (word, Some(next_data))
     } else {
         (input, None)
