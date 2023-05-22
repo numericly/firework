@@ -250,6 +250,11 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
                     .display_gui(client.server.handler.game_menu.clone())
                     .await;
             }
+            // Item::Stick => {
+            //     client
+            //         .display_gui(client.server.handler.practice_menu.clone())
+            //         .await;
+            // }
             Item::RedstoneBlock => {
                 leave_queue(client).await;
             }
@@ -352,6 +357,11 @@ impl LobbyPlayerHandler {
 }
 
 pub struct GameMenu {
+    pub items: Vec<ItemStack>,
+    pub channel: broadcast::Sender<GUIEvent>,
+}
+
+pub struct PracticeMenu {
     pub items: Vec<ItemStack>,
     pub channel: broadcast::Sender<GUIEvent>,
 }
@@ -526,18 +536,200 @@ impl GameMenu {
     }
 }
 
+#[async_trait]
+impl GuiScreen<LobbyServerHandler, MiniGameProxy> for PracticeMenu {
+    async fn init(&self, _client: &Client<LobbyServerHandler, MiniGameProxy>) -> GUIInit {
+        GUIInit {
+            title: r#"{"text":"      Practice Minigames","bold":true}"#.to_string(),
+            window_type: WindowType::Generic9x1,
+            items: self.items.clone(),
+            receiver: self.channel.subscribe(),
+        }
+    }
+    async fn handle_click(
+        &self,
+        slot: ClickContainer,
+        client: &Client<LobbyServerHandler, MiniGameProxy>,
+    ) -> Result<(), ConnectionError> {
+        let ClickContainer {
+            window_id,
+            state_id,
+            slot,
+            button: _button,
+            mode,
+            slots,
+        } = slot;
+
+        match mode {
+            InventoryOperationMode::Click => {
+                if slot >= 0 {
+                    client
+                        .send_packet(SetContainerSlot {
+                            window_id: -1,
+                            state_id: VarInt(state_id.0 + 1),
+                            slot: -1,
+                            item: None,
+                        })
+                        .await?;
+                    let item = self.correct_item(client, slot as usize).await;
+
+                    client
+                        .send_packet(SetContainerSlot {
+                            window_id: window_id as i8,
+                            state_id: VarInt(state_id.0 + 2),
+                            slot,
+                            item,
+                        })
+                        .await?;
+                }
+            }
+            _ => {}
+        }
+
+        for (i, updated_slot) in slots.iter().enumerate() {
+            if updated_slot.slot_number >= 0 {
+                let item = self
+                    .correct_item(client, updated_slot.slot_number as usize)
+                    .await;
+
+                client
+                    .send_packet(SetContainerSlot {
+                        window_id: window_id as i8,
+                        state_id: VarInt(state_id.0 + i as i32 + 1),
+                        slot: updated_slot.slot_number,
+                        item,
+                    })
+                    .await?;
+            }
+        }
+
+        match slot {
+            3 => {
+                let game_id = client
+                    .proxy
+                    .glide_queue
+                    .lock()
+                    .await
+                    .create_server(client.proxy.clone());
+                client.transfer(TransferData::Glide { game_id });
+            }
+            5 => {
+                let game_id = client
+                    .proxy
+                    .battle_queue
+                    .lock()
+                    .await
+                    .create_server(client.proxy.clone());
+                client.transfer(TransferData::Battle { game_id })
+            }
+            _ => {}
+        }
+
+        Ok(())
+    }
+}
+
+impl PracticeMenu {
+    pub fn new() -> Self {
+        let (sender, _) = broadcast::channel(1000);
+        Self {
+            channel: sender,
+            items: vec![
+                None,
+                None,
+                None,
+                Some(StackContents {
+                    id: Item::Elytra, // elytra
+                    count: 1,
+                    nbt: ItemNbt {
+                        display: Some(ItemNbtDisplay {
+                            name: Some(r#"{"text":"Glide Minigame","italic":"false","color":"green"}"#.to_string()),
+                            lore: Some(vec![
+                                r#"{"text":"Race other players through a course","italic":"false","color":"gray"}"#.to_string(),
+                                r#"{"text":"with an elytra.","italic":"false","color":"gray"}"#.to_string(),
+                                r#"{"text":""}"#.to_string(),
+                                r#"{"text":"Click to Connect","color":"green","italic":false}"#.to_string(),
+                                r#"{"italic":false,"color":"gray","extra":[
+                                    {"text":"12","obfuscated":true},
+                                    {"text":" Currently Playing"}
+                                ],"text":""}"#.to_string()
+                            ]),
+                        }),
+                        ..Default::default()
+                    },
+                }),
+                None,
+                Some(StackContents {
+                    id: Item::IronSword, // iron sword
+                    count: 1,
+                    nbt: ItemNbt {
+                        display: Some(ItemNbtDisplay {
+                            name: Some(r#"{"text":"Battle Minigame","italic":"false","color":"green"}"#.to_string()),
+                            lore: Some(vec![
+                                r#"{"text":"Fight your friends in an arena, getting","italic":"false","color":"gray"}"#.to_string(),
+                                r#"{"text":"items to help you in the fight.","italic":"false","color":"gray"}"#.to_string(),
+                                r#"{"text":""}"#.to_string(),
+                                r#"{"text":"Click to Connect","color":"green","italic":false}"#.to_string(),
+                                r#"{"italic":false,"color":"gray","extra":[
+                                    {"text":"12","obfuscated":true},
+                                    {"text":" Currently Playing"}
+                                    ],"text":""}"#.to_string()
+                            ]),
+                        }),
+                        ..Default::default()
+                    },
+                }),
+                None,
+                None,
+                None,
+            ]
+        }
+    }
+    async fn correct_item(
+        &self,
+        client: &Client<LobbyServerHandler, MiniGameProxy>,
+        slot: usize,
+    ) -> ItemStack {
+        if slot < WindowType::Generic9x1.len() {
+            self.items[slot].clone()
+        } else if slot >= WindowType::Generic9x1.len() && slot < WindowType::Generic9x1.len() + 9 {
+            client
+                .player
+                .read()
+                .await
+                .inventory
+                .get_main_slot_from_container(slot - (WindowType::Generic9x1.len()))
+                .clone()
+        } else if slot >= WindowType::Generic9x1.len() + 27
+            && slot < WindowType::Generic9x1.len() + 27 + 9
+        {
+            client
+                .player
+                .read()
+                .await
+                .inventory
+                .get_hotbar_slot_from_container(slot - (WindowType::Generic9x1.len() + 27))
+                .clone()
+        } else {
+            None
+        }
+    }
+}
+
 pub struct LobbyServerHandler {
     commands: CommandTree<Self, MiniGameProxy>,
     game_menu: Arc<GameMenu>,
+    practice_menu: Arc<PracticeMenu>,
 }
 
 #[async_trait]
 impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
-    type ServerGUI = GameMenu;
+    type ServerGUI = GameMenu; // FIXME
     type PlayerHandler = LobbyPlayerHandler;
     fn new() -> Self {
         Self {
             game_menu: Arc::new(GameMenu::new()),
+            practice_menu: Arc::new(PracticeMenu::new()),
             commands: CommandTree::new()
                 .register_command(
                     Command::new("practice", "practice a minigame in a private lobby").add_node(
