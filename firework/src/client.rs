@@ -8,10 +8,7 @@ use crate::{
     {ClientData, ConnectionError, Rotation, Server, ServerHandler, ServerProxy, Vec3},
 };
 use firework_authentication::Profile;
-use firework_data::{
-    blocks::DamagedAnvil,
-    tags::{REGISTRY, TAGS},
-};
+use firework_data::tags::{REGISTRY, TAGS};
 use firework_protocol::{
     client_bound::{
         BossBar, ChangeDifficulty, ClientBoundKeepAlive, ClientBoundPacket, CloseContainer,
@@ -297,6 +294,15 @@ impl InventorySlot {
     const HOTBAR_OFFSET: usize = 36;
     const OFFHAND_OFFSET: usize = 45;
     const MAIN_INVENTORY_OFFSET: usize = 9;
+    pub fn is_armor(&self) -> bool {
+        matches!(
+            self,
+            InventorySlot::Boots
+                | InventorySlot::Leggings
+                | InventorySlot::Chestplate
+                | InventorySlot::Helmet
+        )
+    }
     pub fn value(&self) -> usize {
         match self {
             InventorySlot::Hotbar { slot } => Self::HOTBAR_OFFSET + slot,

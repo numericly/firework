@@ -2,13 +2,13 @@ use crate::{
     MiniGameProxy, TransferData, CAVERN_BATTLE_WORLD, COVE_BATTLE_WORLD, CRUCIBLE_BATTLE_WORLD,
 };
 use async_trait::async_trait;
-use firework::client::DamageType;
 use firework::gui::WindowType;
 use firework::protocol::data_types::{Enchantment, Equipment, EquipmentEntry, EquipmentSlot};
 use firework::{
     authentication::Profile, data::items::Item, gui::GUIInit,
     protocol::data_types::InventoryOperationMode,
 };
+use firework::{client::DamageType, data::items::ArmorPart};
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
     commands::{Argument, Command, CommandTree},
@@ -150,6 +150,44 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
         slot_id: InventorySlot,
         location: Option<Position>,
     ) -> Result<(), ConnectionError> {
+        if let Some(item) = item {
+            if let Some(part) = item.id.get_armor_part() {
+                let mut player = client.player.write().await;
+                match part {
+                    ArmorPart::Helmet => {
+                        let player_helmet = player.inventory.get_slot_mut(&InventorySlot::Helmet);
+
+                        let old_item = player_helmet.replace(item);
+
+                        player.inventory.set_slot(slot_id, old_item);
+                    }
+                    ArmorPart::Chestplate => {
+                        let player_chestplate =
+                            player.inventory.get_slot_mut(&InventorySlot::Chestplate);
+
+                        let old_item = player_chestplate.replace(item);
+
+                        player.inventory.set_slot(slot_id, old_item);
+                    }
+                    ArmorPart::Leggings => {
+                        let player_leggings =
+                            player.inventory.get_slot_mut(&InventorySlot::Leggings);
+
+                        let old_item = player_leggings.replace(item);
+
+                        player.inventory.set_slot(slot_id, old_item);
+                    }
+                    ArmorPart::Boots => {
+                        let player_boots = player.inventory.get_slot_mut(&InventorySlot::Boots);
+
+                        let old_item = player_boots.replace(item);
+
+                        player.inventory.set_slot(slot_id, old_item);
+                    }
+                }
+            }
+        }
+
         if let Some(location) = location {
             let chest = client.server.handler.chests.get(&location);
 
@@ -615,6 +653,53 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                     return Ok(());
                 };
 
+                if let Some(armor_part) = stacking_item.id.get_armor_part() {
+                    if !slot.is_armor() {
+                        match armor_part {
+                            ArmorPart::Helmet => {
+                                if player.inventory.get_slot(&InventorySlot::Helmet).is_none() {
+                                    player
+                                        .inventory
+                                        .set_slot(InventorySlot::Helmet, Some(stacking_item));
+                                    return Ok(());
+                                }
+                            }
+                            ArmorPart::Chestplate => {
+                                if player
+                                    .inventory
+                                    .get_slot(&InventorySlot::Chestplate)
+                                    .is_none()
+                                {
+                                    player
+                                        .inventory
+                                        .set_slot(InventorySlot::Chestplate, Some(stacking_item));
+                                    return Ok(());
+                                }
+                            }
+                            ArmorPart::Leggings => {
+                                if player
+                                    .inventory
+                                    .get_slot(&InventorySlot::Leggings)
+                                    .is_none()
+                                {
+                                    player
+                                        .inventory
+                                        .set_slot(InventorySlot::Leggings, Some(stacking_item));
+                                    return Ok(());
+                                }
+                            }
+                            ArmorPart::Boots => {
+                                if player.inventory.get_slot(&InventorySlot::Boots).is_none() {
+                                    player
+                                        .inventory
+                                        .set_slot(InventorySlot::Boots, Some(stacking_item));
+                                    return Ok(());
+                                }
+                            }
+                        }
+                    }
+                }
+
                 if let InventorySlot::MainInventory { .. } = slot {
                     for already_stacked in 0..2 {
                         for i in 0..9 {
@@ -645,6 +730,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
 
                     // self.set_index(&items, slot, client.client_data.uuid).await;
                 } else {
+                    dbg!(&stacking_item);
                     for already_stacked in 0..2 {
                         for i in 0..27 {
                             if let Some(inventory_item) = player
@@ -660,6 +746,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                                     return Ok(());
                                 }
                             } else if already_stacked == 1 {
+                                dbg!(i);
                                 // self.set_index(&items, slot, client.client_data.uuid).await;
                                 player
                                     .inventory
@@ -752,7 +839,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
             });
         }
 
-        dbg!(&equipment_diff);
+        // dbg!(&equipment_diff);
 
         Ok(())
     }
