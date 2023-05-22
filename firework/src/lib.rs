@@ -808,6 +808,13 @@ where
     ) -> Result<(), ConnectionError> {
         Ok(())
     }
+    async fn on_set_held_item(
+        &self,
+        client: &Client<Handler, Proxy>,
+        slot: u8,
+    ) -> Result<Option<u8>, ConnectionError> {
+        Ok(Some(slot))
+    }
 }
 
 #[async_trait]
@@ -1302,6 +1309,17 @@ where
         client.handler.on_interact(client, interact).await?;
         Ok(())
     }
+    #[allow(unused_must_use)]
+    pub async fn handle_set_held_item(
+        &self,
+        _proxy: &Proxy,
+        client: &Client<Handler, Proxy>,
+        slot: u8,
+    ) -> Result<(), ConnectionError> {
+        client.handler.on_set_held_item(client, slot).await?;
+        Ok(())
+    }
+
     #[allow(unused_must_use)]
     pub async fn handle_swing(
         &self,

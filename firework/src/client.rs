@@ -598,7 +598,9 @@ where
         Ok(())
     }
     pub(super) async fn load_world(&self) -> Result<(), ConnectionError> {
-        self.player.write().await.syncing_position = Some(1);
+        {
+            self.player.write().await.syncing_position = Some(1);
+        }
         self.send_packet({
             let mut buf = Vec::new();
             self.server.brand.to_string().serialize(&mut buf);
@@ -1597,9 +1599,12 @@ where
                 }
             }
             ServerBoundPacket::SetHeldItemServerBound(set_held_item) => {
+                self.server
+                    .handle_set_held_item(&self.proxy, self, set_held_item.slot as u8)
+                    .await?;
                 let mut player = self.player.write().await;
-                player.selected_slot = set_held_item.slot as u8;
                 player.attack_strength_ticker = 0;
+                player.selected_slot = set_held_item.slot as u8;
             }
             ServerBoundPacket::Interact(interact) => {
                 self.server
