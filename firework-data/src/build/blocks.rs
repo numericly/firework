@@ -67,6 +67,7 @@ pub enum StatePropertyType {
     #[serde(rename = "enum")]
     Enum,
 }
+
 pub fn build_blocks() {
     let debug = true;
     let file = fs::read_to_string("./data/1.19.4/blocks.json").expect("Unable to open blocks file");

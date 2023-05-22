@@ -1,3 +1,4 @@
-# rust-minecraft-server
+# Firework Minecraft Server
 
-a (somewhat) efficient reimplementation of the minecraft server software mostly made for the purpose of learning more about rust and networking
+Firework is an implementation of the Minecraft server protocol in the Rust Programming Language. It is designed with performance and extensibility in mind. To demonstrate these goals, we recreated most of the original minigames from minecraft console edition. 
+
