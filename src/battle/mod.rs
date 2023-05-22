@@ -209,6 +209,8 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
             }
         }
 
+        self.synchronize_equipment(client).await;
+
         if let Some(location) = location {
             let chest = client.server.handler.chests.get(&location);
 
@@ -688,6 +690,8 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                 let stacking_item = player.inventory.get_slot_mut(&slot).take();
 
                 let Some(mut stacking_item) = stacking_item else {
+                    drop(player);
+                    self.synchronize_equipment(client).await;
                     return Ok(());
                 };
 
@@ -699,6 +703,8 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                                     player
                                         .inventory
                                         .set_slot(InventorySlot::Helmet, Some(stacking_item));
+                                    drop(player);
+                                    self.synchronize_equipment(client).await;
                                     return Ok(());
                                 }
                             }
@@ -711,6 +717,8 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                                     player
                                         .inventory
                                         .set_slot(InventorySlot::Chestplate, Some(stacking_item));
+                                    drop(player);
+                                    self.synchronize_equipment(client).await;
                                     return Ok(());
                                 }
                             }
@@ -723,6 +731,8 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                                     player
                                         .inventory
                                         .set_slot(InventorySlot::Leggings, Some(stacking_item));
+                                    drop(player);
+                                    self.synchronize_equipment(client).await;
                                     return Ok(());
                                 }
                             }
@@ -731,6 +741,8 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                                     player
                                         .inventory
                                         .set_slot(InventorySlot::Boots, Some(stacking_item));
+                                    drop(player);
+                                    self.synchronize_equipment(client).await;
                                     return Ok(());
                                 }
                             }
@@ -751,6 +763,8 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                                     stacking_item = item;
                                 } else {
                                     // self.set_index(&items, slot, client.client_data.uuid).await;
+                                    drop(player);
+                                    self.synchronize_equipment(client).await;
                                     return Ok(());
                                 }
                             } else if already_stacked == 1 {
@@ -759,6 +773,8 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                                     .inventory
                                     .get_slot_mut(&InventorySlot::Hotbar { slot: i })
                                     .replace(stacking_item);
+                                drop(player);
+                                self.synchronize_equipment(client).await;
                                 return Ok(());
                             }
                         }
@@ -781,6 +797,8 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                                     stacking_item = item;
                                 } else {
                                     // self.set_index(&items, slot, client.client_data.uuid).await;
+                                    drop(player);
+                                    self.synchronize_equipment(client).await;
                                     return Ok(());
                                 }
                             } else if already_stacked == 1 {
@@ -790,6 +808,8 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                                     .inventory
                                     .get_slot_mut(&InventorySlot::MainInventory { slot: i })
                                     .replace(stacking_item);
+                                drop(player);
+                                self.synchronize_equipment(client).await;
                                 return Ok(());
                             }
                         }
@@ -808,13 +828,71 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                 *player.inventory.get_slot_mut(&from_slot) = to_item;
             }
             _ => {
-                println!("action: {:?}", action);
+                println!("action2: {:?}", action);
             }
         }
 
-        // update the held item, offhand, and armor slots
+        // synchronize_equipment
+        drop(player);
+        self.synchronize_equipment(client).await;
 
+        Ok(())
+    }
+    async fn on_set_held_item(
+        &self,
+        client: &Client<BattleServerHandler, MiniGameProxy>,
+        slot: u8,
+    ) -> Result<Option<u8>, ConnectionError> {
+        let player = client.player.read().await;
         let mut equipment = self.equipment.lock().await;
+        let mut equipment_diff = Vec::new();
+
+        if player.inventory.get_slot(&InventorySlot::Hotbar {
+            slot: slot as usize,
+        }) != &equipment.main_hand
+        {
+            equipment_diff.push(Equipment {
+                equipment: vec![EquipmentEntry {
+                    slot: EquipmentSlot::MainHand,
+                    item: player
+                        .inventory
+                        .get_slot(&InventorySlot::Hotbar {
+                            slot: slot as usize,
+                        })
+                        .clone(),
+                }],
+            });
+            equipment.main_hand = player
+                .inventory
+                .get_slot(&InventorySlot::Hotbar {
+                    slot: slot as usize,
+                })
+                .clone();
+        }
+
+        if equipment_diff.len() > 0 {
+            for iter_client in client.server.player_list.iter() {
+                iter_client.send_equipment(
+                    // what the fuck have i just done (i will fix it later (no i won't))
+                    client.client_data.entity_id,
+                    Equipment {
+                        equipment: equipment_diff
+                            .iter()
+                            .map(|e| e.equipment.clone())
+                            .flatten()
+                            .collect::<Vec<_>>(),
+                    },
+                );
+            }
+        }
+        Ok(Some(slot))
+    }
+}
+
+impl BattlePlayerHandler {
+    async fn synchronize_equipment(&self, client: &Client<BattleServerHandler, MiniGameProxy>) {
+        let player = client.player.read().await;
+        let mut equipment = client.handler.equipment.lock().await;
         let mut equipment_diff = Vec::new();
 
         if player.inventory.get_slot(&InventorySlot::Hotbar {
@@ -890,7 +968,6 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
             });
             equipment.feet = player.inventory.get_slot(&InventorySlot::Boots).clone();
         }
-        println!("equipment diff: {:?}", equipment_diff);
 
         if equipment_diff.len() > 0 {
             for iter_client in client.server.player_list.iter() {
@@ -907,62 +984,8 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                 );
             }
         }
-
-        Ok(())
-    }
-    async fn on_set_held_item(
-        &self,
-        client: &Client<BattleServerHandler, MiniGameProxy>,
-        slot: u8,
-    ) -> Result<Option<u8>, ConnectionError> {
-        let player = client.player.read().await;
-        let mut equipment = self.equipment.lock().await;
-        let mut equipment_diff = Vec::new();
-
-        if player.inventory.get_slot(&InventorySlot::Hotbar {
-            slot: slot as usize,
-        }) != &equipment.main_hand
-        {
-            equipment_diff.push(Equipment {
-                equipment: vec![EquipmentEntry {
-                    slot: EquipmentSlot::MainHand,
-                    item: player
-                        .inventory
-                        .get_slot(&InventorySlot::Hotbar {
-                            slot: slot as usize,
-                        })
-                        .clone(),
-                }],
-            });
-            equipment.main_hand = player
-                .inventory
-                .get_slot(&InventorySlot::Hotbar {
-                    slot: slot as usize,
-                })
-                .clone();
-        }
-        println!("equipment diff: {:?}", equipment_diff);
-
-        if equipment_diff.len() > 0 {
-            for iter_client in client.server.player_list.iter() {
-                iter_client.send_equipment(
-                    // what the fuck have i just done (i will fix it later (no i won't))
-                    client.client_data.entity_id,
-                    Equipment {
-                        equipment: equipment_diff
-                            .iter()
-                            .map(|e| e.equipment.clone())
-                            .flatten()
-                            .collect::<Vec<_>>(),
-                    },
-                );
-            }
-        }
-        Ok(Some(slot))
     }
 }
-
-impl BattlePlayerHandler {}
 
 pub struct Chest {
     pub items: RwLock<Vec<ItemStack>>,
@@ -1241,7 +1264,7 @@ impl GuiScreen<BattleServerHandler, MiniGameProxy> for Chest {
             return Ok(());
         };
 
-        println!("action: {:?}, state {}", action, slot.state_id.0);
+        println!("action1: {:?}, state {}", action, slot.state_id.0);
 
         let mut player = client.player.write().await;
         let mut items = self.items.write().await;
@@ -1256,6 +1279,7 @@ impl GuiScreen<BattleServerHandler, MiniGameProxy> for Chest {
                     if from < 27 {
                         self.set_index(&items, from, client.client_data.uuid).await;
                     }
+                    drop(player);drop(items);client.handler.synchronize_equipment(client).await;
                     return Ok(());
                 };
 
@@ -1313,6 +1337,9 @@ impl GuiScreen<BattleServerHandler, MiniGameProxy> for Chest {
                     let stacking_item = items[slot].take();
 
                     let Some(mut stacking_item) = stacking_item else {
+                        drop(player);
+                        drop(items);
+                        client.handler.synchronize_equipment(client).await;
                         return Ok(());
                     };
 
@@ -1327,6 +1354,9 @@ impl GuiScreen<BattleServerHandler, MiniGameProxy> for Chest {
                                 stacking_item = item;
                             } else {
                                 self.set_index(&items, slot, client.client_data.uuid).await;
+                                drop(player);
+                                drop(items);
+                                client.handler.synchronize_equipment(client).await;
                                 return Ok(());
                             }
                         } else {
@@ -1335,6 +1365,9 @@ impl GuiScreen<BattleServerHandler, MiniGameProxy> for Chest {
                                 .inventory
                                 .get_slot_mut(&InventorySlot::Hotbar { slot: i })
                                 .replace(stacking_item);
+                            drop(player);
+                            drop(items);
+                            client.handler.synchronize_equipment(client).await;
                             return Ok(());
                         }
                     }
@@ -1350,6 +1383,9 @@ impl GuiScreen<BattleServerHandler, MiniGameProxy> for Chest {
                                 stacking_item = item;
                             } else {
                                 self.set_index(&items, slot, client.client_data.uuid).await;
+                                drop(player);
+                                drop(items);
+                                client.handler.synchronize_equipment(client).await;
                                 return Ok(());
                             }
                         } else {
@@ -1358,6 +1394,9 @@ impl GuiScreen<BattleServerHandler, MiniGameProxy> for Chest {
                                 .inventory
                                 .get_slot_mut(&InventorySlot::MainInventory { slot: i })
                                 .replace(stacking_item);
+                            drop(player);
+                            drop(items);
+                            client.handler.synchronize_equipment(client).await;
                             return Ok(());
                         }
                     }
@@ -1378,6 +1417,9 @@ impl GuiScreen<BattleServerHandler, MiniGameProxy> for Chest {
                     let stacking_item = item.take();
 
                     let Some(mut stacking_item) = stacking_item else {
+                        drop(player);
+                        drop(items);
+                        client.handler.synchronize_equipment(client).await;
                             return Ok(());
                         };
 
@@ -1390,13 +1432,18 @@ impl GuiScreen<BattleServerHandler, MiniGameProxy> for Chest {
                             if let Some(item) = remainder {
                                 stacking_item = item;
                             } else {
+                                drop(player);
+                                drop(items);
+                                client.handler.synchronize_equipment(client).await;
                                 return Ok(());
                             }
                         } else {
                             items[i] = Some(stacking_item);
 
                             self.set_index(&items, i, client.client_data.uuid).await;
-
+                            drop(player);
+                            drop(items);
+                            client.handler.synchronize_equipment(client).await;
                             return Ok(());
                         }
                     }
@@ -1423,105 +1470,16 @@ impl GuiScreen<BattleServerHandler, MiniGameProxy> for Chest {
 
         if !valid_state {
             client.update_slot(-1, player.inventory.held_item.clone(), -1);
+            drop(player);
+            drop(items);
+            client.handler.synchronize_equipment(client).await;
             return Ok(());
         }
 
         // update the held item, offhand, and armor slots
-
-        let mut equipment = client.handler.equipment.lock().await;
-        let mut equipment_diff = Vec::new();
-
-        if player.inventory.get_slot(&InventorySlot::Hotbar {
-            slot: player.selected_slot as usize,
-        }) != &equipment.main_hand
-        {
-            equipment_diff.push(Equipment {
-                equipment: vec![EquipmentEntry {
-                    slot: EquipmentSlot::MainHand,
-                    item: player
-                        .inventory
-                        .get_slot(&InventorySlot::Hotbar {
-                            slot: player.selected_slot as usize,
-                        })
-                        .clone(),
-                }],
-            });
-            equipment.main_hand = player
-                .inventory
-                .get_slot(&InventorySlot::Hotbar {
-                    slot: player.selected_slot as usize,
-                })
-                .clone();
-        }
-        if player.inventory.get_slot(&InventorySlot::Offhand) != &equipment.off_hand {
-            equipment_diff.push(Equipment {
-                equipment: vec![EquipmentEntry {
-                    slot: EquipmentSlot::OffHand,
-                    item: player.inventory.get_slot(&InventorySlot::Offhand).clone(),
-                }],
-            });
-            equipment.off_hand = player.inventory.get_slot(&InventorySlot::Offhand).clone();
-        }
-        if player.inventory.get_slot(&InventorySlot::Helmet) != &equipment.head {
-            equipment_diff.push(Equipment {
-                equipment: vec![EquipmentEntry {
-                    slot: EquipmentSlot::Helmet,
-                    item: player.inventory.get_slot(&InventorySlot::Helmet).clone(),
-                }],
-            });
-            equipment.head = player.inventory.get_slot(&InventorySlot::Helmet).clone();
-        }
-        if player.inventory.get_slot(&InventorySlot::Chestplate) != &equipment.chest {
-            equipment_diff.push(Equipment {
-                equipment: vec![EquipmentEntry {
-                    slot: EquipmentSlot::Chestplate,
-                    item: player
-                        .inventory
-                        .get_slot(&InventorySlot::Chestplate)
-                        .clone(),
-                }],
-            });
-            equipment.chest = player
-                .inventory
-                .get_slot(&InventorySlot::Chestplate)
-                .clone();
-        }
-        if player.inventory.get_slot(&InventorySlot::Leggings) != &equipment.legs {
-            equipment_diff.push(Equipment {
-                equipment: vec![EquipmentEntry {
-                    slot: EquipmentSlot::Leggings,
-                    item: player.inventory.get_slot(&InventorySlot::Leggings).clone(),
-                }],
-            });
-            equipment.legs = player.inventory.get_slot(&InventorySlot::Leggings).clone();
-        }
-        if player.inventory.get_slot(&InventorySlot::Boots) != &equipment.feet {
-            equipment_diff.push(Equipment {
-                equipment: vec![EquipmentEntry {
-                    slot: EquipmentSlot::Boots,
-                    item: player.inventory.get_slot(&InventorySlot::Boots).clone(),
-                }],
-            });
-            equipment.feet = player.inventory.get_slot(&InventorySlot::Boots).clone();
-        }
-
-        println!("equipment diff: {:?}", equipment_diff);
-
-        if equipment_diff.len() > 0 {
-            for iter_client in client.server.player_list.iter() {
-                iter_client.send_equipment(
-                    // what the fuck have i just done (i will fix it later (no i won't))
-                    client.client_data.entity_id,
-                    Equipment {
-                        equipment: equipment_diff
-                            .iter()
-                            .map(|e| e.equipment.clone())
-                            .flatten()
-                            .collect::<Vec<_>>(),
-                    },
-                );
-            }
-        }
+        drop(player);
+        drop(items);
+        client.handler.synchronize_equipment(client).await;
 
         Ok(())
     }
