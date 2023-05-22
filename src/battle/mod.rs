@@ -1291,8 +1291,6 @@ impl GuiScreen<BattleServerHandler, MiniGameProxy> for Chest {
             return Ok(());
         };
 
-        println!("action1: {:?}, state {}", action, slot.state_id.0);
-
         let mut player = client.player.write().await;
         let mut items = self.items.write().await;
 

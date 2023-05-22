@@ -1409,7 +1409,7 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
             position: self.map.get_spawn_position().clone(),
             max_health: 6.0,
             health: 6.0,
-            flying_allowed: true,
+            flying_allowed: false,
             gamemode: GameMode::Adventure,
             profile,
             uuid,
