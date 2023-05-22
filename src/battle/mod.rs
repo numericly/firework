@@ -1767,8 +1767,8 @@ impl BattleServerHandler {
             );
             client
                 .sync_position(
-                    self.map.get_spawn_point(0).position.clone(),
-                    Some(Rotation::new(0., 0.)),
+                    client.handler.spawn_point.position.clone(),
+                    Some(client.handler.spawn_point.rotation.clone()),
                 )
                 .await;
 
