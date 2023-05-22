@@ -1479,17 +1479,17 @@ where
                     Err(err) => {
                         self.show_chat_message(format!(
                             r##"{{"text":"/{}","color":"#AAB0BC"}}"##,
-                            command
+                            command.replace("\\", "/")
                         ));
                         self.show_chat_message(
-                        json!(
-                            {
-                                "text": format!("help: {}, type /help for a list of commands", err),
-                                "color": "#E96A70"
-                            }
+                            json!(
+                                {
+                                    "text": format!("help: {}, type /help for a list of commands", err).replace("\\", "/"),
+                                    "color": "#E96A70"
+                                }
+                            )
+                            .to_string(),
                         )
-                        .to_string(),
-                    )
                     }
                     Ok(exec) => exec(args, self, &self.server, &self.proxy).await,
                 }
@@ -1631,7 +1631,11 @@ where
 
                 let used_item = {
                     let player_read = self.player.read().await;
-                    player_read.inventory.get_slot(&used_item_slot).as_ref().cloned()
+                    player_read
+                        .inventory
+                        .get_slot(&used_item_slot)
+                        .as_ref()
+                        .cloned()
                 };
 
                 self.handler
@@ -1653,7 +1657,11 @@ where
 
                 let used_item = {
                     let player_read = self.player.read().await;
-                    player_read.inventory.get_slot(&used_item_slot).as_ref().cloned()
+                    player_read
+                        .inventory
+                        .get_slot(&used_item_slot)
+                        .as_ref()
+                        .cloned()
                 };
 
                 self.handler
@@ -1868,9 +1876,7 @@ where
                     client.client_data.entity_id,
                     vec![
                         EntityMetadata::EntityFlags(client.player.read().await.entity_flags()),
-                        EntityMetadata::PlayerDisplayedSkinParts(
-                            information.displayed_skin_parts,
-                        ),
+                        EntityMetadata::PlayerDisplayedSkinParts(information.displayed_skin_parts),
                     ],
                 )
                 .await?;
