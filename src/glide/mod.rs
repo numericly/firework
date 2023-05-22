@@ -278,6 +278,83 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                 PlayerFinishedState::DNF,
             ),
         );
+        let flying_players = finished_states_lock.iter().fold(0, |acc, e| {
+            acc + match e.1 .1 {
+                PlayerFinishedState::InProgress { .. } => 1,
+                _ => 0,
+            }
+        });
+        if flying_players == 0 {
+            let mut game_state = self.server.handler.game_state.lock().await;
+            *game_state = GameState::Finished {
+                finish_time: Instant::now(),
+            };
+            drop(game_state);
+            let mut leaderboard = finished_states_lock
+                .iter()
+                .map(|e| (e.1 .0.clone(), e.1 .1.clone()))
+                .collect::<Vec<_>>();
+            leaderboard.sort_unstable_by(|a, b| {
+                b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal)
+            });
+            for client in self.server.player_list.iter() {
+                client.send_boss_bar_action(0, BossBarAction::Remove);
+                client.send_system_chat_message(
+                    json!([
+                        {
+                            "text": "Game Finished!",
+                            "color": "green",
+                        },
+                        {
+                            "text": "\n",
+                            "color": "white",
+                        },
+                        {
+                            "text": "Leaderboard:",
+                            "color": "gold",
+                        },
+                        {
+                            "text": "\n",
+                            "color": "white",
+                        },
+                        {
+                            "text": "1. ",
+                            "color": "gold",
+                        },
+                        {
+                            "text": format!(
+                                "{}",
+                                {
+                                    let mut leaderboard_str = String::new();
+                                    for (i, (name, state)) in leaderboard.iter().enumerate()
+                                    {
+                                        leaderboard_str.push_str(&format!(
+                                            "{}. {} - {}\n",
+                                            i + 1,
+                                            name,
+                                            match state {
+                                                PlayerFinishedState::Finished {
+                                                    finish_time,
+                                                } => format_duration(&finish_time),
+                                                PlayerFinishedState::DNF => "DNF".to_string(),
+                                                PlayerFinishedState::InProgress { .. } => {
+                                                    "DNF".to_string()
+                                                }
+                                            }
+                                        ));
+                                    }
+                                    leaderboard_str
+                                }
+                            ),
+                            "color": "yellow",
+                        }
+                    ])
+                    .to_string(),
+                    false,
+                );
+                client.clear_scoreboard();
+            }
+        }
         Ok(())
     }
     async fn on_leave(
@@ -293,6 +370,78 @@ impl PlayerHandler<GlideServerHandler, MiniGameProxy> for GlidePlayerHandler {
                 PlayerFinishedState::DNF,
             ),
         );
+        let flying_players = finished_states_lock.iter().fold(0, |acc, e| {
+            acc + match e.1 .1 {
+                PlayerFinishedState::InProgress { .. } => 1,
+                _ => 0,
+            }
+        });
+        if flying_players == 0 {
+            let mut game_state = self.server.handler.game_state.lock().await;
+            *game_state = GameState::Finished {
+                finish_time: Instant::now(),
+            };
+            drop(game_state);
+            let mut leaderboard = finished_states_lock
+                .iter()
+                .map(|e| (e.1 .0.clone(), e.1 .1.clone()))
+                .collect::<Vec<_>>();
+            leaderboard.sort_unstable_by(|a, b| {
+                b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal)
+            });
+            for client in self.server.player_list.iter() {
+                client.send_boss_bar_action(0, BossBarAction::Remove);
+                client.send_system_chat_message(
+                    json!([
+                        {
+                            "text": "Game Finished!",
+                            "color": "green",
+                        },
+                        {
+                            "text": "\n",
+                            "color": "white",
+                        },
+                        {
+                            "text": "Leaderboard:",
+                            "color": "gold",
+                        },
+                        {
+                            "text": "\n\n",
+                        },
+                        {
+                            "text": format!(
+                                "{}",
+                                {
+                                    let mut leaderboard_str = String::new();
+                                    for (i, (name, state)) in leaderboard.iter().enumerate()
+                                    {
+                                        leaderboard_str.push_str(&format!(
+                                            "{}. {} - {}\n",
+                                            i + 1,
+                                            name,
+                                            match state {
+                                                PlayerFinishedState::Finished {
+                                                    finish_time,
+                                                } => format_duration(&finish_time),
+                                                PlayerFinishedState::DNF => "DNF".to_string(),
+                                                PlayerFinishedState::InProgress { .. } => {
+                                                    "DNF".to_string()
+                                                }
+                                            }
+                                        ));
+                                    }
+                                    leaderboard_str
+                                }
+                            ),
+                            "color": "yellow",
+                        }
+                    ])
+                    .to_string(),
+                    false,
+                );
+                client.clear_scoreboard();
+            }
+        }
         Ok(())
     }
 
@@ -922,13 +1071,18 @@ impl GlidePlayerHandler {
                 }
             });
 
-            drop(finished_states_lock);
-
             if flying_players == 0 {
                 *game_state = GameState::Finished {
                     finish_time: Instant::now(),
                 };
                 drop(game_state);
+                let mut leaderboard = finished_states_lock
+                    .iter()
+                    .map(|e| (e.1 .0.clone(), e.1 .1.clone()))
+                    .collect::<Vec<_>>();
+                leaderboard.sort_unstable_by(|a, b| {
+                    b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal)
+                });
                 for client in self.server.player_list.iter() {
                     client.send_boss_bar_action(0, BossBarAction::Remove);
                     client.send_system_chat_message(
@@ -942,7 +1096,7 @@ impl GlidePlayerHandler {
                                 "color": "white",
                             },
                             {
-                                "text": "Leaderboard: (TODO actual functionality)",
+                                "text": "Leaderboard:",
                                 "color": "gold",
                             },
                             {
@@ -955,9 +1109,28 @@ impl GlidePlayerHandler {
                             },
                             {
                                 "text": format!(
-                                    "{} - {}",
-                                    client.player.read().await.profile.name,
-                                    format_duration(&start_time.elapsed())
+                                    "{}",
+                                    {
+                                        let mut leaderboard_str = String::new();
+                                        for (i, (name, state)) in leaderboard.iter().enumerate()
+                                        {
+                                            leaderboard_str.push_str(&format!(
+                                                "{}. {} - {}\n",
+                                                i + 1,
+                                                name,
+                                                match state {
+                                                    PlayerFinishedState::Finished {
+                                                        finish_time,
+                                                    } => format_duration(&finish_time),
+                                                    PlayerFinishedState::DNF => "DNF".to_string(),
+                                                    PlayerFinishedState::InProgress { .. } => {
+                                                        "DNF".to_string()
+                                                    }
+                                                }
+                                            ));
+                                        }
+                                        leaderboard_str
+                                    }
                                 ),
                                 "color": "yellow",
                             }
@@ -1208,8 +1381,9 @@ impl ServerHandler<MiniGameProxy> for GlideServerHandler {
 
                 drop(finished_states_lock);
 
-                leaderboard_lines
-                    .sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal)); // reverse it in a really scuffed way, just swap a and b
+                leaderboard_lines.sort_unstable_by(|a, b| {
+                    b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal)
+                }); // reverse it in a really scuffed way, just swap a and b
 
                 for client in server.player_list.iter() {
                     client.send_system_chat_message(
