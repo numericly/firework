@@ -306,7 +306,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                             return Ok(());
                         }
                     }
-                    _ => {}
+                    _ => return Ok(()),
                 }
                 let player_list = &client.server.player_list;
 
@@ -417,16 +417,38 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                     // FIXME hitregs can happen if the ticks are off sync just right
                     if other_client.player.read().await.invulnerable_time == 0 {
                         if other_client.player.read().await.health - attack_damage as f32 <= 0. {
-                            // "kill" the player
-                            other_client.set_health(other_client.player.read().await.max_health);
                             for iter_client in player_list.iter() {
                                 if iter_client.client_data.uuid == other_client.client_data.uuid {
                                     continue;
                                 }
+
+                                iter_client.send_sound(
+                                    IdMapHolder::Direct(CustomSound {
+                                        resource_location: "minecraft:entity.player.death"
+                                            .to_string(),
+                                        range: Some(16.),
+                                    }),
+                                    SoundSource::Player,
+                                    other_client.player.read().await.position.clone(),
+                                    1.,
+                                    1.,
+                                );
+                                iter_client.send_sound(
+                                    IdMapHolder::Direct(CustomSound {
+                                        resource_location: "minecraft:entity.experience_orb.pickup"
+                                            .to_string(),
+                                        range: Some(16.),
+                                    }),
+                                    SoundSource::Player,
+                                    other_client.player.read().await.position.clone(),
+                                    1.,
+                                    1.,
+                                );
                                 iter_client.kill_player(
                                     other_client.client_data.entity_id,
                                     other_client.client_data.uuid,
                                 );
+                                other_client.transfer(TransferData::Lobby);
                             }
                         } else {
                             let mut defense = 0;
@@ -723,6 +745,12 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                         .clone(),
                 }],
             });
+            equipment.main_hand = player
+                .inventory
+                .get_slot(&InventorySlot::Hotbar {
+                    slot: player.selected_slot as usize,
+                })
+                .clone();
         }
         if player.inventory.get_slot(&InventorySlot::Offhand) != &equipment.off_hand {
             equipment_diff.push(Equipment {
@@ -731,6 +759,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                     item: player.inventory.get_slot(&InventorySlot::Offhand).clone(),
                 }],
             });
+            equipment.off_hand = player.inventory.get_slot(&InventorySlot::Offhand).clone();
         }
         if player.inventory.get_slot(&InventorySlot::Helmet) != &equipment.head {
             equipment_diff.push(Equipment {
@@ -739,6 +768,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                     item: player.inventory.get_slot(&InventorySlot::Helmet).clone(),
                 }],
             });
+            equipment.head = player.inventory.get_slot(&InventorySlot::Helmet).clone();
         }
         if player.inventory.get_slot(&InventorySlot::Chestplate) != &equipment.chest {
             equipment_diff.push(Equipment {
@@ -750,6 +780,10 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                         .clone(),
                 }],
             });
+            equipment.chest = player
+                .inventory
+                .get_slot(&InventorySlot::Chestplate)
+                .clone();
         }
         if player.inventory.get_slot(&InventorySlot::Leggings) != &equipment.legs {
             equipment_diff.push(Equipment {
@@ -758,6 +792,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                     item: player.inventory.get_slot(&InventorySlot::Leggings).clone(),
                 }],
             });
+            equipment.legs = player.inventory.get_slot(&InventorySlot::Leggings).clone();
         }
         if player.inventory.get_slot(&InventorySlot::Boots) != &equipment.feet {
             equipment_diff.push(Equipment {
@@ -766,6 +801,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                     item: player.inventory.get_slot(&InventorySlot::Boots).clone(),
                 }],
             });
+            equipment.feet = player.inventory.get_slot(&InventorySlot::Boots).clone();
         }
 
         dbg!(&equipment_diff);
@@ -1450,92 +1486,6 @@ impl ServerHandler<MiniGameProxy> for BattleServerHandler {
             uuid,
             ..Player::default()
         };
-
-        player.inventory.set_slot(
-            InventorySlot::Helmet,
-            Some(StackContents {
-                id: Item::EndRod,
-                count: 1,
-                nbt: ItemNbt {
-                    ..Default::default()
-                },
-            }),
-        );
-
-        player.inventory.set_slot(
-            InventorySlot::Hotbar { slot: 0 },
-            Some(StackContents {
-                id: Item::DiamondSword,
-                count: 1,
-                nbt: ItemNbt {
-                    ..Default::default()
-                },
-            }),
-        );
-        player.inventory.set_slot(
-            InventorySlot::Hotbar { slot: 1 },
-            Some(StackContents {
-                id: Item::GoldenSword,
-                count: 1,
-                nbt: ItemNbt {
-                    ..Default::default()
-                },
-            }),
-        );
-        player.inventory.set_slot(
-            InventorySlot::Hotbar { slot: 2 },
-            Some(StackContents {
-                id: Item::StoneAxe,
-                count: 1,
-                nbt: ItemNbt {
-                    ..Default::default()
-                },
-            }),
-        );
-        player.inventory.set_slot(
-            InventorySlot::Hotbar { slot: 3 },
-            Some(StackContents {
-                id: Item::DiamondHelmet,
-                count: 1,
-                nbt: ItemNbt {
-                    ..Default::default()
-                },
-            }),
-        );
-        player.inventory.set_slot(
-            InventorySlot::Hotbar { slot: 4 },
-            Some(StackContents {
-                id: Item::DiamondChestplate,
-                count: 1,
-                nbt: ItemNbt {
-                    ..Default::default()
-                },
-            }),
-        );
-        player.inventory.set_slot(
-            InventorySlot::Hotbar { slot: 5 },
-            Some(StackContents {
-                id: Item::DiamondLeggings,
-                count: 1,
-                nbt: ItemNbt {
-                    enchantments: Some(Vec::from([Enchantment {
-                        id: "minecraft:protection".to_string(),
-                        level: 4,
-                    }])),
-                    display: None,
-                },
-            }),
-        );
-        player.inventory.set_slot(
-            InventorySlot::Hotbar { slot: 6 },
-            Some(StackContents {
-                id: Item::DiamondBoots,
-                count: 1,
-                nbt: ItemNbt {
-                    ..Default::default()
-                },
-            }),
-        );
 
         Ok(player)
     }
