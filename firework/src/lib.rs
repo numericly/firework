@@ -17,7 +17,10 @@ use firework_protocol::{
 use firework_protocol::{read_specific_packet, ConnectionState, Protocol, ProtocolError};
 use firework_world::World;
 use gui::GuiScreen;
-use protocol::{client_bound::UpdateTime, core::Position};
+use protocol::{
+    client_bound::UpdateTime,
+    core::{DeserializeError, Position},
+};
 use rsa::{PublicKeyParts, RsaPrivateKey, RsaPublicKey};
 use sha1::{Digest, Sha1};
 use std::sync::Arc;
@@ -1054,8 +1057,25 @@ where
                 loop {
                     select! {
                         event = client.read_packet() => {
-                            let event = event?;
-                            client.handle_packet(event).await?;
+                            let event = event;
+                            match event {
+                                Ok(packet) => {
+                                    client.handle_packet(packet).await?;
+                                }
+                                Err(e) => {
+                                    match e {
+                                        ConnectionError::ProtocolError(ProtocolError::DeserializeError(DeserializeError::IoError(_))) => {
+                                            return Err(e);
+                                        }
+                                        ConnectionError::ProtocolError(ProtocolError::DeserializeError(err)) => {
+                                            println!("Unable to deserialize packet with err {}", err);
+                                        }
+                                        _ => {
+                                            return Err(e);
+                                        }
+                                    }
+                                }
+                            }
                         }
                         _ = event_listener_token.cancelled() => {
                             return Err(ConnectionError::ClientCancelled)
