@@ -5,23 +5,20 @@ use async_trait::async_trait;
 use firework::gui::WindowType;
 use firework::protocol::data_types::{Equipment, EquipmentEntry, EquipmentSlot};
 use firework::{
-    authentication::Profile, gui::GUIInit,
-    protocol::data_types::InventoryOperationMode,
+    authentication::Profile, gui::GUIInit, protocol::data_types::InventoryOperationMode,
 };
-use firework::{data::items::ArmorPart};
 use firework::{
     client::{Client, GameMode, InventorySlot, Player},
     commands::{Argument, Command, CommandTree},
     entities::{EntityMetadata, Pose},
     ConnectionError, PlayerHandler, Rotation, Server, ServerHandler, Vec3, TICKS_PER_SECOND,
 };
+use firework::{data::items::ArmorPart, protocol::data_types::Attribute};
 use firework::{
     gui::GUIEvent,
     protocol::{
         client_bound::{CustomSound, IdMapHolder, SoundSource},
-        data_types::{
-            BossBarAction, BossBarColor, BossBarDivision, InteractAction,
-        },
+        data_types::{BossBarAction, BossBarColor, BossBarDivision, InteractAction},
         server_bound::{ClickContainer, Interact},
     },
 };
@@ -321,7 +318,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
         let mut ticks_since_start = client.handler.ticks_since_start.lock().await;
         *ticks_since_start += 1;
 
-        if *ticks_since_start % 20 == 0 {
+        if *ticks_since_start % 40 == 0 {
             let player = client.player.read().await;
             if player.health + 1. <= player.max_health {
                 client.set_health(player.health + 1.);
@@ -526,8 +523,6 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                                     toughness += boots.id.get_armor_toughness().unwrap_or(0);
                                 };
                             }
-
-                            dbg!(defense, toughness);
 
                             let f = 2. + toughness as f32 / 4.;
                             let f1 = (defense as f32 - attack_damage / f)
@@ -894,6 +889,37 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
 impl BattlePlayerHandler {
     async fn synchronize_equipment(&self, client: &Client<BattleServerHandler, MiniGameProxy>) {
         let player = client.player.read().await;
+
+        let mut defense = 0;
+        let mut toughness = 0;
+        {
+            if let Some(helmet) = player.inventory.get_slot(&InventorySlot::Helmet) {
+                defense += helmet.id.get_armor_defense().unwrap_or(0);
+                toughness += helmet.id.get_armor_toughness().unwrap_or(0);
+            };
+            if let Some(chestplate) = player.inventory.get_slot(&InventorySlot::Chestplate) {
+                defense += chestplate.id.get_armor_defense().unwrap_or(0);
+                toughness += chestplate.id.get_armor_toughness().unwrap_or(0);
+            };
+            if let Some(leggings) = player.inventory.get_slot(&InventorySlot::Leggings) {
+                defense += leggings.id.get_armor_defense().unwrap_or(0);
+                toughness += leggings.id.get_armor_toughness().unwrap_or(0);
+            };
+            if let Some(boots) = player.inventory.get_slot(&InventorySlot::Boots) {
+                defense += boots.id.get_armor_defense().unwrap_or(0);
+                toughness += boots.id.get_armor_toughness().unwrap_or(0);
+            };
+        }
+
+        client.set_attributes(vec![
+            Attribute::Armor {
+                value: defense as f64,
+            },
+            Attribute::ArmorToughness {
+                value: toughness as f64,
+            },
+        ]);
+
         let mut equipment = client.handler.equipment.lock().await;
         let mut equipment_diff = Vec::new();
 

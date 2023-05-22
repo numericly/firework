@@ -537,6 +537,8 @@ impl SerializeField for DisplaySkinParts {
 #[derive(Debug, PartialEq, Clone)]
 pub enum Attribute {
     MaxHealth { value: f64 },
+    Armor { value: f64 },
+    ArmorToughness { value: f64 },
 }
 
 impl SerializeField for Attribute {
@@ -544,6 +546,16 @@ impl SerializeField for Attribute {
         match self {
             Attribute::MaxHealth { value } => {
                 "generic.max_health".to_string().serialize(&mut writer);
+                value.serialize(&mut writer);
+                VarInt(0).serialize(&mut writer);
+            }
+            Attribute::Armor { value } => {
+                "generic.armor".to_string().serialize(&mut writer);
+                value.serialize(&mut writer);
+                VarInt(0).serialize(&mut writer);
+            }
+            Attribute::ArmorToughness { value } => {
+                "generic.armor_toughness".to_string().serialize(&mut writer);
                 value.serialize(&mut writer);
                 VarInt(0).serialize(&mut writer);
             }
@@ -658,7 +670,6 @@ impl SerializeField for EntityEventStatus {
             Self::PlayLivingEntityDeathSoundAndAnimation => 3u8,
             _ => todo!(),
         };
-        dbg!(u8);
         writer.write_u8(u8).unwrap();
     }
 }

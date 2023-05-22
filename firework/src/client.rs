@@ -631,9 +631,13 @@ where
 
         self.send_packet(UpdateAttributes {
             entity_id: VarInt::from(self.client_data.entity_id),
-            attributes: vec![Attribute::MaxHealth {
-                value: self.player.read().await.max_health as f64,
-            }],
+            attributes: vec![
+                Attribute::MaxHealth {
+                    value: self.player.read().await.max_health as f64,
+                },
+                Attribute::Armor { value: 0. },
+                Attribute::ArmorToughness { value: 0. },
+            ],
         })
         .await?;
 
@@ -2062,6 +2066,11 @@ where
                 value: self.player.read().await.max_health as f64,
             }],
         });
+    }
+    #[allow(unused_must_use)]
+    pub fn set_attributes(&self, attributes: Vec<Attribute>) {
+        self.to_client
+            .send(ClientCommand::UpdateAttributes { attributes });
     }
     #[allow(unused_must_use)]
     pub fn send_hurt_animation(&self, entity_id: i32, yaw: f32) {

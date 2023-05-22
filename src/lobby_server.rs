@@ -110,9 +110,13 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
                     "text": "\n"
                 },
                 {
-                    "text": "- Glide: Race other players through a course using an elytra.\n- Battle: Fight your friends in an arena, getting items to help you in the fight.\n-\n- To get started, right click while holding compass in your hotbar.",
-                "color": "green"
+                    "text": "- Glide: Race other players through a course using an elytra.\n- Battle: Fight your friends in an arena, getting items to help you in the fight.\n",
+                    "color": "green"
                 },
+                {
+                    "text": "To get started, right click while holding compass or stick in your hotbar.",
+                    "color": "gray"
+                }
               ])
             .to_string(),
         );
