@@ -103,6 +103,9 @@ enum GameState {
         start_time: Instant,
         initial_player_count: usize,
     },
+    Finished {
+        finish_time: Instant,
+    },
 }
 
 pub struct BattleServerHandler {
@@ -276,7 +279,7 @@ impl PlayerHandler<BattleServerHandler, MiniGameProxy> for BattlePlayerHandler {
                   "text": "\n"
               },
               {
-                  "text": "- battle",
+                  "text": "- Look through treasure chests for armor and weapons\n- Click to swing your weapon, right click to open chests\n- Last one standing wins",
               "color": "green"
               },
               {
@@ -1634,6 +1637,34 @@ impl ServerHandler<MiniGameProxy> for BattleServerHandler {
                 if start_time.elapsed().as_secs() >= 15 {
                     // TODO don't do this on every tick, instead update it when a player leaves or dies
                     let player_count = server.player_list.len();
+                    if *initial_player_count > 1 && player_count == 1 {
+                        *game_state = GameState::Finished {
+                            finish_time: Instant::now(),
+                        };
+                        drop(game_state);
+                        for client in server.player_list.iter() {
+                            client.send_boss_bar_action(0, BossBarAction::Remove);
+                            client.send_system_chat_message(
+                                json!([
+                                    {
+                                        "text": "Game Finished!",
+                                        "color": "green",
+                                    },
+                                    {
+                                        "text": "\n",
+                                        "color": "white",
+                                    },
+                                    {
+                                        "text": format!("Winner: {}", client.player.read().await.profile.name),
+                                        "color": "gold",
+                                    },
+                                ])
+                                .to_string(),
+                                false,
+                            );
+                        }
+                        return;
+                    }
 
                     for player in server.player_list.iter() {
                         player.send_boss_bar_action(
@@ -1672,6 +1703,13 @@ impl ServerHandler<MiniGameProxy> for BattleServerHandler {
                                 health: 1.0 - start_time.elapsed().as_millis() as f32 / 15000.,
                             },
                         );
+                    }
+                }
+            }
+            GameState::Finished { finish_time } => {
+                if finish_time.elapsed().as_millis() > 10000 {
+                    for client in server.player_list.iter() {
+                        client.transfer(TransferData::Lobby);
                     }
                 }
             }

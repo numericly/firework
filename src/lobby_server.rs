@@ -27,7 +27,6 @@ use tokio::sync::{
 #[derive(Debug)]
 enum MiniGame {
     Battle,
-    Tumble,
     Glide,
 }
 
@@ -86,6 +85,37 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
             r#"{{"text": "{} joined the lobby","color":"yellow"}}"#,
             client.player.read().await.profile.name
         ));
+        client.show_chat_message(
+            json!([
+                {
+                    "text": "\n"
+                },
+                {
+                    "text": "Welcome to the Firework Network, ",
+                    "color": "aqua"
+                },
+                {
+                    "text": format!("{}",client.player.read().await.profile.name.clone()),
+                    "color": "gold"
+                },
+                {
+                    "text": "!\n\n",
+                    "color": "aqua"
+                },
+                {
+                    "text": "Minigames",
+                    "color": "dark_green"
+                },
+                {
+                    "text": "\n"
+                },
+                {
+                    "text": "- Glide: Race other players through a course using an elytra.\n- Battle: Fight your friends in an arena, getting items to help you in the fight.\n-\n- To get started, right click while holding compass in your hotbar.",
+                "color": "green"
+                },
+              ])
+            .to_string(),
+        );
 
         Ok(())
     }
@@ -96,14 +126,13 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
                 let msg = queued.receiver.recv().await.unwrap();
                 let game = match queued.mini_game {
                     MiniGame::Battle => "Battle",
-                    MiniGame::Tumble => "Tumble",
                     MiniGame::Glide => "Glide",
                 };
                 match msg {
                     QueueMessage::NotEnoughPlayers => client.send_system_chat_message(
                         json!([
                             {
-                              "text": format!("Not enough players to start {}", game),
+                              "text": format!("Not enough players to start {}, need at least 2", game),
                               "color": "red"
                             }
                         ])
@@ -157,7 +186,6 @@ impl PlayerHandler<LobbyServerHandler, MiniGameProxy> for LobbyPlayerHandler {
                     QueueMessage::Started { game_id } => {
                         client.transfer(match queued.mini_game {
                             MiniGame::Battle => TransferData::Battle { game_id },
-                            MiniGame::Tumble => TransferData::Tumble { game_id },
                             MiniGame::Glide => TransferData::Glide { game_id },
                         });
                     }
@@ -317,7 +345,6 @@ impl LobbyPlayerHandler {
         if let Some(queued) = queued.as_mut() {
             match queued.mini_game {
                 MiniGame::Battle => self.proxy.battle_queue.lock().await.leave_queue(uuid).await,
-                MiniGame::Tumble => self.proxy.tumble_queue.lock().await.leave_queue(uuid).await,
                 MiniGame::Glide => self.proxy.glide_queue.lock().await.leave_queue(uuid).await,
             }
         }
@@ -397,16 +424,12 @@ impl GuiScreen<LobbyServerHandler, MiniGameProxy> for GameMenu {
         }
 
         match slot {
-            2 => {
+            3 => {
                 queue(client, &client.proxy, MiniGame::Glide).await;
                 client.close_gui();
             }
-            4 => {
+            5 => {
                 queue(client, &client.proxy, MiniGame::Battle).await;
-                client.close_gui();
-            }
-            6 => {
-                queue(client, &client.proxy, MiniGame::Tumble).await;
                 client.close_gui();
             }
             _ => {}
@@ -422,6 +445,7 @@ impl GameMenu {
         Self {
             channel: sender,
             items: vec![
+                None,
                 None,
                 None,
                 Some(StackContents {
@@ -452,7 +476,7 @@ impl GameMenu {
                         display: Some(ItemNbtDisplay {
                             name: Some(r#"{"text":"Battle Minigame","italic":"false","color":"green"}"#.to_string()),
                             lore: Some(vec![
-                                r#"{"text":"Glide your friends in an arena, getting","italic":"false","color":"gray"}"#.to_string(),
+                                r#"{"text":"Fight your friends in an arena, getting","italic":"false","color":"gray"}"#.to_string(),
                                 r#"{"text":"items to help you in the fight.","italic":"false","color":"gray"}"#.to_string(),
                                 r#"{"text":""}"#.to_string(),
                                 r#"{"text":"Click to Connect","color":"green","italic":false}"#.to_string(),
@@ -466,26 +490,6 @@ impl GameMenu {
                     },
                 }),
                 None,
-                Some(StackContents {
-                    id: Item::DiamondShovel, // diamond shovel
-                    count: 1,
-                    nbt: ItemNbt {
-                        display: Some(ItemNbtDisplay {
-                            name: Some(r#"{"text":"Tumble Minigame","italic":"false","color":"green"}"#.to_string()),
-                            lore: Some(vec![
-                                r#"{"text":"Throw snowballs to break the blocks underneath","italic":"false","color":"gray"}"#.to_string(),
-                                r#"{"text":"other players' feet. Last one alive wins.","italic":"false","color":"gray"}"#.to_string(),
-                                r#"{"text":""}"#.to_string(),
-                                r#"{"text":"Click to Connect","color":"green","italic":false}"#.to_string(),
-                                r#"{"italic":false,"color":"gray","extra":[
-                                    {"text":"12","obfuscated":true},
-                                    {"text":" Currently Playing"}
-                                    ],"text":""}"#.to_string()
-                            ]),
-                        }),
-                        ..Default::default()
-                    },
-                }),
                 None,
                 None,
             ]
@@ -542,11 +546,7 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
                             ArgumentType::String {
                                 string_type: StringType::SingleWord,
                             },
-                            vec![
-                                "glide".to_string(),
-                                "battle".to_string(),
-                                "tumble".to_string(),
-                            ],
+                            vec!["glide".to_string(), "battle".to_string()],
                         )
                         .with_execution(Box::new(
                             move |args, client, server, proxy| {
@@ -564,11 +564,7 @@ impl ServerHandler<MiniGameProxy> for LobbyServerHandler {
                                 ArgumentType::String {
                                     string_type: StringType::SingleWord,
                                 },
-                                vec![
-                                    "glide".to_string(),
-                                    "battle".to_string(),
-                                    "tumble".to_string(),
-                                ],
+                                vec!["glide".to_string(), "battle".to_string()],
                             )
                             .with_execution(Box::new(
                                 move |args, client, server, proxy| {
@@ -737,7 +733,6 @@ async fn queue(
     let receiver = match game {
         MiniGame::Battle => proxy.battle_queue.lock().await.queue(uuid).await,
         MiniGame::Glide => proxy.glide_queue.lock().await.queue(uuid).await,
-        MiniGame::Tumble => proxy.tumble_queue.lock().await.queue(uuid).await,
     };
 
     let receiver = match receiver {

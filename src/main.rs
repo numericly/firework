@@ -113,7 +113,6 @@ struct MiniGameProxy {
     lobby_server: Arc<Server<LobbyServerHandler, MiniGameProxy>>,
     pub glide_queue: Mutex<Queue<MiniGameProxy, GlideServerHandler, 8>>,
     pub battle_queue: Mutex<Queue<MiniGameProxy, BattleServerHandler, 8>>,
-    pub tumble_queue: Mutex<Queue<MiniGameProxy, BattleServerHandler, 8>>,
 }
 
 #[derive(Debug, Clone)]
@@ -121,7 +120,6 @@ enum TransferData {
     Lobby,
     Glide { game_id: u128 },
     Battle { game_id: u128 },
-    Tumble { game_id: u128 },
 }
 
 #[derive(Debug, Clone, Default)]
@@ -141,13 +139,20 @@ impl ServerProxy for MiniGameProxy {
     async fn new() -> Self {
         let lobby_server = Server::new(
             format!(
-                "{}F{}i{}r{}e{}w{}ork Lobby{}",
+                "{}F{}i{}r{}e{}w{}o{}r{}k {}L{}o{}b{}b{}y{}",
                 ColorCodes::DarkRed.chat_formatting(),
                 ColorCodes::LightRed.chat_formatting(),
                 ColorCodes::Gold.chat_formatting(),
                 ColorCodes::LightYellow.chat_formatting(),
                 ColorCodes::LightGreen.chat_formatting(),
                 ColorCodes::Aqua.chat_formatting(),
+                ColorCodes::LightBlue.chat_formatting(),
+                ColorCodes::LightPurple.chat_formatting(),
+                ColorCodes::DarkRed.chat_formatting(),
+                ColorCodes::LightRed.chat_formatting(),
+                ColorCodes::Gold.chat_formatting(),
+                ColorCodes::LightYellow.chat_formatting(),
+                ColorCodes::LightGreen.chat_formatting(),
                 ColorCodes::Reset.chat_formatting(),
             ),
             0,
@@ -155,27 +160,32 @@ impl ServerProxy for MiniGameProxy {
         Self {
             lobby_server,
             glide_queue: Mutex::new(Queue::new(format!(
-                "{}F{}i{}r{}e{}w{}ork Glide{}",
+                "{}F{}i{}r{}e{}w{}o{}r{}k {}G{}l{}i{}d{}e{}",
                 ColorCodes::DarkRed.chat_formatting(),
                 ColorCodes::LightRed.chat_formatting(),
                 ColorCodes::Gold.chat_formatting(),
                 ColorCodes::LightYellow.chat_formatting(),
                 ColorCodes::LightGreen.chat_formatting(),
                 ColorCodes::Aqua.chat_formatting(),
+                ColorCodes::LightBlue.chat_formatting(),
+                ColorCodes::LightPurple.chat_formatting(),
+                ColorCodes::DarkRed.chat_formatting(),
+                ColorCodes::LightRed.chat_formatting(),
+                ColorCodes::Gold.chat_formatting(),
+                ColorCodes::LightYellow.chat_formatting(),
+                ColorCodes::LightGreen.chat_formatting(),
                 ColorCodes::Reset.chat_formatting(),
             ))),
             battle_queue: Mutex::new(Queue::new(format!(
-                "{}F{}i{}r{}e{}w{}ork Battle{}",
+                "{}F{}i{}r{}e{}w{}o{}r{}k{} B{}a{}t{}t{}l{}e{}",
                 ColorCodes::DarkRed.chat_formatting(),
                 ColorCodes::LightRed.chat_formatting(),
                 ColorCodes::Gold.chat_formatting(),
                 ColorCodes::LightYellow.chat_formatting(),
                 ColorCodes::LightGreen.chat_formatting(),
                 ColorCodes::Aqua.chat_formatting(),
-                ColorCodes::Reset.chat_formatting(),
-            ))),
-            tumble_queue: Mutex::new(Queue::new(format!(
-                "{}F{}i{}r{}e{}w{}ork Tumble{}",
+                ColorCodes::LightBlue.chat_formatting(),
+                ColorCodes::LightPurple.chat_formatting(),
                 ColorCodes::DarkRed.chat_formatting(),
                 ColorCodes::LightRed.chat_formatting(),
                 ColorCodes::Gold.chat_formatting(),
@@ -243,21 +253,6 @@ impl ServerProxy for MiniGameProxy {
                         }
                     }
                 }
-                TransferData::Tumble { game_id } => {
-                    let server = self.tumble_queue.lock().await.get_server(game_id).clone();
-                    let Some(server) = server else {
-                        continue;
-                    };
-                    match server
-                        .handle_connection(self.clone(), connection.clone(), client_data.clone())
-                        .await
-                    {
-                        Ok(_) => {}
-                        Err(_err) => {
-                            break;
-                        }
-                    }
-                }
                 TransferData::Lobby => {
                     break;
                 }
@@ -276,7 +271,7 @@ impl ServerProxy for MiniGameProxy {
             ColorCodes::LightGreen.motd_formatting(),
             ColorCodes::Aqua.motd_formatting(),
             ColorCodes::LightBlue.motd_formatting(),
-            ColorCodes::DarkBlue.motd_formatting(),
+            ColorCodes::LightPurple.motd_formatting(),
             ColorCodes::DarkRed.motd_formatting(),
             ColorCodes::LightRed.motd_formatting(),
             ColorCodes::Gold.motd_formatting(),
